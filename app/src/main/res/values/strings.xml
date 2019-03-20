@@ -1,0 +1,53 @@
+<resources>
+    <string name="app_name">Контроллер</string>
+    <string name="text_font">sans-serif-medium</string>
+
+    <string name="app_version_label">Версия: %d</string>
+    <string name="login_placeholder">Логин</string>
+    <string name="password_placeholder">Пароль</string>
+    <string name="remember_password">Запомнить пароль</string>
+    <string name="login_button_text">ВОЙТИ</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="show_map_button_text">Посмотреть карту</string>
+    <string name="examine_button_text">Я ознакомился</string>
+    <string name="edition_label">Издание:</string>
+    <string name="dates_label">Даты:</string>
+    <string name="brigade_label">Бригада:</string>
+    <string name="area_label">Участок:</string>
+    <string name="city_label">Наc/п:</string>
+    <string name="prints_count_label">Тираж:</string>
+    <string name="pack_count_label">Пачек:</string>
+    <string name="remain_label">Остаток:</string>
+    <string name="storage_label">Склад:</string>
+    <string name="close_task_button">Закрыть задание</string>
+    <string name="show_task_on_map">Показать на карте</string>
+    <string name="sort_standart_button">Стандартная</string>
+    <string name="sort_alphabetic_button">По алфавиту</string>
+    <string name="user_explanation_hint">Ваше примечание</string>
+    <string name="delimeter">-</string>
+    <string name="entrance_code">Код:</string>
+    <string name="entrance_euro_key">Евро:</string>
+    <string name="layout_error">ПСНР</string>
+    <string name="lookout">Вахта</string>
+    <string name="entrance_key">Ключ:</string>
+    <string name="close_entrance_button">Закрыть подъезд</string>
+    <string name="broken">Слом</string>
+    <string name="not_confirmed">НПод</string>
+    <string name="not_regular">НеРег</string>
+    <string name="regular">Рег</string>
+    <string name="has_papers">Да</string>
+    <string name="hasnt_papers">Нет</string>
+    <string name="user_filter_label">Распр-тель:</string>
+    <string name="city_filter_label">Город:</string>
+    <string name="string_fitler_label">Улица:</string>
+    <string name="district_filter_label">Округ:</string>
+    <string name="region_filter_label">Район:</string>
+    <string name="filter_apply_button">Начать (%d)</string>
+    <string name="entrance_list_back">Назазд</string>
+    <string name="task_online_button">Онлайн</string>
+    <string name="control_dates_label">Даты контроля:</string>
+    <string name="description_label">Примечание:</string>
+
+</resources>

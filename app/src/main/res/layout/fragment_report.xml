@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                             xmlns:app="http://schemas.android.com/apk/res-auto"
+                                             xmlns:tools="http://schemas.android.com/tools"
+                                             android:layout_width="match_parent"
+                                             android:layout_height="match_parent"
+                                             tools:context=".ui.fragments.report.ReportFragment">
+
+    <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tasks_list"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_height="64dp"
+            tools:visibility="visible"/>
+
+    <TextView
+            android:id="@+id/entrance_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            tools:text="Подъезд 1 из 2. Кв. 100 - 200"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@id/tasks_list"/>
+
+    <include
+            layout="@layout/include_hint_container"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/entrance_title"/>
+
+    <TextView
+            android:id="@+id/appartaments_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Кв.:"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/hint_container"
+            app:layout_constraintBottom_toBottomOf="@id/appartaments_from"
+            android:textSize="14sp"/>
+
+    <EditText
+            android:id="@+id/appartaments_from"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/hint_container"
+            app:layout_constraintStart_toEndOf="@id/appartaments_label"
+            android:textSize="14sp"
+            tools:text="100"/>
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              app:layout_constraintStart_toEndOf="@id/appartaments_from"
+              app:layout_constraintEnd_toStartOf="@id/appartaments_to"
+              app:layout_constraintTop_toTopOf="@id/appartaments_from"
+              app:layout_constraintBottom_toBottomOf="@id/appartaments_from"
+              android:text="@string/delimeter"/>
+
+    <EditText
+            android:id="@+id/appartaments_to"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/hint_container"
+            app:layout_constraintStart_toEndOf="@id/appartaments_from"
+            android:textSize="14sp"
+            tools:text="100"/>
+
+    <TextView
+            android:id="@+id/entrance_code_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/entrance_code"
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toEndOf="@id/appartaments_to"
+            app:layout_constraintTop_toTopOf="@id/appartaments_to"
+            app:layout_constraintBottom_toBottomOf="@id/appartaments_to"
+    />
+
+    <EditText
+            android:id="@+id/entrance_code"
+            android:layout_width="56dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@+id/hint_container"
+            app:layout_constraintStart_toEndOf="@id/entrance_code_label"
+            android:textSize="14sp"
+            tools:text="0101"/>
+
+    <TextView
+            android:id="@+id/entrance_key_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/entrance_key"
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toEndOf="@id/entrance_code"
+            app:layout_constraintTop_toTopOf="@id/entrance_code"
+            app:layout_constraintBottom_toBottomOf="@id/entrance_code"
+    />
+
+
+    <Spinner
+            android:id="@+id/entrance_key"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/entrance_key_label"
+            app:layout_constraintTop_toTopOf="@id/entrance_key_label"
+            app:layout_constraintBottom_toBottomOf="@id/entrance_key_label"
+    />
+
+    <TextView
+            android:id="@+id/entrance_euro_key_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/entrance_euro_key"
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toEndOf="@id/entrance_code"
+            app:layout_constraintTop_toTopOf="@id/lookout"
+            app:layout_constraintBottom_toBottomOf="@id/lookout"
+    />
+
+    <Spinner
+            android:id="@+id/entrance_euro_key"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/entrance_key"
+            app:layout_constraintTop_toTopOf="@id/entrance_euro_key_label"
+            app:layout_constraintBottom_toBottomOf="@id/entrance_euro_key_label"
+    />
+
+    <Button
+            android:id="@+id/layout_error_button"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="@string/layout_error"
+            app:layout_constraintTop_toBottomOf="@id/appartaments_from"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+            android:id="@+id/lookout"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:text="@string/lookout"
+            app:layout_constraintTop_toBottomOf="@id/appartaments_from"
+            app:layout_constraintStart_toEndOf="@id/layout_error_button"/>
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@+id/layout_error_button"
+            app:layout_constraintBottom_toTopOf="@id/user_explanation_input"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/appartaments_list"
+                android:layout_height="0dp"
+                android:layout_width="match_parent"
+                android:fadeScrollbars="false"
+                android:scrollbars="vertical"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/photos_list"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/photos_list"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <EditText
+
+            android:id="@+id/user_explanation_input"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:background="#DDD"
+            android:gravity="top|start"
+            android:hint="@string/user_explanation_hint"
+            android:inputType="textMultiLine"
+            android:scrollbars="vertical"
+            app:layout_constraintBottom_toTopOf="@+id/close_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_max="128dp"
+            app:layout_constraintHeight_min="48dp"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+            android:id="@+id/close_button"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:text="@string/close_entrance_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+    <LinearLayout
+            android:id="@+id/loading"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#FAFAFA"
+            android:elevation="8dp"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="gone">
+
+        <ProgressBar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

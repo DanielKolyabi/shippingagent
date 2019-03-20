@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                             xmlns:app="http://schemas.android.com/apk/res-auto"
+                                             xmlns:tools="http://schemas.android.com/tools"
+                                             android:layout_width="match_parent"
+                                             android:layout_height="wrap_content">
+
+    <ImageView
+            android:id="@+id/hint_icon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_info"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_goneMarginStart="8dp"/>
+
+    <TextView
+            android:id="@+id/publisher_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@string/text_font"
+            android:text="@string/edition_label"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/hint_icon"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+            android:id="@+id/publisher_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/publisher_label"
+            app:layout_constraintTop_toTopOf="@+id/publisher_label"
+            tools:text="Вечерняя Москва №4"/>
+
+
+    <TextView
+            android:id="@+id/control_dates_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:fontFamily="@string/text_font"
+            android:text="@string/control_dates_label"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/publisher_label"
+            app:layout_constraintTop_toBottomOf="@id/publisher_text"/>
+
+    <TextView
+            android:id="@+id/control_dates_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/control_dates_label"
+            app:layout_constraintTop_toTopOf="@+id/control_dates_label"
+            tools:text="07.02.2018 - 11.02.2018"/>
+
+
+    <TextView
+            android:id="@+id/distribution_dates_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:fontFamily="@string/text_font"
+            android:text="@string/control_dates_label"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/publisher_label"
+            app:layout_constraintTop_toBottomOf="@id/control_dates_label"/>
+
+    <TextView
+            android:id="@+id/distribution_dates_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/distribution_dates_label"
+            app:layout_constraintTop_toTopOf="@+id/distribution_dates_label"
+            tools:text="07.02.2018 - 11.02.2018"/>
+
+
+    <TextView
+            android:id="@+id/storage_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:fontFamily="@string/text_font"
+            android:text="@string/storage_label"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/publisher_label"
+            app:layout_constraintTop_toBottomOf="@id/distribution_dates_label"/>
+
+    <TextView
+            android:id="@+id/storage_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/storage_label"
+            app:layout_constraintTop_toTopOf="@+id/storage_label"
+            tools:text="Москва, Южнобутовская ул., 68, под. 3 (в машину у подъезда).\nСветлана, 8-999-999-99-99"/>
+
+    <TextView
+            android:id="@+id/description_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:fontFamily="@string/text_font"
+            android:text="@string/description_label"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/publisher_label"
+            app:layout_constraintTop_toBottomOf="@id/storage_text"/>
+
+    <TextView
+            android:id="@+id/description_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/description_label"
+            app:layout_constraintTop_toTopOf="@+id/description_label"
+            tools:text="Бла-бла-бла"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
