@@ -60,6 +60,13 @@ class MainActivity : AppCompatActivity() {
         application().router.newRootScreen(LoginScreen())
 
         bindBackstackListener()
+        bindControls()
+    }
+
+    private fun bindControls() {
+        back_button?.setOnClickListener {
+            onBackPressed()
+        }
     }
 
     private fun bindBackstackListener() {
