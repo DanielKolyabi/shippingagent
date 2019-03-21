@@ -4,10 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
-import ru.relabs.kurjercontroller.models.AddressModel
-import ru.relabs.kurjercontroller.models.EntranceModel
-import ru.relabs.kurjercontroller.models.TaskItemModel
-import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.models.*
 import ru.relabs.kurjercontroller.providers.interfaces.ITaskRepository
 import kotlin.random.Random
 
@@ -16,17 +13,17 @@ import kotlin.random.Random
  */
 
 class MockTaskRepository : ITaskRepository {
-    private val taskItems = List(100) { i ->
+    private val taskItems = MutableList(100) { i ->
         TaskItemModel(
             i,
             i % 10,
             AddressModel(
-                i,
-                i,
+                i % 35,
+                i % 35,
                 "Москва",
                 "Проспект Длинного",
-                i,
-                i.toString(),
+                i % 35,
+                (i % 35).toString(),
                 0.0,
                 0.0
             ),
@@ -44,23 +41,60 @@ class MockTaskRepository : ITaskRepository {
             }
         )
     }
-    private val tasks = List(10) { i ->
+    private val tasks = MutableList(10) { i ->
         TaskModel(
             i,
             1,
             "Курчанов Д.О.",
             "Вечерняя Москва",
             i,
-            DateTime(2019, 3, 10+i%3, 0, 0, 0),
-            DateTime(2019, 3, 11+i%3, 0, 0, 0),
-            DateTime(2019, 2, 10+i%3, 0, 0, 0),
-            DateTime(2019, 3, 10+i%3, 0, 0, 0),
+            DateTime(2019, 3, 10 + i % 3, 0, 0, 0),
+            DateTime(2019, 3, 11 + i % 3, 0, 0, 0),
+            DateTime(2019, 2, 10 + i % 3, 0, 0, 0),
+            DateTime(2019, 3, 10 + i % 3, 0, 0, 0),
             listOf(
                 "Москва, ул. Пушкина, д. 36 слева ларёк, в ларьке пенёк, в пеньке яйцо, в яйце - материалы",
                 "Москва, ул. Колотушкина, д. 36 справа ларёк, в ларьке огонёк, в огоньке яйцо, в яйце - материалы"
             ),
             "За этими глаз да глаз, проверить нужно всё!1!",
-            taskItems.filter { it.taskId == i }
+            taskItems.filter { it.taskId == i },
+            null
+        )
+    }.apply {
+        TaskModel(
+            15,
+            1,
+            "Курчанов Д.О.",
+            "Задача Фильтров",
+            1,
+            DateTime(2019, 3, 10 + 1 % 3, 0, 0, 0),
+            DateTime(2019, 3, 11 + 1 % 3, 0, 0, 0),
+            DateTime(2019, 2, 10 + 1 % 3, 0, 0, 0),
+            DateTime(2019, 3, 10 + 1 % 3, 0, 0, 0),
+            listOf(
+                "Москва, ул. Пушкина, д. 36 слева ларёк, в ларьке пенёк, в пеньке яйцо, в яйце - материалы",
+                "Москва, ул. Колотушкина, д. 36 справа ларёк, в ларьке огонёк, в огоньке яйцо, в яйце - материалы"
+            ),
+            "За этими глаз да глаз, проверить нужно всё!1!",
+            listOf(),
+            TaskFiltersModel(
+                listOf(
+                    Filter(
+                        1, "Вечерняя Москва №1", true
+                    )
+                ),
+                listOf(
+                    Filter(
+                        1, "Бригада №1", true
+                    )
+                ),
+                listOf(),
+                listOf(),
+                listOf(),
+                listOf(),
+                listOf(),
+                listOf()
+            )
         )
     }
 

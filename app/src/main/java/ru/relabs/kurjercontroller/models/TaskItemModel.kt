@@ -23,8 +23,8 @@ data class TaskItemModel(
         parcel.readInt(),
         parcel.readParcelable(AddressModel::class.java.classLoader),
         parcel.readInt(),
-        parcel.createStringArrayList(),
-        parcel.createTypedArrayList(EntranceModel)
+        parcel.createStringArrayList().orEmpty(),
+        parcel.createTypedArrayList(EntranceModel).orEmpty()
     ) {
     }
 

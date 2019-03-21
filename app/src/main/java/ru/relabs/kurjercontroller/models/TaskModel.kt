@@ -5,7 +5,6 @@ import android.os.Parcelable
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import org.joda.time.DateTime
-import java.util.*
 
 /**
  * Created by ProOrange on 19.03.2019.
@@ -28,21 +27,23 @@ data class TaskModel(
     val storages: List<String>,
     val description: String,
     @Expose
-    val taskItems: List<TaskItemModel>
+    val taskItems: List<TaskItemModel>,
+    val taskFilters: TaskFiltersModel?
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
         parcel.readInt(),
-        parcel.readString(),
-        parcel.readString(),
+        parcel.readString().orEmpty(),
+        parcel.readString().orEmpty(),
         parcel.readInt(),
         DateTime.parse(parcel.readString()),
         DateTime.parse(parcel.readString()),
         DateTime.parse(parcel.readString()),
         DateTime.parse(parcel.readString()),
-        parcel.createStringArrayList(),
-        parcel.readString(),
-        parcel.createTypedArrayList(TaskItemModel)
+        parcel.createStringArrayList().orEmpty(),
+        parcel.readString().orEmpty(),
+        parcel.createTypedArrayList(TaskItemModel)?.toList().orEmpty(),
+        parcel.readParcelable(TaskFiltersModel::class.java.classLoader)
     ) {
     }
 
@@ -59,6 +60,7 @@ data class TaskModel(
         parcel.writeStringList(storages)
         parcel.writeString(description)
         parcel.writeTypedList(taskItems)
+        parcel.writeParcelable(taskFilters, flags)
     }
 
     override fun describeContents(): Int {
