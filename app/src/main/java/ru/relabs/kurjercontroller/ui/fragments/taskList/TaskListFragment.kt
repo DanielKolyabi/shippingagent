@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_tasklist.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
@@ -17,12 +18,11 @@ import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.fragments.taskList.delegates.HeaderDelegate
 import ru.relabs.kurjercontroller.ui.fragments.taskList.delegates.LoaderDelegate
 import ru.relabs.kurjercontroller.ui.fragments.taskList.delegates.TaskDelegate
-import ru.relabs.kurjercontroller.ui.fragments.yandexMap.YandexMapFragment
 import java.util.*
 
 class TaskListFragment : Fragment() {
 
-    var shouldUpdate: Boolean = false
+    var shouldNetworkUpdate: Boolean = false
     val presenter = TaskListPresenter(this)
     val adapter = DelegateAdapter<TaskListModel>().apply {
         addDelegate(HeaderDelegate())
@@ -46,14 +46,20 @@ class TaskListFragment : Fragment() {
             presenter.onOnlineClicked()
         }
         activity()?.findViewById<View>(R.id.refresh_button)?.setOnClickListener {
-            presenter.performNetworkUpdate()
+            presenter.bgScope.launch {
+                presenter.performNetworkUpdate()
+            }
         }
 
-        if (shouldUpdate) {
-            presenter.performNetworkUpdate()
+        if (shouldNetworkUpdate) {
+            presenter.bgScope.launch {
+                presenter.performNetworkUpdate()
+            }
+        } else {
+            presenter.bgScope.launch {
+                presenter.loadTasks()
+            }
         }
-
-        presenter.performUpdate()
     }
 
 
@@ -93,17 +99,17 @@ class TaskListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            shouldUpdate = it.getBoolean("should_update", false)
+            shouldNetworkUpdate = it.getBoolean("should_network_update", false)
         }
     }
 
     companion object {
 
         @JvmStatic
-        fun newInstance(shouldUpdate: Boolean) =
+        fun newInstance(shouldNetworkUpdate: Boolean) =
             TaskListFragment().apply {
                 arguments = Bundle().apply {
-                    putBoolean("should_update", shouldUpdate)
+                    putBoolean("should_network_update", shouldNetworkUpdate)
                 }
             }
     }

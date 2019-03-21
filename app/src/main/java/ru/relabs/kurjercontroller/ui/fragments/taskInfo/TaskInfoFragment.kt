@@ -14,6 +14,7 @@ import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.delegates.InfoHeaderDelegate
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.delegates.InfoInfoDelegate
@@ -63,8 +64,12 @@ class TaskInfoFragment : Fragment() {
             val tempTask: TaskModel? = it.getParcelable("task")
             if (tempTask == null) {
                 CustomLog.writeToFile("null task in TaskInfoFragment")
-                activity()?.showError("Произошла ошибка")
-                application().router.exit()
+                activity()?.showError("Произошла ошибка", object: ErrorButtonsListener{
+                    override fun positiveListener() {
+                        application().router.exit()
+                    }
+                    override fun negativeListener() {}
+                })
                 return
             }
 

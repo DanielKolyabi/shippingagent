@@ -30,6 +30,12 @@ class TaskHolder(
             onTaskClicked(this.adapterPosition)
         }
 
+        if(item.selected){
+            setIsSelected(true)
+        }else{
+            setIsSelected(false)
+        }
+
         if (item.hasAddressIntersection) {
             view.setBackgroundColor(Color.GRAY)
         } else {
@@ -37,16 +43,7 @@ class TaskHolder(
         }
     }
 
-    fun setIsSelected(selected: Boolean, byOtherUser: Boolean) {
-        view.active_icon.setVisible(selected)
-        if (byOtherUser) {
-            view.active_icon.setColorFilter(Color.GREEN, PorterDuff.Mode.SRC_IN)
-        } else {
-            view.active_icon.setColorFilter(Color.WHITE, PorterDuff.Mode.MULTIPLY)
-        }
-    }
-
-    fun setIsActive(active: Boolean) {
+    fun setIsSelected(active: Boolean) {
         view.selected_icon.setImageDrawable(
             view.resources.getDrawable(
                 if (active)

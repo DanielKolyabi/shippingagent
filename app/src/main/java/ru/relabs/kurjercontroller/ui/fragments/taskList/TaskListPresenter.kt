@@ -2,6 +2,7 @@ package ru.relabs.kurjercontroller.ui.fragments.taskList
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.ui.fragments.TaskInfoScreen
@@ -16,7 +17,11 @@ class TaskListPresenter(val fragment: TaskListFragment) {
     }
 
     fun onTaskSelected(pos: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        if (fragment.adapter.data[pos] !is TaskListModel.TaskItem) {
+            return
+        }
+        (fragment.adapter.data[pos] as TaskListModel.TaskItem).selected = !(fragment.adapter.data[pos] as TaskListModel.TaskItem).selected
+        fragment.adapter.notifyItemChanged(pos)
     }
 
     fun onStartClicked() {
@@ -27,13 +32,15 @@ class TaskListPresenter(val fragment: TaskListFragment) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    fun performUpdate() = bgScope.launch {
+    suspend fun loadTasks() = withContext(Dispatchers.IO) {
         fragment.showLoading(true)
         fragment.populateTaskList(application().tasksLocalRepository.getTasks())
         fragment.showLoading(false)
     }
 
-    fun performNetworkUpdate() = bgScope.launch {
+    suspend fun performNetworkUpdate() = withContext(Dispatchers.IO) {
         //TODO: Network update
+
+        loadTasks()
     }
 }
