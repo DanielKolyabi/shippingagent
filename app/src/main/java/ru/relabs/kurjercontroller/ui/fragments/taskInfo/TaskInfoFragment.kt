@@ -9,12 +9,20 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_taskinfo.*
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
+import ru.relabs.kurjercontroller.CustomLog
 import ru.relabs.kurjercontroller.R
+import ru.relabs.kurjercontroller.activity
+import ru.relabs.kurjercontroller.application
+import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.delegates.InfoHeaderDelegate
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.delegates.InfoInfoDelegate
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.delegates.InfoItemDelegate
+import ru.relabs.kurjercontroller.ui.fragments.taskList.TaskListFragment
 
 class TaskInfoFragment : Fragment() {
+
+    lateinit var task: TaskModel
 
     val presenter = TaskInfoPresenter(this)
     val adapter = DelegateAdapter<TaskInfoModel>().apply {
@@ -28,6 +36,18 @@ class TaskInfoFragment : Fragment() {
 
         task_items_list?.layoutManager = LinearLayoutManager(context)
         task_items_list?.adapter = adapter
+
+        populateList(task)
+    }
+
+    private fun populateList(task: TaskModel) {
+        adapter.data.clear()
+        adapter.data.add(TaskInfoModel.Task(task))
+        adapter.data.add(TaskInfoModel.DetailsTableHeader)
+        adapter.data.addAll(task.taskItems.map {
+            TaskInfoModel.TaskItem(it)
+        })
+        adapter.notifyDataSetChanged()
     }
 
     override fun onCreateView(
@@ -35,5 +55,30 @@ class TaskInfoFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_taskinfo, container, false)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            val tempTask: TaskModel? = it.getParcelable("task")
+            if (tempTask == null) {
+                CustomLog.writeToFile("null task in TaskInfoFragment")
+                activity()?.showError("Произошла ошибка")
+                application().router.exit()
+                return
+            }
+
+            task = tempTask
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        fun newInstance(task: TaskModel) =
+            TaskInfoFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable("task", task)
+                }
+            }
     }
 }

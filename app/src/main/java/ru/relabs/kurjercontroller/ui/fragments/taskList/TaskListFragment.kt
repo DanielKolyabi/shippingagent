@@ -27,8 +27,8 @@ class TaskListFragment : Fragment() {
     val adapter = DelegateAdapter<TaskListModel>().apply {
         addDelegate(HeaderDelegate())
         addDelegate(TaskDelegate(
-            { presenter.onTaskClicked() },
-            { presenter.onTaskSelected() }
+            { presenter.onTaskSelected(it) },
+            { presenter.onTaskClicked(it) }
         ))
         addDelegate(LoaderDelegate())
     }
@@ -39,7 +39,6 @@ class TaskListFragment : Fragment() {
         tasks_list?.layoutManager = LinearLayoutManager(context)
         tasks_list?.adapter = adapter
 
-
         start_button?.setOnClickListener {
             presenter.onStartClicked()
         }
@@ -47,13 +46,16 @@ class TaskListFragment : Fragment() {
             presenter.onOnlineClicked()
         }
         activity()?.findViewById<View>(R.id.refresh_button)?.setOnClickListener {
-            presenter.performUpdate()
+            presenter.performNetworkUpdate()
         }
 
         if (shouldUpdate) {
-            presenter.performUpdate()
+            presenter.performNetworkUpdate()
         }
+
+        presenter.performUpdate()
     }
+
 
     suspend fun showLoading(visible: Boolean) = withContext(Dispatchers.Main) {
         if (visible) {
@@ -99,7 +101,7 @@ class TaskListFragment : Fragment() {
 
         @JvmStatic
         fun newInstance(shouldUpdate: Boolean) =
-            YandexMapFragment().apply {
+            TaskListFragment().apply {
                 arguments = Bundle().apply {
                     putBoolean("should_update", shouldUpdate)
                 }
