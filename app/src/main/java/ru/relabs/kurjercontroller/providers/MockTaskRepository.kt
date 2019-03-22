@@ -79,12 +79,12 @@ class MockTaskRepository : ITaskRepository {
             listOf(),
             TaskFiltersModel(
                 mutableListOf(
-                    Filter(
+                    FilterModel(
                         1, "Вечерняя Москва №1", true
                     )
                 ),
                 mutableListOf(
-                    Filter(
+                    FilterModel(
                         1, "Бригада №1", true
                     )
                 ),

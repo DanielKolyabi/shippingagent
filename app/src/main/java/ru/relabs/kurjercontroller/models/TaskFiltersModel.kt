@@ -8,24 +8,24 @@ import ru.relabs.kurjercontroller.orEmpty
  * Created by ProOrange on 21.03.2019.
  */
 data class TaskFiltersModel(
-    val publishers: MutableList<Filter>,
-    val brigades: MutableList<Filter>,
-    val areas: MutableList<Filter>,
-    val users: MutableList<Filter>,
-    val cities: MutableList<Filter>,
-    val streets: MutableList<Filter>,
-    val districts: MutableList<Filter>,
-    val regions: MutableList<Filter>
+    val publishers: MutableList<FilterModel>,
+    val brigades: MutableList<FilterModel>,
+    val areas: MutableList<FilterModel>,
+    val users: MutableList<FilterModel>,
+    val cities: MutableList<FilterModel>,
+    val streets: MutableList<FilterModel>,
+    val districts: MutableList<FilterModel>,
+    val regions: MutableList<FilterModel>
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
-        parcel.createTypedArrayList(Filter).orEmpty(),
-        parcel.createTypedArrayList(Filter).orEmpty(),
-        parcel.createTypedArrayList(Filter).orEmpty(),
-        parcel.createTypedArrayList(Filter).orEmpty(),
-        parcel.createTypedArrayList(Filter).orEmpty(),
-        parcel.createTypedArrayList(Filter).orEmpty(),
-        parcel.createTypedArrayList(Filter).orEmpty(),
-        parcel.createTypedArrayList(Filter).orEmpty()
+        parcel.createTypedArrayList(FilterModel).orEmpty(),
+        parcel.createTypedArrayList(FilterModel).orEmpty(),
+        parcel.createTypedArrayList(FilterModel).orEmpty(),
+        parcel.createTypedArrayList(FilterModel).orEmpty(),
+        parcel.createTypedArrayList(FilterModel).orEmpty(),
+        parcel.createTypedArrayList(FilterModel).orEmpty(),
+        parcel.createTypedArrayList(FilterModel).orEmpty(),
+        parcel.createTypedArrayList(FilterModel).orEmpty()
     ) {
     }
 
@@ -68,7 +68,7 @@ data class TaskFiltersModel(
     }
 }
 
-data class Filter(
+data class FilterModel(
     val id: Int,
     val name: String,
     val fixed: Boolean
@@ -90,12 +90,12 @@ data class Filter(
         return 0
     }
 
-    companion object CREATOR : Parcelable.Creator<Filter> {
-        override fun createFromParcel(parcel: Parcel): Filter {
-            return Filter(parcel)
+    companion object CREATOR : Parcelable.Creator<FilterModel> {
+        override fun createFromParcel(parcel: Parcel): FilterModel {
+            return FilterModel(parcel)
         }
 
-        override fun newArray(size: Int): Array<Filter?> {
+        override fun newArray(size: Int): Array<FilterModel?> {
             return arrayOfNulls(size)
         }
     }

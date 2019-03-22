@@ -1,27 +1,18 @@
 package ru.relabs.kurjercontroller.ui.fragments.filters
 
-import android.content.Context
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import androidx.fragment.app.Fragment
-import com.hootsuite.nachos.ChipConfiguration
-import com.hootsuite.nachos.NachoTextView
-import com.hootsuite.nachos.chip.Chip
-import com.hootsuite.nachos.chip.ChipCreator
-import com.hootsuite.nachos.chip.ChipSpan
-import com.hootsuite.nachos.chip.ChipSpanChipCreator
-import com.hootsuite.nachos.terminator.ChipTerminatorHandler
-import com.hootsuite.nachos.tokenizer.SpanChipTokenizer
 import kotlinx.android.synthetic.main.fragment_filters.*
-import kotlinx.android.synthetic.main.fragment_filters.view.*
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.models.Filter
+import ru.relabs.kurjercontroller.models.FilterModel
 import ru.relabs.kurjercontroller.models.TaskFiltersModel
+import ru.relabs.kurjercontroller.network.MockFilterSearch
 
 
 /**
@@ -34,11 +25,56 @@ class FiltersFragment() : Fragment() {
 
     lateinit var filters: TaskFiltersModel
     val presenter = FiltersPresenter(this)
+    val filterSearch = MockFilterSearch
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        view.publisher_filters.add(Filter(1, "Test Edition", true))
-        view.publisher_filters.add(Filter(2, "Test Edition Delete", false))
+
+        fillAllFilters()
+        bindAllFilterControls()
+    }
+
+    private fun bindFilterControl(textView: AutoCompleteTextView, container: FilterTagLayout, filterName: String){
+        context?.let{
+            textView.setAdapter(FilterSearchAdapter(it, filterSearch, filterName, container))
+            textView.onItemClickListener = object: AdapterView.OnItemClickListener{
+                override fun onItemClick(adapter: AdapterView<*>?, view: View?, pos: Int, p3: Long) {
+                    val item = adapter?.getItemAtPosition(pos) as? FilterModel
+                    item ?: return
+                    container.add(item)
+                    textView.setText("")
+                }
+            }
+        }
+    }
+
+    private fun bindAllFilterControls(){
+        bindFilterControl(publisher_filter, publisher_filters, "izd")
+        bindFilterControl(area_filter, area_filters, "izd")
+        bindFilterControl(brigade_filter, brigade_filters, "izd")
+        bindFilterControl(city_filter, city_filters, "izd")
+        bindFilterControl(district_filter, district_filters, "izd")
+        bindFilterControl(region_filter, region_filters, "izd")
+        bindFilterControl(street_filter, street_filters, "izd")
+        bindFilterControl(user_filter, user_filters, "izd")
+    }
+
+    private fun fillAllFilters(){
+        fillFilters(publisher_filters, filters.publishers)
+        fillFilters(area_filters, filters.areas)
+        fillFilters(brigade_filters, filters.brigades)
+        fillFilters(city_filters, filters.cities)
+        fillFilters(district_filters, filters.districts)
+        fillFilters(region_filters, filters.regions)
+        fillFilters(street_filters, filters.streets)
+        fillFilters(user_filters, filters.users)
+    }
+
+    private fun fillFilters(view: FilterTagLayout?, filters: List<FilterModel>){
+        view ?: return
+        filters.forEach {
+            view.add(it)
+        }
     }
 
 
@@ -62,9 +98,7 @@ class FiltersFragment() : Fragment() {
         fun newInstance(filters: TaskFiltersModel?) =
             FiltersFragment().apply {
                 arguments = Bundle().apply {
-                    if (filters == null) {
-                        putParcelable("filters", filters)
-                    }
+                    putParcelable("filters", filters)
                 }
             }
     }

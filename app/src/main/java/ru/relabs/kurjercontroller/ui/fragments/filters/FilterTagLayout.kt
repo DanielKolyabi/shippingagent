@@ -8,10 +8,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.constraintlayout.widget.Constraints
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.models.Filter
+import ru.relabs.kurjercontroller.models.FilterModel
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
 
 
@@ -19,13 +19,16 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
     ViewGroup(context, attrs, defStyleAttr) {
     internal var deviceWidth: Int = 0
 
-    private val tags: MutableList<Pair<Int, Filter>> = mutableListOf()
+    private val tags: MutableList<Pair<Int, FilterModel>> = mutableListOf()
+    val currentTags = tags.map {
+        it.second
+    }
 
     init {
         init(context)
     }
 
-    fun add(tag: Filter) {
+    fun add(tag: FilterModel) {
         val view = LayoutInflater.from(context).inflate(R.layout.item_filter, this, false)
         view.findViewById<TextView>(R.id.text).text = tag.name
         view.findViewById<ImageView>(R.id.close_icon).apply {
@@ -34,9 +37,9 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
             }
             setVisible(!tag.fixed)
         }
-        val lpc = (view.layoutParams as? Constraints.LayoutParams)
-        lpc?.setMargins(0, 0, 2, 2)
-        lpc?.let{
+        val lpc = (view.layoutParams as? LinearLayout.LayoutParams)
+        lpc?.setMargins(2, 2, 2, 2)
+        lpc?.let {
             view.layoutParams = it
         }
 
@@ -48,7 +51,7 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
         addView(view)
     }
 
-    fun remove(tag: Filter) {
+    fun remove(tag: FilterModel) {
         tags.firstOrNull { it.second == tag }?.let {
             removeView(findViewWithTag(it.first))
             tags.remove(it)
