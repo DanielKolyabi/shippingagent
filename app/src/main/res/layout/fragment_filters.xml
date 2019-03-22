@@ -44,15 +44,22 @@
                     app:layout_constraintTop_toTopOf="@id/publisher_filter"
                     app:layout_constraintBottom_toBottomOf="@id/publisher_filter"
                     android:text="@string/edition_label"/>
-            <com.hootsuite.nachos.NachoTextView
+            <AutoCompleteTextView
                     android:id="@+id/publisher_filter"
                     android:layout_width="0dp"
                     android:layout_marginTop="8dp"
-                    android:layout_height="40dp"
+                    android:layout_height="wrap_content"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/publisher_label"
                     android:layout_marginStart="8dp"/>
+            <ru.relabs.kurjercontroller.ui.fragments.filters.FilterTagLayout
+                    android:id="@+id/publisher_filters"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/publisher_filter"
+                    app:layout_constraintStart_toStartOf="@id/publisher_label"
+                    app:layout_constraintEnd_toEndOf="@id/publisher_filter"/>
 
             <TextView
                     android:id="@+id/brigade_label"
@@ -62,15 +69,22 @@
                     app:layout_constraintTop_toTopOf="@id/brigade_filter"
                     app:layout_constraintBottom_toBottomOf="@id/brigade_filter"
                     android:text="@string/brigade_label"/>
-            <com.hootsuite.nachos.NachoTextView
+            <AutoCompleteTextView
                     android:id="@+id/brigade_filter"
                     android:layout_width="0dp"
                     android:layout_marginTop="8dp"
-                    android:layout_height="40dp"
-                    app:layout_constraintTop_toBottomOf="@id/publisher_filter"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/publisher_filters"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/brigade_label"
                     android:layout_marginStart="8dp"/>
+            <ru.relabs.kurjercontroller.ui.fragments.filters.FilterTagLayout
+                    android:id="@+id/brigade_filters"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/brigade_filter"
+                    app:layout_constraintStart_toStartOf="@id/brigade_filter"
+                    app:layout_constraintEnd_toEndOf="@id/brigade_filter"/>
 
             <TextView
                     android:id="@+id/area_label"
@@ -80,15 +94,22 @@
                     app:layout_constraintTop_toTopOf="@id/area_filter"
                     app:layout_constraintBottom_toBottomOf="@id/area_filter"
                     android:text="@string/area_label"/>
-            <com.hootsuite.nachos.NachoTextView
+            <AutoCompleteTextView
                     android:id="@+id/area_filter"
                     android:layout_width="0dp"
                     android:layout_marginTop="8dp"
-                    android:layout_height="40dp"
-                    app:layout_constraintTop_toBottomOf="@id/brigade_filter"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/brigade_filters"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/area_label"
                     android:layout_marginStart="8dp"/>
+            <ru.relabs.kurjercontroller.ui.fragments.filters.FilterTagLayout
+                    android:id="@+id/area_filters"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/area_filter"
+                    app:layout_constraintStart_toStartOf="@id/area_filter"
+                    app:layout_constraintEnd_toEndOf="@id/area_filter"/>
 
             <TextView
                     android:id="@+id/user_label"
@@ -98,15 +119,22 @@
                     app:layout_constraintTop_toTopOf="@id/user_filter"
                     app:layout_constraintBottom_toBottomOf="@id/user_filter"
                     android:text="@string/user_filter_label"/>
-            <com.hootsuite.nachos.NachoTextView
+            <AutoCompleteTextView
                     android:id="@+id/user_filter"
                     android:layout_width="0dp"
                     android:layout_marginTop="8dp"
-                    android:layout_height="40dp"
-                    app:layout_constraintTop_toBottomOf="@id/area_filter"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/area_filters"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/user_label"
                     android:layout_marginStart="8dp"/>
+            <ru.relabs.kurjercontroller.ui.fragments.filters.FilterTagLayout
+                    android:id="@+id/user_filters"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/user_filter"
+                    app:layout_constraintStart_toStartOf="@id/user_filter"
+                    app:layout_constraintEnd_toEndOf="@id/user_filter"/>
 
             <TextView
                     android:id="@+id/city_label"
@@ -116,15 +144,22 @@
                     app:layout_constraintTop_toTopOf="@id/city_filter"
                     app:layout_constraintBottom_toBottomOf="@id/city_filter"
                     android:text="@string/city_filter_label"/>
-            <com.hootsuite.nachos.NachoTextView
+            <AutoCompleteTextView
                     android:id="@+id/city_filter"
                     android:layout_width="0dp"
                     android:layout_marginTop="8dp"
-                    android:layout_height="40dp"
-                    app:layout_constraintTop_toBottomOf="@id/user_filter"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/user_filters"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/city_label"
                     android:layout_marginStart="8dp"/>
+            <ru.relabs.kurjercontroller.ui.fragments.filters.FilterTagLayout
+                    android:id="@+id/city_filters"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/city_filter"
+                    app:layout_constraintStart_toStartOf="@id/city_filter"
+                    app:layout_constraintEnd_toEndOf="@id/city_filter"/>
 
             <TextView
                     android:id="@+id/street_label"
@@ -134,15 +169,22 @@
                     app:layout_constraintTop_toTopOf="@id/street_filter"
                     app:layout_constraintBottom_toBottomOf="@id/street_filter"
                     android:text="@string/string_fitler_label"/>
-            <com.hootsuite.nachos.NachoTextView
+            <AutoCompleteTextView
                     android:id="@+id/street_filter"
                     android:layout_width="0dp"
                     android:layout_marginTop="8dp"
-                    android:layout_height="40dp"
-                    app:layout_constraintTop_toBottomOf="@id/city_filter"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/city_filters"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/street_label"
                     android:layout_marginStart="8dp"/>
+            <ru.relabs.kurjercontroller.ui.fragments.filters.FilterTagLayout
+                    android:id="@+id/street_filters"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/street_filter"
+                    app:layout_constraintStart_toStartOf="@id/street_filter"
+                    app:layout_constraintEnd_toEndOf="@id/street_filter"/>
 
             <TextView
                     android:id="@+id/district_label"
@@ -152,15 +194,22 @@
                     app:layout_constraintTop_toTopOf="@id/district_filter"
                     app:layout_constraintBottom_toBottomOf="@id/district_filter"
                     android:text="@string/district_filter_label"/>
-            <com.hootsuite.nachos.NachoTextView
+            <AutoCompleteTextView
                     android:id="@+id/district_filter"
                     android:layout_width="0dp"
                     android:layout_marginTop="8dp"
-                    android:layout_height="40dp"
-                    app:layout_constraintTop_toBottomOf="@id/street_filter"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/street_filters"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/district_label"
                     android:layout_marginStart="8dp"/>
+            <ru.relabs.kurjercontroller.ui.fragments.filters.FilterTagLayout
+                    android:id="@+id/district_filters"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/district_filter"
+                    app:layout_constraintStart_toStartOf="@id/district_filter"
+                    app:layout_constraintEnd_toEndOf="@id/district_filter"/>
 
             <TextView
                     android:id="@+id/region_label"
@@ -170,15 +219,23 @@
                     app:layout_constraintTop_toTopOf="@id/region_filter"
                     app:layout_constraintBottom_toBottomOf="@id/region_filter"
                     android:text="@string/region_filter_label"/>
-            <com.hootsuite.nachos.NachoTextView
+            <AutoCompleteTextView
                     android:id="@+id/region_filter"
                     android:layout_width="0dp"
                     android:layout_marginTop="8dp"
-                    android:layout_height="40dp"
-                    app:layout_constraintTop_toBottomOf="@id/district_filter"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/district_filters"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/region_label"
                     android:layout_marginStart="8dp"/>
+            <ru.relabs.kurjercontroller.ui.fragments.filters.FilterTagLayout
+                    android:id="@+id/region_filters"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/region_filter"
+                    app:layout_constraintStart_toStartOf="@id/region_filter"
+                    app:layout_constraintEnd_toEndOf="@id/region_filter"/>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

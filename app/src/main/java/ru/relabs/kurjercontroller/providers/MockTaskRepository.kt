@@ -61,7 +61,7 @@ class MockTaskRepository : ITaskRepository {
             null
         )
     }.apply {
-        TaskModel(
+        add(TaskModel(
             15,
             1,
             "Курчанов Д.О.",
@@ -78,24 +78,24 @@ class MockTaskRepository : ITaskRepository {
             "За этими глаз да глаз, проверить нужно всё!1!",
             listOf(),
             TaskFiltersModel(
-                listOf(
+                mutableListOf(
                     Filter(
                         1, "Вечерняя Москва №1", true
                     )
                 ),
-                listOf(
+                mutableListOf(
                     Filter(
                         1, "Бригада №1", true
                     )
                 ),
-                listOf(),
-                listOf(),
-                listOf(),
-                listOf(),
-                listOf(),
-                listOf()
+                mutableListOf(),
+                mutableListOf(),
+                mutableListOf(),
+                mutableListOf(),
+                mutableListOf(),
+                mutableListOf()
             )
-        )
+        ))
     }
 
     override suspend fun getTasks(): List<TaskModel> = withContext(Dispatchers.Main) {

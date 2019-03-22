@@ -61,9 +61,9 @@ class TaskInfoFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            val tempTask: TaskModel? = it.getParcelable("task")
+            val tempTask: TaskModel? = it.getParcelable("filters")
             if (tempTask == null) {
-                CustomLog.writeToFile("null task in TaskInfoFragment")
+                CustomLog.writeToFile("null filters in TaskInfoFragment")
                 activity()?.showError("Произошла ошибка", object: ErrorButtonsListener{
                     override fun positiveListener() {
                         application().router.exit()
@@ -82,7 +82,7 @@ class TaskInfoFragment : Fragment() {
         fun newInstance(task: TaskModel) =
             TaskInfoFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelable("task", task)
+                    putParcelable("filters", task)
                 }
             }
     }

@@ -24,3 +24,5 @@ fun Throwable.logError() {
     val stacktrace = CustomLog.getStacktraceAsString(this)
     CustomLog.writeToFile(stacktrace)
 }
+
+inline fun <T> MutableList<T>?.orEmpty(): MutableList<T> = this ?: mutableListOf()

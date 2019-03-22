@@ -6,8 +6,8 @@ import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.ui.fragments.FiltersScreen
 import ru.relabs.kurjercontroller.ui.fragments.TaskInfoScreen
-import java.lang.ref.WeakReference
 
 class TaskListPresenter(val fragment: TaskListFragment) {
     val bgScope = CancelableScope(Dispatchers.Default)
@@ -22,7 +22,8 @@ class TaskListPresenter(val fragment: TaskListFragment) {
         if (fragment.adapter.data[pos] !is TaskListModel.TaskItem) {
             return
         }
-        (fragment.adapter.data[pos] as TaskListModel.TaskItem).selected = !(fragment.adapter.data[pos] as TaskListModel.TaskItem).selected
+        (fragment.adapter.data[pos] as TaskListModel.TaskItem).selected =
+            !(fragment.adapter.data[pos] as TaskListModel.TaskItem).selected
         fragment.adapter.notifyItemChanged(pos)
 
         markIntersectedTasks()
@@ -73,7 +74,12 @@ class TaskListPresenter(val fragment: TaskListFragment) {
     }
 
     fun onOnlineClicked() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        bgScope.launch {
+            val taskFilters = application().tasksLocalRepository.getTask(15).taskFilters
+            withContext(Dispatchers.Main) {
+                application().router.navigateTo(FiltersScreen(fragment, taskFilters))
+            }
+        }
     }
 
     suspend fun loadTasks() = withContext(Dispatchers.IO) {

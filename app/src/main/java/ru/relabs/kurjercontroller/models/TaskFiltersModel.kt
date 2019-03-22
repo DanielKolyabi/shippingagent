@@ -2,29 +2,30 @@ package ru.relabs.kurjercontroller.models
 
 import android.os.Parcel
 import android.os.Parcelable
+import ru.relabs.kurjercontroller.orEmpty
 
 /**
  * Created by ProOrange on 21.03.2019.
  */
 data class TaskFiltersModel(
-    val publishers: List<Filter>,
-    val brigades: List<Filter>,
-    val areas: List<Filter>,
-    val users: List<Filter>,
-    val cities: List<Filter>,
-    val streets: List<Filter>,
-    val districts: List<Filter>,
-    val regions: List<Filter>
+    val publishers: MutableList<Filter>,
+    val brigades: MutableList<Filter>,
+    val areas: MutableList<Filter>,
+    val users: MutableList<Filter>,
+    val cities: MutableList<Filter>,
+    val streets: MutableList<Filter>,
+    val districts: MutableList<Filter>,
+    val regions: MutableList<Filter>
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
-        parcel.createTypedArrayList(Filter)?.toList().orEmpty(),
-        parcel.createTypedArrayList(Filter)?.toList().orEmpty(),
-        parcel.createTypedArrayList(Filter)?.toList().orEmpty(),
-        parcel.createTypedArrayList(Filter)?.toList().orEmpty(),
-        parcel.createTypedArrayList(Filter)?.toList().orEmpty(),
-        parcel.createTypedArrayList(Filter)?.toList().orEmpty(),
-        parcel.createTypedArrayList(Filter)?.toList().orEmpty(),
-        parcel.createTypedArrayList(Filter)?.toList().orEmpty()
+        parcel.createTypedArrayList(Filter).orEmpty(),
+        parcel.createTypedArrayList(Filter).orEmpty(),
+        parcel.createTypedArrayList(Filter).orEmpty(),
+        parcel.createTypedArrayList(Filter).orEmpty(),
+        parcel.createTypedArrayList(Filter).orEmpty(),
+        parcel.createTypedArrayList(Filter).orEmpty(),
+        parcel.createTypedArrayList(Filter).orEmpty(),
+        parcel.createTypedArrayList(Filter).orEmpty()
     ) {
     }
 
@@ -50,6 +51,19 @@ data class TaskFiltersModel(
 
         override fun newArray(size: Int): Array<TaskFiltersModel?> {
             return arrayOfNulls(size)
+        }
+
+        fun blank(): TaskFiltersModel {
+            return TaskFiltersModel(
+                mutableListOf(),
+                mutableListOf(),
+                mutableListOf(),
+                mutableListOf(),
+                mutableListOf(),
+                mutableListOf(),
+                mutableListOf(),
+                mutableListOf()
+            )
         }
     }
 }
