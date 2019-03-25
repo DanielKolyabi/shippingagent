@@ -5,7 +5,10 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
+import android.view.KeyEvent
+import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -14,13 +17,17 @@ import androidx.fragment.app.FragmentTransaction
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
 import ru.relabs.kurjercontroller.CustomLog
+import ru.relabs.kurjercontroller.MyExceptionHandler
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.application.MyApplication
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
+import ru.relabs.kurjercontroller.ui.fragments.ISearchableFragment
 import ru.relabs.kurjercontroller.ui.fragments.LoginScreen
+import ru.relabs.kurjercontroller.ui.fragments.SearchInputAdapter
 import ru.relabs.kurjercontroller.ui.fragments.addressList.AddressListFragment
 import ru.relabs.kurjercontroller.ui.fragments.entrancesList.EntrancesListFragment
+import ru.relabs.kurjercontroller.ui.fragments.filters.FiltersFragment
 import ru.relabs.kurjercontroller.ui.fragments.login.LoginFragment
 import ru.relabs.kurjercontroller.ui.fragments.report.ReportFragment
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.TaskInfoFragment
@@ -59,10 +66,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Thread.setDefaultUncaughtExceptionHandler(MyExceptionHandler())
         hideActionBar()
         setContentView(R.layout.activity_main)
         loading?.setVisible(false)
         requestPermissions()
+
         application().router.newRootScreen(LoginScreen())
 
         bindBackstackListener()
@@ -100,6 +109,55 @@ class MainActivity : AppCompatActivity() {
                 }
             }, "Скопировать", "Отправить crash.log", cancelable = true)
         }
+        search_button.setOnClickListener {
+            val current = supportFragmentManager.findFragmentById(R.id.fragment_container)
+            if (current !is TaskListFragment && current !is AddressListFragment) {
+                setSearchButtonVisible(false)
+                return@setOnClickListener
+            }
+            setSearchInputVisible(true)
+            setTitleVisible(false)
+            setDeviceIdButtonVisible(false)
+            (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)?.showSoftInput(
+                search_input,
+                InputMethodManager.SHOW_IMPLICIT
+            )
+            search_input.requestFocus()
+        }
+
+        val adapter = SearchInputAdapter(this, R.layout.item_search, R.id.text, supportFragmentManager)
+        search_input.setAdapter(adapter)
+
+        search_input.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                actionId == EditorInfo.IME_ACTION_DONE ||
+                actionId == EditorInfo.IME_ACTION_NEXT ||
+                event != null &&
+                event.action == KeyEvent.ACTION_DOWN &&
+                event.keyCode == KeyEvent.KEYCODE_ENTER
+            ) {
+
+                val current = supportFragmentManager.findFragmentById(R.id.fragment_container) as? ISearchableFragment
+                current ?: return@setOnEditorActionListener true
+
+                current.onItemSelected(search_input?.text.toString(), search_input)
+
+                (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)?.hideSoftInputFromWindow(
+                    search_input.windowToken,
+                    0
+                )
+
+                setSearchInputVisible(false)
+                setTitleVisible(true)
+
+                if (current is TaskListFragment) {
+                    setDeviceIdButtonVisible(true)
+                }
+
+                return@setOnEditorActionListener true
+            }
+            return@setOnEditorActionListener false
+        }
     }
 
     private fun bindBackstackListener() {
@@ -113,9 +171,26 @@ class MainActivity : AppCompatActivity() {
         top_app_bar?.title?.text = string
     }
 
+    fun setTitleVisible(visible: Boolean) {
+        top_app_bar?.title?.setVisible(visible)
+    }
+
     private fun setDeviceIdButtonVisible(visible: Boolean) {
         device_uuid?.setVisible(visible)
     }
+
+    private fun setSearchButtonVisible(visible: Boolean) {
+        search_button.setVisible(visible)
+        if (!visible) {
+            setSearchInputVisible(visible)
+        }
+    }
+
+    private fun setSearchInputVisible(visible: Boolean) {
+        search_input.setVisible(visible)
+        search_input.setText("")
+    }
+
 
     private fun onFragmentChanged(current: Fragment?) {
         if (current == null) {
@@ -123,7 +198,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         refresh_button?.setVisible(current is TaskListFragment)
-        setDeviceIdButtonVisible(current is TaskListFragment)
+        setSearchButtonVisible(current is TaskListFragment || current is AddressListFragment)
+        setDeviceIdButtonVisible(current is TaskListFragment || current is LoginFragment)
+        setTitleVisible(true)
 
         when (current) {
             is LoginFragment -> {
@@ -156,6 +233,10 @@ class MainActivity : AppCompatActivity() {
             is YandexMapFragment -> {
                 back_button?.setVisible(true)
             }
+            is FiltersFragment -> {
+                back_button?.setVisible(true)
+                changeTitle("Фильтры")
+            }
             //TODO: Report
         }
     }
@@ -173,7 +254,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        application().router.exit()
+        if (search_input.visibility == View.VISIBLE) {
+            setSearchInputVisible(false)
+            setTitleVisible(true)
+            val current = supportFragmentManager.findFragmentById(R.id.fragment_container)
+            if (current is TaskListFragment) {
+                setDeviceIdButtonVisible(true)
+            }
+            (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)?.hideSoftInputFromWindow(
+                search_input.windowToken,
+                0
+            )
+
+        } else {
+            application().router.exit()
+        }
     }
 
     private fun requestPermissions() {
@@ -219,8 +314,5 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.findFragmentByTag("fragment")
                 ?.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
-    }
-
-    fun showLogin() {
     }
 }

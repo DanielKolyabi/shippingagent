@@ -5,7 +5,7 @@ import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
 import android.provider.Settings
 import android.util.Log
-import ru.relabs.kurjer.files.PathHelper
+import ru.relabs.kurjercontroller.fileHelpers.PathHelper
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AutoCompleteTextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_tasklist.*
@@ -15,12 +16,41 @@ import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.ui.fragments.ISearchableFragment
 import ru.relabs.kurjercontroller.ui.fragments.taskList.delegates.HeaderDelegate
 import ru.relabs.kurjercontroller.ui.fragments.taskList.delegates.LoaderDelegate
 import ru.relabs.kurjercontroller.ui.fragments.taskList.delegates.TaskDelegate
 import java.util.*
 
-class TaskListFragment : Fragment() {
+class TaskListFragment : Fragment(), ISearchableFragment {
+    override fun onSearchItems(filter: String): List<String> {
+        return adapter.data.asSequence()
+            .filter {
+                it is TaskListModel.TaskItem
+            }
+            .filter {
+                val task = (it as? TaskListModel.TaskItem)?.task
+                "${task?.publisher} №${task?.edition}".toLowerCase().contains(filter.toLowerCase())
+            }
+            .map {
+                "${(it as TaskListModel.TaskItem).task.publisher} №${it.task.edition}"
+            }
+            .toList()
+    }
+
+    override fun onItemSelected(item: String, searchView: AutoCompleteTextView) {
+        val itemIndex = adapter.data.indexOfFirst {
+            if(it is TaskListModel.TaskItem) {
+                "${it.task.publisher} №${it.task.edition}".contains(item)
+            }else{
+                false
+            }
+        }
+        if (itemIndex < 0) {
+            return
+        }
+        tasks_list.smoothScrollToPosition(itemIndex)
+    }
 
     var shouldNetworkUpdate: Boolean = false
     val presenter = TaskListPresenter(this)
