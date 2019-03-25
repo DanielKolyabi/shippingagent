@@ -11,12 +11,14 @@ import androidx.core.content.ContextCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
+import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.models.GPSCoordinatesModel
 import ru.relabs.kurjercontroller.providers.MockTaskRepository
 import ru.relabs.kurjercontroller.providers.interfaces.ITaskRepository
 import ru.terrakok.cicerone.Cicerone
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.Router
+import java.util.*
 
 /**
  * Created by ProOrange on 18.03.2019.
@@ -25,6 +27,7 @@ import ru.terrakok.cicerone.Router
 class MyApplication : Application() {
     private var locationManager: LocationManager? = null
     var currentLocation = GPSCoordinatesModel(0.0, 0.0, DateTime(0))
+    lateinit var deviceUUID: String
     private val listener = object : LocationListener {
         override fun onLocationChanged(location: Location?) {
             location?.let {
@@ -51,6 +54,7 @@ class MyApplication : Application() {
         instance = this
         tasksLocalRepository = MockTaskRepository()
         cicerone = Cicerone.create()
+        deviceUUID = getOrGenerateDeviceUUID()
     }
 
     fun enableLocationListening(): Boolean {
@@ -68,6 +72,21 @@ class MyApplication : Application() {
         locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30 * 1000, 10f, listener)
 
         return true
+    }
+
+    fun getOrGenerateDeviceUUID(): String {
+        val sharedPreferences = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
+        var deviceUUID = sharedPreferences.getString(
+            "device_uuid", "unknown"
+        )
+
+        if (deviceUUID == "unknown") {
+            deviceUUID = UUID.randomUUID().toString()
+            sharedPreferences.edit()
+                .putString("device_uuid", deviceUUID)
+                .apply()
+        }
+        return deviceUUID
     }
 
     fun disableLocationListening() {

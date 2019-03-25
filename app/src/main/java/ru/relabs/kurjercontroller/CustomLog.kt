@@ -29,14 +29,14 @@ object CustomLog {
     fun share(context: Activity) {
         val dir = File(
             Environment.getExternalStorageDirectory(),
-            "deliveryman"
+            "deliverycontr"
         )
         val f = File(dir, CRASH_FILENAME)
         if (!f.exists()) {
             throw Exception("crash.log not found")
         }
 
-        val uri = FileProvider.getUriForFile(context, "com.relabs.kurjer.file_provider", f)
+        val uri = FileProvider.getUriForFile(context, "ru.relabs.kurjercontroller.file_provider", f)
         val intent = Intent().apply {
             action = Intent.ACTION_SEND
             putExtra(Intent.EXTRA_TEXT, "crash.log")
@@ -52,7 +52,7 @@ object CustomLog {
             //Gets the Android external storage directory & Create new folder Crash_Reports
             val dir = File(
                 Environment.getExternalStorageDirectory(),
-                "deliveryman"
+                "deliverycontr"
             )
             if (!dir.exists()) {
                 dir.mkdirs()

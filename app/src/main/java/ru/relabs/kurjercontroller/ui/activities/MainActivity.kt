@@ -1,16 +1,22 @@
 package ru.relabs.kurjercontroller.ui.activities
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
+import ru.relabs.kurjercontroller.CustomLog
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.application
+import ru.relabs.kurjercontroller.application.MyApplication
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.LoginScreen
 import ru.relabs.kurjercontroller.ui.fragments.addressList.AddressListFragment
@@ -67,6 +73,33 @@ class MainActivity : AppCompatActivity() {
         back_button?.setOnClickListener {
             onBackPressed()
         }
+        device_uuid.setOnClickListener {
+            val deviceUUID = (application as? MyApplication)?.deviceUUID?.split("-")?.last() ?: ""
+            if (deviceUUID == "") {
+                showError("Не удалось получить device UUID")
+                return@setOnClickListener
+            }
+            showError("Device UUID part: $deviceUUID", object : ErrorButtonsListener {
+                override fun positiveListener() {
+                    try {
+                        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clipboard.primaryClip = ClipData.newPlainText("Device UUID", deviceUUID)
+                        Toast.makeText(this@MainActivity, "Скопированно в буфер обмена", Toast.LENGTH_LONG).show()
+                    } catch (e: java.lang.Exception) {
+                        Toast.makeText(this@MainActivity, "Произошла ошибка", Toast.LENGTH_LONG).show()
+                    }
+                }
+
+                override fun negativeListener() {
+                    try {
+                        CustomLog.share(this@MainActivity)
+                    } catch (e: java.lang.Exception) {
+                        CustomLog.writeToFile(CustomLog.getStacktraceAsString(e))
+                        Toast.makeText(this@MainActivity, "Произошла ошибка", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }, "Скопировать", "Отправить crash.log", cancelable = true)
+        }
     }
 
     private fun bindBackstackListener() {
@@ -80,12 +113,17 @@ class MainActivity : AppCompatActivity() {
         top_app_bar?.title?.text = string
     }
 
+    private fun setDeviceIdButtonVisible(visible: Boolean) {
+        device_uuid?.setVisible(visible)
+    }
+
     private fun onFragmentChanged(current: Fragment?) {
         if (current == null) {
             return
         }
 
         refresh_button?.setVisible(current is TaskListFragment)
+        setDeviceIdButtonVisible(current is TaskListFragment)
 
         when (current) {
             is LoginFragment -> {

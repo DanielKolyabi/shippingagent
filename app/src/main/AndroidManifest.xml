@@ -32,6 +32,17 @@
         <activity
                 android:name=".ui.activities.MainActivity"
                 android:screenOrientation="portrait" />
-    </application>
 
+
+        <provider
+                android:name="androidx.core.content.FileProvider"
+                android:authorities="ru.relabs.kurjercontroller.file_provider"
+                android:exported="false"
+                android:grantUriPermissions="true">
+
+            <meta-data
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/paths" />
+        </provider>
+    </application>
 </manifest>
