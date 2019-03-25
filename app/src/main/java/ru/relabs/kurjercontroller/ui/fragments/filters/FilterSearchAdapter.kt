@@ -11,6 +11,8 @@ import android.widget.TextView
 import kotlinx.coroutines.runBlocking
 import ru.relabs.kurjercontroller.models.FilterModel
 import ru.relabs.kurjercontroller.network.IFilterSearch
+import ru.relabs.kurjercontroller.orEmpty
+import java.lang.ref.WeakReference
 
 /**
  * Created by ProOrange on 22.03.2019.
@@ -19,7 +21,7 @@ class FilterSearchAdapter(
     context: Context,
     val filterSearch: IFilterSearch,
     val filterName: String,
-    val selectedFiltersContainer: FilterTagLayout
+    val selectedFiltersReference: WeakReference<MutableList<FilterModel>>
 ) : ArrayAdapter<FilterModel>(context, 0), Filterable {
     private val results: MutableList<FilterModel> = mutableListOf()
 
@@ -43,7 +45,7 @@ class FilterSearchAdapter(
                 filterSearch.searchFilter(
                     filterName,
                     constraint.toString(),
-                    selectedFiltersContainer.currentTags.map { it.id }
+                    selectedFiltersReference.get().orEmpty()
                 ).await()
             }
             return FilterResults().apply {

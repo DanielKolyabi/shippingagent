@@ -20,6 +20,9 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
     internal var deviceWidth: Int = 0
 
     private val tags: MutableList<Pair<Int, FilterModel>> = mutableListOf()
+    var onFilterAppear: ((filter: FilterModel) -> Unit)? = null
+    var onFilterDisappear: ((filter: FilterModel) -> Unit)? = null
+
     val currentTags = tags.map {
         it.second
     }
@@ -27,6 +30,8 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
     init {
         init(context)
     }
+
+
 
     fun add(tag: FilterModel) {
         val view = LayoutInflater.from(context).inflate(R.layout.item_filter, this, false)
@@ -48,12 +53,14 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
 
         view.tag = indexedTag.first
 
+        onFilterAppear?.invoke(tag)
         addView(view)
     }
 
     fun remove(tag: FilterModel) {
         tags.firstOrNull { it.second == tag }?.let {
             removeView(findViewWithTag(it.first))
+            onFilterDisappear?.invoke(it.second)
             tags.remove(it)
         }
     }

@@ -8,7 +8,7 @@ import ru.relabs.kurjercontroller.models.TaskFiltersModel
  * Created by ProOrange on 22.03.2019.
  */
 object MockFilterSearch: IFilterSearch {
-    override fun searchFilter(filterName: String, filterValue: String, selectedFilters: List<Int>): Deferred<List<FilterModel>> {
+    override fun searchFilter(filterName: String, filterValue: String, selectedFilters: List<FilterModel>): Deferred<List<FilterModel>> {
         val deferred = CompletableDeferred<List<FilterModel>>()
         GlobalScope.launch(Dispatchers.IO) {
             delay(1000)

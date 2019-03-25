@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_filters.*
@@ -13,6 +12,7 @@ import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.models.FilterModel
 import ru.relabs.kurjercontroller.models.TaskFiltersModel
 import ru.relabs.kurjercontroller.network.MockFilterSearch
+import java.lang.ref.WeakReference
 
 
 /**
@@ -26,6 +26,7 @@ class FiltersFragment() : Fragment() {
     lateinit var filters: TaskFiltersModel
     val presenter = FiltersPresenter(this)
     val filterSearch = MockFilterSearch
+    val allFilters: MutableList<FilterModel> = mutableListOf()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -34,10 +35,17 @@ class FiltersFragment() : Fragment() {
         bindAllFilterControls()
     }
 
-    private fun bindFilterControl(textView: AutoCompleteTextView, container: FilterTagLayout, filterName: String){
-        context?.let{
-            textView.setAdapter(FilterSearchAdapter(it, filterSearch, filterName, container))
-            textView.onItemClickListener = object: AdapterView.OnItemClickListener{
+    private fun bindFilterControl(textView: AutoCompleteTextView, container: FilterTagLayout, filterName: String) {
+        context?.let {
+            container.onFilterAppear = {
+                allFilters.add(it)
+            }
+            container.onFilterDisappear = {
+                allFilters.remove(it)
+            }
+
+            textView.setAdapter(FilterSearchAdapter(it, filterSearch, filterName, WeakReference(allFilters)))
+            textView.onItemClickListener = object : AdapterView.OnItemClickListener {
                 override fun onItemClick(adapter: AdapterView<*>?, view: View?, pos: Int, p3: Long) {
                     val item = adapter?.getItemAtPosition(pos) as? FilterModel
                     item ?: return
@@ -48,7 +56,7 @@ class FiltersFragment() : Fragment() {
         }
     }
 
-    private fun bindAllFilterControls(){
+    private fun bindAllFilterControls() {
         bindFilterControl(publisher_filter, publisher_filters, "izd")
         bindFilterControl(area_filter, area_filters, "izd")
         bindFilterControl(brigade_filter, brigade_filters, "izd")
@@ -59,18 +67,26 @@ class FiltersFragment() : Fragment() {
         bindFilterControl(user_filter, user_filters, "izd")
     }
 
-    private fun fillAllFilters(){
+    private fun fillAllFilters() {
         fillFilters(publisher_filters, filters.publishers)
+        allFilters.addAll(filters.publishers)
         fillFilters(area_filters, filters.areas)
+        allFilters.addAll(filters.areas)
         fillFilters(brigade_filters, filters.brigades)
+        allFilters.addAll(filters.brigades)
         fillFilters(city_filters, filters.cities)
+        allFilters.addAll(filters.cities)
         fillFilters(district_filters, filters.districts)
+        allFilters.addAll(filters.districts)
         fillFilters(region_filters, filters.regions)
+        allFilters.addAll(filters.regions)
         fillFilters(street_filters, filters.streets)
+        allFilters.addAll(filters.streets)
         fillFilters(user_filters, filters.users)
+        allFilters.addAll(filters.users)
     }
 
-    private fun fillFilters(view: FilterTagLayout?, filters: List<FilterModel>){
+    private fun fillFilters(view: FilterTagLayout?, filters: List<FilterModel>) {
         view ?: return
         filters.forEach {
             view.add(it)
