@@ -16,10 +16,7 @@ import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
-import ru.relabs.kurjercontroller.ui.fragments.taskInfo.delegates.InfoHeaderDelegate
-import ru.relabs.kurjercontroller.ui.fragments.taskInfo.delegates.InfoInfoDelegate
-import ru.relabs.kurjercontroller.ui.fragments.taskInfo.delegates.InfoItemDelegate
-import ru.relabs.kurjercontroller.ui.fragments.taskList.TaskListFragment
+import ru.relabs.kurjercontroller.ui.fragments.taskInfo.delegates.*
 
 class TaskInfoFragment : Fragment() {
 
@@ -27,9 +24,11 @@ class TaskInfoFragment : Fragment() {
 
     val presenter = TaskInfoPresenter(this)
     val adapter = DelegateAdapter<TaskInfoModel>().apply {
-        addDelegate(InfoHeaderDelegate())
+        addDelegate(InfoAddressesHeaderDelegate())
         addDelegate(InfoInfoDelegate())
-        addDelegate(InfoItemDelegate { presenter.onInfoClicked(it) })
+        addDelegate(InfoAddressItemDelegate { presenter.onInfoClicked(it) })
+        addDelegate(InfoFilterItemDelegate())
+        addDelegate(InfoFiltersHeaderDelegate())
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -42,12 +41,53 @@ class TaskInfoFragment : Fragment() {
     }
 
     private fun populateList(task: TaskModel) {
+        if (task.taskFilters?.all?.isNotEmpty() == true) {
+            populateListFilters(task)
+        } else {
+            populateListAddresses(task)
+        }
+    }
+
+    private fun populateListAddresses(task: TaskModel) {
         adapter.data.clear()
         adapter.data.add(TaskInfoModel.Task(task))
-        adapter.data.add(TaskInfoModel.DetailsTableHeader)
+        adapter.data.add(TaskInfoModel.DetailsAddressTableHeader)
         adapter.data.addAll(task.taskItems.map {
             TaskInfoModel.TaskItem(it)
         })
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun populateListFilters(task: TaskModel) {
+        adapter.data.clear()
+        adapter.data.add(TaskInfoModel.Task(task))
+        adapter.data.add(TaskInfoModel.DetailsFiltersTableHeader)
+        if (task.taskFilters != null) {
+            adapter.data.addAll(task.taskFilters.publishers.map {
+                TaskInfoModel.FilterItem("Издатель", it)
+            })
+            adapter.data.addAll(task.taskFilters.brigades.map {
+                TaskInfoModel.FilterItem("Бригада", it)
+            })
+            adapter.data.addAll(task.taskFilters.users.map {
+                TaskInfoModel.FilterItem("Распространитель", it)
+            })
+            adapter.data.addAll(task.taskFilters.cities.map {
+                TaskInfoModel.FilterItem("Город", it)
+            })
+            adapter.data.addAll(task.taskFilters.areas.map {
+                TaskInfoModel.FilterItem("Участок", it)
+            })
+            adapter.data.addAll(task.taskFilters.streets.map {
+                TaskInfoModel.FilterItem("Улица", it)
+            })
+            adapter.data.addAll(task.taskFilters.districts.map {
+                TaskInfoModel.FilterItem("Округ", it)
+            })
+            adapter.data.addAll(task.taskFilters.regions.map {
+                TaskInfoModel.FilterItem("Район", it)
+            })
+        }
         adapter.notifyDataSetChanged()
     }
 
@@ -61,13 +101,14 @@ class TaskInfoFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            val tempTask: TaskModel? = it.getParcelable("filters")
+            val tempTask: TaskModel? = it.getParcelable("task")
             if (tempTask == null) {
-                CustomLog.writeToFile("null filters in TaskInfoFragment")
-                activity()?.showError("Произошла ошибка", object: ErrorButtonsListener{
+                CustomLog.writeToFile("null task in TaskInfoFragment")
+                activity()?.showError("Произошла ошибка", object : ErrorButtonsListener {
                     override fun positiveListener() {
                         application().router.exit()
                     }
+
                     override fun negativeListener() {}
                 })
                 return
@@ -82,7 +123,7 @@ class TaskInfoFragment : Fragment() {
         fun newInstance(task: TaskModel) =
             TaskInfoFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelable("filters", task)
+                    putParcelable("task", task)
                 }
             }
     }

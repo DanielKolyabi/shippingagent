@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.ui.fragments.taskInfo
 
+import ru.relabs.kurjercontroller.models.FilterModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
 
@@ -9,5 +10,7 @@ import ru.relabs.kurjercontroller.models.TaskModel
 sealed class TaskInfoModel {
     class Task(val task: TaskModel) : TaskInfoModel()
     class TaskItem(val taskItem: TaskItemModel) : TaskInfoModel()
-    object DetailsTableHeader : TaskInfoModel()
+    class FilterItem(val filterName: String, val filterItem: FilterModel) : TaskInfoModel()
+    object DetailsAddressTableHeader : TaskInfoModel()
+    object DetailsFiltersTableHeader : TaskInfoModel()
 }

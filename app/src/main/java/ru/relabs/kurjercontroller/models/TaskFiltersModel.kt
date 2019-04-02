@@ -17,6 +17,18 @@ data class TaskFiltersModel(
     val districts: MutableList<FilterModel>,
     val regions: MutableList<FilterModel>
 ) : Parcelable {
+    val all: List<FilterModel>
+        get() = publishers.asSequence()
+            .plus(brigades)
+            .plus(areas)
+            .plus(users)
+            .plus(cities)
+            .plus(streets)
+            .plus(districts)
+            .plus(regions)
+            .toList()
+
+
     constructor(parcel: Parcel) : this(
         parcel.createTypedArrayList(FilterModel).orEmpty(),
         parcel.createTypedArrayList(FilterModel).orEmpty(),
