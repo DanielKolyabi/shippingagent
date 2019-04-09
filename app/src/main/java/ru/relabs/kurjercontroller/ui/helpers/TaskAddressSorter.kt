@@ -29,11 +29,11 @@ object TaskAddressSorter {
             .thenBy { it.taskItem.address.street }
             .thenBy { it.taskItem.address.house }
             .thenBy { it.taskItem.address.houseName }
-            .thenBy { it.taskItem.state }
+            .thenBy { it.taskItem.isClosed }
         ).groupBy {
             it.taskItem.address.id
         }.toList().sortedBy {
-            !it.second.any { it.taskItem.state != TaskItemModel.CLOSED }
+            !it.second.any { !it.taskItem.isClosed }
         }.toMap().flatMap {
             it.value
         }
@@ -44,11 +44,11 @@ object TaskAddressSorter {
             .thenBy { it.taskItem.address.street }
             .thenBy { it.taskItem.address.house }
             .thenBy { it.taskItem.address.houseName }
-            .thenBy { it.taskItem.state }
+            .thenBy { it.taskItem.isClosed }
         ).groupBy {
             it.taskItem.address.id
         }.toList().sortedBy {
-            !it.second.any { it.taskItem.state != TaskItemModel.CLOSED }
+            !it.second.any { !it.taskItem.isClosed }
         }.toMap().flatMap {
             it.value
         }

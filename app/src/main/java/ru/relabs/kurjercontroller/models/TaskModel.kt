@@ -24,11 +24,12 @@ data class TaskModel(
     val startDistributionDate: DateTime,
     @SerializedName("end_distribution_date")
     val endDistributionDate: DateTime,
-    val storages: List<String>,
+    val storage: String,
     val description: String,
     @Expose
     val taskItems: List<TaskItemModel>,
-    val taskFilters: TaskFiltersModel?
+    val taskFilters: TaskFiltersModel?,
+    val state: Int
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
@@ -40,10 +41,11 @@ data class TaskModel(
         DateTime.parse(parcel.readString()),
         DateTime.parse(parcel.readString()),
         DateTime.parse(parcel.readString()),
-        parcel.createStringArrayList().orEmpty(),
+        parcel.readString().orEmpty(),
         parcel.readString().orEmpty(),
         parcel.createTypedArrayList(TaskItemModel)?.toList().orEmpty(),
-        parcel.readParcelable(TaskFiltersModel::class.java.classLoader)
+        parcel.readParcelable(TaskFiltersModel::class.java.classLoader),
+        parcel.readInt()
     ) {
     }
 
@@ -57,10 +59,11 @@ data class TaskModel(
         parcel.writeString(endControlDate.toString())
         parcel.writeString(startDistributionDate.toString())
         parcel.writeString(endDistributionDate.toString())
-        parcel.writeStringList(storages)
+        parcel.writeString(storage)
         parcel.writeString(description)
         parcel.writeTypedList(taskItems)
         parcel.writeParcelable(taskFilters, flags)
+        parcel.writeInt(state)
     }
 
     override fun describeContents(): Int {

@@ -18,7 +18,9 @@ data class EntranceModel(
     val availableKeys: List<String>,
     @SerializedName("available_euro_keys")
     val availableEuroKeys: List<String>,
-    val code: String
+    val code: String,
+    val floors: Int,
+    val state: Int
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
@@ -26,7 +28,9 @@ data class EntranceModel(
         parcel.readInt(),
         parcel.createStringArrayList(),
         parcel.createStringArrayList(),
-        parcel.readString()
+        parcel.readString(),
+        parcel.readInt(),
+        parcel.readInt()
     ) {
     }
 
@@ -37,6 +41,8 @@ data class EntranceModel(
         parcel.writeStringList(availableKeys)
         parcel.writeStringList(availableEuroKeys)
         parcel.writeString(code)
+        parcel.writeInt(floors)
+        parcel.writeInt(state)
     }
 
     override fun describeContents(): Int {
@@ -51,5 +57,8 @@ data class EntranceModel(
         override fun newArray(size: Int): Array<EntranceModel?> {
             return arrayOfNulls(size)
         }
+
+        val CREATED = 0
+        val CLOSED = 1
     }
 }

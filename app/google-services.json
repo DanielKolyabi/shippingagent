@@ -1,0 +1,35 @@
+{
+  "project_info": {
+    "project_number": "693077155286",
+    "firebase_url": "https://deliverycontroller.firebaseio.com",
+    "project_id": "deliverycontroller",
+    "storage_bucket": "deliverycontroller.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:693077155286:android:580c01c6e80c5542",
+        "android_client_info": {
+          "package_name": "ru.relabs.kurjercontroller"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIVmGq1SsB5oL5HLrT_BCtkHwDtKIURdI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "693077155286-igq0rs1be65nghd6lbuo6ejobop2kdpj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,11 +1,21 @@
 package ru.relabs.kurjercontroller.ui.fragments.login
 
+import android.content.Context
+import android.util.Log
+import kotlinx.android.synthetic.main.fragment_login.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.joda.time.DateTime
+import retrofit2.HttpException
+import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.CancelableScope
+import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.application
+import ru.relabs.kurjercontroller.application.UserModel
+import ru.relabs.kurjercontroller.network.DeliveryServerAPI.api
 import ru.relabs.kurjercontroller.network.NetworkHelper
+import ru.relabs.kurjercontroller.network.models.ErrorUtils
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.fragments.TaskListScreen
@@ -19,7 +29,7 @@ class LoginPresenter(val fragment: LoginFragment) {
     private var isPasswordRemembered = false
     private var authByToken = false
 
-    private fun setRememberPasswordEnabled(enabled: Boolean) {
+    fun setRememberPasswordEnabled(enabled: Boolean) {
         isPasswordRemembered = enabled
         fragment.setRememberPasswordEnabled(enabled)
     }
@@ -38,8 +48,65 @@ class LoginPresenter(val fragment: LoginFragment) {
             showOfflineLoginOffer()
             return@launch
         }
-        withContext(Dispatchers.Main) {
-            application().router.replaceScreen(TaskListScreen())
+
+        bgScope.launch(Dispatchers.Main) {
+            fragment.setLoginButtonLoading(true)
+
+            val sharedPref = application().getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
+
+            try {
+                val time = DateTime().toString("yyyy-MM-dd'T'HH:mm:ss")
+
+                val response = if (!authByToken)
+                    api.login(login, pwd, application().deviceUUID, time).await()
+                else
+                    api.loginByToken(pwd, application().deviceUUID, time).await()
+
+                if (response.error != null) {
+                    fragment.activity()?.showError("Ошибка №${response.error.code}\n${response.error.message}")
+                    return@launch
+                }
+
+                application().user.setUser(UserModel.Authorized(response.user.login, response.token))
+                if (isPasswordRemembered) {
+                    application().user.storeUserCredentials()
+                } else {
+                    application().user.restoreUserCredentials()
+                }
+
+                application().sendPushToken(null)
+                if (sharedPref.getString("last_login", "") != response.user.login) {
+                    Log.d(
+                        "login",
+                        "Clear local database. User changed. Last login ${sharedPref.getString(
+                            "last_login",
+                            ""
+                        )}. New login ${response.user.login}"
+                    )
+                    application().tasksLocalRepository.closeAllTasks()
+                }
+                sharedPref.edit().putString("last_login", response.user.login).apply()
+
+                withContext(Dispatchers.Main) {
+                    application().router.replaceScreen(TaskListScreen())
+                }
+
+            } catch (e: HttpException) {
+                e.printStackTrace()
+
+                if (e.code() == 502) {
+                    showOfflineLoginOffer()
+                    return@launch
+                }
+
+                val err = ErrorUtils.getError(e)
+                fragment.activity()?.showError("Ошибка №${err.code}.\n${err.message}")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                showOfflineLoginOffer()
+            }
+
+            fragment.setLoginButtonLoading(false)
         }
     }
 
@@ -50,6 +117,16 @@ class LoginPresenter(val fragment: LoginFragment) {
         return true
     }
 
+
+    fun loadUserCredentials() {
+        val credentials = application().user.getUserCredentials()
+        credentials ?: return
+        fragment.login_input.setText(credentials.login)
+        fragment.password_input.setText(credentials.token)
+        authByToken = true
+        fragment.setRememberPasswordEnabled(true)
+        fragment.shouldResetRememberOnInput = true
+    }
 
     suspend fun showOfflineLoginOffer() = withContext(Dispatchers.Main) {
         fragment.activity?.showError(

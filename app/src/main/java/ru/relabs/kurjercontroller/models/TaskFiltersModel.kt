@@ -9,30 +9,21 @@ import ru.relabs.kurjercontroller.orEmpty
  */
 data class TaskFiltersModel(
     val publishers: MutableList<FilterModel>,
-    val brigades: MutableList<FilterModel>,
-    val areas: MutableList<FilterModel>,
-    val users: MutableList<FilterModel>,
-    val cities: MutableList<FilterModel>,
-    val streets: MutableList<FilterModel>,
     val districts: MutableList<FilterModel>,
-    val regions: MutableList<FilterModel>
+    val regions: MutableList<FilterModel>,
+    val brigades: MutableList<FilterModel>,
+    val users: MutableList<FilterModel>
 ) : Parcelable {
     val all: List<FilterModel>
         get() = publishers.asSequence()
-            .plus(brigades)
-            .plus(areas)
-            .plus(users)
-            .plus(cities)
-            .plus(streets)
             .plus(districts)
             .plus(regions)
+            .plus(brigades)
+            .plus(users)
             .toList()
 
 
     constructor(parcel: Parcel) : this(
-        parcel.createTypedArrayList(FilterModel).orEmpty(),
-        parcel.createTypedArrayList(FilterModel).orEmpty(),
-        parcel.createTypedArrayList(FilterModel).orEmpty(),
         parcel.createTypedArrayList(FilterModel).orEmpty(),
         parcel.createTypedArrayList(FilterModel).orEmpty(),
         parcel.createTypedArrayList(FilterModel).orEmpty(),
@@ -43,13 +34,10 @@ data class TaskFiltersModel(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeTypedList(publishers)
-        parcel.writeTypedList(brigades)
-        parcel.writeTypedList(areas)
-        parcel.writeTypedList(users)
-        parcel.writeTypedList(cities)
-        parcel.writeTypedList(streets)
         parcel.writeTypedList(districts)
         parcel.writeTypedList(regions)
+        parcel.writeTypedList(brigades)
+        parcel.writeTypedList(users)
     }
 
     override fun describeContents(): Int {
@@ -67,9 +55,6 @@ data class TaskFiltersModel(
 
         fun blank(): TaskFiltersModel {
             return TaskFiltersModel(
-                mutableListOf(),
-                mutableListOf(),
-                mutableListOf(),
                 mutableListOf(),
                 mutableListOf(),
                 mutableListOf(),

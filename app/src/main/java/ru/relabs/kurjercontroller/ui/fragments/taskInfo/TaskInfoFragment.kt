@@ -72,15 +72,6 @@ class TaskInfoFragment : Fragment() {
             adapter.data.addAll(task.taskFilters.users.map {
                 TaskInfoModel.FilterItem("Распространитель", it)
             })
-            adapter.data.addAll(task.taskFilters.cities.map {
-                TaskInfoModel.FilterItem("Город", it)
-            })
-            adapter.data.addAll(task.taskFilters.areas.map {
-                TaskInfoModel.FilterItem("Участок", it)
-            })
-            adapter.data.addAll(task.taskFilters.streets.map {
-                TaskInfoModel.FilterItem("Улица", it)
-            })
             adapter.data.addAll(task.taskFilters.districts.map {
                 TaskInfoModel.FilterItem("Округ", it)
             })

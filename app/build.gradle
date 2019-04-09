@@ -4,19 +4,35 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'kurjer'
+            keyPassword '1qazxsw2'
+            storeFile file('H:/BackupsWindowsReinstall/work/DeliveryManProject/android_deliveryman_client/2017abix.dat')
+            storePassword '1qazxsw2'
+        }
+    }
     compileSdkVersion 28
     defaultConfig {
         applicationId "ru.relabs.kurjercontroller"
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
-        versionName "1.0"
+        versionName "1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+        debug {
+            buildConfigField("String", "API_URL", '"http://192.168.250.176:8081"')
+            buildConfigField("String", "YA_KEY", '"9be78b32-1265-4157-bf15-999b8d747a5c"')
+            signingConfig signingConfigs.config
+        }
         release {
+            buildConfigField("String", "API_URL", '"https://courrmobileapi.courr.ru"')
+            buildConfigField("String", "YA_KEY", '"9be78b32-1265-4157-bf15-999b8d747a5c"')
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
 }
@@ -38,7 +54,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.11.0'
-    implementation 'com.jakewharton.retrofit:retrofit2-kotlin-coroutines-experimental-adapter:1.0.0'
+    implementation 'com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2'
 
     implementation "com.hootsuite.android:nachos:1.1.1"
     implementation "ru.terrakok.cicerone:cicerone:5.0.0"
@@ -52,5 +68,9 @@ dependencies {
     implementation 'com.yandex.android:mapkit:3.0.0'
 
     implementation 'joda-time:joda-time:2.10.1'
+
+    implementation 'com.google.firebase:firebase-core:16.0.8'
+    implementation 'com.google.firebase:firebase-messaging:17.6.0'
 }
 
+apply plugin: 'com.google.gms.google-services'

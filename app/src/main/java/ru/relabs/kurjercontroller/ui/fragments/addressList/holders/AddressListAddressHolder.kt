@@ -6,7 +6,6 @@ import kotlinx.android.synthetic.main.holder_addr_list_address.view.*
 import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.models.AddressModel
-import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.ui.fragments.addressList.AddressListModel
 
 
@@ -21,7 +20,9 @@ class AddressListAddressHolder(
         if (item !is AddressListModel.Address) return
         val address = item.taskItems.first().address.name
         itemView.address_text.text = address
-        val isAddressClosed = !item.taskItems.any { it.state != TaskItemModel.CLOSED }
+        val isAddressClosed = item.taskItems.find {
+            !it.isClosed
+        } == null
 
         if (isAddressClosed) {
             itemView.address_text.setTextColor(Color.parseColor("#CCCCCC"))

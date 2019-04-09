@@ -13,6 +13,10 @@ import kotlin.random.Random
  */
 
 class MockTaskRepository : ITaskRepository {
+    override suspend fun closeAllTasks() = withContext(Dispatchers.IO){
+
+    }
+
     private val taskItems = MutableList(100) { i ->
         TaskItemModel(
             i,
@@ -27,7 +31,6 @@ class MockTaskRepository : ITaskRepository {
                 0.0,
                 0.0
             ),
-            TaskItemModel.CREATED,
             listOf("note1", "note2"),
             List(Random(0).nextInt(4)) { j ->
                 EntranceModel(
@@ -36,7 +39,9 @@ class MockTaskRepository : ITaskRepository {
                     j * 100 + 100,
                     listOf("1234", "4321", "3214", "2341"),
                     listOf("1234", "4321", "3214", "2341"),
-                    "3345"
+                    "3345",
+                    9,
+                    EntranceModel.CREATED
                 )
             }
         )
@@ -55,10 +60,11 @@ class MockTaskRepository : ITaskRepository {
             listOf(
                 "Москва, ул. Пушкина, д. 36 слева ларёк, в ларьке пенёк, в пеньке яйцо, в яйце - материалы",
                 "Москва, ул. Колотушкина, д. 36 справа ларёк, в ларьке огонёк, в огоньке яйцо, в яйце - материалы"
-            ),
+            ).joinToString("; "),
             "За этими глаз да глаз, проверить нужно всё!1!",
             taskItems.filter { it.taskId == i },
-            null
+            null,
+            0
         )
     }.apply {
         add(TaskModel(
@@ -74,7 +80,7 @@ class MockTaskRepository : ITaskRepository {
             listOf(
                 "Москва, ул. Пушкина, д. 36 слева ларёк, в ларьке пенёк, в пеньке яйцо, в яйце - материалы",
                 "Москва, ул. Колотушкина, д. 36 справа ларёк, в ларьке огонёк, в огоньке яйцо, в яйце - материалы"
-            ),
+            ).joinToString("; "),
             "За этими глаз да глаз, проверить нужно всё!1!",
             listOf(),
             TaskFiltersModel(
@@ -90,11 +96,9 @@ class MockTaskRepository : ITaskRepository {
                 ),
                 mutableListOf(),
                 mutableListOf(),
-                mutableListOf(),
-                mutableListOf(),
-                mutableListOf(),
                 mutableListOf()
-            )
+            ),
+            0
         ))
     }
 

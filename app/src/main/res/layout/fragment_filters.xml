@@ -61,130 +61,7 @@
                     app:layout_constraintStart_toStartOf="@id/publisher_label"
                     app:layout_constraintEnd_toEndOf="@id/publisher_filter"/>
 
-            <TextView
-                    android:id="@+id/brigade_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/brigade_filter"
-                    app:layout_constraintBottom_toBottomOf="@id/brigade_filter"
-                    android:text="@string/brigade_label"/>
-            <AutoCompleteTextView
-                    android:id="@+id/brigade_filter"
-                    android:layout_width="0dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/publisher_filters"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/brigade_label"
-                    android:layout_marginStart="8dp"/>
-            <ru.relabs.kurjercontroller.ui.fragments.filters.FilterTagLayout
-                    android:id="@+id/brigade_filters"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/brigade_filter"
-                    app:layout_constraintStart_toStartOf="@id/brigade_filter"
-                    app:layout_constraintEnd_toEndOf="@id/brigade_filter"/>
 
-            <TextView
-                    android:id="@+id/area_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/area_filter"
-                    app:layout_constraintBottom_toBottomOf="@id/area_filter"
-                    android:text="@string/area_label"/>
-            <AutoCompleteTextView
-                    android:id="@+id/area_filter"
-                    android:layout_width="0dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/brigade_filters"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/area_label"
-                    android:layout_marginStart="8dp"/>
-            <ru.relabs.kurjercontroller.ui.fragments.filters.FilterTagLayout
-                    android:id="@+id/area_filters"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/area_filter"
-                    app:layout_constraintStart_toStartOf="@id/area_filter"
-                    app:layout_constraintEnd_toEndOf="@id/area_filter"/>
-
-            <TextView
-                    android:id="@+id/user_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/user_filter"
-                    app:layout_constraintBottom_toBottomOf="@id/user_filter"
-                    android:text="@string/user_filter_label"/>
-            <AutoCompleteTextView
-                    android:id="@+id/user_filter"
-                    android:layout_width="0dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/area_filters"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/user_label"
-                    android:layout_marginStart="8dp"/>
-            <ru.relabs.kurjercontroller.ui.fragments.filters.FilterTagLayout
-                    android:id="@+id/user_filters"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/user_filter"
-                    app:layout_constraintStart_toStartOf="@id/user_filter"
-                    app:layout_constraintEnd_toEndOf="@id/user_filter"/>
-
-            <TextView
-                    android:id="@+id/city_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/city_filter"
-                    app:layout_constraintBottom_toBottomOf="@id/city_filter"
-                    android:text="@string/city_filter_label"/>
-            <AutoCompleteTextView
-                    android:id="@+id/city_filter"
-                    android:layout_width="0dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/user_filters"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/city_label"
-                    android:layout_marginStart="8dp"/>
-            <ru.relabs.kurjercontroller.ui.fragments.filters.FilterTagLayout
-                    android:id="@+id/city_filters"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/city_filter"
-                    app:layout_constraintStart_toStartOf="@id/city_filter"
-                    app:layout_constraintEnd_toEndOf="@id/city_filter"/>
-
-            <TextView
-                    android:id="@+id/street_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/street_filter"
-                    app:layout_constraintBottom_toBottomOf="@id/street_filter"
-                    android:text="@string/string_fitler_label"/>
-            <AutoCompleteTextView
-                    android:id="@+id/street_filter"
-                    android:layout_width="0dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/city_filters"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/street_label"
-                    android:layout_marginStart="8dp"/>
-            <ru.relabs.kurjercontroller.ui.fragments.filters.FilterTagLayout
-                    android:id="@+id/street_filters"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/street_filter"
-                    app:layout_constraintStart_toStartOf="@id/street_filter"
-                    app:layout_constraintEnd_toEndOf="@id/street_filter"/>
 
             <TextView
                     android:id="@+id/district_label"
@@ -199,7 +76,7 @@
                     android:layout_width="0dp"
                     android:layout_marginTop="8dp"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/street_filters"
+                    app:layout_constraintTop_toBottomOf="@id/publisher_filters"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/district_label"
                     android:layout_marginStart="8dp"/>
@@ -210,6 +87,7 @@
                     app:layout_constraintTop_toBottomOf="@id/district_filter"
                     app:layout_constraintStart_toStartOf="@id/district_filter"
                     app:layout_constraintEnd_toEndOf="@id/district_filter"/>
+
 
             <TextView
                     android:id="@+id/region_label"
@@ -235,6 +113,59 @@
                     app:layout_constraintTop_toBottomOf="@id/region_filter"
                     app:layout_constraintStart_toStartOf="@id/region_filter"
                     app:layout_constraintEnd_toEndOf="@id/region_filter"/>
+
+            <TextView
+                    android:id="@+id/brigade_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/brigade_filter"
+                    app:layout_constraintBottom_toBottomOf="@id/brigade_filter"
+                    android:text="@string/brigade_label"/>
+            <AutoCompleteTextView
+                    android:id="@+id/brigade_filter"
+                    android:layout_width="0dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/region_filters"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/brigade_label"
+                    android:layout_marginStart="8dp"/>
+            <ru.relabs.kurjercontroller.ui.fragments.filters.FilterTagLayout
+                    android:id="@+id/brigade_filters"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/brigade_filter"
+                    app:layout_constraintStart_toStartOf="@id/brigade_filter"
+                    app:layout_constraintEnd_toEndOf="@id/brigade_filter"/>
+
+
+            <TextView
+                    android:id="@+id/user_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/user_filter"
+                    app:layout_constraintBottom_toBottomOf="@id/user_filter"
+                    android:text="@string/user_filter_label"/>
+            <AutoCompleteTextView
+                    android:id="@+id/user_filter"
+                    android:layout_width="0dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/brigade_filters"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/user_label"
+                    android:layout_marginStart="8dp"/>
+            <ru.relabs.kurjercontroller.ui.fragments.filters.FilterTagLayout
+                    android:id="@+id/user_filters"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/user_filter"
+                    app:layout_constraintStart_toStartOf="@id/user_filter"
+                    app:layout_constraintEnd_toEndOf="@id/user_filter"/>
+
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

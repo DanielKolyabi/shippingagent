@@ -14,7 +14,7 @@
     <string name="examine_button_text">Я ознакомился</string>
     <string name="edition_label">Издание:</string>
     <string name="dates_label">Даты:</string>
-    <string name="brigade_label">Бригада:</string>
+    <string name="brigade_label">Бригадир:</string>
     <string name="area_label">Участок:</string>
     <string name="city_label">Наc/п:</string>
     <string name="prints_count_label">Тираж:</string>

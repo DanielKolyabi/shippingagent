@@ -12,9 +12,8 @@ data class EntranceReportEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
     @ColumnInfo(name = "task_item_id")
-    val taskItemId: Int,
+    val taskItemId: Int, //iddot
     val idnd: Int,
-    val idot: Int,
     @ColumnInfo(name = "start_appartaments")
     val startAppartaments: Int,
     @ColumnInfo(name = "end_appartaments")
@@ -27,5 +26,6 @@ data class EntranceReportEntity(
     @ColumnInfo(name = "is_delivery_wrong")
     val isDeliveryWrong: Boolean,
     @ColumnInfo(name = "has_lookup_post")
-    val hasLookupPost: Boolean
+    val hasLookupPost: Boolean,
+    val token: String
 )

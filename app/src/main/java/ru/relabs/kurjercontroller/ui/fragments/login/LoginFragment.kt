@@ -34,9 +34,10 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        bindListeners()
-        setRememberPasswordEnabled(true)
+        presenter.loadUserCredentials()
 
+        bindListeners()
+        presenter.setRememberPasswordEnabled(true)
         app_version.text = resources.getString(R.string.app_version_label, BuildConfig.VERSION_CODE)
     }
 

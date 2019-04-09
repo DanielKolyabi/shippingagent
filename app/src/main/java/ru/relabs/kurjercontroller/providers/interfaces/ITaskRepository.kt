@@ -11,4 +11,6 @@ interface ITaskRepository {
     suspend fun getTaskItems(taskId: Int): List<TaskItemModel>
     suspend fun getTask(taskId: Int): TaskModel
     suspend fun getTaskItem(taskItemId: Int): TaskItemModel
+
+    suspend fun closeAllTasks()
 }

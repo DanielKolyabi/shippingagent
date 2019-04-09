@@ -22,7 +22,7 @@ class AddressListTaskItemHolder(
         if (item !is AddressListModel.TaskItem) return
         itemView.task_button.text = "${item.parentTask.publisher} №${item.parentTask.edition}"
 
-        if (item.taskItem.state == TaskItemModel.CLOSED) {
+        if (item.taskItem.isClosed) {
             itemView.task_button.setTextColor(Color.parseColor("#66000000"))
         } else {
             itemView.task_button.setTextColor(Color.parseColor("#ff000000"))

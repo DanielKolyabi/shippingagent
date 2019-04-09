@@ -9,20 +9,21 @@ import com.google.gson.annotations.SerializedName
  */
 
 data class TaskItemModel(
-    val id: Int,
+    val id: Int, //iddot
     @SerializedName("task_id")
     val taskId: Int,
     val address: AddressModel,
-    val state: Int,
     val notes: List<String>,
     val entrances: List<EntranceModel>
 ) : Parcelable {
+
+    val isClosed: Boolean
+        get() = entrances.find { it.state == EntranceModel.CREATED } == null
 
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
         parcel.readInt(),
         parcel.readParcelable(AddressModel::class.java.classLoader),
-        parcel.readInt(),
         parcel.createStringArrayList().orEmpty(),
         parcel.createTypedArrayList(EntranceModel).orEmpty()
     ) {
@@ -32,7 +33,6 @@ data class TaskItemModel(
         parcel.writeInt(id)
         parcel.writeInt(taskId)
         parcel.writeParcelable(address, flags)
-        parcel.writeInt(state)
         parcel.writeStringList(notes)
         parcel.writeTypedList(entrances)
     }
@@ -49,8 +49,5 @@ data class TaskItemModel(
         override fun newArray(size: Int): Array<TaskItemModel?> {
             return arrayOfNulls(size)
         }
-
-        val CREATED = 0
-        val CLOSED = 1
     }
 }

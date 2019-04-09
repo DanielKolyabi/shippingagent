@@ -58,30 +58,21 @@ class FiltersFragment() : Fragment() {
 
     private fun bindAllFilterControls() {
         bindFilterControl(publisher_filter, publisher_filters, "izd")
-        bindFilterControl(area_filter, area_filters, "izd")
         bindFilterControl(brigade_filter, brigade_filters, "izd")
-        bindFilterControl(city_filter, city_filters, "izd")
         bindFilterControl(district_filter, district_filters, "izd")
         bindFilterControl(region_filter, region_filters, "izd")
-        bindFilterControl(street_filter, street_filters, "izd")
         bindFilterControl(user_filter, user_filters, "izd")
     }
 
     private fun fillAllFilters() {
         fillFilters(publisher_filters, filters.publishers)
         allFilters.addAll(filters.publishers)
-        fillFilters(area_filters, filters.areas)
-        allFilters.addAll(filters.areas)
         fillFilters(brigade_filters, filters.brigades)
         allFilters.addAll(filters.brigades)
-        fillFilters(city_filters, filters.cities)
-        allFilters.addAll(filters.cities)
         fillFilters(district_filters, filters.districts)
         allFilters.addAll(filters.districts)
         fillFilters(region_filters, filters.regions)
         allFilters.addAll(filters.regions)
-        fillFilters(street_filters, filters.streets)
-        allFilters.addAll(filters.streets)
         fillFilters(user_filters, filters.users)
         allFilters.addAll(filters.users)
     }
