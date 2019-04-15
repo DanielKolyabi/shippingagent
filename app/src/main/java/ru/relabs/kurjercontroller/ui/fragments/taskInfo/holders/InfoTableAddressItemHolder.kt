@@ -17,7 +17,7 @@ class InfoTableAddressItemHolder(itemView: View, val onInfoClicked: (item: TaskI
         if (item !is TaskInfoModel.TaskItem) return
         val taskItem = item.taskItem
         with(itemView) {
-            address_text.text = taskItem.address.name
+            address_text.text = taskItem.address?.name
 
             info_icon.setOnClickListener {
                 onInfoClicked(taskItem)

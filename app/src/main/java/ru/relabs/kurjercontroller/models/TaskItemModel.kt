@@ -2,7 +2,7 @@ package ru.relabs.kurjercontroller.models
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
+import ru.relabs.kurjercontroller.database.entities.TaskItemEntity
 
 /**
  * Created by ProOrange on 19.03.2019.
@@ -10,36 +10,54 @@ import com.google.gson.annotations.SerializedName
 
 data class TaskItemModel(
     val id: Int, //iddot
-    @SerializedName("task_id")
     val taskId: Int,
+    val publisherName: String,
+    val defaultReportType: Int,
+    val required: Boolean,
     val address: AddressModel,
-    val notes: List<String>,
-    val entrances: List<EntranceModel>
+    val entrances: List<EntranceModel>,
+    val notes: List<String>
 ) : Parcelable {
-
     val isClosed: Boolean
-        get() = entrances.find { it.state == EntranceModel.CREATED } == null
+        get() = !entrances.any { it.state == EntranceModel.CREATED }
 
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
         parcel.readInt(),
-        parcel.readParcelable(AddressModel::class.java.classLoader),
-        parcel.createStringArrayList().orEmpty(),
-        parcel.createTypedArrayList(EntranceModel).orEmpty()
+        parcel.readString().orEmpty(),
+        parcel.readInt(),
+        parcel.readByte() != 0.toByte(),
+        parcel.readParcelable(AddressModel::class.java.classLoader) ?: AddressModel.blank(),
+        parcel.createTypedArrayList(EntranceModel).orEmpty(),
+        parcel.createStringArrayList().orEmpty()
     ) {
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(id)
         parcel.writeInt(taskId)
+        parcel.writeString(publisherName)
+        parcel.writeInt(defaultReportType)
+        parcel.writeByte(if (required) 1 else 0)
         parcel.writeParcelable(address, flags)
-        parcel.writeStringList(notes)
         parcel.writeTypedList(entrances)
+        parcel.writeStringList(notes)
     }
 
     override fun describeContents(): Int {
         return 0
     }
+
+    fun toEntity(): TaskItemEntity =
+        TaskItemEntity(
+            id = id,
+            taskId = taskId,
+            notes = notes,
+            defaultReportType = defaultReportType,
+            required = required,
+            publisherName = publisherName,
+            addressId = address.id
+        )
 
     companion object CREATOR : Parcelable.Creator<TaskItemModel> {
         override fun createFromParcel(parcel: Parcel): TaskItemModel {

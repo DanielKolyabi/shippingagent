@@ -83,12 +83,12 @@ class LoginPresenter(val fragment: LoginFragment) {
                             ""
                         )}. New login ${response.user.login}"
                     )
-                    application().tasksLocalRepository.closeAllTasks()
+                    application().tasksRepository.closeAllTasks()
                 }
                 sharedPref.edit().putString("last_login", response.user.login).apply()
 
                 withContext(Dispatchers.Main) {
-                    application().router.replaceScreen(TaskListScreen())
+                    application().router.replaceScreen(TaskListScreen(true))
                 }
 
             } catch (e: HttpException) {
@@ -138,7 +138,7 @@ class LoginPresenter(val fragment: LoginFragment) {
                         fragment.activity?.showError("Невозможно войти оффлайн. Необходима авторизация через сервер.")
                         return
                     }
-                    application().router.replaceScreen(TaskListScreen())
+                    application().router.replaceScreen(TaskListScreen(false))
                 }
 
                 override fun positiveListener() {}

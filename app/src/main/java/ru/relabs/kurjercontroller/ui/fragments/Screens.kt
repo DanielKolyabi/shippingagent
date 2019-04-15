@@ -4,6 +4,7 @@ import androidx.fragment.app.Fragment
 import ru.relabs.kurjercontroller.models.TaskFiltersModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.ui.fragments.addressList.AddressListFragment
 import ru.relabs.kurjercontroller.ui.fragments.filters.FILTERS_REQUEST_CODE
 import ru.relabs.kurjercontroller.ui.fragments.filters.FiltersFragment
 import ru.relabs.kurjercontroller.ui.fragments.login.LoginFragment
@@ -22,9 +23,15 @@ class LoginScreen: SupportAppScreen() {
     }
 }
 
-class TaskListScreen: SupportAppScreen(){
+class TaskListScreen(private val loadFromNetwork: Boolean): SupportAppScreen(){
     override fun getFragment(): Fragment {
-        return TaskListFragment.newInstance(true)
+        return TaskListFragment.newInstance(loadFromNetwork)
+    }
+}
+
+class AddressListScreen(private val taskIds: List<Int>): SupportAppScreen(){
+    override fun getFragment(): Fragment {
+        return AddressListFragment.newInstance(taskIds)
     }
 }
 

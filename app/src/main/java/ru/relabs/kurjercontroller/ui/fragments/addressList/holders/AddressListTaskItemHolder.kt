@@ -20,7 +20,7 @@ class AddressListTaskItemHolder(
 
     override fun onBindViewHolder(item: AddressListModel) {
         if (item !is AddressListModel.TaskItem) return
-        itemView.task_button.text = "${item.parentTask.publisher} №${item.parentTask.edition}"
+        itemView.task_button.text = item.taskItem.publisherName
 
         if (item.taskItem.isClosed) {
             itemView.task_button.setTextColor(Color.parseColor("#66000000"))

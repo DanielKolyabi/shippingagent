@@ -25,7 +25,7 @@ object TaskAddressSorter {
     }
 
     fun sortTaskItemsStandart(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
-        return taskItems.sortedWith(compareBy<AddressListModel.TaskItem> { it.taskItem.address.city }
+        return taskItems.sortedWith(compareBy<AddressListModel.TaskItem> { it.taskItem.address?.city }
             .thenBy { it.taskItem.address.street }
             .thenBy { it.taskItem.address.house }
             .thenBy { it.taskItem.address.houseName }
@@ -40,7 +40,7 @@ object TaskAddressSorter {
     }
 
     fun sortTaskItemsAlphabetic(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
-        return taskItems.sortedWith(compareBy<AddressListModel.TaskItem> { it.taskItem.address.city }
+        return taskItems.sortedWith(compareBy<AddressListModel.TaskItem> { it.taskItem.address?.city }
             .thenBy { it.taskItem.address.street }
             .thenBy { it.taskItem.address.house }
             .thenBy { it.taskItem.address.houseName }

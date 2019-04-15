@@ -9,13 +9,11 @@ import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.POST
-import retrofit2.http.Query
+import retrofit2.http.*
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.network.models.AuthResponseModel
 import ru.relabs.kurjercontroller.network.models.StatusResponse
+import ru.relabs.kurjercontroller.network.models.TaskResponseModel
 import java.util.concurrent.TimeUnit
 
 
@@ -70,7 +68,7 @@ object DeliveryServerAPI {
         .build()
 
     interface IDeliveryServerAPI {
-        @POST("api/v1/auth")
+        @POST("api/v1/controller/auth")
         @FormUrlEncoded
         fun login(
             @Field("login") login: String, @Field("password") password: String, @Field("device_id") deviceId: String, @Field(
@@ -78,12 +76,12 @@ object DeliveryServerAPI {
             ) currentTime: String
         ): Deferred<AuthResponseModel>
 
-        @POST("api/v1/auth/token")
+        @POST("api/v1/controller/auth/token")
         @FormUrlEncoded
         fun loginByToken(@Field("token") token: String, @Field("device_id") deviceId: String, @Field("current_time") currentTime: String): Deferred<AuthResponseModel>
 
-        //        @GET("api/v1/tasks")
-//        fun getTasks(@Query("token") token: String, @Query("current_time") currentTime: String): Deferred<List<TaskResponseModel>>
+        @GET("api/v1/controller/tasks")
+        fun getTasks(@Query("token") token: String, @Query("current_time") currentTime: String): Deferred<List<TaskResponseModel>>
 //
 //        @POST("api/v1/tasks/{id}/report")
 //        @Multipart

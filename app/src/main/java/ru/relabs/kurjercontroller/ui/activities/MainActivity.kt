@@ -237,7 +237,7 @@ class MainActivity : AppCompatActivity() {
                 back_button?.setVisible(true)
                 changeTitle("Фильтры")
             }
-            //TODO: Report
+            //TODO: ReportFragment
         }
     }
 

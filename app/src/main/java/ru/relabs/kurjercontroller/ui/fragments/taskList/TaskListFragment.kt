@@ -24,32 +24,34 @@ import java.util.*
 
 class TaskListFragment : Fragment(), ISearchableFragment {
     override fun onSearchItems(filter: String): List<String> {
-        return adapter.data.asSequence()
-            .filter {
-                it is TaskListModel.TaskItem
-            }
-            .filter {
-                val task = (it as? TaskListModel.TaskItem)?.task
-                "${task?.publisher} №${task?.edition}".toLowerCase().contains(filter.toLowerCase())
-            }
-            .map {
-                "${(it as TaskListModel.TaskItem).task.publisher} №${it.task.edition}"
-            }
-            .toList()
+        return listOf()
+        //TODO: Fix search
+//        return adapter.data.asSequence()
+//            .filter {
+//                it is TaskListModel.TaskItem
+//            }
+//            .filter {
+//                val task = (it as? TaskListModel.TaskItem)?.task
+//                task?.publishers?.any { it.name.toLowerCase().contains(filter.toLowerCase()) } ?: false
+//            }
+//            .map {
+//                it as TaskListModel.TaskItem
+//            }
+//            .toList()
     }
 
     override fun onItemSelected(item: String, searchView: AutoCompleteTextView) {
-        val itemIndex = adapter.data.indexOfFirst {
-            if(it is TaskListModel.TaskItem) {
+        /*val itemIndex = adapter.data.indexOfFirst {
+            if (it is TaskListModel.TaskItem) {
                 "${it.task.publisher} №${it.task.edition}".contains(item)
-            }else{
+            } else {
                 false
             }
         }
         if (itemIndex < 0) {
             return
         }
-        tasks_list.smoothScrollToPosition(itemIndex)
+        tasks_list.smoothScrollToPosition(itemIndex)*/
     }
 
     var shouldNetworkUpdate: Boolean = false
@@ -65,6 +67,8 @@ class TaskListFragment : Fragment(), ISearchableFragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        presenter.updateStartButton()
 
         tasks_list?.layoutManager = LinearLayoutManager(context)
         tasks_list?.adapter = adapter
@@ -84,21 +88,25 @@ class TaskListFragment : Fragment(), ISearchableFragment {
         if (shouldNetworkUpdate) {
             presenter.bgScope.launch {
                 presenter.performNetworkUpdate()
+                shouldNetworkUpdate = false
             }
         } else {
             presenter.bgScope.launch {
                 presenter.loadTasks()
             }
         }
+
     }
 
 
     suspend fun showLoading(visible: Boolean) = withContext(Dispatchers.Main) {
         if (visible) {
+            online_button?.isEnabled = false
             adapter.data.add(0, TaskListModel.Loader)
             tasks_list?.isNestedScrollingEnabled = false
             adapter.notifyDataSetChanged()
         } else {
+            online_button?.isEnabled = true
             adapter.data.removeAll {
                 it is TaskListModel.Loader
             }

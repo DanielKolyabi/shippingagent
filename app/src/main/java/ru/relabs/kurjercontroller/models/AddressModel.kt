@@ -2,6 +2,7 @@ package ru.relabs.kurjercontroller.models
 
 import android.os.Parcel
 import android.os.Parcelable
+import ru.relabs.kurjercontroller.database.entities.AddressEntity
 
 /**
  * Created by ProOrange on 19.03.2019.
@@ -23,10 +24,10 @@ data class AddressModel(
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
         parcel.readInt(),
-        parcel.readString(),
-        parcel.readString(),
+        parcel.readString().orEmpty(),
+        parcel.readString().orEmpty(),
         parcel.readInt(),
-        parcel.readString(),
+        parcel.readString().orEmpty(),
         parcel.readDouble(),
         parcel.readDouble()
     ) {
@@ -47,6 +48,18 @@ data class AddressModel(
         return 0
     }
 
+    fun toEntity(): AddressEntity =
+        AddressEntity(
+            id = id,
+            street = street,
+            idnd = idnd,
+            houseName = houseName,
+            house = house,
+            city = city,
+            gpsLat = lat,
+            gpsLong = long
+        )
+
     companion object CREATOR : Parcelable.Creator<AddressModel> {
         override fun createFromParcel(parcel: Parcel): AddressModel {
             return AddressModel(parcel)
@@ -54,6 +67,10 @@ data class AddressModel(
 
         override fun newArray(size: Int): Array<AddressModel?> {
             return arrayOfNulls(size)
+        }
+
+        fun blank(): AddressModel {
+            return AddressModel(-1, -1, "Unknown", "Unknown", -1, "Unknown", .0, .0)
         }
     }
 }

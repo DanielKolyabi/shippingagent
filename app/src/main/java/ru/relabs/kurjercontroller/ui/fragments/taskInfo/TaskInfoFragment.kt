@@ -37,7 +37,21 @@ class TaskInfoFragment : Fragment() {
         task_items_list?.layoutManager = LinearLayoutManager(context)
         task_items_list?.adapter = adapter
 
+        examine_button?.isEnabled =
+            !(task.state == TaskModel.EXAMINED || task.state == TaskModel.STARTED || task.state == TaskModel.COMPLETED)
+
+        bindControls()
         populateList(task)
+    }
+
+    private fun bindControls() {
+        examine_button?.setOnClickListener {
+            presenter.onExamineClicked()
+        }
+
+        show_map_button?.setOnClickListener {
+
+        }
     }
 
     private fun populateList(task: TaskModel) {
@@ -107,6 +121,11 @@ class TaskInfoFragment : Fragment() {
 
             task = tempTask
         }
+    }
+
+    override fun onDestroy() {
+        presenter.bgScope.terminate()
+        super.onDestroy()
     }
 
     companion object {

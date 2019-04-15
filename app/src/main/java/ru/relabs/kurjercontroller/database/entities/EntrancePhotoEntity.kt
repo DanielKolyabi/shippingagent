@@ -9,7 +9,7 @@ import ru.relabs.kurjercontroller.models.GPSCoordinatesModel
  * Created by ProOrange on 19.03.2019.
  */
 @Entity(tableName = "entrance_photos")
-data class TaskItemPhotoEntity(
+data class EntrancePhotoEntity(
     @PrimaryKey(autoGenerate = true)
     var id: Int,
     @ColumnInfo(name = "uuid")

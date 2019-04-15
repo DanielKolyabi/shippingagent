@@ -8,14 +8,14 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import androidx.core.content.ContextCompat
+import androidx.room.Room
 import com.google.firebase.iid.FirebaseInstanceId
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.BuildConfig
+import ru.relabs.kurjercontroller.database.AppDatabase
 import ru.relabs.kurjercontroller.models.GPSCoordinatesModel
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
-import ru.relabs.kurjercontroller.providers.MockTaskRepository
+import ru.relabs.kurjercontroller.providers.TaskRepository
 import ru.relabs.kurjercontroller.providers.interfaces.ITaskRepository
 import ru.terrakok.cicerone.Cicerone
 import ru.terrakok.cicerone.NavigatorHolder
@@ -51,14 +51,20 @@ class MyApplication : Application() {
 
     val user = UserCredentials(this)
 
-    lateinit var tasksLocalRepository: ITaskRepository
+    lateinit var database: AppDatabase
+
+    lateinit var tasksRepository: TaskRepository
 
     override fun onCreate() {
         super.onCreate()
         instance = this
-        tasksLocalRepository = MockTaskRepository()
         cicerone = Cicerone.create()
         deviceUUID = getOrGenerateDeviceUUID()
+        database = Room
+            .databaseBuilder(applicationContext, AppDatabase::class.java, "deliverycontroller")
+            .fallbackToDestructiveMigration()
+            .build()
+        tasksRepository = TaskRepository(database)
     }
 
     fun enableLocationListening(): Boolean {
@@ -110,12 +116,15 @@ class MyApplication : Application() {
 
         if (pushToken != null) {
             try {
-                DeliveryServerAPI.api.sendPushToken((user as UserModel.Authorized).token, pushToken)
+                DeliveryServerAPI.api.sendPushToken((user.getUserCredentials() as UserModel.Authorized).token, pushToken)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         } else {
-            val token = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE).getString("firebase_token", "notoken")
+            val token = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE).getString(
+                "firebase_token",
+                "notoken"
+            )
             if (token != "notoken") {
                 sendPushToken(token)
                 return

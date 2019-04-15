@@ -13,10 +13,10 @@ class InfoTableInfoHolder(itemView: View) : BaseViewHolder<TaskInfoModel>(itemVi
         if (item !is TaskInfoModel.Task) return
         val task = item.task
         with(itemView) {
-            publisher_text.text = "${task.publisher} №${task.edition}"
+            publisher_text.text = task.publishers.joinToString { it.name + "; " }
             control_dates_text.text = "${task.startControlDate.toString("dd.MM.yyyy")} - ${task.endControlDate.toString("dd.MM.yyyy")}"
-            distribution_dates_text.text = "${task.startDistributionDate.toString("dd.MM.yyyy")} - ${task.endDistributionDate.toString("dd.MM.yyyy")}"
-            storage_text.text = task.storage
+            distribution_dates_text.text = "TODO"//${task.startDistributionDate.toString("dd.MM.yyyy")} - ${task.endDistributionDate.toString("dd.MM.yyyy")}"
+            storage_text.text = task.storages.joinToString { "$it; " }
             description_text.text = task.description
         }
     }
