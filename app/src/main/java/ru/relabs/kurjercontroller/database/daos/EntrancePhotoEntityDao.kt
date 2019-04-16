@@ -27,4 +27,7 @@ interface EntrancePhotoEntityDao {
 
     @Delete
     fun delete(address: EntrancePhotoEntity)
+
+    @Query("DELETE FROM entrance_photos WHERE id = :id")
+    fun deleteById(id: Int)
 }

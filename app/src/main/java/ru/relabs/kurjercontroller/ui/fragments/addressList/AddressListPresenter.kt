@@ -8,6 +8,8 @@ import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.AddressModel
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
+import ru.relabs.kurjercontroller.ui.fragments.ReportScreen
+import ru.relabs.kurjercontroller.ui.fragments.YandexMapScreen
 import ru.relabs.kurjercontroller.ui.helpers.TaskAddressSorter
 
 /**
@@ -24,7 +26,17 @@ class AddressListPresenter(val fragment: AddressListFragment) {
     }
 
     fun onTaskItemClicked(clickedTask: AddressListModel.TaskItem) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
+        val taskItemsOnAddress = fragment.adapter.data
+            .filter {
+                (it as? AddressListModel.TaskItem)?.taskItem?.address?.id == clickedTask.taskItem.address.id
+            }
+            .map {
+                val task = it as AddressListModel.TaskItem
+                Pair(task.parentTask, task.taskItem)
+            }
+
+        application().router.navigateTo(ReportScreen(taskItemsOnAddress, clickedTask.taskItem.id))
     }
 
     fun onSortingChanged(sortingMethod: Int) {
@@ -34,11 +46,11 @@ class AddressListPresenter(val fragment: AddressListFragment) {
     }
 
     fun onAddressMapClicked(addressModel: AddressModel) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        application().router.navigateTo(YandexMapScreen(addressModel))
     }
 
     fun onCloseTaskClicked() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("close task if all required taskItems closed. Send status to sirius") //To change body of created functions use File | Settings | File Templates.
     }
 
     suspend fun applySorting() = withContext(Dispatchers.IO) {

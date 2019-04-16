@@ -24,10 +24,10 @@ data class EntranceResponseModel(
         return EntranceModel(
             number = number,
             state = state,
-            startAppartaments = startAppartaments,
+            startApartments = startAppartaments,
             mailboxType = mailboxType,
             floors = floors,
-            endAppartaments = endAppartaments,
+            endApartments = endAppartaments,
             code = code.orEmpty(),
             availableKeys = availableKeys,
             availableEuroKeys = availableEuroKeys

@@ -29,7 +29,7 @@ import ru.relabs.kurjercontroller.ui.fragments.addressList.AddressListFragment
 import ru.relabs.kurjercontroller.ui.fragments.entrancesList.EntrancesListFragment
 import ru.relabs.kurjercontroller.ui.fragments.filters.FiltersFragment
 import ru.relabs.kurjercontroller.ui.fragments.login.LoginFragment
-import ru.relabs.kurjercontroller.ui.fragments.report.ReportFragment
+import ru.relabs.kurjercontroller.ui.fragments.report.ReportPagerFragment
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.TaskInfoFragment
 import ru.relabs.kurjercontroller.ui.fragments.taskItemExplanation.TaskItemExplanationFragment
 import ru.relabs.kurjercontroller.ui.fragments.taskList.TaskListFragment
@@ -227,7 +227,7 @@ class MainActivity : AppCompatActivity() {
                 back_button?.setVisible(true)
                 changeTitle("Список подъездов")
             }
-            is ReportFragment -> {
+            is ReportPagerFragment -> {
                 back_button?.setVisible(true)
             }
             is YandexMapFragment -> {
@@ -237,7 +237,7 @@ class MainActivity : AppCompatActivity() {
                 back_button?.setVisible(true)
                 changeTitle("Фильтры")
             }
-            //TODO: ReportFragment
+            //TODO: ReportPagerFragment
         }
     }
 

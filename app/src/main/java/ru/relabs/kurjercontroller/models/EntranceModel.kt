@@ -2,7 +2,6 @@ package ru.relabs.kurjercontroller.models
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
 import ru.relabs.kurjercontroller.database.entities.EntranceEntity
 
 /**
@@ -14,8 +13,8 @@ data class EntranceModel(
     val availableEuroKeys: List<String>,
     val availableKeys: List<String>,
     val code: String,
-    val startAppartaments: Int,
-    val endAppartaments: Int,
+    val startApartments: Int,
+    val endApartments: Int,
     val floors: Int,
     val mailboxType: Int,
     val state: Int
@@ -38,8 +37,8 @@ data class EntranceModel(
         parcel.writeStringList(availableEuroKeys)
         parcel.writeStringList(availableKeys)
         parcel.writeString(code)
-        parcel.writeInt(startAppartaments)
-        parcel.writeInt(endAppartaments)
+        parcel.writeInt(startApartments)
+        parcel.writeInt(endApartments)
         parcel.writeInt(floors)
         parcel.writeInt(mailboxType)
         parcel.writeInt(state)
@@ -57,10 +56,10 @@ data class EntranceModel(
             availableEuroKeys = availableEuroKeys,
             availableKeys = availableKeys,
             code = code,
-            endAppartaments = endAppartaments,
+            endApartments = endApartments,
             floors = floors,
             mailboxType = mailboxType,
-            startAppartaments = startAppartaments,
+            startApartments = startApartments,
             number = number
         )
 

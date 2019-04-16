@@ -15,10 +15,10 @@ data class EntranceEntity(
     val number: Int,
     @ColumnInfo(name = "task_item_id")
     val taskItemId: Int,
-    @ColumnInfo(name = "start_appartaments")
-    val startAppartaments: Int,
-    @ColumnInfo(name = "end_appartaments")
-    val endAppartaments: Int,
+    @ColumnInfo(name = "start_apartments")
+    val startApartments: Int,
+    @ColumnInfo(name = "end_apartments")
+    val endApartments: Int,
     @ColumnInfo(name = "available_keys")
     val availableKeys: List<String>,
     @ColumnInfo(name = "available_euro_keys")
@@ -36,10 +36,10 @@ data class EntranceEntity(
             availableKeys = availableKeys,
             state = state,
             code = code,
-            endAppartaments = endAppartaments,
+            endApartments = endApartments,
             floors = floors,
             mailboxType = mailboxType,
-            startAppartaments = startAppartaments
+            startApartments = startApartments
         )
     }
 }

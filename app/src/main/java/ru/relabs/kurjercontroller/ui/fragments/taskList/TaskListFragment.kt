@@ -99,18 +99,19 @@ class TaskListFragment : Fragment(), ISearchableFragment {
     }
 
 
-    suspend fun showLoading(visible: Boolean) = withContext(Dispatchers.Main) {
+    suspend fun showLoading(visible: Boolean, clear: Boolean = false) = withContext(Dispatchers.Main) {
         if (visible) {
+            if(clear){
+                adapter.data.clear()
+            }
             online_button?.isEnabled = false
             adapter.data.add(0, TaskListModel.Loader)
-            tasks_list?.isNestedScrollingEnabled = false
             adapter.notifyDataSetChanged()
         } else {
             online_button?.isEnabled = true
             adapter.data.removeAll {
                 it is TaskListModel.Loader
             }
-            tasks_list?.isNestedScrollingEnabled = false
             adapter.notifyDataSetChanged()
         }
     }

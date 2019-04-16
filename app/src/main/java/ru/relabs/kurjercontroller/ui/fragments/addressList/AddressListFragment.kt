@@ -9,15 +9,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_address_list.*
 import kotlinx.android.synthetic.main.fragment_tasklist.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
-import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
-import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListAddressDelegate
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListLoaderDelegate
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListSortingDelegate
@@ -48,13 +43,12 @@ class AddressListFragment : Fragment() {
             presenter.onCloseTaskClicked()
         }
 
-        presenter.preloadTasks()
+        if (adapter.data.isEmpty()) {
+            presenter.preloadTasks()
+        }
     }
 
-    fun populateList() {
-        adapter.data.clear()
 
-    }
     suspend fun showLoading(visible: Boolean) = withContext(Dispatchers.Main) {
         if (visible) {
             adapter.data.add(0, AddressListModel.Loader)

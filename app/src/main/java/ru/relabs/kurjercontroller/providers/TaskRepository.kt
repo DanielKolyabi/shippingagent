@@ -8,6 +8,7 @@ import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.application.UserModel
 import ru.relabs.kurjercontroller.database.AppDatabase
 import ru.relabs.kurjercontroller.database.entities.SendQueryItemEntity
+import ru.relabs.kurjercontroller.models.EntrancePhotoModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
@@ -87,5 +88,13 @@ class TaskRepository(val db: AppDatabase) {
 
             db.taskDao().delete(task)
         }
+    }
+
+    suspend fun removePhoto(entrancePhoto: EntrancePhotoModel) = withContext(Dispatchers.IO){
+        db.entrancePhotoDao().deleteById(entrancePhoto.id)
+    }
+
+    suspend fun savePhoto(entrancePhoto: EntrancePhotoModel) = withContext(Dispatchers.IO){
+        db.entrancePhotoDao().insert(entrancePhoto.toEntity())
     }
 }

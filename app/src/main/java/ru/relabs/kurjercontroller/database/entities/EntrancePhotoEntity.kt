@@ -17,7 +17,5 @@ data class EntrancePhotoEntity(
     var gps: GPSCoordinatesModel,
     @ColumnInfo(name = "task_item_id")
     var taskItemId: Int, //iddot
-    var idnd: Int,
-    @ColumnInfo(name = "entrance_report_id")
-    var entranceReportId: Int
+    var idnd: Int
 )

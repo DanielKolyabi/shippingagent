@@ -7,6 +7,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
+import android.os.StrictMode
 import androidx.core.content.ContextCompat
 import androidx.room.Room
 import com.google.firebase.iid.FirebaseInstanceId
@@ -57,6 +58,7 @@ class MyApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder().build())
         instance = this
         cicerone = Cicerone.create()
         deviceUUID = getOrGenerateDeviceUUID()

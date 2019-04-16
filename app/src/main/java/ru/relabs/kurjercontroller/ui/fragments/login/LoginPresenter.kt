@@ -88,7 +88,8 @@ class LoginPresenter(val fragment: LoginFragment) {
                 sharedPref.edit().putString("last_login", response.user.login).apply()
 
                 withContext(Dispatchers.Main) {
-                    application().router.replaceScreen(TaskListScreen(true))
+                    //TODO: Change to true
+                    application().router.replaceScreen(TaskListScreen(false))
                 }
 
             } catch (e: HttpException) {
