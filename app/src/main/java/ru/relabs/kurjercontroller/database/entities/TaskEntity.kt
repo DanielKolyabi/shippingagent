@@ -27,7 +27,8 @@ data class TaskEntity(
     val storages: List<String>,
     //TODO: Filters
     val description: String,
-    val state: Int
+    val state: Int,
+    val iteration: Int
 ) {
     suspend fun toModel(db: AppDatabase): TaskModel = withContext(Dispatchers.IO) {
         return@withContext TaskModel(
@@ -41,7 +42,8 @@ data class TaskEntity(
             storages = storages,
             taskFilters = TaskFiltersModel.blank(), //TODO: Filters
             publishers = db.taskPublisherDao().getByTaskId(id).map { it.toModel() },
-            taskItems = db.taskItemDao().getByTaskId(id).map { it.toModel(db) }
+            taskItems = db.taskItemDao().getByTaskId(id).map { it.toModel(db) },
+            iteration = iteration
         )
     }
 }

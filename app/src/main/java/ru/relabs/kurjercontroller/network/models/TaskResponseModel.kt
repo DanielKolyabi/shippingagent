@@ -19,6 +19,7 @@ data class TaskResponseModel(
     @SerializedName("end_сontrol_date")
     val endControlDate: Date,
     val description: String,
+    val iteration: Int,
 
     val items: List<TaskItemResponseModel>,
     val publishers: List<TaskPublisherResponseModel>,
@@ -37,7 +38,8 @@ data class TaskResponseModel(
             storages = storages,
             taskItems = items.map { it.toModel() },
             publishers = publishers.map{it.toModel()},
-            taskFilters = filters.toModel()
+            taskFilters = filters.toModel(),
+            iteration = iteration
         )
     }
 }

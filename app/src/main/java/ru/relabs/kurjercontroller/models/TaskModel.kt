@@ -22,7 +22,7 @@ fun Int.toAndroidState(): Int {
 }
 
 fun Int.toSiriusState(): Int {
-    return when(this) {
+    return when (this) {
         TaskModel.CREATED -> 20
         TaskModel.EXAMINED -> 30
         TaskModel.STARTED -> 40
@@ -43,7 +43,8 @@ data class TaskModel(
     val publishers: List<PublisherModel>,
     val taskItems: List<TaskItemModel>,
     val taskFilters: TaskFiltersModel?,
-    val state: Int
+    val state: Int,
+    val iteration: Int
 ) : Parcelable {
 
     val androidState: Int
@@ -63,7 +64,8 @@ data class TaskModel(
             initiator = initiator,
             description = description,
             endControlDate = endControlDate,
-            startControlDate = startControlDate
+            startControlDate = startControlDate,
+            iteration = iteration
         )
 
     constructor(parcel: Parcel) : this(
@@ -77,6 +79,7 @@ data class TaskModel(
         parcel.createTypedArrayList(PublisherModel).orEmpty(),
         parcel.createTypedArrayList(TaskItemModel).orEmpty(),
         parcel.readParcelable(TaskFiltersModel::class.java.classLoader),
+        parcel.readInt(),
         parcel.readInt()
     ) {
     }
@@ -93,6 +96,7 @@ data class TaskModel(
         parcel.writeTypedList(taskItems)
         parcel.writeParcelable(taskFilters, flags)
         parcel.writeInt(state)
+        parcel.writeInt(iteration)
     }
 
     override fun describeContents(): Int {
