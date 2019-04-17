@@ -10,8 +10,11 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_report.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
+import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
@@ -97,7 +100,13 @@ class ReportFragment : Fragment() {
     private fun fillPhotosList() {
         photosAdapter.data.add(ReportPhotosListModel.BlankMultiPhoto)
         photosAdapter.data.add(ReportPhotosListModel.BlankPhoto)
-        //TODO: Load saved photos
+        presenter.bgScope.launch(Dispatchers.Main) {
+            val photos = application().tasksRepository.loadEntrancePhotos(taskItem, entrance)
+            photosAdapter.data.addAll(photos.map {
+                ReportPhotosListModel.TaskItemPhoto(it)
+            })
+            photosAdapter.notifyItemRangeChanged(2, photos.size)
+        }
         photosAdapter.notifyDataSetChanged()
     }
 

@@ -18,6 +18,9 @@ interface EntranceEntityDao {
     @Query("SELECT * FROM entrances WHERE task_item_id = :taskItemId")
     fun getByTaskItemId(taskItemId: Int): List<EntranceEntity>
 
+    @Query("SELECT * FROM entrances WHERE task_item_id = :taskItemId AND number = :number")
+    fun getByNumber(taskItemId: Int, number: Int): EntranceEntity?
+
     @Update
     fun update(address: EntranceEntity)
 

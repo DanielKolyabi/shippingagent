@@ -65,13 +65,16 @@
 
     <EditText
             android:id="@+id/entrance_code"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:gravity="start"
+            android:layout_marginEnd="4dp"
             android:textSize="14sp"
             tools:text="к196к7112"
+            android:maxLines="2"
             app:layout_constraintTop_toBottomOf="@id/appartaments_from"
             app:layout_constraintStart_toEndOf="@+id/entrance_code_label"
+            app:layout_constraintEnd_toStartOf="@id/layout_error_button"
             android:layout_marginTop="4dp"
             android:layout_marginStart="4dp"/>
 
@@ -122,7 +125,7 @@
             android:text="@string/layout_error"
             app:layout_constraintTop_toTopOf="@+id/entrance_code"
             app:layout_constraintBottom_toBottomOf="@id/entrance_code"
-            app:layout_constraintStart_toEndOf="@id/entrance_code"/>
+            app:layout_constraintEnd_toStartOf="@id/lookout"/>
 
     <Button
             android:id="@+id/lookout"
@@ -131,7 +134,7 @@
             android:layout_marginStart="8dp"
             android:text="@string/lookout"
             app:layout_constraintTop_toTopOf="@+id/layout_error_button"
-            app:layout_constraintStart_toEndOf="@+id/layout_error_button"/>
+            app:layout_constraintEnd_toEndOf="parent"/>
     <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"

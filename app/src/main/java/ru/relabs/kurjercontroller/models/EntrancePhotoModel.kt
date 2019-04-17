@@ -21,7 +21,8 @@ data class EntrancePhotoModel(
             uuid,
             gps,
             taskItem.id,
-            taskItem.address.idnd
+            taskItem.address.idnd,
+            entranceModel.number
         )
 
     val URI: Uri

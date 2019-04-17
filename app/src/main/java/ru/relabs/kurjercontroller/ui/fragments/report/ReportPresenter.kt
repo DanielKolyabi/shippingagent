@@ -127,12 +127,16 @@ class ReportPresenter(val fragment: ReportFragment) {
             val photoModel =
                 EntrancePhotoModel(0, photoUUID.toString(), fragment.taskItem, fragment.entrance, currentGPS)
 
+            val id = application().tasksRepository.savePhoto(photoModel)
+            val savedPhoto =
+                EntrancePhotoModel(id.toInt(), photoUUID.toString(), fragment.taskItem, fragment.entrance, currentGPS)
+
+
             fragment.photosAdapter.data.add(
-                ReportPhotosListModel.TaskItemPhoto(photoModel)
+                ReportPhotosListModel.TaskItemPhoto(savedPhoto)
             )
             fragment.photosAdapter.notifyItemRangeChanged(fragment.photosAdapter.data.size - 1, 2)
 
-            application().tasksRepository.savePhoto(photoModel)
             if (photoMultiMode) {
                 requestPhoto()
             }
@@ -142,18 +146,22 @@ class ReportPresenter(val fragment: ReportFragment) {
     }
 
 
-    fun onRemovePhotoClicked(holder: RecyclerView.ViewHolder) {val position = holder.adapterPosition
+    fun onRemovePhotoClicked(holder: RecyclerView.ViewHolder) {
+        val position = holder.adapterPosition
         if (position >= fragment.photosAdapter.data.size ||
-            position < 0) {
+            position < 0
+        ) {
 
             fragment.context?.showError("Невозможно удалить фото.")
             return
         }
-        val status = File((fragment.photosAdapter.data[holder.adapterPosition] as ReportPhotosListModel.TaskItemPhoto).photo.URI.path).delete()
+        val status =
+            File((fragment.photosAdapter.data[holder.adapterPosition] as ReportPhotosListModel.TaskItemPhoto).photo.URI.path).delete()
         if (!status) {
             fragment.context?.showError("Невозможно удалить фото из памяти.")
         }
-        val entrancePhotoModel = (fragment.photosAdapter.data[holder.adapterPosition] as ReportPhotosListModel.TaskItemPhoto).photo
+        val entrancePhotoModel =
+            (fragment.photosAdapter.data[holder.adapterPosition] as ReportPhotosListModel.TaskItemPhoto).photo
         bgScope.launch {
             application().tasksRepository.removePhoto(entrancePhotoModel)
         }

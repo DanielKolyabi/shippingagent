@@ -8,8 +8,10 @@ import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.database.AppDatabase
 import ru.relabs.kurjercontroller.database.entities.SendQueryItemEntity
+import ru.relabs.kurjercontroller.fileHelpers.PathHelper
 import ru.relabs.kurjercontroller.models.*
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
+import java.io.File
 
 /**
  * Created by ProOrange on 11.04.2019.
@@ -187,10 +189,17 @@ class TaskRepository(val db: AppDatabase) {
 
     suspend fun removePhoto(entrancePhoto: EntrancePhotoModel) = withContext(Dispatchers.IO) {
         db.entrancePhotoDao().deleteById(entrancePhoto.id)
+        PathHelper.deletePhoto(entrancePhoto)
     }
 
-    suspend fun savePhoto(entrancePhoto: EntrancePhotoModel) = withContext(Dispatchers.IO) {
-        db.entrancePhotoDao().insert(entrancePhoto.toEntity())
+    suspend fun savePhoto(entrancePhoto: EntrancePhotoModel): Long = withContext(Dispatchers.IO) {
+        return@withContext db.entrancePhotoDao().insert(entrancePhoto.toEntity())
+    }
+
+    suspend fun loadEntrancePhotos(taskItem: TaskItemModel, entrance: EntranceModel): List<EntrancePhotoModel> = withContext(Dispatchers.IO) {
+        return@withContext db.entrancePhotoDao().getEntrancePhoto(taskItem.id, entrance.number).map{
+            it.toModel(db)
+        }
     }
 
     data class MergeResult(

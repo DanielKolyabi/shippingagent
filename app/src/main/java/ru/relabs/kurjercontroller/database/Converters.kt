@@ -4,21 +4,34 @@ package ru.relabs.kurjercontroller.database
  * Created by ProOrange on 30.08.2018.
  */
 
-import android.util.Log
 import androidx.room.TypeConverter
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonElement
+import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import ru.relabs.kurjercontroller.models.AddressModel
 import ru.relabs.kurjercontroller.models.GPSCoordinatesModel
+import java.lang.reflect.Type
 import java.util.*
 
 
 class Converters {
     val gson = GsonBuilder()
         .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+        .registerTypeAdapter(DateTime::class.java, object : JsonSerializer<DateTime> {
+            override fun serialize(src: DateTime?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement {
+                return JsonPrimitive(src?.millis)
+            }
+        })
+        .registerTypeAdapter(DateTime::class.java, object : JsonDeserializer<DateTime> {
+            override fun deserialize(
+                json: JsonElement?,
+                typeOfT: Type?,
+                context: JsonDeserializationContext?
+            ): DateTime {
+                return DateTime(json?.asLong)
+            }
+        })
         .create()
 
     @TypeConverter
@@ -68,28 +81,7 @@ class Converters {
 
     @TypeConverter
     fun jsonToGPS(value: String): GPSCoordinatesModel {
-        val obj = gson.fromJson(value, JsonElement::class.java).asJsonObject
-        val lat = obj["lat"].asDouble
-        val long = obj["long"].asDouble
-        val timeStr = obj["time"].asString
-        Log.d("Database Conv", timeStr)
-
-        var date = tryParseDateWithFormat("yyyy-MM-dd'T'HH:mm:ss", timeStr)
-        if (date != null) {
-            return GPSCoordinatesModel(lat, long, date)
-        }
-
-        date = tryParseDateWithFormat("MMM d, yyyy HH:mm:ss", timeStr)
-        if (date != null) {
-            return GPSCoordinatesModel(lat, long, date)
-        }
-
-        date = tryParseDateWithFormat("MMM d, yyyy HH:mm:ss", timeStr, Locale("ru", "RU"))
-        if (date != null) {
-            return GPSCoordinatesModel(lat, long, date)
-        }
-
-        return GPSCoordinatesModel(lat, long, DateTime())
+        return gson.fromJson(value, GPSCoordinatesModel::class.java)
     }
 
     private fun tryParseDateWithFormat(

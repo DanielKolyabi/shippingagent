@@ -38,4 +38,19 @@ object PathHelper {
     fun getUpdateFile(): File {
         return File(dataPath, "update.apk")
     }
+
+    fun deletePhoto(entrancePhoto: EntrancePhotoModel) {
+        val file = File(entrancePhoto.URI.path)
+        val entranceFolder = file.parentFile
+        val taskItemFolder = entranceFolder.parentFile
+        file.delete()
+        entranceFolder.deleteIfEmpty()
+        taskItemFolder.deleteIfEmpty()
+    }
+}
+
+fun File.deleteIfEmpty() {
+    if (this.isDirectory && this.listFiles().isEmpty()) {
+        this.deleteRecursively()
+    }
 }

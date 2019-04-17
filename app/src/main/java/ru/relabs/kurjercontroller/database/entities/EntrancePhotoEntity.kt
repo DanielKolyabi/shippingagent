@@ -3,6 +3,10 @@ package ru.relabs.kurjercontroller.database.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import ru.relabs.kurjercontroller.database.AppDatabase
+import ru.relabs.kurjercontroller.models.EntrancePhotoModel
 import ru.relabs.kurjercontroller.models.GPSCoordinatesModel
 
 /**
@@ -17,5 +21,22 @@ data class EntrancePhotoEntity(
     var gps: GPSCoordinatesModel,
     @ColumnInfo(name = "task_item_id")
     var taskItemId: Int, //iddot
-    var idnd: Int
-)
+    var idnd: Int,
+    @ColumnInfo(name = "entrance_number")
+    var entranceNumber: Int
+) {
+    suspend fun toModel(db: AppDatabase): EntrancePhotoModel = withContext(Dispatchers.IO) {
+        val taskItem = db.taskItemDao().getById(taskItemId)?.toModel(db)
+            ?: throw Exception("TaskItem ${taskItemId} not found")
+        val entrance = db.entranceDao().getByNumber(taskItemId, entranceNumber)?.toModel()
+            ?: throw Exception("Entrance ${taskItemId} ${entranceNumber} not found")
+
+        EntrancePhotoModel(
+            id = id,
+            entranceModel = entrance,
+            gps = gps,
+            uuid = UUID,
+            taskItem = taskItem
+        )
+    }
+}
