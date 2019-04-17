@@ -2,13 +2,17 @@ package ru.relabs.kurjercontroller.database.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import ru.relabs.kurjercontroller.models.EntranceModel
 
 /**
  * Created by ProOrange on 19.03.2019.
  */
-@Entity(tableName = "entrances")
+@Entity(
+    tableName = "entrances",
+    indices = [Index(value = ["number", "task_item_id"], unique = true)]
+)
 data class EntranceEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int,

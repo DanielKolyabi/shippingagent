@@ -13,8 +13,8 @@ object TaskAddressSorter {
         var lastAddressId = -1
         var lastAddressModel: AddressListModel.Address = AddressListModel.Address(mutableListOf())
         taskItems.forEach {
-            if (lastAddressId != it.taskItem.address.id) {
-                lastAddressId = it.taskItem.address.id
+            if (lastAddressId != it.taskItem.address.idnd) {
+                lastAddressId = it.taskItem.address.idnd
                 lastAddressModel = AddressListModel.Address(mutableListOf(it.taskItem))
                 result.add(lastAddressModel)
             }
@@ -25,13 +25,13 @@ object TaskAddressSorter {
     }
 
     fun sortTaskItemsStandart(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
-        return taskItems.sortedWith(compareBy<AddressListModel.TaskItem> { it.taskItem.address?.city }
+        return taskItems.sortedWith(compareBy<AddressListModel.TaskItem> { it.taskItem.address.city }
             .thenBy { it.taskItem.address.street }
             .thenBy { it.taskItem.address.house }
             .thenBy { it.taskItem.address.houseName }
             .thenBy { it.taskItem.isClosed }
         ).groupBy {
-            it.taskItem.address.id
+            it.taskItem.address.idnd
         }.toList().sortedBy {
             !it.second.any { !it.taskItem.isClosed }
         }.toMap().flatMap {
@@ -46,7 +46,7 @@ object TaskAddressSorter {
             .thenBy { it.taskItem.address.houseName }
             .thenBy { it.taskItem.isClosed }
         ).groupBy {
-            it.taskItem.address.id
+            it.taskItem.address.idnd
         }.toList().sortedBy {
             !it.second.any { !it.taskItem.isClosed }
         }.toMap().flatMap {

@@ -114,12 +114,20 @@ class TaskListPresenter(val fragment: TaskListFragment) {
             //TODO: Error?
             return@withContext
         } else {
-            fragment.showLoading(true)
+            fragment.showLoading(true, true)
             //TODO: Show loading. Ignore refresh button
             val tasks = application().tasksRepository.loadRemoteTasks(user.token)
-            application().tasksRepository.mergeTasks(tasks)
+            val mergeResult = application().tasksRepository.mergeTasks(tasks)
             loadTasks()
             fragment.showLoading(false)
+
+            if (mergeResult.isTasksChanged) {
+                fragment.context?.showError("Задания были обновлены.")
+            } else if (mergeResult.isNewTasksAdded) {
+                fragment.context?.showError("Обновление прошло успешно.")
+            } else {
+                fragment.context?.showError("Нет новых заданий.")
+            }
         }
     }
 }

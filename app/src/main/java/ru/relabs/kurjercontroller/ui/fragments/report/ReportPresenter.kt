@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.fragment_report.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.relabs.kurjer.files.ImageUtils
@@ -158,6 +159,14 @@ class ReportPresenter(val fragment: ReportFragment) {
 
         fragment.photosAdapter.data.removeAt(holder.adapterPosition)
         fragment.photosAdapter.notifyItemRemoved(holder.adapterPosition)
+    }
+
+    fun onApartmentButtonGroupChanged(apartment: Int, buttonGroup: Int) {
+        val index = fragment.apartmentAdapter.data.indexOfFirst {
+            (it as? ApartmentListModel.Apartment)?.number == apartment
+        }
+        val item = fragment.apartmentAdapter.data[index] as ApartmentListModel.Apartment
+        fragment.apartmentAdapter.data[index] = item.copy(buttonGroup = buttonGroup)
     }
 
     val bgScope = CancelableScope(Dispatchers.Default)

@@ -9,12 +9,14 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager.widget.ViewPager
 import kotlinx.android.synthetic.main.fragment_report.*
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.ui.fragments.report.adapters.ApartmentButtonsPagerAdapter
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ApartmentDelegate
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ReportBlankMultiPhotoDelegate
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ReportBlankPhotoDelegate
@@ -49,7 +51,11 @@ class ReportFragment : Fragment() {
             entrance.availableEuroKeys.ifEmpty { listOf("нет") })
 
         //TODO: If apartments interval changed - refresh apartments list
-        apartmentAdapter.addDelegate(ApartmentDelegate())
+        apartmentAdapter.addDelegate(
+            ApartmentDelegate { apartment, buttonGroup ->
+                presenter.onApartmentButtonGroupChanged(apartment, buttonGroup)
+            }
+        )
         photosAdapter.addDelegate(ReportPhotoDelegate { holder ->
             presenter.onRemovePhotoClicked(holder)
         })
@@ -100,7 +106,7 @@ class ReportFragment : Fragment() {
         apartmentAdapter.data.clear()
         apartmentAdapter.data.addAll(
             (entrance.startApartments..entrance.endApartments).map {
-                ApartmentListModel.Apartment(it)
+                ApartmentListModel.Apartment(it, buttonGroup = 0)
             }
         )
         apartmentAdapter.notifyDataSetChanged()

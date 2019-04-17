@@ -1,13 +1,14 @@
 package ru.relabs.kurjercontroller.providers
 
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.application.UserModel
 import ru.relabs.kurjercontroller.database.AppDatabase
 import ru.relabs.kurjercontroller.database.entities.SendQueryItemEntity
+import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.EntrancePhotoModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
@@ -27,19 +28,110 @@ class TaskRepository(val db: AppDatabase) {
         val updatedTask = task.copy(state = TaskModel.EXAMINED)
         db.taskDao().update(updatedTask.toEntity())
 
-        db.sendQueryDao().insert(SendQueryItemEntity(
-            0,
-            BuildConfig.API_URL + "/api/v1/controller/tasks/${task.id}/examined?token=" + application().user.getUserCredentials()?.token.orEmpty(),
-            ""
-        ))
+        db.sendQueryDao().insert(
+            SendQueryItemEntity(
+                0,
+                BuildConfig.API_URL + "/api/v1/controller/tasks/${task.id}/examined?token=" + application().user.getUserCredentials()?.token.orEmpty(),
+                ""
+            )
+        )
 
         return@withContext updatedTask
     }
 
-    suspend fun mergeTasks(newTasks: List<TaskModel>) = withContext(Dispatchers.IO) {
-        //TODO: Make merge strategy
-        closeAllTasks()
-        newTasks.forEach { saveTaskToDB(it) }
+    suspend fun mergeTasks(newTasks: List<TaskModel>): MergeResult = withContext(Dispatchers.IO) {
+        return@withContext merge(newTasks) {}
+    }
+
+    private suspend fun merge(
+        newTasks: List<TaskModel>,
+        onNewTaskAppear: (task: TaskModel) -> Unit
+        ): MergeResult {
+        val result = MergeResult(false, false)
+        val savedTasksIDs = db.taskDao().all.map { it.id }
+        val newTasksIDs = newTasks.map { it.id }
+
+        //Задача отсутствует в ответе от сервера (удалено)
+        db.taskDao().all.filter { it.id !in newTasksIDs }.forEach { task ->
+            closeTaskById(task.id)
+            result.isTasksChanged = true
+            Log.d("merge", "Close task: ${task.id}")
+        }
+
+        //Задача не присутствует в сохранённых (новая)
+        newTasks.filter { it.id !in savedTasksIDs }.forEach { task ->
+            if (task.state == TaskModel.CANCELED) {
+                Log.d("merge", "New task ${task.id} passed due 12 status")
+                return@forEach
+            }
+            //Add task
+            val newTaskId = db.taskDao().insert(task.toEntity())
+            Log.d("merge", "Add task ID: $newTaskId")
+            var openedEntrances = 0
+            task.taskItems.forEach { item ->
+                db.addressDao().insert(item.address.toEntity())
+                db.taskItemDao().insert(item.toEntity())
+                item.entrances.forEach { entrance ->
+                    db.entranceDao().insert(entrance.toEntity(item.id))
+                    //TODO: Entrance report state
+                    if (entrance.state == EntranceModel.CREATED) {
+                        openedEntrances++
+                    }
+                }
+            }
+            if (openedEntrances <= 0) {
+                closeTaskById(newTaskId.toInt())
+            } else {
+                result.isNewTasksAdded = true
+                onNewTaskAppear(task)
+            }
+        }
+
+        //Задача есть и на сервере и на клиенте (мерж)
+        /*
+        Если она закрыта | выполнена на сервере - удалить с клиента
+        Если итерация > сохранённой | состояние отличается от сохранённого и сохранённое != начато |
+         */
+        newTasks.filter { it.id in savedTasksIDs }.forEach { task ->
+            val savedTask = db.taskDao().getById(task.id) ?: return@forEach
+            if (task.state == TaskModel.CANCELED) {
+                if (savedTask.state == TaskModel.STARTED) {
+                    //Уведомили что задание уже в работе
+                    //TODO: Backend!!!
+                    db.sendQueryDao().insert(
+                        SendQueryItemEntity(
+                            0,
+                            BuildConfig.API_URL + "/api/v1/controller/tasks/${savedTask.id}/accepted?token=" + application().user.getUserCredentials()?.token.orEmpty(),
+                            ""
+                        )
+                    )
+                } else {
+                    closeTaskById(savedTask.id)
+                }
+            } else if (task.state == TaskModel.COMPLETED) {
+                closeTaskById(savedTask.id)
+                return@forEach
+            } else if (
+            //TODO: Add iterations
+            /*(savedTask.iteration < task.iteration)
+            ||*/
+                (task.state != savedTask.state && savedTask.state != TaskModel.STARTED)
+                || (task.endControlDate != savedTask.endControlDate || task.startControlDate != savedTask.startControlDate)
+            ) {
+
+                db.taskDao().update(task.toEntity())
+                task.taskItems.forEach { taskItem ->
+                    db.addressDao().insert(taskItem.address.toEntity())
+                    db.taskItemDao().insert(taskItem.toEntity())
+                    taskItem.entrances.forEach { entrance ->
+                        //TODO: Entrance report state
+                        db.entranceDao().insert(entrance.toEntity(taskItem.id))
+                    }
+                }
+                result.isTasksChanged = true
+            }
+        }
+        return result
     }
 
     suspend fun saveTaskToDB(task: TaskModel) = withContext(Dispatchers.IO) {
@@ -71,30 +163,39 @@ class TaskRepository(val db: AppDatabase) {
 
     suspend fun closeAllTasks() = withContext(Dispatchers.IO) {
         db.taskDao().all.forEach { task ->
-            db.taskPublisherDao().getByTaskId(task.id)
-                .forEach { db.taskPublisherDao().delete(it) }
-
-            db.taskItemDao().getByTaskId(task.id)
-                .forEach { taskItem ->
-                    db.entranceDao().getByTaskItemId(taskItem.id)
-                        .forEach {
-                            db.entranceDao().delete(it)
-                        }
-
-                    db.addressDao().deleteById(taskItem.addressId)
-
-                    db.taskItemDao().delete(taskItem)
-                }
-
-            db.taskDao().delete(task)
+            closeTaskById(task.id)
         }
     }
 
-    suspend fun removePhoto(entrancePhoto: EntrancePhotoModel) = withContext(Dispatchers.IO){
+    suspend fun closeTaskById(taskId: Int) = withContext(Dispatchers.IO) {
+        db.taskPublisherDao().getByTaskId(taskId)
+            .forEach { db.taskPublisherDao().delete(it) }
+
+        db.taskItemDao().getByTaskId(taskId)
+            .forEach { taskItem ->
+                db.entranceDao().getByTaskItemId(taskItem.id)
+                    .forEach {
+                        db.entranceDao().delete(it)
+                    }
+
+                db.addressDao().deleteById(taskItem.addressId)
+
+                db.taskItemDao().delete(taskItem)
+            }
+
+        db.taskDao().deleteById(taskId)
+    }
+
+    suspend fun removePhoto(entrancePhoto: EntrancePhotoModel) = withContext(Dispatchers.IO) {
         db.entrancePhotoDao().deleteById(entrancePhoto.id)
     }
 
-    suspend fun savePhoto(entrancePhoto: EntrancePhotoModel) = withContext(Dispatchers.IO){
+    suspend fun savePhoto(entrancePhoto: EntrancePhotoModel) = withContext(Dispatchers.IO) {
         db.entrancePhotoDao().insert(entrancePhoto.toEntity())
     }
+
+    data class MergeResult(
+        var isTasksChanged: Boolean,
+        var isNewTasksAdded: Boolean
+    )
 }

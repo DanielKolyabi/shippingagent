@@ -9,14 +9,14 @@
             android:layout_width="70dp"
             android:layout_height="40dp"
             android:textAllCaps="false"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/no_button"
             android:text="@string/has_papers"/>
 
     <Button
             android:id="@+id/no_button"
             android:layout_width="70dp"
             android:layout_height="40dp"
-            app:layout_constraintStart_toEndOf="@id/yes_button"
+            app:layout_constraintEnd_toStartOf="@id/broken_button"
             android:textAllCaps="false"
             android:text="@string/hasnt_papers"/>
 
@@ -24,7 +24,7 @@
             android:id="@+id/broken_button"
             android:layout_width="70dp"
             android:layout_height="40dp"
-            app:layout_constraintStart_toEndOf="@id/no_button"
+            app:layout_constraintEnd_toEndOf="parent"
             android:textAllCaps="false"
             android:text="@string/broken"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -29,7 +29,7 @@ class AddressListPresenter(val fragment: AddressListFragment) {
 
         val taskItemsOnAddress = fragment.adapter.data
             .filter {
-                (it as? AddressListModel.TaskItem)?.taskItem?.address?.id == clickedTask.taskItem.address.id
+                (it as? AddressListModel.TaskItem)?.taskItem?.address?.idnd == clickedTask.taskItem.address.idnd
             }
             .map {
                 val task = it as AddressListModel.TaskItem
