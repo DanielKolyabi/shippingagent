@@ -7,6 +7,7 @@ import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.database.AppDatabase
+import ru.relabs.kurjercontroller.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.database.entities.SendQueryItemEntity
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
 import ru.relabs.kurjercontroller.models.*
@@ -174,6 +175,7 @@ class TaskRepository(val db: AppDatabase) {
                 db.entranceDao().getByTaskItemId(taskItem.id)
                     .forEach {
                         db.entranceDao().delete(it)
+                        db.entranceResultDao().deleteByEntrance(taskItem.id, it.number)
                     }
 
                 db.addressDao().deleteById(taskItem.addressId)
@@ -198,6 +200,51 @@ class TaskRepository(val db: AppDatabase) {
             return@withContext db.entrancePhotoDao().getEntrancePhoto(taskItem.id, entrance.number).map {
                 it.toModel(db)
             }
+        }
+
+    suspend fun insertEntranceResult(
+        taskItem: TaskItemModel, entrance: EntranceModel,
+        hasLookupPost: Boolean? = null,
+        isDeliveryWrong: Boolean? = null,
+        description: String? = null,
+        code: String? = null,
+        apartmentFrom: Int? = null,
+        apartmentTo: Int? = null,
+        floors: Int? = null
+    ) = withContext(Dispatchers.IO) {
+        var saved = db.entranceResultDao().getByEntrance(taskItem.id, entrance.number)
+        if (saved == null) {
+            db.entranceResultDao().insert(
+                EntranceResultEntity(
+                    0,
+                    taskItem.id,
+                    entrance.number,
+                    hasLookupPost,
+                    isDeliveryWrong,
+                    description,
+                    code,
+                    apartmentFrom,
+                    apartmentTo,
+                    floors
+                )
+            )
+            return@withContext
+        }
+
+        if (hasLookupPost != null) saved = saved.copy(hasLookupPost = hasLookupPost)
+        if (isDeliveryWrong != null) saved = saved.copy(isDeliveryWrong = isDeliveryWrong)
+        if (description != null) saved = saved.copy(description = description)
+        if (code != null) saved = saved.copy(code = code)
+        if (apartmentFrom != null) saved = saved.copy(apartmentFrom = apartmentFrom)
+        if (apartmentTo != null) saved = saved.copy(apartmentTo = apartmentTo)
+        if (floors != null) saved = saved.copy(floors = floors)
+
+        db.entranceResultDao().update(saved)
+    }
+
+    suspend fun loadEntranceResult(taskItem: TaskItemModel, entrance: EntranceModel): EntranceResultEntity? =
+        withContext(Dispatchers.IO) {
+            db.entranceResultDao().getByEntrance(taskItem.id, entrance.number)
         }
 
     data class MergeResult(

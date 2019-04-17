@@ -7,6 +7,8 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.fragment_report.*
+import kotlinx.android.synthetic.main.holder_task_details_list_info.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.relabs.kurjer.files.ImageUtils
@@ -140,9 +142,15 @@ class ReportPresenter(val fragment: ReportFragment) {
             if (photoMultiMode) {
                 requestPhoto()
             }
+
+            onPhotoCreated()
         }
 
         return photoFile
+    }
+
+    private fun onPhotoCreated() {
+        fragment.updateEditable()
     }
 
 
@@ -168,6 +176,7 @@ class ReportPresenter(val fragment: ReportFragment) {
 
         fragment.photosAdapter.data.removeAt(holder.adapterPosition)
         fragment.photosAdapter.notifyItemRemoved(holder.adapterPosition)
+        fragment.updateEditable()
     }
 
     fun onApartmentButtonGroupChanged(apartment: Int, buttonGroup: Int) {
@@ -176,6 +185,58 @@ class ReportPresenter(val fragment: ReportFragment) {
         }
         val item = fragment.apartmentAdapter.data[index] as ApartmentListModel.Apartment
         fragment.apartmentAdapter.data[index] = item.copy(buttonGroup = buttonGroup)
+    }
+
+    fun onDescriptionChanged() {
+        val description = fragment.user_explanation_input?.text.toString()
+        bgScope.launch {
+            application().tasksRepository.insertEntranceResult(
+                fragment.taskItem,
+                fragment.entrance,
+                description = description
+            )
+        }
+    }
+
+    fun onCodeChanged() {
+        val code = fragment.entrance_code?.text.toString()
+        bgScope.launch {
+            application().tasksRepository.insertEntranceResult(fragment.taskItem, fragment.entrance, code = code)
+        }
+    }
+
+    fun onApartmentIntervalChanged() {
+        val from = try {
+            fragment.appartaments_from?.text.toString().toInt()
+        } catch (e: Exception) {
+            return
+        }
+        val to = try {
+            fragment.appartaments_to?.text.toString().toInt()
+        } catch (e: Exception) {
+            return
+        }
+
+        bgScope.launch {
+            application().tasksRepository.insertEntranceResult(
+                fragment.taskItem,
+                fragment.entrance,
+                apartmentFrom = from,
+                apartmentTo = to
+            )
+        }
+    }
+
+    fun onFloorsChanged() {
+        val floors = try {
+            fragment.floors?.text.toString().toInt()
+        } catch (e: java.lang.Exception) {
+            return
+        }
+
+        bgScope.launch {
+            application().tasksRepository.insertEntranceResult(fragment.taskItem, fragment.entrance, floors = floors)
+        }
     }
 
     val bgScope = CancelableScope(Dispatchers.Default)

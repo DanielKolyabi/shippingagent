@@ -50,5 +50,6 @@
     <string name="control_dates_label">Даты контроля:</string>
     <string name="description_label">Примечание:</string>
     <string name="start_tasks">Начать выполнение</string>
+    <string name="floors_label">Эт.:</string>
 
 </resources>

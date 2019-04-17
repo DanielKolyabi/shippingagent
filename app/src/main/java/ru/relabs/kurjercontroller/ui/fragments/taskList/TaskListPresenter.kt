@@ -12,6 +12,7 @@ import ru.relabs.kurjercontroller.ui.fragments.TaskInfoScreen
 
 class TaskListPresenter(val fragment: TaskListFragment) {
     val bgScope = CancelableScope(Dispatchers.Default)
+    var networkUpdateStarted = false
 
     fun onTaskClicked(pos: Int) {
         val item = fragment.adapter.data[pos] as? TaskListModel.TaskItem
@@ -111,23 +112,35 @@ class TaskListPresenter(val fragment: TaskListFragment) {
     suspend fun performNetworkUpdate() = withContext(Dispatchers.IO) {
         val user = application().user.getUserCredentials()
         if (user == null) {
-            //TODO: Error?
+            fragment.context?.showError("Что-то пошло не так. Перезагрузите приложение.")
             return@withContext
-        } else {
-            fragment.showLoading(true, true)
-            //TODO: Show loading. Ignore refresh button
-            val tasks = application().tasksRepository.loadRemoteTasks(user.token)
-            val mergeResult = application().tasksRepository.mergeTasks(tasks)
-            loadTasks()
-            fragment.showLoading(false)
+        }
+        if (networkUpdateStarted) {
+            return@withContext
+        }
 
-            if (mergeResult.isTasksChanged) {
-                fragment.context?.showError("Задания были обновлены.")
-            } else if (mergeResult.isNewTasksAdded) {
-                fragment.context?.showError("Обновление прошло успешно.")
-            } else {
-                fragment.context?.showError("Нет новых заданий.")
-            }
+        fragment.showLoading(true, true)
+        networkUpdateStarted = true
+        //TODO: Show loading. Ignore refresh button
+        val tasks = try {
+            application().tasksRepository.loadRemoteTasks(user.token)
+        } catch (e: Exception) {
+            fragment.context?.showError("Не удалось получить список заданий.")
+            networkUpdateStarted = false
+            return@withContext
+        }
+        val mergeResult = application().tasksRepository.mergeTasks(tasks)
+        fragment.showLoading(false)
+        networkUpdateStarted = false
+        loadTasks()
+
+        if (mergeResult.isTasksChanged) {
+            fragment.context?.showError("Задания были обновлены.")
+        } else if (mergeResult.isNewTasksAdded) {
+            fragment.context?.showError("Обновление прошло успешно.")
+        } else {
+            fragment.context?.showError("Нет новых заданий.")
         }
     }
+
 }

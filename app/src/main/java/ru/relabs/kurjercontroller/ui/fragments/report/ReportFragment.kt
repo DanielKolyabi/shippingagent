@@ -2,6 +2,8 @@ package ru.relabs.kurjercontroller.ui.fragments.report
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -73,6 +75,13 @@ class ReportFragment : Fragment() {
         bindControl()
     }
 
+    fun updateEditable() {
+        val isEmpty = photosAdapter.data.none { it is ReportPhotosListModel.TaskItemPhoto }
+//        floors.isEnabled = photosAdapter.data.isNotEmpty()
+        appartaments_from.isEnabled = !isEmpty
+        appartaments_to.isEnabled = !isEmpty
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (!presenter.onActivityResult(requestCode, resultCode, data)) {
             super.onActivityResult(requestCode, resultCode, data)
@@ -93,6 +102,19 @@ class ReportFragment : Fragment() {
         photos_list.isNestedScrollingEnabled = true
         photos_list.adapter = photosAdapter
 
+        floors?.setText(entrance.floors.toString())
+
+        presenter.bgScope.launch(Dispatchers.Main) {
+            val saved = application().tasksRepository.loadEntranceResult(taskItem, entrance) ?: return@launch
+
+            if (saved.apartmentFrom != null) appartaments_from?.setText(saved.apartmentFrom.toString())
+            if (saved.apartmentTo != null) appartaments_to?.setText(saved.apartmentTo.toString())
+            if (saved.code != null) entrance_code?.setText(saved.code.toString())
+            if (saved.description != null) user_explanation_input?.setText(saved.description)
+            if (saved.floors != null) floors?.setText(saved.floors.toString())
+            //TODO: Button states
+        }
+
         fillPhotosList()
         fillApartmentList()
     }
@@ -106,6 +128,7 @@ class ReportFragment : Fragment() {
                 ReportPhotosListModel.TaskItemPhoto(it)
             })
             photosAdapter.notifyItemRangeChanged(2, photos.size)
+            updateEditable()
         }
         photosAdapter.notifyDataSetChanged()
     }
@@ -125,6 +148,51 @@ class ReportFragment : Fragment() {
         close_button?.setOnClickListener {
             callback?.onEntranceClosed(task, taskItem, entrance)
         }
+        user_explanation_input?.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {}
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                presenter.onDescriptionChanged()
+            }
+        })
+        entrance_code?.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {}
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                presenter.onCodeChanged()
+            }
+        })
+        appartaments_from?.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {}
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                presenter.onApartmentIntervalChanged()
+            }
+        })
+        appartaments_to?.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {}
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                presenter.onApartmentIntervalChanged()
+            }
+        })
+        floors?.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {}
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                presenter.onFloorsChanged()
+            }
+        })
     }
 
     override fun onCreateView(
