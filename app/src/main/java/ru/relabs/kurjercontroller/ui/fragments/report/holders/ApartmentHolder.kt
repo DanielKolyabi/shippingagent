@@ -4,7 +4,7 @@ import android.view.View
 import androidx.viewpager.widget.ViewPager
 import kotlinx.android.synthetic.main.holder_report_appartament.view.*
 import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
-import ru.relabs.kurjercontroller.ui.fragments.report.ApartmentListModel
+import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 import ru.relabs.kurjercontroller.ui.fragments.report.adapters.ApartmentButtonsPagerAdapter
 
 

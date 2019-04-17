@@ -1,4 +1,4 @@
-package ru.relabs.kurjercontroller.ui.fragments.report
+package ru.relabs.kurjercontroller.ui.fragments.report.models
 
 /**
  * Created by ProOrange on 16.04.2019.

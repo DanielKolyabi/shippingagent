@@ -23,7 +23,7 @@ class TaskListPresenter(val fragment: TaskListFragment) {
         if (fragment.adapter.data[pos] !is TaskListModel.TaskItem) {
             return
         }
-        if ((fragment.adapter.data[pos] as TaskListModel.TaskItem).task.state == TaskModel.CREATED) {
+        if ((fragment.adapter.data[pos] as TaskListModel.TaskItem).task.androidState == TaskModel.CREATED) {
             fragment.context?.showError("Вы должны ознакомиться с заданием")
             return
         }

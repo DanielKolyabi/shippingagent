@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.fragment_report.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.relabs.kurjer.files.ImageUtils
@@ -16,6 +15,8 @@ import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
 import ru.relabs.kurjercontroller.models.EntrancePhotoModel
 import ru.relabs.kurjercontroller.ui.activities.showError
+import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
+import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportPhotosListModel
 import java.io.File
 import java.util.*
 

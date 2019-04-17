@@ -3,7 +3,7 @@ package ru.relabs.kurjercontroller.ui.fragments.report.holders
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
-import ru.relabs.kurjercontroller.ui.fragments.report.ReportPhotosListModel
+import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportPhotosListModel
 
 /**
  * Created by ProOrange on 30.08.2018.

@@ -38,7 +38,7 @@ class TaskInfoFragment : Fragment() {
         task_items_list?.adapter = adapter
 
         examine_button?.isEnabled =
-            !(task.state == TaskModel.EXAMINED || task.state == TaskModel.STARTED || task.state == TaskModel.COMPLETED)
+            !(task.androidState == TaskModel.EXAMINED || task.androidState == TaskModel.STARTED || task.androidState == TaskModel.COMPLETED)
 
         bindControls()
         populateList(task)

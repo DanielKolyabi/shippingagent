@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.holder_report_photo.view.*
 import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
-import ru.relabs.kurjercontroller.ui.fragments.report.ReportPhotosListModel
+import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportPhotosListModel
 
 /**
  * Created by ProOrange on 30.08.2018.

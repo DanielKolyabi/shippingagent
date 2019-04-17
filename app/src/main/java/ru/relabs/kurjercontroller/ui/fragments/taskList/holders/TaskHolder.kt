@@ -30,7 +30,7 @@ class TaskHolder(
             onTaskClicked(this.adapterPosition)
         }
 
-        view.active_icon.setVisible(item.task.state >= TaskModel.EXAMINED)
+        view.active_icon.setVisible(item.task.androidState >= TaskModel.EXAMINED)
 
         if (item.selected) {
             setIsSelected(true)

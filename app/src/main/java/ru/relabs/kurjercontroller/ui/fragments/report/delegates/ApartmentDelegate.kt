@@ -5,8 +5,7 @@ import android.view.ViewGroup
 import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
 import ru.relabs.kurjer.ui.delegateAdapter.IAdapterDelegate
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.ui.fragments.report.ApartmentListModel
-import ru.relabs.kurjercontroller.ui.fragments.report.adapters.ApartmentButtonsPagerAdapter
+import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 import ru.relabs.kurjercontroller.ui.fragments.report.holders.ApartmentHolder
 
 /**

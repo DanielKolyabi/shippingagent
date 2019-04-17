@@ -1,4 +1,4 @@
-package ru.relabs.kurjercontroller.ui.fragments.report
+package ru.relabs.kurjercontroller.ui.fragments.report.models
 
 import ru.relabs.kurjercontroller.models.EntrancePhotoModel
 

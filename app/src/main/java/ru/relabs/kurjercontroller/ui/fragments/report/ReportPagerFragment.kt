@@ -5,12 +5,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_report_pager.*
+import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.report.adapters.ReportPagerAdapter
+import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ReportTasksDelegate
+import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportTasksListModel
 import java.util.*
 
 /**
@@ -23,11 +28,26 @@ class ReportPagerFragment : Fragment() {
     var selectedTaskItemId: Int = 0
     val presenter = ReportPagerPresenter(this)
     lateinit var pagerAdapter: ReportPagerAdapter
+    val taskListAdapter = DelegateAdapter<ReportTasksListModel>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         loading.setVisible(false)
+        taskListAdapter.addDelegate(ReportTasksDelegate { presenter.onTaskChanged(it) })
+        tasks_list.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+        tasks_list.adapter = taskListAdapter
+
+        updateTasks()
         presenter.updatePagerAdapter()
+    }
+
+    fun updateTasks() {
+        tasks_list.setVisible(tasks.size > 1)
+        taskListAdapter.data.clear()
+        taskListAdapter.data.addAll(tasks.mapIndexed { i, it ->
+            ReportTasksListModel.TaskButton(it, taskItems[i], i, taskItems[i].id == selectedTaskItemId)
+        })
+        taskListAdapter.notifyDataSetChanged()
     }
 
     override fun onCreateView(

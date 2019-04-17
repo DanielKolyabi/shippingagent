@@ -39,4 +39,10 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
         fragment.view_pager?.adapter = fragment.pagerAdapter
         fragment.view_pager?.currentItem = 0
     }
+
+    fun onTaskChanged(taskNumber: Int) {
+        fragment.selectedTaskItemId = fragment.taskItems[taskNumber].id
+        fragment.updateTasks()
+        updatePagerAdapter()
+    }
 }

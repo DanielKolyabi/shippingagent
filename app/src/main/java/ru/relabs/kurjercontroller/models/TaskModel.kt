@@ -10,6 +10,28 @@ import ru.relabs.kurjercontroller.database.entities.TaskEntity
 /**
  * Created by ProOrange on 19.03.2019.
  */
+fun Int.toAndroidState(): Int {
+    return when (this) {
+        0, 10, 11, 20 -> TaskModel.CREATED
+        30 -> TaskModel.EXAMINED
+        40 -> TaskModel.STARTED
+        50, 60 -> TaskModel.COMPLETED
+        12 -> TaskModel.CANCELED
+        else -> TaskModel.COMPLETED
+    }
+}
+
+fun Int.toSiriusState(): Int {
+    return when(this) {
+        TaskModel.CREATED -> 20
+        TaskModel.EXAMINED -> 30
+        TaskModel.STARTED -> 40
+        TaskModel.COMPLETED -> 50
+        TaskModel.CANCELED -> 12
+        else -> 60
+    }
+}
+
 data class TaskModel(
     val id: Int,
     val userId: Int,
@@ -23,6 +45,9 @@ data class TaskModel(
     val taskFilters: TaskFiltersModel?,
     val state: Int
 ) : Parcelable {
+
+    val androidState: Int
+        get() = state.toAndroidState()
 
     suspend fun getTaskItems(): List<TaskItemModel> = withContext(Dispatchers.IO) {
         //TODO: Filters loading

@@ -2,6 +2,7 @@ package ru.relabs.kurjercontroller.database.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.models.PublisherModel
@@ -10,7 +11,10 @@ import ru.relabs.kurjercontroller.models.PublisherModel
  * Created by ProOrange on 11.04.2019.
  */
 
-@Entity(tableName = "task_publishers")
+@Entity(
+    tableName = "task_publishers",
+    indices = [Index(value = ["publisher_id", "task_id"], unique = true)]
+)
 data class TaskPublisherEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int,

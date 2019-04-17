@@ -8,10 +8,7 @@ import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.database.AppDatabase
 import ru.relabs.kurjercontroller.database.entities.SendQueryItemEntity
-import ru.relabs.kurjercontroller.models.EntranceModel
-import ru.relabs.kurjercontroller.models.EntrancePhotoModel
-import ru.relabs.kurjercontroller.models.TaskItemModel
-import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.models.*
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 
 /**
@@ -24,8 +21,8 @@ class TaskRepository(val db: AppDatabase) {
     }
 
     suspend fun examineTask(task: TaskModel): TaskModel = withContext(Dispatchers.IO) {
-        if (task.state != TaskModel.CREATED) return@withContext task
-        val updatedTask = task.copy(state = TaskModel.EXAMINED)
+        if (task.androidState != TaskModel.CREATED) return@withContext task
+        val updatedTask = task.copy(state = TaskModel.EXAMINED.toSiriusState())
         db.taskDao().update(updatedTask.toEntity())
 
         db.sendQueryDao().insert(
@@ -46,7 +43,7 @@ class TaskRepository(val db: AppDatabase) {
     private suspend fun merge(
         newTasks: List<TaskModel>,
         onNewTaskAppear: (task: TaskModel) -> Unit
-        ): MergeResult {
+    ): MergeResult {
         val result = MergeResult(false, false)
         val savedTasksIDs = db.taskDao().all.map { it.id }
         val newTasksIDs = newTasks.map { it.id }
@@ -60,7 +57,7 @@ class TaskRepository(val db: AppDatabase) {
 
         //Задача не присутствует в сохранённых (новая)
         newTasks.filter { it.id !in savedTasksIDs }.forEach { task ->
-            if (task.state == TaskModel.CANCELED) {
+            if (task.androidState == TaskModel.CANCELED) {
                 Log.d("merge", "New task ${task.id} passed due 12 status")
                 return@forEach
             }
@@ -68,6 +65,7 @@ class TaskRepository(val db: AppDatabase) {
             val newTaskId = db.taskDao().insert(task.toEntity())
             Log.d("merge", "Add task ID: $newTaskId")
             var openedEntrances = 0
+            db.taskPublisherDao().insertAll(task.publishers.map { it.toEntity() })
             task.taskItems.forEach { item ->
                 db.addressDao().insert(item.address.toEntity())
                 db.taskItemDao().insert(item.toEntity())
@@ -94,7 +92,7 @@ class TaskRepository(val db: AppDatabase) {
          */
         newTasks.filter { it.id in savedTasksIDs }.forEach { task ->
             val savedTask = db.taskDao().getById(task.id) ?: return@forEach
-            if (task.state == TaskModel.CANCELED) {
+            if (task.androidState == TaskModel.CANCELED) {
                 if (savedTask.state == TaskModel.STARTED) {
                     //Уведомили что задание уже в работе
                     //TODO: Backend!!!
@@ -108,18 +106,19 @@ class TaskRepository(val db: AppDatabase) {
                 } else {
                     closeTaskById(savedTask.id)
                 }
-            } else if (task.state == TaskModel.COMPLETED) {
+            } else if (task.androidState == TaskModel.COMPLETED) {
                 closeTaskById(savedTask.id)
                 return@forEach
             } else if (
             //TODO: Add iterations
             /*(savedTask.iteration < task.iteration)
             ||*/
-                (task.state != savedTask.state && savedTask.state != TaskModel.STARTED)
+                (task.androidState != savedTask.state && savedTask.state != TaskModel.STARTED)
                 || (task.endControlDate != savedTask.endControlDate || task.startControlDate != savedTask.startControlDate)
             ) {
 
                 db.taskDao().update(task.toEntity())
+                db.taskPublisherDao().insertAll(task.publishers.map { it.toEntity() })
                 task.taskItems.forEach { taskItem ->
                     db.addressDao().insert(taskItem.address.toEntity())
                     db.taskItemDao().insert(taskItem.toEntity())

@@ -9,18 +9,18 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager.widget.ViewPager
 import kotlinx.android.synthetic.main.fragment_report.*
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
-import ru.relabs.kurjercontroller.ui.fragments.report.adapters.ApartmentButtonsPagerAdapter
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ApartmentDelegate
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ReportBlankMultiPhotoDelegate
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ReportBlankPhotoDelegate
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ReportPhotoDelegate
+import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
+import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportPhotosListModel
 
 /**
  * Created by ProOrange on 15.04.2019.
