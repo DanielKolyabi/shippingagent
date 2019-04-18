@@ -107,6 +107,8 @@ class TaskListPresenter(val fragment: TaskListFragment) {
         fragment.showLoading(true)
         fragment.populateTaskList(application().tasksRepository.getTasks())
         fragment.showLoading(false)
+
+        withContext(Dispatchers.Main) { updateStartButton() }
     }
 
     suspend fun performNetworkUpdate() = withContext(Dispatchers.IO) {
@@ -121,7 +123,6 @@ class TaskListPresenter(val fragment: TaskListFragment) {
 
         fragment.showLoading(true, true)
         networkUpdateStarted = true
-        //TODO: Show loading. Ignore refresh button
         val tasks = try {
             application().tasksRepository.loadRemoteTasks(user.token)
         } catch (e: Exception) {

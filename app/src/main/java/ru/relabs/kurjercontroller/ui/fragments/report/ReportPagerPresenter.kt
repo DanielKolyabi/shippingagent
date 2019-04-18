@@ -2,7 +2,11 @@ package ru.relabs.kurjercontroller.ui.fragments.report
 
 import kotlinx.android.synthetic.main.fragment_report_pager.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.CancelableScope
+import ru.relabs.kurjercontroller.application
+import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.fragments.report.adapters.ReportPagerAdapter
@@ -32,12 +36,58 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
             selectedTask.first,
             selectedTask.second,
             { task, taskItem, entrance ->
-
+                onEntranceClosed(taskItem, entrance)
             },
             manager
         )
         fragment.view_pager?.adapter = fragment.pagerAdapter
         fragment.view_pager?.currentItem = 0
+    }
+
+    private fun onEntranceClosed(taskItem: TaskItemModel, entrance: EntranceModel) {
+        bgScope.launch {
+            var shouldRefreshUI = true
+
+            application().tasksRepository.saveTaskReport(taskItem, entrance)
+            application().tasksRepository.closeEntrance(taskItem.id, entrance.number)
+
+            //TODO: Если все падики закрыты - удалить Task, TaskItem, обновить список таск
+            //TODO: Если таск не осталось - вернуться на AddressScreen
+            val idx = fragment.taskItems.indexOfFirst {
+                it.entrances.contains(entrance)
+            }
+            if (idx < 0) {
+                return@launch
+            }
+            val entranceIdx = fragment.taskItems[idx].entrances.indexOf(entrance)
+            if (entranceIdx < 0) {
+                return@launch
+            }
+
+            fragment.taskItems[idx].entrances[entranceIdx].state = EntranceModel.CLOSED
+
+            if (fragment.taskItems[idx].entrances.none { it.state == EntranceModel.CREATED }) {
+
+                fragment.taskItems.removeAt(idx)
+                fragment.tasks.removeAt(idx)
+
+                if (fragment.taskItems.isEmpty()) {
+                    shouldRefreshUI = false
+                    withContext(Dispatchers.Main) {
+                        application().router.exit()
+                    }
+                } else {
+                    fragment.selectedTaskItemId = fragment.taskItems.first().id
+                }
+            }
+
+            if (shouldRefreshUI) {
+                withContext(Dispatchers.Main) {
+                    fragment.updateTasks()
+                    updatePagerAdapter()
+                }
+            }
+        }
     }
 
     fun onTaskChanged(taskNumber: Int) {

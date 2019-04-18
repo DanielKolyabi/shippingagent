@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_address_list.*
 import kotlinx.android.synthetic.main.fragment_tasklist.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
@@ -45,6 +46,10 @@ class AddressListFragment : Fragment() {
 
         if (adapter.data.isEmpty()) {
             presenter.preloadTasks()
+        }else{
+            presenter.bgScope.launch {
+                presenter.applySorting()
+            }
         }
     }
 

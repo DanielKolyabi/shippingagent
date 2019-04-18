@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_report_pager.*
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
+import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
@@ -23,8 +24,8 @@ import java.util.*
  */
 class ReportPagerFragment : Fragment() {
 
-    var tasks: List<TaskModel> = listOf()
-    var taskItems: List<TaskItemModel> = listOf()
+    var tasks: MutableList<TaskModel> = mutableListOf()
+    var taskItems: MutableList<TaskItemModel> = mutableListOf()
     var selectedTaskItemId: Int = 0
     val presenter = ReportPagerPresenter(this)
     lateinit var pagerAdapter: ReportPagerAdapter
@@ -36,6 +37,8 @@ class ReportPagerFragment : Fragment() {
         taskListAdapter.addDelegate(ReportTasksDelegate { presenter.onTaskChanged(it) })
         tasks_list.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
         tasks_list.adapter = taskListAdapter
+
+        activity()?.changeTitle(getTitle())
 
         updateTasks()
         presenter.updatePagerAdapter()
@@ -60,8 +63,8 @@ class ReportPagerFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            tasks = it.getParcelableArrayList("tasks") ?: listOf()
-            taskItems = it.getParcelableArrayList("task_items") ?: listOf()
+            tasks = it.getParcelableArrayList("tasks") ?: mutableListOf()
+            taskItems = it.getParcelableArrayList("task_items") ?: mutableListOf()
             selectedTaskItemId = it.getInt("selected_task_id")
         }
     }
@@ -69,6 +72,10 @@ class ReportPagerFragment : Fragment() {
     override fun onDestroy() {
         presenter.bgScope.terminate()
         super.onDestroy()
+    }
+
+    fun getTitle(): String {
+        return taskItems.first().address.name
     }
 
     companion object {

@@ -17,7 +17,7 @@ data class EntranceModel(
     val endApartments: Int,
     val floors: Int,
     val mailboxType: Int,
-    val state: Int
+    var state: Int
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readInt(),

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -26,6 +27,7 @@ import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ReportBlankPhoto
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ReportPhotoDelegate
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportPhotosListModel
+import java.util.*
 
 /**
  * Created by ProOrange on 15.04.2019.
@@ -57,9 +59,14 @@ class ReportFragment : Fragment() {
 
         //TODO: If apartments interval changed - refresh apartments list
         apartmentAdapter.addDelegate(
-            ApartmentDelegate { apartment, buttonGroup ->
-                presenter.onApartmentButtonGroupChanged(apartment, buttonGroup)
-            }
+            ApartmentDelegate(
+                { apartment, buttonGroup ->
+                    presenter.onApartmentButtonGroupChanged(apartment, buttonGroup)
+                },
+                { apartment, change ->
+                    presenter.onApartmentButtonStateChanged(apartment, change)
+                }
+            )
         )
         photosAdapter.addDelegate(ReportPhotoDelegate { holder ->
             presenter.onRemovePhotoClicked(holder)
@@ -73,6 +80,24 @@ class ReportFragment : Fragment() {
 
         fillData()
         bindControl()
+        if(entrance.state == EntranceModel.CLOSED){
+            setControlsLocked(true)
+        }else{
+            setControlsLocked(false)
+        }
+    }
+
+    private fun setControlsLocked(locked: Boolean) {
+        appartaments_from.isEnabled = !locked
+        appartaments_to.isEnabled = !locked
+        entrance_euro_key.isEnabled = !locked
+        entrance_key.isEnabled = !locked
+        floors.isEnabled = !locked
+        entrance_code.isEnabled = !locked
+        layout_error_button.isEnabled = !locked
+        lookout.isEnabled = !locked
+        close_button.isEnabled = !locked
+        user_explanation_input.isEnabled = !locked
     }
 
     fun updateEditable() {
@@ -138,9 +163,19 @@ class ReportFragment : Fragment() {
         apartmentAdapter.data.clear()
         apartmentAdapter.data.addAll(
             (entrance.startApartments..entrance.endApartments).map {
-                ApartmentListModel.Apartment(it, buttonGroup = 0)
+                ApartmentListModel.Apartment(it, buttonGroup = 0, state = 0)
             }
         )
+        presenter.bgScope.launch {
+            val saves = application().tasksRepository.loadEntranceApartments(taskItem, entrance)
+            saves.forEach { save ->
+                val idx = apartmentAdapter.data.indexOfFirst {
+                    (it as? ApartmentListModel.Apartment)?.number == save.number
+                }
+                if (idx < 0) return@forEach
+                apartmentAdapter.data[idx] = save
+            }
+        }
         apartmentAdapter.notifyDataSetChanged()
     }
 
@@ -148,6 +183,16 @@ class ReportFragment : Fragment() {
         close_button?.setOnClickListener {
             callback?.onEntranceClosed(task, taskItem, entrance)
         }
+
+        val listClickInterceptor = object : RecyclerView.OnItemTouchListener {
+            override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
+            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean = entrance.state == EntranceModel.CLOSED
+        }
+
+        photos_list.addOnItemTouchListener(listClickInterceptor)
+        appartaments_list.addOnItemTouchListener(listClickInterceptor)
+
         user_explanation_input?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
 

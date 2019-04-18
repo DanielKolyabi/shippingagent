@@ -16,12 +16,12 @@
             android:id="@+id/no_button"
             android:layout_width="70dp"
             android:layout_height="40dp"
-            app:layout_constraintEnd_toStartOf="@id/broken_button"
+            app:layout_constraintEnd_toStartOf="@id/broken_button_addition"
             android:textAllCaps="false"
             android:text="@string/hasnt_papers"/>
 
     <Button
-            android:id="@+id/broken_button"
+            android:id="@+id/broken_button_addition"
             android:layout_width="70dp"
             android:layout_height="40dp"
             app:layout_constraintEnd_toEndOf="parent"

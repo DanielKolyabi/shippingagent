@@ -7,11 +7,15 @@ import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.database.AppDatabase
+import ru.relabs.kurjercontroller.database.entities.ApartmentResultEntity
+import ru.relabs.kurjercontroller.database.entities.EntranceReportEntity
 import ru.relabs.kurjercontroller.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.database.entities.SendQueryItemEntity
+import ru.relabs.kurjercontroller.database.models.ApartmentResult
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
 import ru.relabs.kurjercontroller.models.*
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
+import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 
 /**
  * Created by ProOrange on 11.04.2019.
@@ -174,8 +178,7 @@ class TaskRepository(val db: AppDatabase) {
             .forEach { taskItem ->
                 db.entranceDao().getByTaskItemId(taskItem.id)
                     .forEach {
-                        db.entranceDao().delete(it)
-                        db.entranceResultDao().deleteByEntrance(taskItem.id, it.number)
+                        deleteEntrance(taskItem.id, it.number)
                     }
 
                 db.addressDao().deleteById(taskItem.addressId)
@@ -184,6 +187,18 @@ class TaskRepository(val db: AppDatabase) {
             }
 
         db.taskDao().deleteById(taskId)
+    }
+
+    suspend fun deleteEntrance(taskItemId: Int, entranceNumber: Int) = withContext(Dispatchers.IO) {
+        val entity = db.entranceDao().getByNumber(taskItemId, entranceNumber) ?: return@withContext
+        db.entranceDao().delete(entity)
+        db.entranceResultDao().deleteByEntrance(entity.taskItemId, entity.number)
+        db.apartmentResultDao().deleteByEntrance(entity.taskItemId, entity.number)
+    }
+
+    suspend fun closeEntrance(taskItemId: Int, entranceNumber: Int)  = withContext(Dispatchers.IO) {
+        val entity = db.entranceDao().getByNumber(taskItemId, entranceNumber) ?: return@withContext
+        db.entranceDao().update(entity.copy(state = EntranceModel.CLOSED))
     }
 
     suspend fun removePhoto(entrancePhoto: EntrancePhotoModel) = withContext(Dispatchers.IO) {
@@ -246,6 +261,61 @@ class TaskRepository(val db: AppDatabase) {
         withContext(Dispatchers.IO) {
             db.entranceResultDao().getByEntrance(taskItem.id, entrance.number)
         }
+
+    suspend fun saveApartmentResult(
+        taskItem: TaskItemModel,
+        entrance: EntranceModel,
+        apartment: ApartmentListModel.Apartment
+    ) = withContext(Dispatchers.IO) {
+        db.apartmentResultDao().insert(
+            ApartmentResultEntity(
+                0,
+                taskItem.id,
+                entrance.number,
+                apartment.number,
+                apartment.buttonGroup,
+                apartment.state
+            )
+        )
+    }
+
+    suspend fun loadEntranceApartments(
+        taskItem: TaskItemModel,
+        entrance: EntranceModel
+    ): List<ApartmentListModel.Apartment> = withContext(Dispatchers.IO) {
+        return@withContext db.apartmentResultDao().getByEntrance(taskItem.id, entrance.number).map {
+            ApartmentListModel.Apartment(
+                it.apartmentNumber,
+                it.buttonGroup,
+                it.buttonState
+            )
+        }
+    }
+
+    suspend fun saveTaskReport(taskItem: TaskItemModel, entrance: EntranceModel) = withContext(Dispatchers.IO) {
+        val entranceResult = loadEntranceResult(taskItem, entrance)
+        val apartmentResults = loadEntranceApartments(taskItem, entrance)
+
+        val report = EntranceReportEntity(
+            0,
+            taskItem.id,
+            taskItem.address.idnd,
+            entrance.number,
+            entranceResult?.apartmentFrom ?: entrance.startApartments,
+            entranceResult?.apartmentTo ?: entrance.endApartments,
+            entranceResult?.floors ?: entrance.floors,
+            entranceResult?.description ?: "",
+            entranceResult?.code ?: entrance.code,
+            "", //TODO: Key and euro-key
+            "",
+            entranceResult?.isDeliveryWrong ?: false,
+            entranceResult?.hasLookupPost ?: false,
+            application().user.getUserCredentials()?.token ?: "",
+            apartmentResults.map { ApartmentResult(it.number, it.state, it.buttonGroup) }
+        )
+
+        db.entranceReportDao().insert(report)
+    }
 
     data class MergeResult(
         var isTasksChanged: Boolean,

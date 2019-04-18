@@ -32,4 +32,7 @@ interface EntranceEntityDao {
 
     @Delete
     fun delete(address: EntranceEntity)
+
+    @Query("DELETE FROM entrances WHERE id = :id")
+    fun deleteById(id: Int)
 }

@@ -3,6 +3,7 @@ package ru.relabs.kurjercontroller.models
 import android.os.Parcel
 import android.os.Parcelable
 import ru.relabs.kurjercontroller.database.entities.TaskItemEntity
+import ru.relabs.kurjercontroller.orEmpty
 
 /**
  * Created by ProOrange on 19.03.2019.
@@ -15,11 +16,11 @@ data class TaskItemModel(
     val defaultReportType: Int,
     val required: Boolean,
     val address: AddressModel,
-    val entrances: List<EntranceModel>,
+    val entrances: MutableList<EntranceModel>,
     val notes: List<String>
 ) : Parcelable {
     val isClosed: Boolean
-        get() = !entrances.any { it.state == EntranceModel.CREATED }
+        get() = entrances.none { it.state == EntranceModel.CREATED }
 
     constructor(parcel: Parcel) : this(
         parcel.readInt(),

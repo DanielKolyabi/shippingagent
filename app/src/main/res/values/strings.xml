@@ -34,9 +34,9 @@
     <string name="entrance_key">Ключ:</string>
     <string name="close_entrance_button">Закрыть подъезд</string>
     <string name="broken">Слом</string>
-    <string name="not_confirmed">НПод</string>
-    <string name="not_regular">НеРег</string>
-    <string name="regular">Рег</string>
+    <string name="not_confirmed">Нет</string>
+    <string name="not_regular">Нер</string>
+    <string name="regular">Да</string>
     <string name="has_papers">Да</string>
     <string name="hasnt_papers">Нет</string>
     <string name="user_filter_label">Распр-тель:</string>

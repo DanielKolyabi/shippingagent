@@ -28,7 +28,7 @@ data class TaskItemResponseModel(
             required = required,
             defaultReportType = defaultReportType,
             notes = notes,
-            entrances = entrances.map { it.toModel() },
+            entrances = entrances.map { it.toModel() }.toMutableList(),
             address = address.toModel()
         )
     }

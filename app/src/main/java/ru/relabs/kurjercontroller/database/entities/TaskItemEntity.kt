@@ -38,7 +38,7 @@ data class TaskItemEntity(
             taskId = taskId,
             publisherName = publisherName,
             address = db.addressDao().getById(addressId)?.toModel() ?: AddressModel.blank(),
-            entrances = db.entranceDao().getByTaskItemId(id).map { it.toModel() }
+            entrances = db.entranceDao().getByTaskItemId(id).map { it.toModel() }.toMutableList()
         )
     }
 }

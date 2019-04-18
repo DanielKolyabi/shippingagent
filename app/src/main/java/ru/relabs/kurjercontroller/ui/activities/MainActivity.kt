@@ -227,9 +227,6 @@ class MainActivity : AppCompatActivity() {
                 back_button?.setVisible(true)
                 changeTitle("Список подъездов")
             }
-            is ReportPagerFragment -> {
-                back_button?.setVisible(true)
-            }
             is YandexMapFragment -> {
                 back_button?.setVisible(true)
             }
@@ -237,7 +234,9 @@ class MainActivity : AppCompatActivity() {
                 back_button?.setVisible(true)
                 changeTitle("Фильтры")
             }
-            //TODO: ReportPagerFragment
+            is ReportPagerFragment -> {
+                back_button?.setVisible(true)
+            }
         }
     }
 

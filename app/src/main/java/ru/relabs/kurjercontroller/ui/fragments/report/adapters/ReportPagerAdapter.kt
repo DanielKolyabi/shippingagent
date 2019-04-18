@@ -20,7 +20,7 @@ class ReportPagerAdapter(
 ) :
     FragmentStatePagerAdapter(fm) {
 
-    private fun openedEntrances(): List<EntranceModel> = taskItem.entrances.filter { it.state == EntranceModel.CREATED }
+    private fun openedEntrances(): List<EntranceModel> = taskItem.entrances.sortedBy { it.state == EntranceModel.CLOSED }//.filter { it.state == EntranceModel.CREATED }
 
     override fun getItem(position: Int): Fragment {
         val fragment = ReportFragment.newInstance(

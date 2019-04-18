@@ -8,7 +8,6 @@ import android.net.Uri
 import android.provider.MediaStore
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_report.*
-import kotlinx.android.synthetic.main.holder_task_details_list_info.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.relabs.kurjer.files.ImageUtils
@@ -154,39 +153,6 @@ class ReportPresenter(val fragment: ReportFragment) {
     }
 
 
-    fun onRemovePhotoClicked(holder: RecyclerView.ViewHolder) {
-        val position = holder.adapterPosition
-        if (position >= fragment.photosAdapter.data.size ||
-            position < 0
-        ) {
-
-            fragment.context?.showError("Невозможно удалить фото.")
-            return
-        }
-        val status =
-            File((fragment.photosAdapter.data[holder.adapterPosition] as ReportPhotosListModel.TaskItemPhoto).photo.URI.path).delete()
-        if (!status) {
-            fragment.context?.showError("Невозможно удалить фото из памяти.")
-        }
-        val entrancePhotoModel =
-            (fragment.photosAdapter.data[holder.adapterPosition] as ReportPhotosListModel.TaskItemPhoto).photo
-        bgScope.launch {
-            application().tasksRepository.removePhoto(entrancePhotoModel)
-        }
-
-        fragment.photosAdapter.data.removeAt(holder.adapterPosition)
-        fragment.photosAdapter.notifyItemRemoved(holder.adapterPosition)
-        fragment.updateEditable()
-    }
-
-    fun onApartmentButtonGroupChanged(apartment: Int, buttonGroup: Int) {
-        val index = fragment.apartmentAdapter.data.indexOfFirst {
-            (it as? ApartmentListModel.Apartment)?.number == apartment
-        }
-        val item = fragment.apartmentAdapter.data[index] as ApartmentListModel.Apartment
-        fragment.apartmentAdapter.data[index] = item.copy(buttonGroup = buttonGroup)
-    }
-
     fun onDescriptionChanged() {
         val description = fragment.user_explanation_input?.text.toString()
         bgScope.launch {
@@ -225,6 +191,32 @@ class ReportPresenter(val fragment: ReportFragment) {
                 apartmentTo = to
             )
         }
+
+    }
+
+    fun onRemovePhotoClicked(holder: RecyclerView.ViewHolder) {
+        val position = holder.adapterPosition
+        if (position >= fragment.photosAdapter.data.size ||
+            position < 0
+        ) {
+
+            fragment.context?.showError("Невозможно удалить фото.")
+            return
+        }
+        val status =
+            File((fragment.photosAdapter.data[holder.adapterPosition] as ReportPhotosListModel.TaskItemPhoto).photo.URI.path).delete()
+        if (!status) {
+            fragment.context?.showError("Невозможно удалить фото из памяти.")
+        }
+        val entrancePhotoModel =
+            (fragment.photosAdapter.data[holder.adapterPosition] as ReportPhotosListModel.TaskItemPhoto).photo
+        bgScope.launch {
+            application().tasksRepository.removePhoto(entrancePhotoModel)
+        }
+
+        fragment.photosAdapter.data.removeAt(holder.adapterPosition)
+        fragment.photosAdapter.notifyItemRemoved(holder.adapterPosition)
+        fragment.updateEditable()
     }
 
     fun onFloorsChanged() {
@@ -236,6 +228,33 @@ class ReportPresenter(val fragment: ReportFragment) {
 
         bgScope.launch {
             application().tasksRepository.insertEntranceResult(fragment.taskItem, fragment.entrance, floors = floors)
+        }
+    }
+
+    fun onApartmentButtonGroupChanged(apartment: Int, buttonGroup: Int) {
+        val index = fragment.apartmentAdapter.data.indexOfFirst {
+            (it as? ApartmentListModel.Apartment)?.number == apartment
+        }
+        val item = fragment.apartmentAdapter.data[index] as ApartmentListModel.Apartment
+        val newItem = item.copy(buttonGroup = buttonGroup)
+        fragment.apartmentAdapter.data[index] = newItem
+
+        bgScope.launch {
+            application().tasksRepository.saveApartmentResult(fragment.taskItem, fragment.entrance, newItem)
+        }
+    }
+
+    fun onApartmentButtonStateChanged(apartment: Int, change: Int) {
+        val index = fragment.apartmentAdapter.data.indexOfFirst {
+            (it as? ApartmentListModel.Apartment)?.number == apartment
+        }
+        val item = fragment.apartmentAdapter.data[index] as ApartmentListModel.Apartment
+        val newItem = item.copy(state = item.state xor change)
+        fragment.apartmentAdapter.data[index] = newItem
+        fragment.apartmentAdapter.notifyItemChanged(index)
+
+        bgScope.launch {
+            application().tasksRepository.saveApartmentResult(fragment.taskItem, fragment.entrance, newItem)
         }
     }
 

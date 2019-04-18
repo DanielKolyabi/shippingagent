@@ -30,6 +30,7 @@ class AddressListPresenter(val fragment: AddressListFragment) {
         val taskItemsOnAddress = fragment.adapter.data
             .filter {
                 (it as? AddressListModel.TaskItem)?.taskItem?.address?.idnd == clickedTask.taskItem.address.idnd
+                        && (it as? AddressListModel.TaskItem)?.taskItem?.isClosed == clickedTask.taskItem.isClosed
             }
             .map {
                 val task = it as AddressListModel.TaskItem

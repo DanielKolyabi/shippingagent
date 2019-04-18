@@ -29,7 +29,7 @@ object TaskAddressSorter {
             .thenBy { it.taskItem.address.street }
             .thenBy { it.taskItem.address.house }
             .thenBy { it.taskItem.address.houseName }
-            .thenBy { it.taskItem.isClosed }
+            .thenBy { !it.taskItem.isClosed }
         ).groupBy {
             it.taskItem.address.idnd
         }.toList().sortedBy {
@@ -44,7 +44,7 @@ object TaskAddressSorter {
             .thenBy { it.taskItem.address.street }
             .thenBy { it.taskItem.address.house }
             .thenBy { it.taskItem.address.houseName }
-            .thenBy { it.taskItem.isClosed }
+            .thenBy { !it.taskItem.isClosed }
         ).groupBy {
             it.taskItem.address.idnd
         }.toList().sortedBy {

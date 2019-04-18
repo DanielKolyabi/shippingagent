@@ -18,7 +18,7 @@ class AddressListAddressHolder(
 ) : BaseViewHolder<AddressListModel>(itemView) {
     override fun onBindViewHolder(item: AddressListModel) {
         if (item !is AddressListModel.Address) return
-        val address = item.taskItems.first().address?.name
+        val address = item.taskItems.first().address.name
         itemView.address_text.text = address
         val isAddressClosed = item.taskItems.find {
             !it.isClosed
@@ -36,11 +36,7 @@ class AddressListAddressHolder(
 
         itemView.map_icon.setOnClickListener {
             val address = item.taskItems[0].address
-            if(address != null) {
-                onMapClick(address)
-            }else{
-                //TODO: If task hasn't address show error
-            }
+            onMapClick(address)
         }
     }
 }

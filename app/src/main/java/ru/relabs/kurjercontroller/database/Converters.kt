@@ -9,6 +9,7 @@ import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
+import ru.relabs.kurjercontroller.database.models.ApartmentResult
 import ru.relabs.kurjercontroller.models.AddressModel
 import ru.relabs.kurjercontroller.models.GPSCoordinatesModel
 import java.lang.reflect.Type
@@ -72,6 +73,16 @@ class Converters {
     @TypeConverter
     fun stringListToJSON(value: List<String>): String {
         return gson.toJson(value)
+    }
+
+    @TypeConverter
+    fun apartmentResultsToJSON(value: List<ApartmentResult>): String {
+        return gson.toJson(value)
+    }
+
+    @TypeConverter
+    fun jsonToApartmentResults(value: String): List<ApartmentResult> {
+        return gson.fromJson(value, object: TypeToken<List<ApartmentResult>>() {}.type)
     }
 
     @TypeConverter
