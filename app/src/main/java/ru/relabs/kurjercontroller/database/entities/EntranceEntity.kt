@@ -31,7 +31,7 @@ data class EntranceEntity(
     val floors: Int,
     @ColumnInfo(name = "mailbox_type")
     val mailboxType: Int,
-    val state: Int
+    var state: Int
 ) {
     fun toModel(): EntranceModel {
         return EntranceModel(

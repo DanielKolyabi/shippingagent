@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import ru.relabs.kurjercontroller.R
+import ru.relabs.kurjercontroller.ReportService
 
 class SplashActivity : AppCompatActivity() {
 
@@ -14,7 +15,7 @@ class SplashActivity : AppCompatActivity() {
         hideActionBar()
         setContentView(R.layout.activity_splash)
 
-        //startService(Intent(this, ReportService::class.java))
+        startService(Intent(this, ReportService::class.java))
 
         AsyncTask.execute {
             Thread.sleep(2000)

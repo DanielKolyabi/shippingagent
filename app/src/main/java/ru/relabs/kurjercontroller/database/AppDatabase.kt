@@ -14,7 +14,7 @@ import ru.relabs.kurjercontroller.database.entities.*
         EntrancePhotoEntity::class, EntranceReportEntity::class, TaskEntity::class, TaskItemEntity::class,
         TaskPublisherEntity::class, SendQueryItemEntity::class, EntranceResultEntity::class,
         ApartmentResultEntity::class],
-    version = 12
+    version = 13
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {

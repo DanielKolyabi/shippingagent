@@ -3,6 +3,7 @@ package ru.relabs.kurjercontroller.database.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.database.models.ApartmentResult
 
 /**
@@ -33,5 +34,7 @@ data class EntranceReportEntity(
     val hasLookupPost: Boolean,
     val token: String,
     @ColumnInfo(name = "apartment_results")
-    val apartmentResult: List<ApartmentResult>
+    val apartmentResult: List<ApartmentResult>,
+    @ColumnInfo(name = "close_time")
+    val closeTime: DateTime
 )

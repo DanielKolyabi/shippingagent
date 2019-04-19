@@ -16,6 +16,7 @@ import ru.relabs.kurjercontroller.fileHelpers.PathHelper
 import ru.relabs.kurjercontroller.models.*
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
+import java.util.*
 
 /**
  * Created by ProOrange on 11.04.2019.
@@ -26,15 +27,23 @@ class TaskRepository(val db: AppDatabase) {
             .map { it.toModel() }
     }
 
-    suspend fun examineTask(task: TaskModel): TaskModel = withContext(Dispatchers.IO) {
-        if (task.androidState != TaskModel.CREATED) return@withContext task
-        val updatedTask = task.copy(state = TaskModel.EXAMINED.toSiriusState())
+    private suspend fun taskChangeStatus(task: TaskModel, status: Int): TaskModel = withContext(Dispatchers.IO) {
+
+        val endpoint = when (status) {
+            TaskModel.CREATED -> "received"
+            TaskModel.EXAMINED -> "examined"
+            TaskModel.STARTED -> "accepted"
+            TaskModel.COMPLETED -> "completed"
+            else -> return@withContext task
+        }
+
+        val updatedTask = task.copy(state = status.toSiriusState())
         db.taskDao().update(updatedTask.toEntity())
 
         db.sendQueryDao().insert(
             SendQueryItemEntity(
                 0,
-                BuildConfig.API_URL + "/api/v1/controller/tasks/${task.id}/examined?token=" + application().user.getUserCredentials()?.token.orEmpty(),
+                BuildConfig.API_URL + "/api/v1/controller/tasks/${task.id}/$endpoint?token=" + application().user.getUserCredentials()?.token.orEmpty(),
                 ""
             )
         )
@@ -42,13 +51,19 @@ class TaskRepository(val db: AppDatabase) {
         return@withContext updatedTask
     }
 
+    suspend fun receiveTaskStatus(task: TaskModel): TaskModel = taskChangeStatus(task, TaskModel.CREATED)
+    suspend fun examineTaskStatus(task: TaskModel): TaskModel = taskChangeStatus(task, TaskModel.EXAMINED)
+    suspend fun startTaskStatus(task: TaskModel): TaskModel = taskChangeStatus(task, TaskModel.STARTED)
+    suspend fun closeTaskStatus(task: TaskModel): TaskModel = taskChangeStatus(task, TaskModel.COMPLETED)
+
     suspend fun mergeTasks(newTasks: List<TaskModel>): MergeResult = withContext(Dispatchers.IO) {
-        return@withContext merge(newTasks) {}
+        val result = merge(newTasks) { receiveTaskStatus(it) }
+        return@withContext result
     }
 
-    private suspend fun merge(
+    suspend fun merge(
         newTasks: List<TaskModel>,
-        onNewTaskAppear: (task: TaskModel) -> Unit
+        onNewTaskAppear: suspend (task: TaskModel) -> Unit
     ): MergeResult {
         val result = MergeResult(false, false)
         val savedTasksIDs = db.taskDao().all.map { it.id }
@@ -76,8 +91,11 @@ class TaskRepository(val db: AppDatabase) {
                 db.addressDao().insert(item.address.toEntity())
                 db.taskItemDao().insert(item.toEntity())
                 item.entrances.forEach { entrance ->
-                    db.entranceDao().insert(entrance.toEntity(item.id))
-                    //TODO: Entrance report state
+                    val entity = entrance.toEntity(item.id)
+                    if (db.entranceReportDao().getByNumber(entity.taskItemId, entity.number) != null) {
+                        entity.state = EntranceModel.CLOSED
+                    }
+                    db.entranceDao().insert(entity)
                     if (entrance.state == EntranceModel.CREATED) {
                         openedEntrances++
                     }
@@ -99,7 +117,7 @@ class TaskRepository(val db: AppDatabase) {
         newTasks.filter { it.id in savedTasksIDs }.forEach { task ->
             val savedTask = db.taskDao().getById(task.id) ?: return@forEach
             if (task.androidState == TaskModel.CANCELED) {
-                if (savedTask.state == TaskModel.STARTED) {
+                if (savedTask.state.toAndroidState() == TaskModel.STARTED) {
                     //Уведомили что задание уже в работе
                     //TODO: Backend!!!
                     db.sendQueryDao().insert(
@@ -117,8 +135,7 @@ class TaskRepository(val db: AppDatabase) {
                 return@forEach
             } else if (
                 (savedTask.iteration < task.iteration)
-                || (task.androidState != savedTask.state && savedTask.state != TaskModel.STARTED)
-                || (task.endControlDate != savedTask.endControlDate || task.startControlDate != savedTask.startControlDate)
+                || (task.state != savedTask.state && savedTask.state.toAndroidState() != TaskModel.STARTED)
             ) {
 
                 db.taskDao().update(task.toEntity())
@@ -127,14 +144,25 @@ class TaskRepository(val db: AppDatabase) {
                     db.addressDao().insert(taskItem.address.toEntity())
                     db.taskItemDao().insert(taskItem.toEntity())
                     taskItem.entrances.forEach { entrance ->
-                        //TODO: Entrance report state
-                        db.entranceDao().insert(entrance.toEntity(taskItem.id))
+                        val entity = entrance.toEntity(taskItem.id)
+                        if (db.entranceReportDao().getByNumber(entity.taskItemId, entity.number) != null) {
+                            entity.state = EntranceModel.CLOSED
+                        }
+                        db.entranceDao().insert(entity)
                     }
                 }
                 result.isTasksChanged = true
             }
         }
         return result
+    }
+
+    suspend fun removeReport(db: AppDatabase, report: EntranceReportEntity) = withContext(Dispatchers.IO){
+        db.entranceReportDao().delete(report)
+        db.entrancePhotoDao().getEntrancePhoto(report.taskItemId, report.entranceNumber).forEach {
+            //Delete photo
+            removePhoto(it.toModel(db))
+        }
     }
 
     suspend fun saveTaskToDB(task: TaskModel) = withContext(Dispatchers.IO) {
@@ -196,9 +224,17 @@ class TaskRepository(val db: AppDatabase) {
         db.apartmentResultDao().deleteByEntrance(entity.taskItemId, entity.number)
     }
 
-    suspend fun closeEntrance(taskItemId: Int, entranceNumber: Int)  = withContext(Dispatchers.IO) {
+    suspend fun closeEntrance(taskItemId: Int, entranceNumber: Int) = withContext(Dispatchers.IO) {
         val entity = db.entranceDao().getByNumber(taskItemId, entranceNumber) ?: return@withContext
         db.entranceDao().update(entity.copy(state = EntranceModel.CLOSED))
+
+        //TODO: Log error
+        val taskItem = db.taskItemDao().getById(taskItemId) ?: return@withContext
+        val task = db.taskDao().getById(taskItem.taskId)?.toModel(db) ?: return@withContext
+
+        if (task.state.toAndroidState() != TaskModel.STARTED) {
+            startTaskStatus(task)
+        }
     }
 
     suspend fun removePhoto(entrancePhoto: EntrancePhotoModel) = withContext(Dispatchers.IO) {
@@ -311,7 +347,8 @@ class TaskRepository(val db: AppDatabase) {
             entranceResult?.isDeliveryWrong ?: false,
             entranceResult?.hasLookupPost ?: false,
             application().user.getUserCredentials()?.token ?: "",
-            apartmentResults.map { ApartmentResult(it.number, it.state, it.buttonGroup) }
+            apartmentResults.map { ApartmentResult(it.number, it.state, it.buttonGroup) },
+            DateTime.now()
         )
 
         db.entranceReportDao().insert(report)

@@ -6,6 +6,8 @@ import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.AddressModel
+import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.models.toAndroidState
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.fragments.ReportScreen
@@ -51,7 +53,7 @@ class AddressListPresenter(val fragment: AddressListFragment) {
     }
 
     fun onCloseTaskClicked() {
-        TODO("close task if all required taskItems closed. Send status to sirius") //To change body of created functions use File | Settings | File Templates.
+        //TODO close task if all required taskItems closed. Send status to sirius
     }
 
     suspend fun applySorting() = withContext(Dispatchers.IO) {
@@ -110,6 +112,27 @@ class AddressListPresenter(val fragment: AddressListFragment) {
                 }, "Назад")
             } else {
                 fragment.showLoading(false)
+            }
+        }
+    }
+
+    suspend fun checkTasks() = withContext(Dispatchers.IO) {
+        val closedTasks = fragment.tasks.filter {
+            it.taskItems.none {
+                !it.isClosed
+            }
+        }
+        closedTasks.forEach {
+            if(it.state.toAndroidState() != TaskModel.COMPLETED){
+                application().tasksRepository.closeTaskStatus(it)
+            }
+            fragment.tasks.remove(it)
+        }
+        withContext(Dispatchers.Main) {
+            if (fragment.tasks.isEmpty()) {
+                application().router.exit()
+            } else {
+                applySorting()
             }
         }
     }

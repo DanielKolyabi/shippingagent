@@ -104,11 +104,13 @@ class TaskListFragment : Fragment(), ISearchableFragment {
             if(clear){
                 adapter.data.clear()
             }
+            start_button?.isEnabled = false
             online_button?.isEnabled = false
             adapter.data.add(0, TaskListModel.Loader)
             adapter.notifyDataSetChanged()
         } else {
             online_button?.isEnabled = true
+            presenter.updateStartButton()
             adapter.data.removeAll {
                 it is TaskListModel.Loader
             }

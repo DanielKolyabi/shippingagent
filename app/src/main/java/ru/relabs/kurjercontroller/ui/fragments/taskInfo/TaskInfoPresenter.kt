@@ -6,7 +6,6 @@ import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.TaskItemModel
-import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 import ru.relabs.kurjercontroller.ui.fragments.TaskItemExplanationScreen
 
 class TaskInfoPresenter(val fragment: TaskInfoFragment) {
@@ -18,7 +17,7 @@ class TaskInfoPresenter(val fragment: TaskInfoFragment) {
 
     fun onExamineClicked() {
         bgScope.launch {
-            application().tasksRepository.examineTask(fragment.task)
+            application().tasksRepository.examineTaskStatus(fragment.task)
             withContext(Dispatchers.Main){
                 application().router.exit()
             }

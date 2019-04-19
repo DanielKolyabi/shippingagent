@@ -49,6 +49,7 @@ class AddressListFragment : Fragment() {
         }else{
             presenter.bgScope.launch {
                 presenter.applySorting()
+                presenter.checkTasks()
             }
         }
     }

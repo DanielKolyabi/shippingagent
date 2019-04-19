@@ -2,11 +2,23 @@ package ru.relabs.kurjercontroller.network
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.net.Uri
 import android.net.wifi.WifiManager
 import android.provider.Settings
 import android.util.Log
+import android.webkit.MimeTypeMap
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import ru.relabs.kurjercontroller.database.entities.EntrancePhotoEntity
+import ru.relabs.kurjercontroller.database.entities.EntranceReportEntity
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
+import ru.relabs.kurjercontroller.logError
+import ru.relabs.kurjercontroller.network.DeliveryServerAPI.api
+import ru.relabs.kurjercontroller.network.models.PhotoReportModel
+import ru.relabs.kurjercontroller.network.models.TaskItemReportModel
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -83,5 +95,57 @@ object NetworkHelper {
 
 
         return file
+    }
+
+
+    suspend fun sendReport(data: EntranceReportEntity, photos: List<EntrancePhotoEntity>): Boolean {
+
+        val photosMap = mutableMapOf<String, PhotoReportModel>()
+        val photoParts = mutableListOf<MultipartBody.Part>()
+
+        var imgCount = 0
+        photos.forEachIndexed { i, photo ->
+            try {
+                photoParts.add(photoEntityToPart("img_$imgCount", data, photo))
+                photosMap["img_$imgCount"] = PhotoReportModel("", photo.gps)
+                imgCount++
+            } catch (e: Throwable) {
+                e.logError()
+            }
+        }
+
+        val reportObject = TaskItemReportModel(
+            data.taskItemId, data.idnd, data.entranceNumber,
+            data.startAppartaments, data.endAppartaments, data.floors,
+            data.description, data.code, data.key,
+            data.euroKey, data.isDeliveryWrong, data.hasLookupPost,
+            data.token, data.apartmentResult, data.closeTime,
+            photosMap
+        )
+
+        return api.sendTaskReport(data.taskItemId, data.token, reportObject, photoParts).await().status
+    }
+
+    private fun photoEntityToPart(
+        partName: String,
+        reportEnt: EntranceReportEntity,
+        photoEnt: EntrancePhotoEntity
+    ): MultipartBody.Part {
+        val photoFile = PathHelper.getEntrancePhotoFileByID(
+            reportEnt.taskItemId,
+            photoEnt.entranceNumber,
+            photoEnt.UUID
+        )
+        if (!photoFile.exists()) {
+            throw FileNotFoundException(photoFile.path)
+        }
+        val extension = Uri.fromFile(photoFile).toString().split(".").last()
+        val mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+
+        val requestFile = RequestBody.create(
+            MediaType.parse(mime),
+            photoFile
+        )
+        return MultipartBody.Part.createFormData(partName, photoFile.name, requestFile)
     }
 }

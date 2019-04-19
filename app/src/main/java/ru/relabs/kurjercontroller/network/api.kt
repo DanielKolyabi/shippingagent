@@ -4,6 +4,7 @@ import com.google.gson.GsonBuilder
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import kotlinx.coroutines.Deferred
 import okhttp3.Interceptor
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
@@ -13,6 +14,7 @@ import retrofit2.http.*
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.network.models.AuthResponseModel
 import ru.relabs.kurjercontroller.network.models.StatusResponse
+import ru.relabs.kurjercontroller.network.models.TaskItemReportModel
 import ru.relabs.kurjercontroller.network.models.TaskResponseModel
 import java.util.concurrent.TimeUnit
 
@@ -95,6 +97,11 @@ object DeliveryServerAPI {
 
         @POST("api/v1/coords")
         fun sendGPS(@Query("token") token: String, @Query("lat") lat: Double, @Query("long") long: Double, @Query("time") time: String): Deferred<StatusResponse>
+
+        @POST("api/v1/tasks/{id}/report")
+        @Multipart
+        fun sendTaskReport(@Path("id") taskItemId: Int, @Query("token") token: String, @Part("data") data: TaskItemReportModel, @Part photos: List<MultipartBody.Part>): Deferred<StatusResponse>
+
     }
 
     val api = retrofit.create(IDeliveryServerAPI::class.java)
