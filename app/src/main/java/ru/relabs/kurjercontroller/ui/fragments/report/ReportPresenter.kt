@@ -16,6 +16,7 @@ import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
 import ru.relabs.kurjercontroller.models.EntrancePhotoModel
 import ru.relabs.kurjercontroller.ui.activities.showError
+import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportPhotosListModel
 import java.io.File
@@ -255,6 +256,28 @@ class ReportPresenter(val fragment: ReportFragment) {
 
         bgScope.launch {
             application().tasksRepository.saveApartmentResult(fragment.taskItem, fragment.entrance, newItem)
+        }
+    }
+
+    fun onDeliveryWrongChanged() {
+        fragment.deliveryWrong = !fragment.deliveryWrong
+        fragment.layout_error_button?.setSelectButtonActive(fragment.deliveryWrong)
+        bgScope.launch {
+            application().tasksRepository.insertEntranceResult(fragment.taskItem, fragment.entrance, isDeliveryWrong = fragment.deliveryWrong)
+        }
+    }
+
+    fun onLookupChanged() {
+        fragment.hasLookup = !fragment.hasLookup
+        fragment.lookout?.setSelectButtonActive(fragment.hasLookup)
+        bgScope.launch {
+            application().tasksRepository.insertEntranceResult(fragment.taskItem, fragment.entrance, hasLookupPost = fragment.hasLookup)
+        }
+    }
+
+    fun onEntranceKeyChanged(key: String) {
+        bgScope.launch {
+            application().tasksRepository.insertEntranceResult(fragment.taskItem, fragment.entrance, key = key)
         }
     }
 

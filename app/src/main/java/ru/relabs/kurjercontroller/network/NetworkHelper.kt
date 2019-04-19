@@ -115,12 +115,12 @@ object NetworkHelper {
         }
 
         val reportObject = TaskItemReportModel(
-            data.taskItemId, data.idnd, data.entranceNumber,
+            data.taskId, data.taskItemId, data.idnd, data.entranceNumber,
             data.startAppartaments, data.endAppartaments, data.floors,
             data.description, data.code, data.key,
             data.euroKey, data.isDeliveryWrong, data.hasLookupPost,
             data.token, data.apartmentResult, data.closeTime,
-            photosMap
+            photosMap, data.publisherId
         )
 
         return api.sendTaskReport(data.taskItemId, data.token, reportObject, photoParts).await().status

@@ -7,6 +7,7 @@ import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.ReportService
+import ru.relabs.kurjercontroller.application
 
 class SplashActivity : AppCompatActivity() {
 

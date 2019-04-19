@@ -10,8 +10,8 @@ import ru.relabs.kurjercontroller.database.entities.EntranceEntity
 
 data class EntranceModel(
     val number: Int,
-    val availableEuroKeys: List<String>,
-    val availableKeys: List<String>,
+    val euroKey: String,
+    val key: String,
     val code: String,
     val startApartments: Int,
     val endApartments: Int,
@@ -21,8 +21,8 @@ data class EntranceModel(
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
-        parcel.createStringArrayList().orEmpty(),
-        parcel.createStringArrayList().orEmpty(),
+        parcel.readString().orEmpty(),
+        parcel.readString().orEmpty(),
         parcel.readString().orEmpty(),
         parcel.readInt(),
         parcel.readInt(),
@@ -34,8 +34,8 @@ data class EntranceModel(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(number)
-        parcel.writeStringList(availableEuroKeys)
-        parcel.writeStringList(availableKeys)
+        parcel.writeString(euroKey)
+        parcel.writeString(key)
         parcel.writeString(code)
         parcel.writeInt(startApartments)
         parcel.writeInt(endApartments)
@@ -53,8 +53,8 @@ data class EntranceModel(
             id = 0,
             taskItemId = taskItemId,
             state = state,
-            availableEuroKeys = availableEuroKeys,
-            availableKeys = availableKeys,
+            euroKey = euroKey,
+            key = key,
             code = code,
             endApartments = endApartments,
             floors = floors,

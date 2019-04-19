@@ -36,7 +36,7 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
             selectedTask.first,
             selectedTask.second,
             { task, taskItem, entrance ->
-                onEntranceClosed(taskItem, entrance)
+                onEntranceClosed(task, taskItem, entrance)
             },
             manager
         )
@@ -44,15 +44,17 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
         fragment.view_pager?.currentItem = 0
     }
 
-    private fun onEntranceClosed(taskItem: TaskItemModel, entrance: EntranceModel) {
+    private fun onEntranceClosed(task: TaskModel, taskItem: TaskItemModel, entrance: EntranceModel) {
         bgScope.launch {
             var shouldRefreshUI = true
 
-            application().tasksRepository.saveTaskReport(taskItem, entrance)
+            application().tasksRepository.saveTaskReport(
+                taskItem,
+                entrance,
+                task.publishers.first { it.name == taskItem.publisherName })
+
             application().tasksRepository.closeEntrance(taskItem.id, entrance.number)
 
-            //TODO: Если все падики закрыты - удалить Task, TaskItem, обновить список таск
-            //TODO: Если таск не осталось - вернуться на AddressScreen
             val idx = fragment.taskItems.indexOfFirst {
                 it.entrances.contains(entrance)
             }

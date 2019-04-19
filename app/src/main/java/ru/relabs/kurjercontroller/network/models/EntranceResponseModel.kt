@@ -5,10 +5,10 @@ import ru.relabs.kurjercontroller.models.EntranceModel
 
 data class EntranceResponseModel(
     val number: Int,
-    @SerializedName("available_euro_keys")
-    val availableEuroKeys: List<String>,
-    @SerializedName("available_keys")
-    val availableKeys: List<String>,
+    @SerializedName("euro_key")
+    val euroKey: String,
+    @SerializedName("key")
+    val key: String,
     val code: String?,
     @SerializedName("start_appartaments")
     val startAppartaments: Int,
@@ -29,8 +29,8 @@ data class EntranceResponseModel(
             floors = floors,
             endApartments = endAppartaments,
             code = code.orEmpty(),
-            availableKeys = availableKeys,
-            availableEuroKeys = availableEuroKeys
+            key = key,
+            euroKey = euroKey
         )
     }
 

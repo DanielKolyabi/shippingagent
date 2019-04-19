@@ -13,6 +13,8 @@ import ru.relabs.kurjercontroller.database.models.ApartmentResult
 data class EntranceReportEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
+    @ColumnInfo(name = "task_id")
+    val taskId: Int,
     @ColumnInfo(name = "task_item_id")
     val taskItemId: Int, //iddot
     val idnd: Int,
@@ -36,5 +38,7 @@ data class EntranceReportEntity(
     @ColumnInfo(name = "apartment_results")
     val apartmentResult: List<ApartmentResult>,
     @ColumnInfo(name = "close_time")
-    val closeTime: DateTime
+    val closeTime: DateTime,
+    @ColumnInfo(name = "publisher_id")
+    val publisherId: Int
 )

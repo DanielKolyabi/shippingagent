@@ -24,9 +24,9 @@ data class EntranceEntity(
     @ColumnInfo(name = "end_apartments")
     val endApartments: Int,
     @ColumnInfo(name = "available_keys")
-    val availableKeys: List<String>,
+    val key: String,
     @ColumnInfo(name = "available_euro_keys")
-    val availableEuroKeys: List<String>,
+    val euroKey: String,
     val code: String,
     val floors: Int,
     @ColumnInfo(name = "mailbox_type")
@@ -36,8 +36,8 @@ data class EntranceEntity(
     fun toModel(): EntranceModel {
         return EntranceModel(
             number = number,
-            availableEuroKeys = availableEuroKeys,
-            availableKeys = availableKeys,
+            euroKey = euroKey,
+            key = key,
             state = state,
             code = code,
             endApartments = endApartments,

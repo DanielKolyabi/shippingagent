@@ -1,6 +1,6 @@
 package ru.relabs.kurjercontroller.network
 
-import com.google.gson.GsonBuilder
+import com.google.gson.*
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import kotlinx.coroutines.Deferred
 import okhttp3.Interceptor
@@ -8,6 +8,7 @@ import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
+import org.joda.time.DateTime
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
@@ -16,6 +17,7 @@ import ru.relabs.kurjercontroller.network.models.AuthResponseModel
 import ru.relabs.kurjercontroller.network.models.StatusResponse
 import ru.relabs.kurjercontroller.network.models.TaskItemReportModel
 import ru.relabs.kurjercontroller.network.models.TaskResponseModel
+import java.lang.reflect.Type
 import java.util.concurrent.TimeUnit
 
 
@@ -60,6 +62,20 @@ object DeliveryServerAPI {
 
     var gson = GsonBuilder()
         .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+        .registerTypeAdapter(DateTime::class.java, object : JsonSerializer<DateTime> {
+            override fun serialize(src: DateTime?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement {
+                return JsonPrimitive(src?.millis)
+            }
+        })
+        .registerTypeAdapter(DateTime::class.java, object : JsonDeserializer<DateTime> {
+            override fun deserialize(
+                json: JsonElement?,
+                typeOfT: Type?,
+                context: JsonDeserializationContext?
+            ): DateTime {
+                return DateTime(json?.asLong)
+            }
+        })
         .create()
 
     private val retrofit = Retrofit.Builder()
@@ -84,7 +100,8 @@ object DeliveryServerAPI {
 
         @GET("api/v1/controller/tasks")
         fun getTasks(@Query("token") token: String, @Query("current_time") currentTime: String): Deferred<List<TaskResponseModel>>
-//
+
+        //
 //        @POST("api/v1/tasks/{id}/report")
 //        @Multipart
 //        fun sendTaskReport(@Path("id") taskItemId: Int, @Query("token") token: String, @Part("data") data: TaskItemReportModel, @Part photos: List<MultipartBody.Part>): Deferred<StatusResponse>
@@ -98,9 +115,12 @@ object DeliveryServerAPI {
         @POST("api/v1/coords")
         fun sendGPS(@Query("token") token: String, @Query("lat") lat: Double, @Query("long") long: Double, @Query("time") time: String): Deferred<StatusResponse>
 
-        @POST("api/v1/tasks/{id}/report")
+        @POST("api/v1/controller/tasks/{id}/report")
         @Multipart
         fun sendTaskReport(@Path("id") taskItemId: Int, @Query("token") token: String, @Part("data") data: TaskItemReportModel, @Part photos: List<MultipartBody.Part>): Deferred<StatusResponse>
+
+        @GET("api/v1/controller/keys")
+        fun getAvailableEntranceKeys(@Query("token") token: String): Deferred<List<String>>
 
     }
 

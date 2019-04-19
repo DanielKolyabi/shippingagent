@@ -125,6 +125,7 @@ class AddressListPresenter(val fragment: AddressListFragment) {
         closedTasks.forEach {
             if(it.state.toAndroidState() != TaskModel.COMPLETED){
                 application().tasksRepository.closeTaskStatus(it)
+                application().tasksRepository.closeTaskById(it.id)
             }
             fragment.tasks.remove(it)
         }

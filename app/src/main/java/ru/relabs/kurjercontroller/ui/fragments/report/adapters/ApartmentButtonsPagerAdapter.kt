@@ -4,11 +4,11 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.viewpager.widget.PagerAdapter
 import kotlinx.android.synthetic.main.holder_report_appartament_button_group_addition.view.*
 import kotlinx.android.synthetic.main.holder_report_appartament_button_group_main.view.*
 import ru.relabs.kurjercontroller.R
+import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
 
 /**
  * Created by ProOrange on 16.04.2019.
@@ -62,14 +62,6 @@ class ApartmentButtonsPagerAdapter(
         view.no_button?.setSelectButtonActive(state and 32 > 0)
 
         return view
-    }
-
-    private fun Button.setSelectButtonActive(active: Boolean) {
-        if (active) {
-            this.setBackgroundResource(R.drawable.abc_btn_colored_material)
-        } else {
-            this.setBackgroundResource(R.drawable.abc_btn_default_mtrl_shape)
-        }
     }
 
     override fun destroyItem(container: ViewGroup, position: Int, view: Any) {

@@ -7,21 +7,20 @@ import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.database.AppDatabase
-import ru.relabs.kurjercontroller.database.entities.ApartmentResultEntity
-import ru.relabs.kurjercontroller.database.entities.EntranceReportEntity
-import ru.relabs.kurjercontroller.database.entities.EntranceResultEntity
-import ru.relabs.kurjercontroller.database.entities.SendQueryItemEntity
+import ru.relabs.kurjercontroller.database.entities.*
 import ru.relabs.kurjercontroller.database.models.ApartmentResult
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
 import ru.relabs.kurjercontroller.models.*
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
+import ru.relabs.kurjercontroller.network.DeliveryServerAPI.api
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
-import java.util.*
 
 /**
  * Created by ProOrange on 11.04.2019.
  */
 class TaskRepository(val db: AppDatabase) {
+    private var availableEntranceKeys: List<String> = listOf()
+
     suspend fun loadRemoteTasks(token: String): List<TaskModel> = withContext(Dispatchers.IO) {
         return@withContext DeliveryServerAPI.api.getTasks(token, DateTime().toString("yyyy-MM-dd'T'HH:mm:ss")).await()
             .map { it.toModel() }
@@ -96,7 +95,7 @@ class TaskRepository(val db: AppDatabase) {
                         entity.state = EntranceModel.CLOSED
                     }
                     db.entranceDao().insert(entity)
-                    if (entrance.state == EntranceModel.CREATED) {
+                    if (entity.state == EntranceModel.CREATED) {
                         openedEntrances++
                     }
                 }
@@ -157,7 +156,7 @@ class TaskRepository(val db: AppDatabase) {
         return result
     }
 
-    suspend fun removeReport(db: AppDatabase, report: EntranceReportEntity) = withContext(Dispatchers.IO){
+    suspend fun removeReport(db: AppDatabase, report: EntranceReportEntity) = withContext(Dispatchers.IO) {
         db.entranceReportDao().delete(report)
         db.entrancePhotoDao().getEntrancePhoto(report.taskItemId, report.entranceNumber).forEach {
             //Delete photo
@@ -261,7 +260,9 @@ class TaskRepository(val db: AppDatabase) {
         code: String? = null,
         apartmentFrom: Int? = null,
         apartmentTo: Int? = null,
-        floors: Int? = null
+        floors: Int? = null,
+        key: String? = null,
+        euroKey: String? = null
     ) = withContext(Dispatchers.IO) {
         var saved = db.entranceResultDao().getByEntrance(taskItem.id, entrance.number)
         if (saved == null) {
@@ -276,7 +277,9 @@ class TaskRepository(val db: AppDatabase) {
                     code,
                     apartmentFrom,
                     apartmentTo,
-                    floors
+                    floors,
+                    key,
+                    euroKey
                 )
             )
             return@withContext
@@ -289,6 +292,8 @@ class TaskRepository(val db: AppDatabase) {
         if (apartmentFrom != null) saved = saved.copy(apartmentFrom = apartmentFrom)
         if (apartmentTo != null) saved = saved.copy(apartmentTo = apartmentTo)
         if (floors != null) saved = saved.copy(floors = floors)
+        if (key != null) saved = saved.copy(key = key)
+        if (euroKey != null) saved = saved.copy(euroKey = euroKey)
 
         db.entranceResultDao().update(saved)
     }
@@ -328,31 +333,47 @@ class TaskRepository(val db: AppDatabase) {
         }
     }
 
-    suspend fun saveTaskReport(taskItem: TaskItemModel, entrance: EntranceModel) = withContext(Dispatchers.IO) {
-        val entranceResult = loadEntranceResult(taskItem, entrance)
-        val apartmentResults = loadEntranceApartments(taskItem, entrance)
+    suspend fun saveTaskReport(taskItem: TaskItemModel, entrance: EntranceModel, publisher: PublisherModel) =
+        withContext(Dispatchers.IO) {
+            val entranceResult = loadEntranceResult(taskItem, entrance)
+            val apartmentResults = loadEntranceApartments(taskItem, entrance)
 
-        val report = EntranceReportEntity(
-            0,
-            taskItem.id,
-            taskItem.address.idnd,
-            entrance.number,
-            entranceResult?.apartmentFrom ?: entrance.startApartments,
-            entranceResult?.apartmentTo ?: entrance.endApartments,
-            entranceResult?.floors ?: entrance.floors,
-            entranceResult?.description ?: "",
-            entranceResult?.code ?: entrance.code,
-            "", //TODO: Key and euro-key
-            "",
-            entranceResult?.isDeliveryWrong ?: false,
-            entranceResult?.hasLookupPost ?: false,
-            application().user.getUserCredentials()?.token ?: "",
-            apartmentResults.map { ApartmentResult(it.number, it.state, it.buttonGroup) },
-            DateTime.now()
-        )
+            val report = EntranceReportEntity(
+                0,
+                taskItem.taskId,
+                taskItem.id,
+                taskItem.address.idnd,
+                entrance.number,
+                entranceResult?.apartmentFrom ?: entrance.startApartments,
+                entranceResult?.apartmentTo ?: entrance.endApartments,
+                entranceResult?.floors ?: entrance.floors,
+                entranceResult?.description ?: "",
+                entranceResult?.code ?: entrance.code,
+                entranceResult?.key ?: entrance.key,
+                entranceResult?.euroKey ?: entrance.euroKey,
+                entranceResult?.isDeliveryWrong ?: false,
+                entranceResult?.hasLookupPost ?: false,
+                application().user.getUserCredentials()?.token ?: "",
+                apartmentResults.map { ApartmentResult(it.number, it.state, it.buttonGroup) },
+                DateTime.now(),
+                publisher.id
+            )
 
-        db.entranceReportDao().insert(report)
-    }
+            db.entranceReportDao().insert(report)
+        }
+
+    suspend fun getAvailableEntranceKeys(token: String = "", withRefresh: Boolean = false): List<String> =
+        withContext(Dispatchers.IO) {
+            if (!withRefresh && availableEntranceKeys.isEmpty()) {
+                availableEntranceKeys = db.entranceKeysDao().all.map { it.key }
+            }
+            if (withRefresh || availableEntranceKeys.isEmpty()) {
+                availableEntranceKeys = api.getAvailableEntranceKeys(token).await()
+                db.entranceKeysDao().clear()
+                db.entranceKeysDao().insertAll(availableEntranceKeys.map{EntranceKeyEntity(0, it)})
+            }
+            return@withContext availableEntranceKeys
+        }
 
     data class MergeResult(
         var isTasksChanged: Boolean,

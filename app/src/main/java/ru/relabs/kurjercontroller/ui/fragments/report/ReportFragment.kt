@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,25 +16,28 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_report.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ApartmentDelegate
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ReportBlankMultiPhotoDelegate
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ReportBlankPhotoDelegate
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ReportPhotoDelegate
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportPhotosListModel
-import java.util.*
 
 /**
  * Created by ProOrange on 15.04.2019.
  */
 class ReportFragment : Fragment() {
 
+    var deliveryWrong: Boolean = false
+    var hasLookup: Boolean = false
     var apartmentAdapter = DelegateAdapter<ApartmentListModel>()
     val photosAdapter = DelegateAdapter<ReportPhotosListModel>()
 
@@ -51,11 +55,13 @@ class ReportFragment : Fragment() {
         keyAdapter = ArrayAdapter(
             context,
             android.R.layout.simple_spinner_item,
-            entrance.availableKeys.ifEmpty { listOf("нет") })
+            arrayListOf("загрузка")
+        )
         euroKeyAdapter = ArrayAdapter(
             context,
             android.R.layout.simple_spinner_item,
-            entrance.availableEuroKeys.ifEmpty { listOf("нет") })
+            arrayListOf("нет")
+        )
 
         //TODO: If apartments interval changed - refresh apartments list
         apartmentAdapter.addDelegate(
@@ -80,9 +86,9 @@ class ReportFragment : Fragment() {
 
         fillData()
         bindControl()
-        if(entrance.state == EntranceModel.CLOSED){
+        if (entrance.state == EntranceModel.CLOSED) {
             setControlsLocked(true)
-        }else{
+        } else {
             setControlsLocked(false)
         }
     }
@@ -131,13 +137,35 @@ class ReportFragment : Fragment() {
 
         presenter.bgScope.launch(Dispatchers.Main) {
             val saved = application().tasksRepository.loadEntranceResult(taskItem, entrance) ?: return@launch
+            val availableKeys = application().tasksRepository.getAvailableEntranceKeys()
+
+            keyAdapter?.clear()
+            keyAdapter?.addAll(availableKeys)
+            if (entrance.key.isNotBlank()) {
+                val key = saved.key ?: entrance.key
+                val pos = keyAdapter?.getPosition(key)
+                if (pos != null && pos >= 0) {
+                    entrance_key?.setSelection(pos)
+                }
+                withContext(Dispatchers.Main){
+                    keyAdapter?.notifyDataSetChanged()
+                }
+            }
+
 
             if (saved.apartmentFrom != null) appartaments_from?.setText(saved.apartmentFrom.toString())
             if (saved.apartmentTo != null) appartaments_to?.setText(saved.apartmentTo.toString())
             if (saved.code != null) entrance_code?.setText(saved.code.toString())
             if (saved.description != null) user_explanation_input?.setText(saved.description)
             if (saved.floors != null) floors?.setText(saved.floors.toString())
-            //TODO: Button states
+            if (saved.hasLookupPost != null) {
+                hasLookup = saved.hasLookupPost
+                lookout?.setSelectButtonActive(saved.hasLookupPost)
+            }
+            if (saved.isDeliveryWrong != null) {
+                deliveryWrong = saved.isDeliveryWrong
+                layout_error_button?.setSelectButtonActive(saved.isDeliveryWrong)
+            }
         }
 
         fillPhotosList()
@@ -184,10 +212,21 @@ class ReportFragment : Fragment() {
             callback?.onEntranceClosed(task, taskItem, entrance)
         }
 
+        entrance_key?.onItemSelectedListener = object: AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, pos: Int, p3: Long) {
+                keyAdapter?.getItem(pos)?.let{
+                    presenter.onEntranceKeyChanged(it)
+                }
+            }
+        }
+
         val listClickInterceptor = object : RecyclerView.OnItemTouchListener {
             override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
             override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
-            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean = entrance.state == EntranceModel.CLOSED
+            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean =
+                entrance.state == EntranceModel.CLOSED
         }
 
         photos_list.addOnItemTouchListener(listClickInterceptor)
@@ -238,6 +277,12 @@ class ReportFragment : Fragment() {
                 presenter.onFloorsChanged()
             }
         })
+        layout_error_button?.setOnClickListener {
+            presenter.onDeliveryWrongChanged()
+        }
+        lookout?.setOnClickListener {
+            presenter.onLookupChanged()
+        }
     }
 
     override fun onCreateView(

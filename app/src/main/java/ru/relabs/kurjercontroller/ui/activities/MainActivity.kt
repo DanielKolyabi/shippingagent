@@ -16,10 +16,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
-import ru.relabs.kurjercontroller.CustomLog
-import ru.relabs.kurjercontroller.MyExceptionHandler
-import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.application
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import ru.relabs.kurjercontroller.*
 import ru.relabs.kurjercontroller.application.MyApplication
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.ISearchableFragment
@@ -40,6 +39,8 @@ import ru.terrakok.cicerone.commands.Command
 
 
 class MainActivity : AppCompatActivity() {
+    val bgScope = CancelableScope(Dispatchers.Main)
+
     private val navigator = object : SupportAppNavigator(this, supportFragmentManager, R.id.fragment_container) {
 
         override fun setupFragmentTransaction(

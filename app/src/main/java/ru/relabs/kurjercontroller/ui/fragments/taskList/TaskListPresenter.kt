@@ -6,6 +6,7 @@ import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.models.toAndroidState
 import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.fragments.AddressListScreen
 import ru.relabs.kurjercontroller.ui.fragments.TaskInfoScreen
@@ -105,7 +106,9 @@ class TaskListPresenter(val fragment: TaskListFragment) {
 
     suspend fun loadTasks() = withContext(Dispatchers.IO) {
         fragment.showLoading(true)
-        fragment.populateTaskList(application().tasksRepository.getTasks())
+        fragment.populateTaskList(application().tasksRepository.getTasks().filter{
+            it.state.toAndroidState() != TaskModel.COMPLETED && it.state.toAndroidState() != TaskModel.CANCELED
+        })
         fragment.showLoading(false)
 
         withContext(Dispatchers.Main) { updateStartButton() }

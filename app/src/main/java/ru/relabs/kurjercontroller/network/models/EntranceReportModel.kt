@@ -13,6 +13,8 @@ import java.util.*
  */
 
 data class TaskItemReportModel(
+    @SerializedName("task_id")
+    val taskId: Int,
     @SerializedName("task_item_id")
     val taskItemId: Int, //iddot
     val idnd: Int,
@@ -37,7 +39,9 @@ data class TaskItemReportModel(
     val apartmentResult: List<ApartmentResult>,
     @SerializedName("close_time")
     val closeTime: DateTime,
-    val photos: Map<String, PhotoReportModel>
+    val photos: Map<String, PhotoReportModel>,
+    @SerializedName("publisher_id")
+    val publisherId: Int
 )
 
 data class PhotoReportModel(
