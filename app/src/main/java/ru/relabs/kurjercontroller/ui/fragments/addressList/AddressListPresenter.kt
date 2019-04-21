@@ -10,6 +10,7 @@ import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.models.toAndroidState
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
+import ru.relabs.kurjercontroller.ui.activities.showErrorSuspend
 import ru.relabs.kurjercontroller.ui.fragments.ReportScreen
 import ru.relabs.kurjercontroller.ui.fragments.YandexMapScreen
 import ru.relabs.kurjercontroller.ui.helpers.TaskAddressSorter
@@ -103,7 +104,7 @@ class AddressListPresenter(val fragment: AddressListFragment) {
             applySorting()
 
             if (fragment.tasks.isEmpty()) {
-                fragment.context?.showError("Что-то сломалось :(", object : ErrorButtonsListener {
+                fragment.context?.showErrorSuspend("Что-то сломалось :(", object : ErrorButtonsListener {
                     override fun positiveListener() {
                         application().router.exit()
                     }

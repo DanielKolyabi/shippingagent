@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Контроллер</string>
+    <string name="app_name">Контролер</string>
     <string name="text_font">sans-serif-medium</string>
 
     <string name="app_version_label">Версия: %d</string>

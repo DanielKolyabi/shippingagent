@@ -18,6 +18,7 @@ import ru.relabs.kurjercontroller.network.NetworkHelper
 import ru.relabs.kurjercontroller.network.models.ErrorUtils
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
+import ru.relabs.kurjercontroller.ui.activities.showErrorSuspend
 import ru.relabs.kurjercontroller.ui.fragments.TaskListScreen
 
 /**
@@ -49,7 +50,7 @@ class LoginPresenter(val fragment: LoginFragment) {
             return@launch
         }
 
-        bgScope.launch(Dispatchers.Main) {
+        bgScope.launch(Dispatchers.Default) {
             fragment.setLoginButtonLoading(true)
 
             val sharedPref = application().getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
@@ -63,7 +64,7 @@ class LoginPresenter(val fragment: LoginFragment) {
                     api.loginByToken(pwd, application().deviceUUID, time).await()
 
                 if (response.error != null) {
-                    fragment.activity()?.showError("Ошибка №${response.error.code}\n${response.error.message}")
+                    fragment.activity()?.showErrorSuspend("Ошибка №${response.error.code}\n${response.error.message}")
                     return@launch
                 }
 
@@ -102,7 +103,7 @@ class LoginPresenter(val fragment: LoginFragment) {
                 }
 
                 val err = ErrorUtils.getError(e)
-                fragment.activity()?.showError("Ошибка №${err.code}.\n${err.message}")
+                fragment.activity()?.showErrorSuspend("Ошибка №${err.code}.\n${err.message}")
             } catch (e: Exception) {
                 e.printStackTrace()
                 showOfflineLoginOffer()
@@ -131,7 +132,7 @@ class LoginPresenter(val fragment: LoginFragment) {
     }
 
     suspend fun showOfflineLoginOffer() = withContext(Dispatchers.Main) {
-        fragment.activity?.showError(
+        fragment.activity?.showErrorSuspend(
             "Нет ответа от сервера.",
             object : ErrorButtonsListener {
                 override fun negativeListener() {

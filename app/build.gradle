@@ -4,14 +4,14 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    signingConfigs {
-        config {
-            keyAlias 'kurjer'
-            keyPassword '1qazxsw2'
-            storeFile file('H:/BackupsWindowsReinstall/work/DeliveryManProject/android_deliveryman_client/2017abix.dat')
-            storePassword '1qazxsw2'
-        }
-    }
+//    signingConfigs {
+//        config {
+//            keyAlias 'kurjer'
+//            keyPassword '1qazxsw2'
+//            storeFile file('H:/BackupsWindowsReinstall/work/DeliveryManProject/android_deliveryman_client/2017abix.dat')
+//            storePassword '1qazxsw2'
+//        }
+//    }
     compileSdkVersion 28
     defaultConfig {
         applicationId "ru.relabs.kurjercontroller"
@@ -23,16 +23,16 @@ android {
     }
     buildTypes {
         debug {
-            buildConfigField("String", "API_URL", '"http://192.168.250.176:8081"')
+            buildConfigField("String", "API_URL", '"http://warp.courr.ru:8084"')
             buildConfigField("String", "YA_KEY", '"9be78b32-1265-4157-bf15-999b8d747a5c"')
-            signingConfig signingConfigs.config
+//            signingConfig signingConfigs.config
         }
         release {
             buildConfigField("String", "API_URL", '"https://courrmobileapi.courr.ru"')
             buildConfigField("String", "YA_KEY", '"9be78b32-1265-4157-bf15-999b8d747a5c"')
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.config
+//            signingConfig signingConfigs.config
         }
     }
 }

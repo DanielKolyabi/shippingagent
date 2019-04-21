@@ -8,6 +8,7 @@ import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.models.toAndroidState
 import ru.relabs.kurjercontroller.ui.activities.showError
+import ru.relabs.kurjercontroller.ui.activities.showErrorSuspend
 import ru.relabs.kurjercontroller.ui.fragments.AddressListScreen
 import ru.relabs.kurjercontroller.ui.fragments.TaskInfoScreen
 
@@ -106,7 +107,7 @@ class TaskListPresenter(val fragment: TaskListFragment) {
 
     suspend fun loadTasks() = withContext(Dispatchers.IO) {
         fragment.showLoading(true)
-        fragment.populateTaskList(application().tasksRepository.getTasks().filter{
+        fragment.populateTaskList(application().tasksRepository.getTasks().filter {
             it.state.toAndroidState() != TaskModel.COMPLETED && it.state.toAndroidState() != TaskModel.CANCELED
         })
         fragment.showLoading(false)
@@ -117,7 +118,7 @@ class TaskListPresenter(val fragment: TaskListFragment) {
     suspend fun performNetworkUpdate() = withContext(Dispatchers.IO) {
         val user = application().user.getUserCredentials()
         if (user == null) {
-            fragment.context?.showError("Что-то пошло не так. Перезагрузите приложение.")
+            fragment.context?.showErrorSuspend("Что-то пошло не так. Перезагрузите приложение.")
             return@withContext
         }
         if (networkUpdateStarted) {
@@ -129,7 +130,7 @@ class TaskListPresenter(val fragment: TaskListFragment) {
         val tasks = try {
             application().tasksRepository.loadRemoteTasks(user.token)
         } catch (e: Exception) {
-            fragment.context?.showError("Не удалось получить список заданий.")
+            fragment.context?.showErrorSuspend("Не удалось получить список заданий.")
             networkUpdateStarted = false
             return@withContext
         }
@@ -138,12 +139,10 @@ class TaskListPresenter(val fragment: TaskListFragment) {
         networkUpdateStarted = false
         loadTasks()
 
-        if (mergeResult.isTasksChanged) {
-            fragment.context?.showError("Задания были обновлены.")
-        } else if (mergeResult.isNewTasksAdded) {
-            fragment.context?.showError("Обновление прошло успешно.")
-        } else {
-            fragment.context?.showError("Нет новых заданий.")
+        when {
+            mergeResult.isTasksChanged -> fragment.context?.showErrorSuspend("Задания были обновлены.")
+            mergeResult.isNewTasksAdded -> fragment.context?.showErrorSuspend("Обновление прошло успешно.")
+            else -> fragment.context?.showErrorSuspend("Нет новых заданий.")
         }
     }
 

@@ -2,6 +2,8 @@ package ru.relabs.kurjercontroller.ui.activities
 
 import android.content.Context
 import androidx.appcompat.app.AlertDialog
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.CustomLog
 
 /**
@@ -11,6 +13,15 @@ import ru.relabs.kurjercontroller.CustomLog
 interface ErrorButtonsListener {
     fun positiveListener()
     fun negativeListener()
+}
+
+suspend fun Context.showErrorSuspend(
+    errorMessage: String,
+    listener: ErrorButtonsListener? = null,
+    forcePositiveButtonName: String = "Ок",
+    forceNegativeButtonName: String = "",
+    cancelable: Boolean = false) = withContext(Dispatchers.Main){
+    this@showErrorSuspend.showError(errorMessage, listener, forcePositiveButtonName, forceNegativeButtonName, cancelable)
 }
 
 fun Context.showError(
