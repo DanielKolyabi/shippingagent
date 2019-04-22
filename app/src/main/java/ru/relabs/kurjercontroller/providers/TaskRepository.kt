@@ -56,7 +56,11 @@ class TaskRepository(val db: AppDatabase) {
     suspend fun closeTaskStatus(task: TaskModel): TaskModel = taskChangeStatus(task, TaskModel.COMPLETED)
 
     suspend fun mergeTasks(newTasks: List<TaskModel>): MergeResult = withContext(Dispatchers.IO) {
-        val result = merge(newTasks) { receiveTaskStatus(it) }
+        val result = merge(newTasks) {
+            if(it.state.toAndroidState() == TaskModel.CREATED){
+                receiveTaskStatus(it)
+            }
+        }
         return@withContext result
     }
 

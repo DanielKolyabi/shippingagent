@@ -245,12 +245,12 @@ class ReportPresenter(val fragment: ReportFragment) {
         }
     }
 
-    fun onApartmentButtonStateChanged(apartment: Int, change: Int) {
+    fun onApartmentButtonStateChanged(apartment: Int, newState: Int) {
         val index = fragment.apartmentAdapter.data.indexOfFirst {
             (it as? ApartmentListModel.Apartment)?.number == apartment
         }
         val item = fragment.apartmentAdapter.data[index] as ApartmentListModel.Apartment
-        val newItem = item.copy(state = item.state xor change)
+        val newItem = item.copy(state = newState)
         fragment.apartmentAdapter.data[index] = newItem
         fragment.apartmentAdapter.notifyItemChanged(index)
 

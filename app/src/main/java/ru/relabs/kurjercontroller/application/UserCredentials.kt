@@ -7,7 +7,7 @@ import ru.relabs.kurjercontroller.BuildConfig
  * Created by ProOrange on 18.03.2019.
  */
 class UserCredentials(val application: MyApplication) {
-    private var user: UserModel = UserModel.Unauthorized
+    var user: UserModel = UserModel.Unauthorized
 
     fun storeUserCredentials() {
         if (user !is UserModel.Authorized) return
@@ -19,8 +19,15 @@ class UserCredentials(val application: MyApplication) {
     }
 
     fun getUserCredentials(): UserModel.Authorized? {
-        val login = application.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE).getString("login", "-unknw")
-        val token = application.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE).getString("token", "-unknw")
+        user.let {
+            if (it is UserModel.Authorized) {
+                return it
+            }
+        }
+        val login = application.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
+            .getString("login", "-unknw")
+        val token = application.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
+            .getString("token", "-unknw")
         if (token == "-unknw") {
             return null
         }
@@ -36,7 +43,7 @@ class UserCredentials(val application: MyApplication) {
     }
 
     fun setUser(user: UserModel.Authorized?) {
-        if(user == null){
+        if (user == null) {
             this.user = UserModel.Unauthorized
             return
         }

@@ -2,7 +2,7 @@
     <string name="app_name">Контролер</string>
     <string name="text_font">sans-serif-medium</string>
 
-    <string name="app_version_label">Версия: %d</string>
+    <string name="app_version_label">Версия: %s</string>
     <string name="login_placeholder">Логин</string>
     <string name="password_placeholder">Пароль</string>
     <string name="remember_password">Запомнить пароль</string>

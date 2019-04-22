@@ -5,23 +5,23 @@
                                                    android:layout_height="match_parent">
 
     <Button
-            android:id="@+id/regular_button"
+            android:id="@+id/yes_button_main"
             android:layout_width="70dp"
             android:layout_height="40dp"
             android:textAllCaps="false"
-            app:layout_constraintEnd_toStartOf="@+id/not_regular_button"
+            app:layout_constraintEnd_toStartOf="@+id/not_regular_button_main"
             android:text="@string/regular"/>
 
     <Button
-            android:id="@+id/not_regular_button"
+            android:id="@+id/not_regular_button_main"
             android:layout_width="70dp"
             android:layout_height="40dp"
-            app:layout_constraintEnd_toStartOf="@id/not_confirmed_button"
+            app:layout_constraintEnd_toStartOf="@id/no_button_main"
             android:textAllCaps="false"
             android:text="@string/not_regular"/>
 
     <Button
-            android:id="@+id/not_confirmed_button"
+            android:id="@+id/no_button_main"
             android:layout_width="70dp"
             android:layout_height="40dp"
             app:layout_constraintEnd_toStartOf="@id/broken_button_main"

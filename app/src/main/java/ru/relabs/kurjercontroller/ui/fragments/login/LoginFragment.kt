@@ -38,7 +38,7 @@ class LoginFragment : Fragment() {
 
         bindListeners()
         presenter.setRememberPasswordEnabled(true)
-        app_version.text = resources.getString(R.string.app_version_label, BuildConfig.VERSION_CODE)
+        app_version.text = resources.getString(R.string.app_version_label, BuildConfig.VERSION_NAME)
     }
 
     fun bindListeners() {

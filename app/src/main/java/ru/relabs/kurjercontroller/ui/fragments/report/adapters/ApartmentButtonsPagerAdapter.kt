@@ -28,38 +28,58 @@ class ApartmentButtonsPagerAdapter(
 
         val view = LayoutInflater.from(context).inflate(layout, container, false)
         container.addView(view)
+
         if (position == 0) {
-            view.regular_button?.setOnClickListener {
-                onStateChanged(1)
+            view.yes_button_main?.setOnClickListener {
+                state = state xor 1
+                if(state and 4 > 0){
+                    state = state xor 4
+                }
+                onStateChanged(state)
             }
-            view.not_regular_button?.setOnClickListener {
-                onStateChanged(2)
+            view.not_regular_button_main?.setOnClickListener {
+                state = state xor 2
+                onStateChanged(state)
             }
-            view.not_confirmed_button?.setOnClickListener {
-                onStateChanged(4)
+            view.no_button_main?.setOnClickListener {
+                state = state xor 4
+                if(state and 1 > 0){
+                    state = state xor 1
+                }
+                onStateChanged(state)
             }
             view.broken_button_main?.setOnClickListener {
-                onStateChanged(8)
+                state = state xor 8
+                onStateChanged(state)
             }
         } else {
-            view.yes_button?.setOnClickListener {
-                onStateChanged(16)
+            view.yes_button_addition?.setOnClickListener {
+                state = state xor 16
+                if(state and 32 > 0){
+                    state = state xor 32
+                }
+                onStateChanged(state)
             }
-            view.no_button?.setOnClickListener {
-                onStateChanged(32)
+            view.no_button_addition?.setOnClickListener {
+                state = state xor 32
+                if(state and 16 > 0){
+                    state = state xor 16
+                }
+                onStateChanged(state)
             }
             view.broken_button_addition?.setOnClickListener {
-                onStateChanged(8)
+                state = state xor 8
+                onStateChanged(state)
             }
         }
 
-        view.regular_button?.setSelectButtonActive(state and 1 > 0)
-        view.not_regular_button?.setSelectButtonActive(state and 2 > 0)
-        view.not_confirmed_button?.setSelectButtonActive(state and 4 > 0)
+        view.yes_button_main?.setSelectButtonActive(state and 1 > 0)
+        view.not_regular_button_main?.setSelectButtonActive(state and 2 > 0)
+        view.no_button_main?.setSelectButtonActive(state and 4 > 0)
         view.broken_button_main?.setSelectButtonActive(state and 8 > 0)
         view.broken_button_addition?.setSelectButtonActive(state and 8 > 0)
-        view.yes_button?.setSelectButtonActive(state and 16 > 0)
-        view.no_button?.setSelectButtonActive(state and 32 > 0)
+        view.yes_button_addition?.setSelectButtonActive(state and 16 > 0)
+        view.no_button_addition?.setSelectButtonActive(state and 32 > 0)
 
         return view
     }

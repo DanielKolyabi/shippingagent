@@ -69,8 +69,8 @@ class ReportFragment : Fragment() {
                 { apartment, buttonGroup ->
                     presenter.onApartmentButtonGroupChanged(apartment, buttonGroup)
                 },
-                { apartment, change ->
-                    presenter.onApartmentButtonStateChanged(apartment, change)
+                { apartment, newState ->
+                    presenter.onApartmentButtonStateChanged(apartment, newState)
                 }
             )
         )

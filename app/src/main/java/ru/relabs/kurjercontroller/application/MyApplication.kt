@@ -8,6 +8,7 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.os.StrictMode
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.room.Room
 import com.google.firebase.iid.FirebaseInstanceId
@@ -21,7 +22,10 @@ import ru.relabs.kurjercontroller.providers.interfaces.ITaskRepository
 import ru.terrakok.cicerone.Cicerone
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.Router
+import java.lang.Math.sqrt
 import java.util.*
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 /**
  * Created by ProOrange on 18.03.2019.
