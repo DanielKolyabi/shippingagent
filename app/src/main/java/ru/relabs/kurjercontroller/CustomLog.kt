@@ -46,7 +46,7 @@ object CustomLog {
         context.startActivity(intent)
     }
 
-    fun writeToFile(currentStacktrace: String) {
+    fun writeToFile(message: String) {
         try {
 
             //Gets the Android external storage directory & Create new folder Crash_Reports
@@ -63,7 +63,7 @@ object CustomLog {
             val reportFile = File(dir, CRASH_FILENAME)
             val fileWriter = FileWriter(reportFile, true)
             fileWriter.append("\n${DateTime().toString("yyyy-MM-dd'T'HH:mm:ss")} Ver.${BuildConfig.VERSION_NAME}:\n")
-            fileWriter.append(currentStacktrace)
+            fileWriter.append(message)
             fileWriter.flush()
             fileWriter.close()
 

@@ -54,7 +54,19 @@ class AddressListPresenter(val fragment: AddressListFragment) {
     }
 
     fun onCloseTaskClicked() {
-        //TODO close task if all required taskItems closed. Send status to sirius
+        if (fragment.tasks.size != 1) {
+            fragment.context?.showError("Что-то пошло не так. Не можем закрыть задание.")
+            fragment.updateCloseTaskButtonVisibility()
+            return
+        }
+
+        bgScope.launch(Dispatchers.IO) {
+            fragment.showLoading(true)
+            application().tasksRepository.closeTaskStatus(fragment.tasks.first())
+            withContext(Dispatchers.Main) {
+                application().router.exit()
+            }
+        }
     }
 
     suspend fun applySorting() = withContext(Dispatchers.IO) {
@@ -124,7 +136,7 @@ class AddressListPresenter(val fragment: AddressListFragment) {
             }
         }
         closedTasks.forEach {
-            if(it.state.toAndroidState() != TaskModel.COMPLETED){
+            if (it.state.toAndroidState() != TaskModel.COMPLETED) {
                 application().tasksRepository.closeTaskStatus(it)
                 application().tasksRepository.closeTaskById(it.id)
             }

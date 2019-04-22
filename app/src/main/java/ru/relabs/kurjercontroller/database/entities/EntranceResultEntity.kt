@@ -32,5 +32,7 @@ data class EntranceResultEntity(
     val floors: Int?,
     val key: String?,
     @ColumnInfo(name = "euro_key")
-    val euroKey: String?
+    val euroKey: String?,
+    @ColumnInfo(name = "mailbox_type")
+    val mailboxType: Int?
 )

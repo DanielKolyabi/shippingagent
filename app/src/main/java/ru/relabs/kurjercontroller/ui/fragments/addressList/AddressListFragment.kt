@@ -14,6 +14,7 @@ import kotlinx.coroutines.withContext
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListAddressDelegate
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListLoaderDelegate
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListSortingDelegate
@@ -43,6 +44,7 @@ class AddressListFragment : Fragment() {
         close_button?.setOnClickListener {
             presenter.onCloseTaskClicked()
         }
+        updateCloseTaskButtonVisibility()
 
         if (adapter.data.isEmpty()) {
             presenter.preloadTasks()
@@ -54,6 +56,10 @@ class AddressListFragment : Fragment() {
         }
     }
 
+
+    fun updateCloseTaskButtonVisibility(){
+        close_button.setVisible(tasks.size == 1)
+    }
 
     suspend fun showLoading(visible: Boolean) = withContext(Dispatchers.Main) {
         if (visible) {

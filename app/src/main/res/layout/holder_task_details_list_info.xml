@@ -68,7 +68,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:fontFamily="@string/text_font"
-            android:text="@string/control_dates_label"
+            android:text="@string/distribution_dates_label"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@+id/publisher_label"
             app:layout_constraintTop_toBottomOf="@id/control_dates_label"/>
@@ -78,10 +78,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
+            android:layout_marginTop="4dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/distribution_dates_label"
-            app:layout_constraintTop_toTopOf="@+id/distribution_dates_label"
-            tools:text="07.02.2018 - 11.02.2018"/>
+            app:layout_constraintStart_toStartOf="@id/distribution_dates_label"
+            app:layout_constraintTop_toBottomOf="@+id/distribution_dates_label"
+            tools:text="Вечерняя москва №2: 02.03.2019 - 04.12.2019"/>
 
 
     <TextView
@@ -93,7 +94,7 @@
             android:text="@string/storage_label"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@+id/publisher_label"
-            app:layout_constraintTop_toBottomOf="@id/distribution_dates_label"/>
+            app:layout_constraintTop_toBottomOf="@id/distribution_dates_text"/>
 
     <TextView
             android:id="@+id/storage_text"

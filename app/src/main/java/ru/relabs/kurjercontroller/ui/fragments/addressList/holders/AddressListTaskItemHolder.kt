@@ -3,6 +3,7 @@ package ru.relabs.kurjercontroller.ui.fragments.addressList.holders
 import android.graphics.Color
 import android.view.View
 import kotlinx.android.synthetic.main.holder_addr_list_address.view.*
+import kotlinx.android.synthetic.main.holder_addr_list_sorting.view.*
 import kotlinx.android.synthetic.main.holder_addr_list_task.view.*
 import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
 import ru.relabs.kurjercontroller.R
@@ -30,6 +31,13 @@ class AddressListTaskItemHolder(
 
         itemView.task_button.setOnClickListener {
             onItemClicked(item)
+        }
+
+
+        if(item.taskItem.required){
+            itemView.task_button.setBackgroundColor(Color.argb(80, 255, 219, 139))
+        }else{
+            itemView.task_button.setBackgroundColor(itemView.resources.getColor(R.color.button_material_light))
         }
     }
 }

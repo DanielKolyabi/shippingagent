@@ -38,6 +38,7 @@ class ReportFragment : Fragment() {
 
     var deliveryWrong: Boolean = false
     var hasLookup: Boolean = false
+    var mailboxType: Int = 1
     var apartmentAdapter = DelegateAdapter<ApartmentListModel>()
     val photosAdapter = DelegateAdapter<ReportPhotosListModel>()
 
@@ -119,10 +120,18 @@ class ReportFragment : Fragment() {
         }
     }
 
+    fun updateMailboxTypeText(){
+        mailbox_type?.text = if(mailboxType == 1) {"Щель"} else{"Евро"}
+    }
+
     private fun fillData() {
         appartaments_from?.setText(entrance.startApartments.toString())
         appartaments_to?.setText(entrance.endApartments.toString())
         entrance_code?.setText(entrance.code)
+
+        mailboxType = entrance.mailboxType
+        updateMailboxTypeText()
+
         entrance_key.adapter = keyAdapter
         entrance_euro_key.adapter = euroKeyAdapter
 
@@ -166,6 +175,10 @@ class ReportFragment : Fragment() {
                 deliveryWrong = saved.isDeliveryWrong
                 layout_error_button?.setSelectButtonActive(saved.isDeliveryWrong)
             }
+            if(saved.mailboxType != null){
+                mailboxType = saved.mailboxType
+                updateMailboxTypeText()
+            }
         }
 
         fillPhotosList()
@@ -208,6 +221,10 @@ class ReportFragment : Fragment() {
     }
 
     private fun bindControl() {
+        mailbox_type?.setOnClickListener {
+            presenter.onEntranceMailboxTypeChanged()
+        }
+
         close_button?.setOnClickListener {
             callback?.onEntranceClosed(task, taskItem, entrance)
         }

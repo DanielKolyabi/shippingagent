@@ -263,7 +263,11 @@ class ReportPresenter(val fragment: ReportFragment) {
         fragment.deliveryWrong = !fragment.deliveryWrong
         fragment.layout_error_button?.setSelectButtonActive(fragment.deliveryWrong)
         bgScope.launch {
-            application().tasksRepository.insertEntranceResult(fragment.taskItem, fragment.entrance, isDeliveryWrong = fragment.deliveryWrong)
+            application().tasksRepository.insertEntranceResult(
+                fragment.taskItem,
+                fragment.entrance,
+                isDeliveryWrong = fragment.deliveryWrong
+            )
         }
     }
 
@@ -271,13 +275,29 @@ class ReportPresenter(val fragment: ReportFragment) {
         fragment.hasLookup = !fragment.hasLookup
         fragment.lookout?.setSelectButtonActive(fragment.hasLookup)
         bgScope.launch {
-            application().tasksRepository.insertEntranceResult(fragment.taskItem, fragment.entrance, hasLookupPost = fragment.hasLookup)
+            application().tasksRepository.insertEntranceResult(
+                fragment.taskItem,
+                fragment.entrance,
+                hasLookupPost = fragment.hasLookup
+            )
         }
     }
 
     fun onEntranceKeyChanged(key: String) {
         bgScope.launch {
             application().tasksRepository.insertEntranceResult(fragment.taskItem, fragment.entrance, key = key)
+        }
+    }
+
+    fun onEntranceMailboxTypeChanged() {
+        fragment.mailboxType = if (fragment.mailboxType == 1) 2 else 1
+        fragment.updateMailboxTypeText()
+        bgScope.launch {
+            application().tasksRepository.insertEntranceResult(
+                fragment.taskItem,
+                fragment.entrance,
+                mailboxType = fragment.mailboxType
+            )
         }
     }
 

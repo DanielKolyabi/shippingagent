@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.BuildConfig
+import ru.relabs.kurjercontroller.CustomLog
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.database.AppDatabase
 import ru.relabs.kurjercontroller.database.entities.*
@@ -57,7 +58,7 @@ class TaskRepository(val db: AppDatabase) {
 
     suspend fun mergeTasks(newTasks: List<TaskModel>): MergeResult = withContext(Dispatchers.IO) {
         val result = merge(newTasks) {
-            if(it.state.toAndroidState() == TaskModel.CREATED){
+            if (it.state.toAndroidState() == TaskModel.CREATED) {
                 receiveTaskStatus(it)
             }
         }
@@ -122,7 +123,6 @@ class TaskRepository(val db: AppDatabase) {
             if (task.androidState == TaskModel.CANCELED) {
                 if (savedTask.state.toAndroidState() == TaskModel.STARTED) {
                     //Уведомили что задание уже в работе
-                    //TODO: Backend!!!
                     db.sendQueryDao().insert(
                         SendQueryItemEntity(
                             0,
@@ -228,17 +228,26 @@ class TaskRepository(val db: AppDatabase) {
     }
 
     suspend fun closeEntrance(taskItemId: Int, entranceNumber: Int) = withContext(Dispatchers.IO) {
-        val entity = db.entranceDao().getByNumber(taskItemId, entranceNumber) ?: return@withContext
+        val entity = db.entranceDao().getByNumber(taskItemId, entranceNumber) ?: run {
+            CustomLog.writeToFile("closeEntrance: Can't find entrance #$entranceNumber in tid: $taskItemId")
+            return@withContext
+        }
         db.entranceDao().update(entity.copy(state = EntranceModel.CLOSED))
 
-        //TODO: Log error
-        val taskItem = db.taskItemDao().getById(taskItemId) ?: return@withContext
-        val task = db.taskDao().getById(taskItem.taskId)?.toModel(db) ?: return@withContext
+        val taskItem = db.taskItemDao().getById(taskItemId) ?: run {
+            CustomLog.writeToFile("closeEntrance: Can't find taskItem $taskItemId")
+            return@withContext
+        }
+        val task = db.taskDao().getById(taskItem.taskId)?.toModel(db) ?: run {
+            CustomLog.writeToFile("closeEntrance: Can't find task ${taskItem.taskId}")
+            return@withContext
+        }
 
         if (task.state.toAndroidState() != TaskModel.STARTED) {
             startTaskStatus(task)
         }
     }
+
 
     suspend fun removePhoto(entrancePhoto: EntrancePhotoModel) = withContext(Dispatchers.IO) {
         db.entrancePhotoDao().deleteById(entrancePhoto.id)
@@ -266,7 +275,8 @@ class TaskRepository(val db: AppDatabase) {
         apartmentTo: Int? = null,
         floors: Int? = null,
         key: String? = null,
-        euroKey: String? = null
+        euroKey: String? = null,
+        mailboxType: Int? = null
     ) = withContext(Dispatchers.IO) {
         var saved = db.entranceResultDao().getByEntrance(taskItem.id, entrance.number)
         if (saved == null) {
@@ -283,7 +293,8 @@ class TaskRepository(val db: AppDatabase) {
                     apartmentTo,
                     floors,
                     key,
-                    euroKey
+                    euroKey,
+                    mailboxType
                 )
             )
             return@withContext
@@ -298,6 +309,7 @@ class TaskRepository(val db: AppDatabase) {
         if (floors != null) saved = saved.copy(floors = floors)
         if (key != null) saved = saved.copy(key = key)
         if (euroKey != null) saved = saved.copy(euroKey = euroKey)
+        if (mailboxType != null) saved = saved.copy(mailboxType = mailboxType)
 
         db.entranceResultDao().update(saved)
     }
@@ -360,7 +372,8 @@ class TaskRepository(val db: AppDatabase) {
                 application().user.getUserCredentials()?.token ?: "",
                 apartmentResults.map { ApartmentResult(it.number, it.state, it.buttonGroup) },
                 DateTime.now(),
-                publisher.id
+                publisher.id,
+                entranceResult?.mailboxType ?: entrance.mailboxType
             )
 
             db.entranceReportDao().insert(report)
@@ -374,7 +387,7 @@ class TaskRepository(val db: AppDatabase) {
             if (withRefresh || availableEntranceKeys.isEmpty()) {
                 availableEntranceKeys = api.getAvailableEntranceKeys(token).await()
                 db.entranceKeysDao().clear()
-                db.entranceKeysDao().insertAll(availableEntranceKeys.map{EntranceKeyEntity(0, it)})
+                db.entranceKeysDao().insertAll(availableEntranceKeys.map { EntranceKeyEntity(0, it) })
             }
             return@withContext availableEntranceKeys
         }

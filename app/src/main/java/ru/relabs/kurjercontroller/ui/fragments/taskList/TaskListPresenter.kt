@@ -72,7 +72,7 @@ class TaskListPresenter(val fragment: TaskListFragment) {
 
     private fun isTasksHasIntersectedAddresses(task1: TaskModel, task2: TaskModel): Boolean {
         for (taskItem in task1.taskItems) {
-            if (task2.taskItems.find { it.address?.id == taskItem.address?.id } != null) {
+            if (task2.taskItems.any { it.address.idnd == taskItem.address.idnd }) {
                 return true
             }
         }

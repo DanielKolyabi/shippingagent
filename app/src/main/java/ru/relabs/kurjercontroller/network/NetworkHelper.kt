@@ -120,7 +120,7 @@ object NetworkHelper {
             data.description, data.code, data.key,
             data.euroKey, data.isDeliveryWrong, data.hasLookupPost,
             data.token, data.apartmentResult, data.closeTime,
-            photosMap, data.publisherId
+            photosMap, data.publisherId, data.mailboxType
         )
 
         return api.sendTaskReport(data.taskItemId, data.token, reportObject, photoParts).await().status

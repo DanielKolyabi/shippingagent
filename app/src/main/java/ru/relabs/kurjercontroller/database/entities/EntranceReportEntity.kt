@@ -40,5 +40,7 @@ data class EntranceReportEntity(
     @ColumnInfo(name = "close_time")
     val closeTime: DateTime,
     @ColumnInfo(name = "publisher_id")
-    val publisherId: Int
+    val publisherId: Int,
+    @ColumnInfo(name = "mailbox_type")
+    val mailboxType: Int
 )

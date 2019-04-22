@@ -41,7 +41,9 @@ data class TaskItemReportModel(
     val closeTime: DateTime,
     val photos: Map<String, PhotoReportModel>,
     @SerializedName("publisher_id")
-    val publisherId: Int
+    val publisherId: Int,
+    @SerializedName("mailbox_type")
+    val mailboxType: Int
 )
 
 data class PhotoReportModel(
