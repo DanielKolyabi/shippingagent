@@ -23,9 +23,11 @@ class AddressListPresenter(val fragment: AddressListFragment) {
     val bgScope = CancelableScope(Dispatchers.Default)
     var sortingMethod = TaskAddressSorter.ALPHABETIC
 
-    suspend fun changeSortingMethod(sorting: Int) {
+    fun changeSortingMethod(sorting: Int) {
         sortingMethod = sorting
-        applySorting()
+        bgScope.launch(Dispatchers.Default) {
+            applySorting()
+        }
     }
 
     fun onTaskItemClicked(clickedTask: AddressListModel.TaskItem) {

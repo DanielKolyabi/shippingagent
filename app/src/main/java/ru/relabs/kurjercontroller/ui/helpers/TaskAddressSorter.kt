@@ -39,8 +39,20 @@ object TaskAddressSorter {
         }
     }
 
+    fun sortInfoTaskItemsAlphabetic(taskItems: List<TaskItemModel>): List<TaskItemModel> {
+        return taskItems.asSequence().sortedWith(compareBy<TaskItemModel> { it.address.city }
+            .thenBy { it.address.street }
+            .thenBy { it.address.house }
+            .thenBy { it.address.houseName }
+        ).groupBy {
+            it.address.idnd
+        }.toMap().flatMap {
+            it.value
+        }
+    }
+
     fun sortTaskItemsAlphabetic(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
-        return taskItems.sortedWith(compareBy<AddressListModel.TaskItem> { it.taskItem.address?.city }
+        return taskItems.sortedWith(compareBy<AddressListModel.TaskItem> { it.taskItem.address.city }
             .thenBy { it.taskItem.address.street }
             .thenBy { it.taskItem.address.house }
             .thenBy { it.taskItem.address.houseName }

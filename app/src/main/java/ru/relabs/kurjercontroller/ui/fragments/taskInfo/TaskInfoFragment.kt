@@ -17,6 +17,7 @@ import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.delegates.*
+import ru.relabs.kurjercontroller.ui.helpers.TaskAddressSorter
 
 class TaskInfoFragment : Fragment() {
 
@@ -66,7 +67,7 @@ class TaskInfoFragment : Fragment() {
         adapter.data.clear()
         adapter.data.add(TaskInfoModel.Task(task))
         adapter.data.add(TaskInfoModel.DetailsAddressTableHeader)
-        adapter.data.addAll(task.taskItems.map {
+        adapter.data.addAll(TaskAddressSorter.sortInfoTaskItemsAlphabetic(task.taskItems).map {
             TaskInfoModel.TaskItem(it)
         })
         adapter.notifyDataSetChanged()

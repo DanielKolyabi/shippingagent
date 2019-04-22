@@ -24,26 +24,25 @@ import java.util.*
 
 class TaskListFragment : Fragment(), ISearchableFragment {
     override fun onSearchItems(filter: String): List<String> {
-        return listOf()
-        //TODO: Fix search
-//        return adapter.data.asSequence()
-//            .filter {
-//                it is TaskListModel.TaskItem
-//            }
-//            .filter {
-//                val task = (it as? TaskListModel.TaskItem)?.task
-//                task?.publishers?.any { it.name.toLowerCase().contains(filter.toLowerCase()) } ?: false
-//            }
-//            .map {
-//                it as TaskListModel.TaskItem
-//            }
-//            .toList()
+
+        return adapter.data.asSequence()
+            .filter {
+                it is TaskListModel.TaskItem
+            }
+            .filter {
+                val task = (it as? TaskListModel.TaskItem)?.task
+                task?.publishers?.any { it.name.toLowerCase().contains(filter.toLowerCase()) } ?: false
+            }
+            .map {
+                (it as TaskListModel.TaskItem).task.publishers.map { it.name }.joinToString("; ")
+            }
+            .toList()
     }
 
     override fun onItemSelected(item: String, searchView: AutoCompleteTextView) {
-        /*val itemIndex = adapter.data.indexOfFirst {
+        val itemIndex = adapter.data.indexOfFirst {
             if (it is TaskListModel.TaskItem) {
-                "${it.task.publisher} №${it.task.edition}".contains(item)
+                it.task.publishers.map { it.name }.joinToString("; ").contains(item)
             } else {
                 false
             }
@@ -51,7 +50,7 @@ class TaskListFragment : Fragment(), ISearchableFragment {
         if (itemIndex < 0) {
             return
         }
-        tasks_list.smoothScrollToPosition(itemIndex)*/
+        tasks_list.smoothScrollToPosition(itemIndex)
     }
 
     var shouldNetworkUpdate: Boolean = false
@@ -101,7 +100,7 @@ class TaskListFragment : Fragment(), ISearchableFragment {
 
     suspend fun showLoading(visible: Boolean, clear: Boolean = false) = withContext(Dispatchers.Main) {
         if (visible) {
-            if(clear){
+            if (clear) {
                 adapter.data.clear()
             }
             start_button?.isEnabled = false

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AutoCompleteTextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_address_list.*
@@ -15,15 +16,55 @@ import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
+import ru.relabs.kurjercontroller.ui.fragments.ISearchableFragment
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListAddressDelegate
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListLoaderDelegate
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListSortingDelegate
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListTaskItemDelegate
+import ru.relabs.kurjercontroller.ui.helpers.TaskAddressSorter
 
 /**
  * Created by ProOrange on 18.03.2019.
  */
-class AddressListFragment : Fragment() {
+class AddressListFragment : Fragment(), ISearchableFragment {
+    override fun onSearchItems(filter: String): List<String> {
+        if (filter.contains(",")) {
+            return adapter.data.asSequence()
+                .filter { it is AddressListModel.Address }
+                .filter {
+                    (it as AddressListModel.Address).taskItems.first().address.name.contains(filter, true)
+                }
+                .map {
+                    (it as AddressListModel.Address).taskItems.first().address.name
+                }
+                .toList()
+        } else {
+            return adapter.data.asSequence()
+                .filter { it is AddressListModel.Address }
+                .filter {
+                    (it as AddressListModel.Address).taskItems.first().address.street.contains(filter, true)
+                }
+                .map {
+                    (it as AddressListModel.Address).taskItems.first().address.street + ","
+                }
+                .distinct()
+                .toList()
+        }
+    }
+
+    override fun onItemSelected(item: String, searchView: AutoCompleteTextView) {
+
+        val itemIndex = adapter.data.indexOfFirst {
+            (it as? AddressListModel.Address)?.taskItems?.first()?.address?.name?.contains(item, true)
+                ?: false
+        }
+        if (itemIndex < 0) {
+            return
+        }
+        address_list?.smoothScrollToPosition(itemIndex)
+    }
+
+
     var taskIds: List<Int> = listOf()
     val tasks: MutableList<TaskModel> = mutableListOf()
 
@@ -48,7 +89,7 @@ class AddressListFragment : Fragment() {
 
         if (adapter.data.isEmpty()) {
             presenter.preloadTasks()
-        }else{
+        } else {
             presenter.bgScope.launch {
                 presenter.applySorting()
                 presenter.checkTasks()
@@ -57,7 +98,7 @@ class AddressListFragment : Fragment() {
     }
 
 
-    fun updateCloseTaskButtonVisibility(){
+    fun updateCloseTaskButtonVisibility() {
         close_button.setVisible(tasks.size == 1)
     }
 
