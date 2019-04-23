@@ -21,6 +21,7 @@ import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
  */
 class TaskRepository(val db: AppDatabase) {
     private var availableEntranceKeys: List<String> = listOf()
+    private var availableEntranceEuroKeys: List<String> = listOf()
 
     suspend fun loadRemoteTasks(token: String): List<TaskModel> = withContext(Dispatchers.IO) {
         return@withContext DeliveryServerAPI.api.getTasks(token, DateTime().toString("yyyy-MM-dd'T'HH:mm:ss")).await()
@@ -185,6 +186,10 @@ class TaskRepository(val db: AppDatabase) {
 
     suspend fun getTaskItems(taskId: Int): List<TaskItemModel> = withContext(Dispatchers.IO) {
         return@withContext db.taskItemDao().getByTaskId(taskId).map { it.toModel(db) }
+    }
+
+    suspend fun getAddress(addressId: Int): AddressModel? = withContext(Dispatchers.IO) {
+        return@withContext db.addressDao().getById(addressId)?.toModel()
     }
 
     suspend fun getTask(taskId: Int): TaskModel? = withContext(Dispatchers.IO) {
@@ -391,6 +396,20 @@ class TaskRepository(val db: AppDatabase) {
             }
             return@withContext availableEntranceKeys
         }
+
+    suspend fun getAvailableEntranceEuroKeys(token: String = "", withRefresh: Boolean = false): List<String> =
+        withContext(Dispatchers.IO) {
+            if (!withRefresh && availableEntranceEuroKeys.isEmpty()) {
+                availableEntranceEuroKeys = db.entranceEuroKeysDao().all.map { it.key }
+            }
+            if (withRefresh || availableEntranceEuroKeys.isEmpty()) {
+                availableEntranceEuroKeys = api.getAvailableEntranceEuroKeys(token).await()
+                db.entranceEuroKeysDao().clear()
+                db.entranceEuroKeysDao().insertAll(availableEntranceEuroKeys.map { EntranceEuroKeyEntity(0, it) })
+            }
+            return@withContext availableEntranceEuroKeys
+        }
+
 
     data class MergeResult(
         var isTasksChanged: Boolean,

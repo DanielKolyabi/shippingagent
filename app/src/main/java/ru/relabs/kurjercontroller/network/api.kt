@@ -122,6 +122,8 @@ object DeliveryServerAPI {
         @GET("api/v1/controller/keys")
         fun getAvailableEntranceKeys(@Query("token") token: String): Deferred<List<String>>
 
+        @GET("api/v1/controller/euro_keys")
+        fun getAvailableEntranceEuroKeys(@Query("token") token: String): Deferred<List<String>>
     }
 
     val api = retrofit.create(IDeliveryServerAPI::class.java)

@@ -12,6 +12,8 @@ android {
 //            storePassword '1qazxsw2'
 //        }
 //    }
+
+
     compileSdkVersion 28
     defaultConfig {
         applicationId "ru.relabs.kurjercontroller"
@@ -20,10 +22,14 @@ android {
         versionCode 1
         versionName "1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters("armeabi-v7a", "x86")
+        }
     }
     buildTypes {
         debug {
-            buildConfigField("String", "API_URL", '"http://warp.courr.ru:8084"')
+            buildConfigField("String", "API_URL", '"http://192.168.1.47:8081"')
             buildConfigField("String", "YA_KEY", '"9be78b32-1265-4157-bf15-999b8d747a5c"')
 //            signingConfig signingConfigs.config
         }

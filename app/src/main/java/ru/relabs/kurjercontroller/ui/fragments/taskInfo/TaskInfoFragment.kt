@@ -51,7 +51,7 @@ class TaskInfoFragment : Fragment() {
         }
 
         show_map_button?.setOnClickListener {
-
+            presenter.onShowMapClicked()
         }
     }
 

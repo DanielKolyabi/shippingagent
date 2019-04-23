@@ -61,7 +61,7 @@ class ReportFragment : Fragment() {
         euroKeyAdapter = ArrayAdapter(
             context,
             android.R.layout.simple_spinner_item,
-            arrayListOf("нет")
+            arrayListOf("загрузка")
         )
 
         //TODO: If apartments interval changed - refresh apartments list
@@ -121,7 +121,7 @@ class ReportFragment : Fragment() {
     }
 
     fun updateMailboxTypeText(){
-        mailbox_type?.text = if(mailboxType == 1) {"Щель"} else{"Евро"}
+        mailbox_type?.text = if(mailboxType == 1) {"щелев"} else{"евро"}
     }
 
     private fun fillData() {
@@ -147,20 +147,34 @@ class ReportFragment : Fragment() {
         presenter.bgScope.launch(Dispatchers.Main) {
             val saved = application().tasksRepository.loadEntranceResult(taskItem, entrance) ?: return@launch
             val availableKeys = application().tasksRepository.getAvailableEntranceKeys()
+            val availableEuroKeys = application().tasksRepository.getAvailableEntranceEuroKeys()
 
             keyAdapter?.clear()
             keyAdapter?.addAll(availableKeys)
-            if (entrance.key.isNotBlank()) {
+
+            euroKeyAdapter?.clear()
+            euroKeyAdapter?.addAll(availableEuroKeys)
+
+            if (entrance.key.isNotBlank() || saved.key?.isNotBlank() == true) {
                 val key = saved.key ?: entrance.key
                 val pos = keyAdapter?.getPosition(key)
                 if (pos != null && pos >= 0) {
                     entrance_key?.setSelection(pos)
                 }
-                withContext(Dispatchers.Main){
-                    keyAdapter?.notifyDataSetChanged()
+            }
+
+            if (entrance.euroKey.isNotBlank() || saved.euroKey?.isNotBlank() == true) {
+                val key = saved.euroKey ?: entrance.euroKey
+                val pos = euroKeyAdapter?.getPosition(key)
+                if (pos != null && pos >= 0) {
+                    entrance_euro_key?.setSelection(pos)
                 }
             }
 
+            withContext(Dispatchers.Main){
+                keyAdapter?.notifyDataSetChanged()
+                euroKeyAdapter?.notifyDataSetChanged()
+            }
 
             if (saved.apartmentFrom != null) appartaments_from?.setText(saved.apartmentFrom.toString())
             if (saved.apartmentTo != null) appartaments_to?.setText(saved.apartmentTo.toString())
@@ -238,6 +252,17 @@ class ReportFragment : Fragment() {
                 }
             }
         }
+
+        entrance_euro_key?.onItemSelectedListener = object: AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, pos: Int, p3: Long) {
+                euroKeyAdapter?.getItem(pos)?.let{
+                    presenter.onEntranceEuroKeyChanged(it)
+                }
+            }
+        }
+
 
         val listClickInterceptor = object : RecyclerView.OnItemTouchListener {
             override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}

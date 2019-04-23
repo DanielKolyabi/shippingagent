@@ -12,6 +12,7 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.room.Room
 import com.google.firebase.iid.FirebaseInstanceId
+import com.yandex.mapkit.MapKitFactory
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.database.AppDatabase
@@ -71,6 +72,8 @@ class MyApplication : Application() {
             .fallbackToDestructiveMigration()
             .build()
         tasksRepository = TaskRepository(database)
+
+        MapKitFactory.setApiKey(BuildConfig.YA_KEY)
     }
 
     fun enableLocationListening(): Boolean {

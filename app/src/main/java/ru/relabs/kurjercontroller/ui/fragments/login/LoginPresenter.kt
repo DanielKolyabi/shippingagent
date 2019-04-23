@@ -77,6 +77,7 @@ class LoginPresenter(val fragment: LoginFragment) {
 
                 application().sendPushToken(null)
                 application().tasksRepository.getAvailableEntranceKeys(response.token, true)
+                application().tasksRepository.getAvailableEntranceEuroKeys(response.token, true)
 
                 if (sharedPref.getString("last_login", "") != response.user.login) {
                     Log.d(

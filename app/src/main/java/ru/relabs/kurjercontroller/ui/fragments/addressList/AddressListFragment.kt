@@ -82,6 +82,9 @@ class AddressListFragment : Fragment(), ISearchableFragment {
         address_list?.layoutManager = LinearLayoutManager(context)
         address_list?.adapter = adapter
 
+        map_button?.setOnClickListener {
+            presenter.onMapClicked()
+        }
         close_button?.setOnClickListener {
             presenter.onCloseTaskClicked()
         }

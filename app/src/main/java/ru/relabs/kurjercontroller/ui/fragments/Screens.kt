@@ -41,14 +41,18 @@ class AddressListScreen(private val taskIds: List<Int>) : SupportAppScreen() {
 class ReportScreen(private val taskItems: List<Pair<TaskModel, TaskItemModel>>, private val selectedTaskItemId: Int) :
     SupportAppScreen() {
     override fun getFragment(): Fragment {
-        return ReportPagerFragment.newInstance(taskItems.map { it.first }, taskItems.map { it.second }, selectedTaskItemId)
+        return ReportPagerFragment.newInstance(
+            taskItems.map { it.first },
+            taskItems.map { it.second },
+            selectedTaskItemId
+        )
     }
 }
 
-class YandexMapScreen(private val address: AddressModel) :
+class YandexMapScreen(private val addresses: List<AddressModel>) :
     SupportAppScreen() {
     override fun getFragment(): Fragment {
-        return YandexMapFragment.newInstance(address)
+        return YandexMapFragment.newInstance(addresses.map { it.id })
     }
 }
 

@@ -289,6 +289,12 @@ class ReportPresenter(val fragment: ReportFragment) {
         }
     }
 
+    fun onEntranceEuroKeyChanged(key: String) {
+        bgScope.launch {
+            application().tasksRepository.insertEntranceResult(fragment.taskItem, fragment.entrance, euroKey = key)
+        }
+    }
+
     fun onEntranceMailboxTypeChanged() {
         fragment.mailboxType = if (fragment.mailboxType == 1) 2 else 1
         fragment.updateMailboxTypeText()

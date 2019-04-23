@@ -19,14 +19,15 @@ import ru.relabs.kurjercontroller.models.AddressModel
 
 class YandexMapFragment : Fragment() {
     private lateinit var userLocationLayer: UserLocationLayer
-    private lateinit var address: AddressModel
+    var addressIds: List<Int> = listOf()
+    var addresses: List<AddressModel> = listOf()
     val presenter = YandexMapPresenter(this)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            address = it.getParcelable("address")
+            addressIds = it.getIntArray("address_ids")?.toList() ?: listOf()
         }
     }
 
@@ -37,23 +38,33 @@ class YandexMapFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_yandex_map, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    fun showAddresses(){
+        addresses.forEach(::showAddress)
+    }
 
-        MapKitFactory.initialize(this.context)
-        var point = Point(application().currentLocation.lat, application().currentLocation.long)
-        mapview.map.isRotateGesturesEnabled = false
+    private fun showAddress(address: AddressModel) {
         if (address.lat != 0.0 && address.long != 0.0) {
-            point = Point(address.lat, address.long)
+            val point = Point(address.lat, address.long)
 
             mapview.map.mapObjects.addPlacemark(Point(address.lat, address.long))
             mapview.map.mapObjects.addCircle(
                 Circle(point, 100f),
                 R.color.colorPrimary,
                 2f,
-                ColorUtils.setAlphaComponent(resources.getColor(R.color.colorAccent), 125)
+                ColorUtils.setAlphaComponent(resources.getColor(R.color.colorAccent), 80)
             )
         }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        MapKitFactory.initialize(this.context)
+
+        presenter.loadAddresses()
+
+        val point = Point(application().currentLocation.lat, application().currentLocation.long)
+        mapview.map.isRotateGesturesEnabled = false
+
         mapview.map.move(
             CameraPosition(point, 14f, 0f, 0f)
         )
@@ -73,6 +84,7 @@ class YandexMapFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
+        presenter.bgScope.cancel()
         MapKitFactory.getInstance().onStop()
         mapview.onStop()
     }
@@ -83,14 +95,18 @@ class YandexMapFragment : Fragment() {
         mapview.onStart()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        presenter.bgScope.terminate()
+    }
 
     companion object {
 
         @JvmStatic
-        fun newInstance(address: AddressModel) =
+        fun newInstance(addresses: List<Int>) =
             YandexMapFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelable("address", address)
+                    putIntArray("address_ids", addresses.toIntArray())
                 }
             }
     }

@@ -13,8 +13,8 @@ import ru.relabs.kurjercontroller.database.entities.*
     entities = [AddressEntity::class, EntranceAppartamentReportEntity::class, EntranceEntity::class,
         EntrancePhotoEntity::class, EntranceReportEntity::class, TaskEntity::class, TaskItemEntity::class,
         TaskPublisherEntity::class, SendQueryItemEntity::class, EntranceResultEntity::class,
-        ApartmentResultEntity::class, EntranceKeyEntity::class],
-    version = 17
+        ApartmentResultEntity::class, EntranceKeyEntity::class, EntranceEuroKeyEntity::class],
+    version = 18
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -30,4 +30,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun sendQueryDao(): SendQueryDao
     abstract fun apartmentResultDao(): ApartmentResultEntityDao
     abstract fun entranceKeysDao(): EntranceKeyEntityDao
+    abstract fun entranceEuroKeysDao(): EntranceEuroKeyEntityDao
 }

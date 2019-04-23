@@ -116,6 +116,7 @@ class TaskListPresenter(val fragment: TaskListFragment) {
     }
 
     suspend fun performNetworkUpdate() = withContext(Dispatchers.IO) {
+
         val user = application().user.getUserCredentials()
         if (user == null) {
             fragment.context?.showErrorSuspend("Что-то пошло не так. Перезагрузите приложение.")
@@ -124,6 +125,9 @@ class TaskListPresenter(val fragment: TaskListFragment) {
         if (networkUpdateStarted) {
             return@withContext
         }
+
+        application().tasksRepository.getAvailableEntranceKeys(user.token, true)
+        application().tasksRepository.getAvailableEntranceEuroKeys(user.token, true)
 
         fragment.showLoading(true, true)
         networkUpdateStarted = true

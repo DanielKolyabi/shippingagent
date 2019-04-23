@@ -52,7 +52,7 @@ class AddressListPresenter(val fragment: AddressListFragment) {
     }
 
     fun onAddressMapClicked(addressModel: AddressModel) {
-        application().router.navigateTo(YandexMapScreen(addressModel))
+        application().router.navigateTo(YandexMapScreen(listOf(addressModel)))
     }
 
     fun onCloseTaskClicked() {
@@ -151,5 +151,9 @@ class AddressListPresenter(val fragment: AddressListFragment) {
                 applySorting()
             }
         }
+    }
+
+    fun onMapClicked() {
+        application().router.navigateTo(YandexMapScreen(fragment.tasks.flatMap { it.taskItems }.map { it.address }))
     }
 }
