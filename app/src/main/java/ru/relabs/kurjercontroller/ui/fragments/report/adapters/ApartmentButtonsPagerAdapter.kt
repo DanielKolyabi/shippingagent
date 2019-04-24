@@ -17,7 +17,8 @@ import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
 class ApartmentButtonsPagerAdapter(
     val context: Context?,
     var state: Int,
-    val onStateChanged: (change: Int) -> Unit
+    val onStateChanged: (newState: Int) -> Unit,
+    val onLongStateChanged: (change: Int) -> Unit
 ) : PagerAdapter() {
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
@@ -30,6 +31,10 @@ class ApartmentButtonsPagerAdapter(
         container.addView(view)
 
         if (position == 0) {
+            view.yes_button_main?.setOnLongClickListener {
+                onLongStateChanged(1)
+                true
+            }
             view.yes_button_main?.setOnClickListener {
                 state = state xor 1
                 if(state and 4 > 0){
@@ -37,9 +42,19 @@ class ApartmentButtonsPagerAdapter(
                 }
                 onStateChanged(state)
             }
+
+            view.not_regular_button_main?.setOnLongClickListener {
+                onLongStateChanged(2)
+                true
+            }
             view.not_regular_button_main?.setOnClickListener {
                 state = state xor 2
                 onStateChanged(state)
+            }
+
+            view.no_button_main?.setOnLongClickListener {
+                onLongStateChanged(4)
+                true
             }
             view.no_button_main?.setOnClickListener {
                 state = state xor 4
@@ -48,11 +63,21 @@ class ApartmentButtonsPagerAdapter(
                 }
                 onStateChanged(state)
             }
+
+            view.broken_button_main?.setOnLongClickListener {
+                onLongStateChanged(8)
+                true
+            }
             view.broken_button_main?.setOnClickListener {
                 state = state xor 8
                 onStateChanged(state)
             }
         } else {
+
+            view.yes_button_addition?.setOnLongClickListener {
+                onLongStateChanged(16)
+                true
+            }
             view.yes_button_addition?.setOnClickListener {
                 state = state xor 16
                 if(state and 32 > 0){
@@ -60,12 +85,22 @@ class ApartmentButtonsPagerAdapter(
                 }
                 onStateChanged(state)
             }
+
+            view.no_button_addition?.setOnLongClickListener {
+                onLongStateChanged(32)
+                true
+            }
             view.no_button_addition?.setOnClickListener {
                 state = state xor 32
                 if(state and 16 > 0){
                     state = state xor 16
                 }
                 onStateChanged(state)
+            }
+
+            view.broken_button_addition?.setOnLongClickListener {
+                onLongStateChanged(8)
+                true
             }
             view.broken_button_addition?.setOnClickListener {
                 state = state xor 8

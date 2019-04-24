@@ -14,7 +14,8 @@ import ru.relabs.kurjercontroller.ui.fragments.report.adapters.ApartmentButtonsP
 class ApartmentHolder(
     itemView: View,
     val onButtonGroupChanged: (apartmentNumber: Int, buttonGroup: Int) -> Unit,
-    val onStateChanged: (apartmentNumber: Int, state: Int) -> Unit
+    val onStateChanged: (apartmentNumber: Int, state: Int) -> Unit,
+    val onLongStateChanged: (apartmentNumber: Int, change: Int) -> Unit
 ) : BaseViewHolder<ApartmentListModel>(itemView) {
     var item: ApartmentListModel? = null
 
@@ -39,8 +40,11 @@ class ApartmentHolder(
         itemView.buttons_list?.adapter = ApartmentButtonsPagerAdapter(
             itemView.context,
             item.state,
-            { change ->
-                onStateChanged(item.number, change)
+            { newState ->
+                onStateChanged(item.number, newState)
+            },
+            { newState ->
+                onLongStateChanged(item.number, newState)
             }
         )
         itemView.buttons_list?.currentItem = item.buttonGroup

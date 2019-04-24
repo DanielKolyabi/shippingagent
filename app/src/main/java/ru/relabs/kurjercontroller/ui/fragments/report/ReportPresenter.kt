@@ -319,6 +319,43 @@ class ReportPresenter(val fragment: ReportFragment) {
         }
     }
 
+    fun onAllApartmentsButtonStateChanged(apartmentNumber: Int, change: Int) {
+        val originalApartment = fragment.apartmentAdapter.data.firstOrNull {
+            (it as? ApartmentListModel.Apartment)?.number == apartmentNumber
+        } as? ApartmentListModel.Apartment ?: return
+
+        val targetState = (originalApartment.state xor change) and change
+
+        fragment.apartmentAdapter.data
+            .filter { it is ApartmentListModel.Apartment }
+            .forEach {
+                val apartment = (it as ApartmentListModel.Apartment)
+                if (apartment.state and change != targetState) {
+                    apartment.state = apartment.state xor change
+                    when(change){
+                        1 -> if(apartment.state and 4 > 0) apartment.state = apartment.state xor 4
+                        4 -> if(apartment.state and 1 > 0) apartment.state = apartment.state xor 1
+                        16 -> if(apartment.state and 32 > 0) apartment.state = apartment.state xor 32
+                        32 -> if(apartment.state and 16 > 0) apartment.state = apartment.state xor 16
+                    }
+                }
+            }
+
+        fragment.apartmentAdapter.notifyDataSetChanged()
+
+        bgScope.launch {
+            fragment.apartmentAdapter.data
+                .filter { it is ApartmentListModel.Apartment }
+                .forEach {
+                    application().tasksRepository.saveApartmentResult(
+                        fragment.taskItem,
+                        fragment.entrance,
+                        it as ApartmentListModel.Apartment
+                    )
+                }
+        }
+    }
+
     val bgScope = CancelableScope(Dispatchers.Default)
 
 }

@@ -8,6 +8,6 @@ sealed class ApartmentListModel {
     data class Apartment(
         val number: Int,
         val buttonGroup: Int = 0,
-        val state: Int = 0
+        var state: Int = 0
     ): ApartmentListModel()
 }
