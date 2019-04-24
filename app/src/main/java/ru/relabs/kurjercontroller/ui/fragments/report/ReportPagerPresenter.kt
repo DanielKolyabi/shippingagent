@@ -38,6 +38,9 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
             { task, taskItem, entrance ->
                 onEntranceClosed(task, taskItem, entrance)
             },
+            {
+                fragment.taskItems.toList()
+            },
             manager
         )
         fragment.view_pager?.adapter = fragment.pagerAdapter

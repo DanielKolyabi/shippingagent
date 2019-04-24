@@ -16,6 +16,7 @@ class ReportPagerAdapter(
     val task: TaskModel,
     val taskItem: TaskItemModel,
     val onEntranceClosed: (task: TaskModel, taskItem: TaskItemModel, entrance: EntranceModel) -> Unit,
+    val getAllTaskItems: () -> List<TaskItemModel>,
     fm: FragmentManager
 ) :
     FragmentStatePagerAdapter(fm) {
@@ -30,6 +31,10 @@ class ReportPagerAdapter(
         )
 
         fragment.callback = object : ReportFragment.Callback {
+            override fun getAllTaskItems(): List<TaskItemModel> =
+                this@ReportPagerAdapter.getAllTaskItems()
+
+
             override fun onEntranceClosed(task: TaskModel, taskItem: TaskItemModel, entrance: EntranceModel) {
                 this@ReportPagerAdapter.onEntranceClosed(task, taskItem, entrance)
             }

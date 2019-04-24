@@ -168,7 +168,9 @@ class ReportPresenter(val fragment: ReportFragment) {
     fun onCodeChanged() {
         val code = fragment.entrance_code?.text.toString()
         bgScope.launch {
-            application().tasksRepository.insertEntranceResult(fragment.taskItem, fragment.entrance, code = code)
+            fragment.allTaskItems.forEach {
+                application().tasksRepository.insertEntranceResult(it, fragment.entrance, code = code)
+            }
         }
     }
 
@@ -185,12 +187,14 @@ class ReportPresenter(val fragment: ReportFragment) {
         }
 
         bgScope.launch {
-            application().tasksRepository.insertEntranceResult(
-                fragment.taskItem,
-                fragment.entrance,
-                apartmentFrom = from,
-                apartmentTo = to
-            )
+            fragment.allTaskItems.forEach {
+                application().tasksRepository.insertEntranceResult(
+                    it,
+                    fragment.entrance,
+                    apartmentFrom = from,
+                    apartmentTo = to
+                )
+            }
         }
 
     }
@@ -228,7 +232,9 @@ class ReportPresenter(val fragment: ReportFragment) {
         }
 
         bgScope.launch {
-            application().tasksRepository.insertEntranceResult(fragment.taskItem, fragment.entrance, floors = floors)
+            fragment.allTaskItems.forEach {
+                application().tasksRepository.insertEntranceResult(it, fragment.entrance, floors = floors)
+            }
         }
     }
 
@@ -275,23 +281,29 @@ class ReportPresenter(val fragment: ReportFragment) {
         fragment.hasLookup = !fragment.hasLookup
         fragment.lookout?.setSelectButtonActive(fragment.hasLookup)
         bgScope.launch {
-            application().tasksRepository.insertEntranceResult(
-                fragment.taskItem,
-                fragment.entrance,
-                hasLookupPost = fragment.hasLookup
-            )
+            fragment.allTaskItems.forEach {
+                application().tasksRepository.insertEntranceResult(
+                    it,
+                    fragment.entrance,
+                    hasLookupPost = fragment.hasLookup
+                )
+            }
         }
     }
 
     fun onEntranceKeyChanged(key: String) {
         bgScope.launch {
-            application().tasksRepository.insertEntranceResult(fragment.taskItem, fragment.entrance, key = key)
+            fragment.allTaskItems.forEach {
+                application().tasksRepository.insertEntranceResult(it, fragment.entrance, key = key)
+            }
         }
     }
 
     fun onEntranceEuroKeyChanged(key: String) {
         bgScope.launch {
-            application().tasksRepository.insertEntranceResult(fragment.taskItem, fragment.entrance, euroKey = key)
+            fragment.allTaskItems.forEach {
+                application().tasksRepository.insertEntranceResult(it, fragment.entrance, euroKey = key)
+            }
         }
     }
 
@@ -299,11 +311,11 @@ class ReportPresenter(val fragment: ReportFragment) {
         fragment.mailboxType = if (fragment.mailboxType == 1) 2 else 1
         fragment.updateMailboxTypeText()
         bgScope.launch {
-            application().tasksRepository.insertEntranceResult(
-                fragment.taskItem,
-                fragment.entrance,
-                mailboxType = fragment.mailboxType
-            )
+            fragment.allTaskItems.forEach {
+                application().tasksRepository.insertEntranceResult(
+                    it, fragment.entrance, mailboxType = fragment.mailboxType
+                )
+            }
         }
     }
 

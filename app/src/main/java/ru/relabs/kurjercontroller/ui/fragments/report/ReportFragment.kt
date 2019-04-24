@@ -49,9 +49,12 @@ class ReportFragment : Fragment() {
     lateinit var task: TaskModel
     lateinit var taskItem: TaskItemModel
     lateinit var entrance: EntranceModel
+    var allTaskItems: List<TaskItemModel> = listOf()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        allTaskItems = callback?.getAllTaskItems() ?: listOf(taskItem)
 
         keyAdapter = ArrayAdapter(
             context,
@@ -95,23 +98,23 @@ class ReportFragment : Fragment() {
     }
 
     private fun setControlsLocked(locked: Boolean) {
-        appartaments_from.isEnabled = !locked
-        appartaments_to.isEnabled = !locked
-        entrance_euro_key.isEnabled = !locked
-        entrance_key.isEnabled = !locked
-        floors.isEnabled = !locked
-        entrance_code.isEnabled = !locked
-        layout_error_button.isEnabled = !locked
-        lookout.isEnabled = !locked
-        close_button.isEnabled = !locked
-        user_explanation_input.isEnabled = !locked
+        appartaments_from?.isEnabled = !locked
+        appartaments_to?.isEnabled = !locked
+        entrance_euro_key?.isEnabled = !locked
+        entrance_key?.isEnabled = !locked
+        floors?.isEnabled = !locked
+        entrance_code?.isEnabled = !locked
+        layout_error_button?.isEnabled = !locked
+        lookout?.isEnabled = !locked
+        close_button?.isEnabled = !locked
+        user_explanation_input?.isEnabled = !locked
     }
 
     fun updateEditable() {
         val isEmpty = photosAdapter.data.none { it is ReportPhotosListModel.TaskItemPhoto }
 //        floors.isEnabled = photosAdapter.data.isNotEmpty()
-        appartaments_from.isEnabled = !isEmpty
-        appartaments_to.isEnabled = !isEmpty
+        appartaments_from?.isEnabled = !isEmpty
+        appartaments_to?.isEnabled = !isEmpty
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -132,15 +135,15 @@ class ReportFragment : Fragment() {
         mailboxType = entrance.mailboxType
         updateMailboxTypeText()
 
-        entrance_key.adapter = keyAdapter
-        entrance_euro_key.adapter = euroKeyAdapter
+        entrance_key?.adapter = keyAdapter
+        entrance_euro_key?.adapter = euroKeyAdapter
 
-        appartaments_list.layoutManager = LinearLayoutManager(context)
-        appartaments_list.adapter = apartmentAdapter
+        appartaments_list?.layoutManager = LinearLayoutManager(context)
+        appartaments_list?.adapter = apartmentAdapter
 
-        photos_list.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
-        photos_list.isNestedScrollingEnabled = true
-        photos_list.adapter = photosAdapter
+        photos_list?.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+        photos_list?.isNestedScrollingEnabled = true
+        photos_list?.adapter = photosAdapter
 
         floors?.setText(entrance.floors.toString())
 
@@ -271,8 +274,8 @@ class ReportFragment : Fragment() {
                 entrance.state == EntranceModel.CLOSED
         }
 
-        photos_list.addOnItemTouchListener(listClickInterceptor)
-        appartaments_list.addOnItemTouchListener(listClickInterceptor)
+        photos_list?.addOnItemTouchListener(listClickInterceptor)
+        appartaments_list?.addOnItemTouchListener(listClickInterceptor)
 
         user_explanation_input?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
@@ -362,5 +365,6 @@ class ReportFragment : Fragment() {
 
     interface Callback {
         fun onEntranceClosed(task: TaskModel, taskItem: TaskItemModel, entrance: EntranceModel)
+        fun getAllTaskItems(): List<TaskItemModel>
     }
 }

@@ -117,8 +117,10 @@
 
     <Spinner
             android:id="@+id/entrance_key"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_marginEnd="4dp"
             android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="@id/guideline"
             app:layout_constraintStart_toEndOf="@id/entrance_key_label"
             app:layout_constraintTop_toTopOf="@id/entrance_key_label"
             app:layout_constraintBottom_toBottomOf="@id/entrance_key_label"/>
@@ -127,18 +129,19 @@
             android:id="@+id/entrance_euro_key_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="2dp"
+            android:layout_marginStart="4dp"
             android:text="@string/entrance_euro_key"
-            app:layout_constraintStart_toEndOf="@+id/entrance_key"
+            app:layout_constraintStart_toStartOf="@id/guideline"
             app:layout_constraintTop_toTopOf="@+id/entrance_key_label"
             app:layout_constraintBottom_toBottomOf="@+id/entrance_key_label"
     />
 
     <Spinner
             android:id="@+id/entrance_euro_key"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toEndOf="@+id/entrance_euro_key_label"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/entrance_euro_key_label"
             app:layout_constraintBottom_toBottomOf="@+id/entrance_euro_key_label"/>
 
@@ -234,4 +237,12 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>
+
+    <androidx.constraintlayout.widget.Guideline
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/guideline"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5"
+    />
 </androidx.constraintlayout.widget.ConstraintLayout>
