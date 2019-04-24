@@ -20,6 +20,7 @@ import kotlinx.coroutines.withContext
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.application
+import ru.relabs.kurjercontroller.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
@@ -151,51 +152,23 @@ class ReportFragment : Fragment() {
         floors?.setText(entrance.floors.toString())
 
         presenter.bgScope.launch(Dispatchers.Main) {
-            val saved = application().tasksRepository.loadEntranceResult(taskItem, entrance) ?: return@launch
-            val availableKeys = application().tasksRepository.getAvailableEntranceKeys()
-            val availableEuroKeys = application().tasksRepository.getAvailableEntranceEuroKeys()
+            val saved = application().tasksRepository.loadEntranceResult(taskItem, entrance)
+            loadKeys(saved)
 
-            keyAdapter?.clear()
-            keyAdapter?.addAll(availableKeys)
-
-            euroKeyAdapter?.clear()
-            euroKeyAdapter?.addAll(availableEuroKeys)
-
-            if (entrance.key.isNotBlank() || saved.key?.isNotBlank() == true) {
-                val key = saved.key ?: entrance.key
-                val pos = keyAdapter?.getPosition(key)
-                if (pos != null && pos >= 0) {
-                    entrance_key?.setSelection(pos)
-                }
-            }
-
-            if (entrance.euroKey.isNotBlank() || saved.euroKey?.isNotBlank() == true) {
-                val key = saved.euroKey ?: entrance.euroKey
-                val pos = euroKeyAdapter?.getPosition(key)
-                if (pos != null && pos >= 0) {
-                    entrance_euro_key?.setSelection(pos)
-                }
-            }
-
-            withContext(Dispatchers.Main){
-                keyAdapter?.notifyDataSetChanged()
-                euroKeyAdapter?.notifyDataSetChanged()
-            }
-
-            if (saved.apartmentFrom != null) appartaments_from?.setText(saved.apartmentFrom.toString())
-            if (saved.apartmentTo != null) appartaments_to?.setText(saved.apartmentTo.toString())
-            if (saved.code != null) entrance_code?.setText(saved.code.toString())
-            if (saved.description != null) user_explanation_input?.setText(saved.description)
-            if (saved.floors != null) floors?.setText(saved.floors.toString())
-            if (saved.hasLookupPost != null) {
+            if (saved?.apartmentFrom != null) appartaments_from?.setText(saved.apartmentFrom.toString())
+            if (saved?.apartmentTo != null) appartaments_to?.setText(saved.apartmentTo.toString())
+            if (saved?.code != null) entrance_code?.setText(saved.code.toString())
+            if (saved?.description != null) user_explanation_input?.setText(saved.description)
+            if (saved?.floors != null) floors?.setText(saved.floors.toString())
+            if (saved?.hasLookupPost != null) {
                 hasLookup = saved.hasLookupPost
                 lookout?.setSelectButtonActive(saved.hasLookupPost)
             }
-            if (saved.isDeliveryWrong != null) {
+            if (saved?.isDeliveryWrong != null) {
                 deliveryWrong = saved.isDeliveryWrong
                 layout_error_button?.setSelectButtonActive(saved.isDeliveryWrong)
             }
-            if(saved.mailboxType != null){
+            if(saved?.mailboxType != null){
                 mailboxType = saved.mailboxType
                 updateMailboxTypeText()
             }
@@ -203,6 +176,38 @@ class ReportFragment : Fragment() {
 
         fillPhotosList()
         fillApartmentList()
+    }
+
+    private suspend fun loadKeys(saved: EntranceResultEntity?) {
+        val availableKeys = application().tasksRepository.getAvailableEntranceKeys()
+        val availableEuroKeys = application().tasksRepository.getAvailableEntranceEuroKeys()
+
+        keyAdapter?.clear()
+        keyAdapter?.addAll(availableKeys)
+
+        euroKeyAdapter?.clear()
+        euroKeyAdapter?.addAll(availableEuroKeys)
+
+        if (entrance.key.isNotBlank() || saved?.key?.isNotBlank() == true) {
+            val key = saved?.key ?: entrance.key
+            val pos = keyAdapter?.getPosition(key)
+            if (pos != null && pos >= 0) {
+                entrance_key?.setSelection(pos)
+            }
+        }
+
+        if (entrance.euroKey.isNotBlank() || saved?.euroKey?.isNotBlank() == true) {
+            val key = saved?.euroKey ?: entrance.euroKey
+            val pos = euroKeyAdapter?.getPosition(key)
+            if (pos != null && pos >= 0) {
+                entrance_euro_key?.setSelection(pos)
+            }
+        }
+
+        withContext(Dispatchers.Main){
+            keyAdapter?.notifyDataSetChanged()
+            euroKeyAdapter?.notifyDataSetChanged()
+        }
     }
 
     private fun fillPhotosList() {
