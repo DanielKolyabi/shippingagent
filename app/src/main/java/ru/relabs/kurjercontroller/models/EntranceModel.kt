@@ -13,8 +13,8 @@ data class EntranceModel(
     val euroKey: String,
     val key: String,
     val code: String,
-    val startApartments: Int,
-    val endApartments: Int,
+    var startApartments: Int,
+    var endApartments: Int,
     val floors: Int,
     val mailboxType: Int,
     var state: Int

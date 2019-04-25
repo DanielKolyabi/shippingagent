@@ -26,9 +26,9 @@ data class EntranceResultEntity(
     val description: String?,
     val code: String?,
     @ColumnInfo(name = "apartment_from")
-    val apartmentFrom: Int?,
+    var apartmentFrom: Int?,
     @ColumnInfo(name = "apartment_to")
-    val apartmentTo: Int?,
+    var apartmentTo: Int?,
     val floors: Int?,
     val key: String?,
     @ColumnInfo(name = "euro_key")

@@ -10,4 +10,14 @@ sealed class ApartmentListModel {
         val buttonGroup: Int = 0,
         var state: Int = 0
     ): ApartmentListModel()
+
+    data class Lookout(
+        val buttonGroup: Int = 0,
+        var state: Int = 0
+    ): ApartmentListModel()
+
+    data class Entrance(
+        val buttonGroup: Int = 1,
+        var state: Int = 0
+    )
 }

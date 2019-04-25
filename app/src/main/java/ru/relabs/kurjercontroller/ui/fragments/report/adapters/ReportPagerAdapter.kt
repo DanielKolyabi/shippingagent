@@ -7,6 +7,7 @@ import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.fragments.report.ReportFragment
+import java.lang.ref.WeakReference
 
 /**
  * Created by ProOrange on 15.04.2019.
@@ -20,6 +21,7 @@ class ReportPagerAdapter(
     fm: FragmentManager
 ) :
     FragmentStatePagerAdapter(fm) {
+    private val fragments: MutableMap<Int, WeakReference<ReportFragment>> = mutableMapOf()
 
     private fun openedEntrances(): List<EntranceModel> = taskItem.entrances.sortedBy { it.state == EntranceModel.CLOSED }//.filter { it.state == EntranceModel.CREATED }
 
@@ -29,6 +31,7 @@ class ReportPagerAdapter(
             taskItem,
             openedEntrances()[position]
         )
+        fragments[position] = WeakReference(fragment)
 
         fragment.callback = object : ReportFragment.Callback {
             override fun getAllTaskItems(): List<TaskItemModel> =
@@ -37,6 +40,12 @@ class ReportPagerAdapter(
 
             override fun onEntranceClosed(task: TaskModel, taskItem: TaskItemModel, entrance: EntranceModel) {
                 this@ReportPagerAdapter.onEntranceClosed(task, taskItem, entrance)
+            }
+
+            override fun onEntranceChanged(entrance: EntranceModel) {
+                fragments.forEach { ref ->
+                    ref.value.get()?.onChanged(entrance)
+                }
             }
         }
 
@@ -48,6 +57,6 @@ class ReportPagerAdapter(
 
     override fun getPageTitle(position: Int): CharSequence? {
         val entrance = openedEntrances()[position]
-        return "Подъезд ${entrance.number} из $count. Кв. ${entrance.startApartments} - ${entrance.endApartments}"
+        return "Подъезд ${entrance.number} из $count"
     }
 }

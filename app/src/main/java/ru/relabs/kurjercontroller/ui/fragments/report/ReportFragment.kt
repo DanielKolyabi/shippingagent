@@ -1,13 +1,13 @@
 package ru.relabs.kurjercontroller.ui.fragments.report
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
@@ -51,6 +51,7 @@ class ReportFragment : Fragment() {
     lateinit var taskItem: TaskItemModel
     lateinit var entrance: EntranceModel
     var allTaskItems: List<TaskItemModel> = listOf()
+    var saved: EntranceResultEntity? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -92,13 +93,28 @@ class ReportFragment : Fragment() {
             presenter.onBlankMultiPhotoClicked()
         })
 
-        fillData()
         bindControl()
+        refreshData()
+
         if (entrance.state == EntranceModel.CLOSED) {
             setControlsLocked(true)
         } else {
             setControlsLocked(false)
         }
+    }
+
+    private fun refreshData() {
+        presenter.bgScope.launch {
+            saved = application().tasksRepository.loadEntranceResult(taskItem, entrance)
+            fillData()
+        }
+    }
+
+    fun onChanged(entrance: EntranceModel) {
+        if (entrance.number != this.entrance.number) {
+            return
+        }
+        refreshData()
     }
 
     private fun setControlsLocked(locked: Boolean) {
@@ -116,7 +132,6 @@ class ReportFragment : Fragment() {
 
     fun updateEditable() {
         val isEmpty = photosAdapter.data.none { it is ReportPhotosListModel.TaskItemPhoto }
-//        floors.isEnabled = photosAdapter.data.isNotEmpty()
         appartaments_from?.isEnabled = !isEmpty
         appartaments_to?.isEnabled = !isEmpty
     }
@@ -127,11 +142,15 @@ class ReportFragment : Fragment() {
         }
     }
 
-    fun updateMailboxTypeText(){
-        mailbox_type?.text = if(mailboxType == 1) {"щелев"} else{"евро"}
+    fun updateMailboxTypeText() {
+        mailbox_type?.text = if (mailboxType == 1) {
+            "щелев"
+        } else {
+            "евро"
+        }
     }
 
-    private fun fillData() {
+    private suspend fun fillData() = withContext(Dispatchers.Main) {
         appartaments_from?.setText(entrance.startApartments.toString())
         appartaments_to?.setText(entrance.endApartments.toString())
         entrance_code?.setText(entrance.code)
@@ -152,23 +171,25 @@ class ReportFragment : Fragment() {
         floors?.setText(entrance.floors.toString())
 
         presenter.bgScope.launch(Dispatchers.Main) {
-            val saved = application().tasksRepository.loadEntranceResult(taskItem, entrance)
             loadKeys(saved)
 
-            if (saved?.apartmentFrom != null) appartaments_from?.setText(saved.apartmentFrom.toString())
-            if (saved?.apartmentTo != null) appartaments_to?.setText(saved.apartmentTo.toString())
-            if (saved?.code != null) entrance_code?.setText(saved.code.toString())
-            if (saved?.description != null) user_explanation_input?.setText(saved.description)
-            if (saved?.floors != null) floors?.setText(saved.floors.toString())
-            if (saved?.hasLookupPost != null) {
+        }
+
+        saved?.let { saved ->
+            if (saved.apartmentFrom != null) appartaments_from?.setText(saved.apartmentFrom.toString())
+            if (saved.apartmentTo != null) appartaments_to?.setText(saved.apartmentTo.toString())
+            if (saved.code != null) entrance_code?.setText(saved.code.toString())
+            if (saved.description != null) user_explanation_input?.setText(saved.description)
+            if (saved.floors != null) floors?.setText(saved.floors.toString())
+            if (saved.hasLookupPost != null) {
                 hasLookup = saved.hasLookupPost
                 lookout?.setSelectButtonActive(saved.hasLookupPost)
             }
-            if (saved?.isDeliveryWrong != null) {
+            if (saved.isDeliveryWrong != null) {
                 deliveryWrong = saved.isDeliveryWrong
                 layout_error_button?.setSelectButtonActive(saved.isDeliveryWrong)
             }
-            if(saved?.mailboxType != null){
+            if (saved.mailboxType != null) {
                 mailboxType = saved.mailboxType
                 updateMailboxTypeText()
             }
@@ -204,13 +225,14 @@ class ReportFragment : Fragment() {
             }
         }
 
-        withContext(Dispatchers.Main){
+        withContext(Dispatchers.Main) {
             keyAdapter?.notifyDataSetChanged()
             euroKeyAdapter?.notifyDataSetChanged()
         }
     }
 
     private fun fillPhotosList() {
+        photosAdapter.data.clear()
         photosAdapter.data.add(ReportPhotosListModel.BlankMultiPhoto)
         photosAdapter.data.add(ReportPhotosListModel.BlankPhoto)
         presenter.bgScope.launch(Dispatchers.Main) {
@@ -224,11 +246,10 @@ class ReportFragment : Fragment() {
         photosAdapter.notifyDataSetChanged()
     }
 
-    private fun fillApartmentList() {
-        //TODO: Merge if interval changed
+    fun fillApartmentList() {
         apartmentAdapter.data.clear()
         apartmentAdapter.data.addAll(
-            (entrance.startApartments..entrance.endApartments).map {
+            ((saved?.apartmentFrom ?: entrance.startApartments)..(saved?.apartmentTo ?: entrance.endApartments)).map {
                 ApartmentListModel.Apartment(it, buttonGroup = 0, state = 0)
             }
         )
@@ -254,21 +275,21 @@ class ReportFragment : Fragment() {
             callback?.onEntranceClosed(task, taskItem, entrance)
         }
 
-        entrance_key?.onItemSelectedListener = object: AdapterView.OnItemSelectedListener{
+        entrance_key?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<*>?) {}
 
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, pos: Int, p3: Long) {
-                keyAdapter?.getItem(pos)?.let{
+                keyAdapter?.getItem(pos)?.let {
                     presenter.onEntranceKeyChanged(it)
                 }
             }
         }
 
-        entrance_euro_key?.onItemSelectedListener = object: AdapterView.OnItemSelectedListener{
+        entrance_euro_key?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<*>?) {}
 
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, pos: Int, p3: Long) {
-                euroKeyAdapter?.getItem(pos)?.let{
+                euroKeyAdapter?.getItem(pos)?.let {
                     presenter.onEntranceEuroKeyChanged(it)
                 }
             }
@@ -303,24 +324,55 @@ class ReportFragment : Fragment() {
                 presenter.onCodeChanged()
             }
         })
-        appartaments_from?.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {}
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        appartaments_from?.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                actionId == EditorInfo.IME_ACTION_DONE ||
+                actionId == EditorInfo.IME_ACTION_NEXT ||
+                event != null &&
+                event.action == KeyEvent.ACTION_DOWN &&
+                event.keyCode == KeyEvent.KEYCODE_ENTER
+            ) {
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 presenter.onApartmentIntervalChanged()
+                (context?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)?.hideSoftInputFromWindow(
+                    appartaments_from?.windowToken,
+                    0
+                )
+                return@setOnEditorActionListener true
             }
-        })
-        appartaments_to?.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {}
+            return@setOnEditorActionListener false
+        }
+        appartaments_from?.setOnFocusChangeListener { view, hasFocus ->
+            if (!hasFocus) {
+                appartaments_from?.setText((saved?.apartmentFrom ?: entrance.startApartments).toString())
+            }
+        }
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        appartaments_to?.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                actionId == EditorInfo.IME_ACTION_DONE ||
+                actionId == EditorInfo.IME_ACTION_NEXT ||
+                event != null &&
+                event.action == KeyEvent.ACTION_DOWN &&
+                event.keyCode == KeyEvent.KEYCODE_ENTER
+            ) {
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 presenter.onApartmentIntervalChanged()
+                (context?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)?.hideSoftInputFromWindow(
+                    appartaments_to?.windowToken,
+                    0
+                )
+                return@setOnEditorActionListener true
             }
-        })
+            return@setOnEditorActionListener false
+        }
+        appartaments_to?.setOnFocusChangeListener { view, hasFocus ->
+            if (!hasFocus) {
+                appartaments_to?.setText((saved?.apartmentTo ?: entrance.endApartments).toString())
+            }
+        }
+
         floors?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
 
@@ -374,5 +426,6 @@ class ReportFragment : Fragment() {
     interface Callback {
         fun onEntranceClosed(task: TaskModel, taskItem: TaskItemModel, entrance: EntranceModel)
         fun getAllTaskItems(): List<TaskItemModel>
+        fun onEntranceChanged(entrance: EntranceModel)
     }
 }

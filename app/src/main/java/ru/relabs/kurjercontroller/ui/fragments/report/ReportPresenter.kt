@@ -13,7 +13,9 @@ import kotlinx.coroutines.launch
 import ru.relabs.kurjer.files.ImageUtils
 import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.application
+import ru.relabs.kurjercontroller.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
+import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.EntrancePhotoModel
 import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
@@ -186,17 +188,84 @@ class ReportPresenter(val fragment: ReportFragment) {
             return
         }
 
+        if(from < 1){
+            fragment.appartaments_from?.setText((fragment.saved?.apartmentFrom ?: fragment.entrance.startApartments).toString())
+            return
+        }
+        if(from > to){
+            fragment.appartaments_from?.setText((fragment.saved?.apartmentFrom ?: fragment.entrance.startApartments).toString())
+            return
+        }
+        if(to < from){
+            fragment.appartaments_to?.setText((fragment.saved?.apartmentTo ?: fragment.entrance.endApartments).toString())
+            return
+        }
+
+        if(fragment.saved == null){
+            fragment.saved = EntranceResultEntity(
+                id = 0,
+                taskItemId = fragment.taskItem.id,
+                entranceNumber = fragment.entrance.number,
+                apartmentTo = to,
+                apartmentFrom = from,
+                euroKey = null,
+                mailboxType = null,
+                key = null,
+                hasLookupPost = null,
+                isDeliveryWrong = null,
+                floors = null,
+                description = null,
+                code = null
+            )
+        }else{
+            fragment.saved?.apartmentFrom = from
+            fragment.saved?.apartmentTo = to
+        }
+
+        fragment.fillApartmentList()
+
+        changeApartmentInterval(fragment.entrance, from, to)
+    }
+
+    private fun changeApartmentInterval(entrance: EntranceModel, from: Int, to: Int) {
+        var toApartment = to
+        var fromApartment = from
+        if(fromApartment > toApartment){
+            toApartment = fromApartment+1
+        }
+        if(toApartment < fromApartment){
+            fromApartment = toApartment-1
+        }
+
         bgScope.launch {
             fragment.allTaskItems.forEach {
                 application().tasksRepository.insertEntranceResult(
                     it,
-                    fragment.entrance,
-                    apartmentFrom = from,
-                    apartmentTo = to
+                    entrance,
+                    apartmentFrom = fromApartment,
+                    apartmentTo = toApartment
                 )
+            }
+
+            if(entrance.number != fragment.entrance.number){
+                fragment.callback?.onEntranceChanged(entrance)
             }
         }
 
+        fragment.taskItem.entrances.firstOrNull{
+            it.number == entrance.number-1
+        }?.let{ prevEntrance ->
+            if(prevEntrance.endApartments >= fromApartment){
+                changeApartmentInterval(prevEntrance, prevEntrance.startApartments, fromApartment-1)
+            }
+        }
+        fragment.taskItem.entrances.firstOrNull{
+            it.number == entrance.number+1
+        }?.let{ nextEntrance ->
+            if(nextEntrance.startApartments <= toApartment){
+                changeApartmentInterval(nextEntrance, toApartment+1, nextEntrance.endApartments)
+            }
+        }
     }
 
     fun onRemovePhotoClicked(holder: RecyclerView.ViewHolder) {
