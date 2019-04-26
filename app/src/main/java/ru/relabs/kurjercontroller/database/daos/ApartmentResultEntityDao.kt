@@ -12,11 +12,11 @@ interface ApartmentResultEntityDao {
     @get:Query("SELECT * FROM apartment_results")
     val all: List<ApartmentResultEntity>
 
-    @Query("SELECT * FROM apartment_results WHERE task_item_id = :taskItemId AND entrance_number = :entranceNumber")
-    fun getByEntrance(taskItemId: Int, entranceNumber: Int): List<ApartmentResultEntity>
+    @Query("SELECT * FROM apartment_results WHERE task_id = :taskId AND task_item_id = :taskItemId AND entrance_number = :entranceNumber")
+    fun getByEntrance(taskId: Int, taskItemId: Int, entranceNumber: Int): List<ApartmentResultEntity>
 
-    @Query("SELECT * FROM apartment_results WHERE task_item_id = :taskItemId AND entrance_number = :entranceNumber AND apartment_number = :apartmentNumber")
-    fun getByEntranceApartment(taskItemId: Int, entranceNumber: Int, apartmentNumber: Int): ApartmentResultEntity?
+    @Query("SELECT * FROM apartment_results WHERE task_id = :taskId AND task_item_id = :taskItemId AND entrance_number = :entranceNumber AND apartment_number = :apartmentNumber")
+    fun getByEntranceApartment(taskId: Int, taskItemId: Int, entranceNumber: Int, apartmentNumber: Int): ApartmentResultEntity?
 
     @Update
     fun update(address: ApartmentResultEntity)
@@ -30,6 +30,6 @@ interface ApartmentResultEntityDao {
     @Delete
     fun delete(address: ApartmentResultEntity)
 
-    @Query("DELETE FROM apartment_results WHERE task_item_id = :taskItemId AND entrance_number = :entranceNumber")
-    fun deleteByEntrance(taskItemId: Int, entranceNumber: Int)
+    @Query("DELETE FROM apartment_results WHERE task_id = :taskId AND task_item_id = :taskItemId AND entrance_number = :entranceNumber")
+    fun deleteByEntrance(taskId: Int, taskItemId: Int, entranceNumber: Int)
 }

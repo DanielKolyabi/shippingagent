@@ -42,7 +42,7 @@ class AddressListPresenter(val fragment: AddressListFragment) {
                 Pair(task.parentTask, task.taskItem)
             }
 
-        application().router.navigateTo(ReportScreen(taskItemsOnAddress, clickedTask.taskItem.id))
+        application().router.navigateTo(ReportScreen(taskItemsOnAddress, clickedTask.taskItem.taskId, clickedTask.taskItem.id))
     }
 
     fun onSortingChanged(sortingMethod: Int) {

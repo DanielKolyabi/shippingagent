@@ -16,7 +16,7 @@ import ru.relabs.kurjercontroller.models.TaskModel
 @Entity(tableName = "tasks")
 data class TaskEntity(
     @PrimaryKey
-    val id: Int,
+    val id: Int, //id_ct
     @ColumnInfo(name = "user_id")
     val userId: Int,
     val initiator: String,

@@ -26,7 +26,7 @@ class ReportPagerFragment : Fragment() {
 
     var tasks: MutableList<TaskModel> = mutableListOf()
     var taskItems: MutableList<TaskItemModel> = mutableListOf()
-    var selectedTaskItemId: Int = 0
+    var selectedTask: Pair<Int, Int> = Pair(0,0)
     val presenter = ReportPagerPresenter(this)
     lateinit var pagerAdapter: ReportPagerAdapter
     val taskListAdapter = DelegateAdapter<ReportTasksListModel>()
@@ -48,7 +48,7 @@ class ReportPagerFragment : Fragment() {
         tasks_list.setVisible(tasks.size > 1)
         taskListAdapter.data.clear()
         taskListAdapter.data.addAll(tasks.mapIndexed { i, it ->
-            ReportTasksListModel.TaskButton(it, taskItems[i], i, taskItems[i].id == selectedTaskItemId)
+            ReportTasksListModel.TaskButton(it, taskItems[i], i, taskItems[i].id == selectedTask.second && taskItems[i].taskId == selectedTask.first)
         })
         taskListAdapter.notifyDataSetChanged()
     }
@@ -65,7 +65,7 @@ class ReportPagerFragment : Fragment() {
         arguments?.let {
             tasks = it.getParcelableArrayList("tasks") ?: mutableListOf()
             taskItems = it.getParcelableArrayList("task_items") ?: mutableListOf()
-            selectedTaskItemId = it.getInt("selected_task_id")
+            selectedTask = Pair(it.getInt("selected_task_id"), it.getInt("selected_task_item_id"))
         }
     }
 
@@ -80,12 +80,13 @@ class ReportPagerFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(tasks: List<TaskModel>, taskItems: List<TaskItemModel>, selectedTaskItemId: Int) =
+        fun newInstance(tasks: List<TaskModel>, taskItems: List<TaskItemModel>, selectedTaskId: Int, selectedTaskItemId: Int) =
             ReportPagerFragment().apply {
                 arguments = Bundle().apply {
                     putParcelableArrayList("tasks", ArrayList(tasks))
                     putParcelableArrayList("task_items", ArrayList(taskItems))
-                    putInt("selected_task_id", selectedTaskItemId)
+                    putInt("selected_task_id", selectedTaskId)
+                    putInt("selected_task_item_id", selectedTaskItemId)
                 }
             }
     }

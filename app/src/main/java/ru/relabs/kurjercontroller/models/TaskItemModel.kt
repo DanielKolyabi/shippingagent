@@ -51,7 +51,8 @@ data class TaskItemModel(
 
     fun toEntity(): TaskItemEntity =
         TaskItemEntity(
-            id = id,
+            id = 0,
+            taskItemId = id,
             taskId = taskId,
             notes = notes,
             defaultReportType = defaultReportType,

@@ -19,6 +19,8 @@ data class EntrancePhotoEntity(
     @ColumnInfo(name = "uuid")
     var UUID: String,
     var gps: GPSCoordinatesModel,
+    @ColumnInfo(name = "task_id")
+    var taskId: Int, //iddot
     @ColumnInfo(name = "task_item_id")
     var taskItemId: Int, //iddot
     var idnd: Int,
@@ -26,9 +28,9 @@ data class EntrancePhotoEntity(
     var entranceNumber: Int
 ) {
     suspend fun toModel(db: AppDatabase): EntrancePhotoModel = withContext(Dispatchers.IO) {
-        val taskItem = db.taskItemDao().getById(taskItemId)?.toModel(db)
+        val taskItem = db.taskItemDao().getByTaskItemId(taskId, taskItemId)?.toModel(db)
             ?: throw Exception("TaskItem ${taskItemId} not found")
-        val entrance = db.entranceDao().getByNumber(taskItemId, entranceNumber)?.toModel()
+        val entrance = db.entranceDao().getByNumber(taskId, taskItemId, entranceNumber)?.toModel()
             ?: throw Exception("Entrance ${taskItemId} ${entranceNumber} not found")
 
         EntrancePhotoModel(

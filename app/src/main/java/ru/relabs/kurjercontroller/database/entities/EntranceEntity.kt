@@ -11,7 +11,7 @@ import ru.relabs.kurjercontroller.models.EntranceModel
  */
 @Entity(
     tableName = "entrances",
-    indices = [Index(value = ["number", "task_item_id"], unique = true)]
+    indices = [Index(value = ["number", "task_item_id", "task_id"], unique = true)]
 )
 data class EntranceEntity(
     @PrimaryKey(autoGenerate = true)
@@ -19,6 +19,8 @@ data class EntranceEntity(
     val number: Int,
     @ColumnInfo(name = "task_item_id")
     val taskItemId: Int,
+    @ColumnInfo(name = "task_id")
+    val taskId: Int,
     @ColumnInfo(name = "start_apartments")
     val startApartments: Int,
     @ColumnInfo(name = "end_apartments")

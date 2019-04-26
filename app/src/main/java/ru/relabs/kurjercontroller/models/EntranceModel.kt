@@ -48,7 +48,7 @@ data class EntranceModel(
         return 0
     }
 
-    fun toEntity(taskItemId: Int): EntranceEntity =
+    fun toEntity(taskId: Int, taskItemId: Int): EntranceEntity =
         EntranceEntity(
             id = 0,
             taskItemId = taskItemId,
@@ -60,7 +60,8 @@ data class EntranceModel(
             floors = floors,
             mailboxType = mailboxType,
             startApartments = startApartments,
-            number = number
+            number = number,
+            taskId = taskId
         )
 
     companion object CREATOR : Parcelable.Creator<EntranceModel> {

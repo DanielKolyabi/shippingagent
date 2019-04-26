@@ -20,6 +20,7 @@ data class EntrancePhotoModel(
             0,
             uuid,
             gps,
+            taskItem.taskId,
             taskItem.id,
             taskItem.address.idnd,
             entranceModel.number

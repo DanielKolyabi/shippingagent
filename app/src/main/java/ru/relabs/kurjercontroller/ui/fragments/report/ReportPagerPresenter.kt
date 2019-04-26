@@ -20,7 +20,7 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
 
     fun getSelectedTask(): Pair<TaskModel, TaskItemModel> {
         val selectedTaskItem = fragment.taskItems.first {
-            it.id == fragment.selectedTaskItemId
+            it.id == fragment.selectedTask.second && it.taskId == fragment.selectedTask.first
         }
         val selectedTask = fragment.tasks.first {
             it.id == selectedTaskItem.taskId
@@ -56,10 +56,10 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
                 entrance,
                 task.publishers.first { it.name == taskItem.publisherName })
 
-            application().tasksRepository.closeEntrance(taskItem.id, entrance.number)
+            application().tasksRepository.closeEntrance(taskItem.taskId, taskItem.id, entrance.number)
 
             val idx = fragment.taskItems.indexOfFirst {
-                it.entrances.contains(entrance)
+                it.id == taskItem.id && it.taskId == task.id
             }
             if (idx < 0) {
                 return@launch
@@ -82,7 +82,7 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
                         application().router.exit()
                     }
                 } else {
-                    fragment.selectedTaskItemId = fragment.taskItems.first().id
+                    fragment.selectedTask = Pair(fragment.taskItems.first().taskId, fragment.taskItems.first().id)
                 }
             }
 
@@ -96,7 +96,7 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
     }
 
     fun onTaskChanged(taskNumber: Int) {
-        fragment.selectedTaskItemId = fragment.taskItems[taskNumber].id
+        fragment.selectedTask = Pair(fragment.taskItems[taskNumber].taskId, fragment.taskItems[taskNumber].id)
         fragment.updateTasks()
         updatePagerAdapter()
     }

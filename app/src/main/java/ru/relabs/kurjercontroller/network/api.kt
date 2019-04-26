@@ -102,9 +102,9 @@ object DeliveryServerAPI {
         fun getTasks(@Query("token") token: String, @Query("current_time") currentTime: String): Deferred<List<TaskResponseModel>>
 
         //
-//        @POST("api/v1/tasks/{id}/report")
+//        @POST("api/v1/tasks/{taskItemId}/report")
 //        @Multipart
-//        fun sendTaskReport(@Path("id") taskItemId: Int, @Query("token") token: String, @Part("data") data: TaskItemReportModel, @Part photos: List<MultipartBody.Part>): Deferred<StatusResponse>
+//        fun sendTaskReport(@Path("taskItemId") taskItemId: Int, @Query("token") token: String, @Part("data") data: TaskItemReportModel, @Part photos: List<MultipartBody.Part>): Deferred<StatusResponse>
 //
 //        @GET("api/v1/update")
 //        fun getUpdateInfo(): Deferred<UpdateInfoResponse>
@@ -115,9 +115,9 @@ object DeliveryServerAPI {
         @POST("api/v1/coords")
         fun sendGPS(@Query("token") token: String, @Query("lat") lat: Double, @Query("long") long: Double, @Query("time") time: String): Deferred<StatusResponse>
 
-        @POST("api/v1/controller/tasks/{id}/report")
+        @POST("api/v1/controller/tasks/{taskItemId}/report")
         @Multipart
-        fun sendTaskReport(@Path("id") taskItemId: Int, @Query("token") token: String, @Part("data") data: TaskItemReportModel, @Part photos: List<MultipartBody.Part>): Deferred<StatusResponse>
+        fun sendTaskReport(@Path("taskItemId") taskItemId: Int, @Query("token") token: String, @Part("data") data: TaskItemReportModel, @Part photos: List<MultipartBody.Part>): Deferred<StatusResponse>
 
         @GET("api/v1/controller/keys")
         fun getAvailableEntranceKeys(@Query("token") token: String): Deferred<List<String>>

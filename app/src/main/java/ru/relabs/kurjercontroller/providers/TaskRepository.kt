@@ -96,7 +96,7 @@ class TaskRepository(val db: AppDatabase) {
                 db.addressDao().insert(item.address.toEntity())
                 db.taskItemDao().insert(item.toEntity())
                 item.entrances.forEach { entrance ->
-                    val entity = entrance.toEntity(item.id)
+                    val entity = entrance.toEntity(item.taskId, item.id)
                     if (db.entranceReportDao().getByNumber(entity.taskItemId, entity.number) != null) {
                         entity.state = EntranceModel.CLOSED
                     }
@@ -148,7 +148,7 @@ class TaskRepository(val db: AppDatabase) {
                     db.addressDao().insert(taskItem.address.toEntity())
                     db.taskItemDao().insert(taskItem.toEntity())
                     taskItem.entrances.forEach { entrance ->
-                        val entity = entrance.toEntity(taskItem.id)
+                        val entity = entrance.toEntity(taskItem.taskId, taskItem.id)
                         if (db.entranceReportDao().getByNumber(entity.taskItemId, entity.number) != null) {
                             entity.state = EntranceModel.CLOSED
                         }
@@ -175,7 +175,7 @@ class TaskRepository(val db: AppDatabase) {
         db.taskItemDao().insertAll(task.taskItems.map { it.toEntity() })
         task.taskItems.forEach { taskItem ->
             db.addressDao().insert(taskItem.address.toEntity())
-            db.entranceDao().insertAll(taskItem.entrances.map { it.toEntity(taskItem.id) })
+            db.entranceDao().insertAll(taskItem.entrances.map { it.toEntity(taskItem.taskId, taskItem.id) })
         }
         //TODO: Filters
     }
@@ -196,10 +196,6 @@ class TaskRepository(val db: AppDatabase) {
         return@withContext db.taskDao().getById(taskId)?.toModel(db)
     }
 
-    suspend fun getTaskItem(taskItemId: Int): TaskItemModel? = withContext(Dispatchers.IO) {
-        return@withContext db.taskItemDao().getById(taskItemId)?.toModel(db)
-    }
-
     suspend fun closeAllTasks() = withContext(Dispatchers.IO) {
         db.taskDao().all.forEach { task ->
             closeTaskById(task.id)
@@ -212,9 +208,9 @@ class TaskRepository(val db: AppDatabase) {
 
         db.taskItemDao().getByTaskId(taskId)
             .forEach { taskItem ->
-                db.entranceDao().getByTaskItemId(taskItem.id)
+                db.entranceDao().getByTaskItemId(taskItem.taskId, taskItem.taskItemId)
                     .forEach {
-                        deleteEntrance(taskItem.id, it.number)
+                        deleteEntrance(taskItem.taskId, taskItem.taskItemId, it.number)
                     }
 
                 db.addressDao().deleteById(taskItem.addressId)
@@ -225,21 +221,21 @@ class TaskRepository(val db: AppDatabase) {
         db.taskDao().deleteById(taskId)
     }
 
-    suspend fun deleteEntrance(taskItemId: Int, entranceNumber: Int) = withContext(Dispatchers.IO) {
-        val entity = db.entranceDao().getByNumber(taskItemId, entranceNumber) ?: return@withContext
+    suspend fun deleteEntrance(taskId: Int, taskItemId: Int, entranceNumber: Int) = withContext(Dispatchers.IO) {
+        val entity = db.entranceDao().getByNumber(taskId, taskItemId, entranceNumber) ?: return@withContext
         db.entranceDao().delete(entity)
-        db.entranceResultDao().deleteByEntrance(entity.taskItemId, entity.number)
-        db.apartmentResultDao().deleteByEntrance(entity.taskItemId, entity.number)
+        db.entranceResultDao().deleteByEntrance(entity.taskId, entity.taskItemId, entity.number)
+        db.apartmentResultDao().deleteByEntrance(entity.taskId, entity.taskItemId, entity.number)
     }
 
-    suspend fun closeEntrance(taskItemId: Int, entranceNumber: Int) = withContext(Dispatchers.IO) {
-        val entity = db.entranceDao().getByNumber(taskItemId, entranceNumber) ?: run {
+    suspend fun closeEntrance(taskId: Int, taskItemId: Int, entranceNumber: Int) = withContext(Dispatchers.IO) {
+        val entity = db.entranceDao().getByNumber(taskId, taskItemId, entranceNumber) ?: run {
             CustomLog.writeToFile("closeEntrance: Can't find entrance #$entranceNumber in tid: $taskItemId")
             return@withContext
         }
         db.entranceDao().update(entity.copy(state = EntranceModel.CLOSED))
 
-        val taskItem = db.taskItemDao().getById(taskItemId) ?: run {
+        val taskItem = db.taskItemDao().getByTaskItemId(taskId, taskItemId) ?: run {
             CustomLog.writeToFile("closeEntrance: Can't find taskItem $taskItemId")
             return@withContext
         }
@@ -283,11 +279,12 @@ class TaskRepository(val db: AppDatabase) {
         euroKey: String? = null,
         mailboxType: Int? = null
     ) = withContext(Dispatchers.IO) {
-        var saved = db.entranceResultDao().getByEntrance(taskItem.id, entrance.number)
+        var saved = db.entranceResultDao().getByEntrance(taskItem.taskId, taskItem.id, entrance.number)
         if (saved == null) {
             db.entranceResultDao().insert(
                 EntranceResultEntity(
                     0,
+                    taskItem.taskId,
                     taskItem.id,
                     entrance.number,
                     hasLookupPost,
@@ -321,7 +318,7 @@ class TaskRepository(val db: AppDatabase) {
 
     suspend fun loadEntranceResult(taskItem: TaskItemModel, entrance: EntranceModel): EntranceResultEntity? =
         withContext(Dispatchers.IO) {
-            db.entranceResultDao().getByEntrance(taskItem.id, entrance.number)
+            db.entranceResultDao().getByEntrance(taskItem.taskId, taskItem.id, entrance.number)
         }
 
     suspend fun saveApartmentResult(
@@ -332,6 +329,7 @@ class TaskRepository(val db: AppDatabase) {
         db.apartmentResultDao().insert(
             ApartmentResultEntity(
                 0,
+                taskItem.taskId,
                 taskItem.id,
                 entrance.number,
                 apartment.number,
@@ -345,7 +343,7 @@ class TaskRepository(val db: AppDatabase) {
         taskItem: TaskItemModel,
         entrance: EntranceModel
     ): List<ApartmentListModel.Apartment> = withContext(Dispatchers.IO) {
-        return@withContext db.apartmentResultDao().getByEntrance(taskItem.id, entrance.number).map {
+        return@withContext db.apartmentResultDao().getByEntrance(taskItem.taskId, taskItem.id, entrance.number).map {
             ApartmentListModel.Apartment(
                 it.apartmentNumber,
                 it.buttonGroup,
@@ -359,7 +357,7 @@ class TaskRepository(val db: AppDatabase) {
         entrance: EntranceModel,
         apartmentNumber: Int
     ): ApartmentListModel.Apartment? = withContext(Dispatchers.IO) {
-        val data = db.apartmentResultDao().getByEntranceApartment(taskItem.id, entrance.number, apartmentNumber) ?: return@withContext null
+        val data = db.apartmentResultDao().getByEntranceApartment(taskItem.taskId, taskItem.id, entrance.number, apartmentNumber) ?: return@withContext null
         return@withContext ApartmentListModel.Apartment(
             data.apartmentNumber,
             data.buttonGroup,

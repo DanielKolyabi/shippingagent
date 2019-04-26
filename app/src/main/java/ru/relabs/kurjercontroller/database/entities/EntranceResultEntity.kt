@@ -10,11 +10,13 @@ import androidx.room.PrimaryKey
  */
 @Entity(
     tableName = "entrance_results",
-    indices = [Index(value = ["task_item_id", "entrance_number"], unique = true)]
+    indices = [Index(value = ["task_id", "task_item_id", "entrance_number"], unique = true)]
 )
 data class EntranceResultEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
+    @ColumnInfo(name = "task_id")
+    val taskId: Int, //id_ct
     @ColumnInfo(name = "task_item_id")
     val taskItemId: Int, //iddot
     @ColumnInfo(name = "entrance_number")

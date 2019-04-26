@@ -15,11 +15,11 @@ interface EntranceEntityDao {
     @Query("SELECT * FROM entrances WHERE id = :id")
     fun getById(id: Int): EntranceEntity?
 
-    @Query("SELECT * FROM entrances WHERE task_item_id = :taskItemId")
-    fun getByTaskItemId(taskItemId: Int): List<EntranceEntity>
+    @Query("SELECT * FROM entrances WHERE task_id = :taskId AND task_item_id = :taskItemId")
+    fun getByTaskItemId(taskId: Int, taskItemId: Int): List<EntranceEntity>
 
-    @Query("SELECT * FROM entrances WHERE task_item_id = :taskItemId AND number = :number")
-    fun getByNumber(taskItemId: Int, number: Int): EntranceEntity?
+    @Query("SELECT * FROM entrances WHERE task_id = :taskId AND task_item_id = :taskItemId AND number = :number")
+    fun getByNumber(taskId: Int, taskItemId: Int, number: Int): EntranceEntity?
 
     @Update
     fun update(address: EntranceEntity)

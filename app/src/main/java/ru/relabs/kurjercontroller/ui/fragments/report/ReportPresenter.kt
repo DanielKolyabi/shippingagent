@@ -211,6 +211,7 @@ class ReportPresenter(val fragment: ReportFragment) {
         if (fragment.saved == null) {
             fragment.saved = EntranceResultEntity(
                 id = 0,
+                taskId = fragment.taskItem.taskId,
                 taskItemId = fragment.taskItem.id,
                 entranceNumber = fragment.entrance.number,
                 apartmentTo = to,
