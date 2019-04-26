@@ -25,10 +25,7 @@ import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
-import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ApartmentDelegate
-import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ReportBlankMultiPhotoDelegate
-import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ReportBlankPhotoDelegate
-import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ReportPhotoDelegate
+import ru.relabs.kurjercontroller.ui.fragments.report.delegates.*
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportPhotosListModel
 
@@ -69,7 +66,6 @@ class ReportFragment : Fragment() {
             arrayListOf("загрузка")
         )
 
-        //TODO: If apartments interval changed - refresh apartments list
         apartmentAdapter.addDelegate(
             ApartmentDelegate(
                 { apartment, buttonGroup ->
@@ -82,6 +78,16 @@ class ReportFragment : Fragment() {
                     presenter.onAllApartmentsButtonStateChanged(apartment, change)
                 }
             )
+        )
+        apartmentAdapter.addDelegate(
+            EntranceDelegate { newState ->
+                presenter.onEntranceButtonStateChanged(newState)
+            }
+        )
+        apartmentAdapter.addDelegate(
+            LookoutDelegate { newState ->
+                presenter.onLookoutButtonStateChanged(newState)
+            }
         )
         photosAdapter.addDelegate(ReportPhotoDelegate { holder ->
             presenter.onRemovePhotoClicked(holder)
@@ -246,6 +252,33 @@ class ReportFragment : Fragment() {
         photosAdapter.notifyDataSetChanged()
     }
 
+    fun apartmentListAddEntrance() =
+        presenter.bgScope.launch(Dispatchers.IO) {
+            val saved = application().tasksRepository.loadEntranceApartment(taskItem, entrance, -1)
+
+            apartmentAdapter.data.removeAll {
+                it is ApartmentListModel.Entrance
+            }
+            apartmentAdapter.data.add(0, ApartmentListModel.Entrance(saved?.state ?: 0))
+        }
+
+
+    fun apartmentListAddLookout() =
+        presenter.bgScope.launch(Dispatchers.IO) {
+            val saved = application().tasksRepository.loadEntranceApartment(taskItem, entrance, -2)
+
+            apartmentAdapter.data.removeAll {
+                it is ApartmentListModel.Lookout
+            }
+            apartmentAdapter.data.add(0, ApartmentListModel.Lookout(saved?.state ?: 0))
+        }
+
+    fun apartmentListRemoveLookout() {
+        apartmentAdapter.data.removeAll {
+            it is ApartmentListModel.Lookout
+        }
+    }
+
     fun fillApartmentList() {
         apartmentAdapter.data.clear()
         apartmentAdapter.data.addAll(
@@ -262,6 +295,13 @@ class ReportFragment : Fragment() {
                 if (idx < 0) return@forEach
                 apartmentAdapter.data[idx] = save
             }
+
+            if (hasLookup) {
+                apartmentListAddLookout()
+            } else {
+                apartmentListRemoveLookout()
+            }
+            apartmentListAddEntrance()
         }
         apartmentAdapter.notifyDataSetChanged()
     }

@@ -2,7 +2,6 @@ package ru.relabs.kurjercontroller.database.daos
 
 import androidx.room.*
 import ru.relabs.kurjercontroller.database.entities.ApartmentResultEntity
-import ru.relabs.kurjercontroller.database.entities.EntranceResultEntity
 
 /**
  * Created by ProOrange on 30.08.2018.
@@ -15,6 +14,9 @@ interface ApartmentResultEntityDao {
 
     @Query("SELECT * FROM apartment_results WHERE task_item_id = :taskItemId AND entrance_number = :entranceNumber")
     fun getByEntrance(taskItemId: Int, entranceNumber: Int): List<ApartmentResultEntity>
+
+    @Query("SELECT * FROM apartment_results WHERE task_item_id = :taskItemId AND entrance_number = :entranceNumber AND apartment_number = :apartmentNumber")
+    fun getByEntranceApartment(taskItemId: Int, entranceNumber: Int, apartmentNumber: Int): ApartmentResultEntity?
 
     @Update
     fun update(address: ApartmentResultEntity)

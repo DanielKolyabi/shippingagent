@@ -354,6 +354,21 @@ class TaskRepository(val db: AppDatabase) {
         }
     }
 
+    suspend fun loadEntranceApartment(
+        taskItem: TaskItemModel,
+        entrance: EntranceModel,
+        apartmentNumber: Int
+    ): ApartmentListModel.Apartment? = withContext(Dispatchers.IO) {
+        val data = db.apartmentResultDao().getByEntranceApartment(taskItem.id, entrance.number, apartmentNumber) ?: return@withContext null
+        return@withContext ApartmentListModel.Apartment(
+            data.apartmentNumber,
+            data.buttonGroup,
+            data.buttonState
+        )
+
+    }
+
+
     suspend fun saveTaskReport(taskItem: TaskItemModel, entrance: EntranceModel, publisher: PublisherModel) =
         withContext(Dispatchers.IO) {
             val entranceResult = loadEntranceResult(taskItem, entrance)

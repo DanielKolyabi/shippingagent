@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_report.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.relabs.kurjer.files.ImageUtils
 import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.application
@@ -188,20 +189,26 @@ class ReportPresenter(val fragment: ReportFragment) {
             return
         }
 
-        if(from < 1){
-            fragment.appartaments_from?.setText((fragment.saved?.apartmentFrom ?: fragment.entrance.startApartments).toString())
+        if (from < 1) {
+            fragment.appartaments_from?.setText(
+                (fragment.saved?.apartmentFrom ?: fragment.entrance.startApartments).toString()
+            )
             return
         }
-        if(from > to){
-            fragment.appartaments_from?.setText((fragment.saved?.apartmentFrom ?: fragment.entrance.startApartments).toString())
+        if (from > to) {
+            fragment.appartaments_from?.setText(
+                (fragment.saved?.apartmentFrom ?: fragment.entrance.startApartments).toString()
+            )
             return
         }
-        if(to < from){
-            fragment.appartaments_to?.setText((fragment.saved?.apartmentTo ?: fragment.entrance.endApartments).toString())
+        if (to < from) {
+            fragment.appartaments_to?.setText(
+                (fragment.saved?.apartmentTo ?: fragment.entrance.endApartments).toString()
+            )
             return
         }
 
-        if(fragment.saved == null){
+        if (fragment.saved == null) {
             fragment.saved = EntranceResultEntity(
                 id = 0,
                 taskItemId = fragment.taskItem.id,
@@ -217,7 +224,7 @@ class ReportPresenter(val fragment: ReportFragment) {
                 description = null,
                 code = null
             )
-        }else{
+        } else {
             fragment.saved?.apartmentFrom = from
             fragment.saved?.apartmentTo = to
         }
@@ -230,11 +237,11 @@ class ReportPresenter(val fragment: ReportFragment) {
     private fun changeApartmentInterval(entrance: EntranceModel, from: Int, to: Int) {
         var toApartment = to
         var fromApartment = from
-        if(fromApartment > toApartment){
-            toApartment = fromApartment+1
+        if (fromApartment > toApartment) {
+            toApartment = fromApartment + 1
         }
-        if(toApartment < fromApartment){
-            fromApartment = toApartment-1
+        if (toApartment < fromApartment) {
+            fromApartment = toApartment - 1
         }
 
         bgScope.launch {
@@ -247,23 +254,23 @@ class ReportPresenter(val fragment: ReportFragment) {
                 )
             }
 
-            if(entrance.number != fragment.entrance.number){
+            if (entrance.number != fragment.entrance.number) {
                 fragment.callback?.onEntranceChanged(entrance)
             }
         }
 
-        fragment.taskItem.entrances.firstOrNull{
-            it.number == entrance.number-1
-        }?.let{ prevEntrance ->
-            if(prevEntrance.endApartments >= fromApartment){
-                changeApartmentInterval(prevEntrance, prevEntrance.startApartments, fromApartment-1)
+        fragment.taskItem.entrances.firstOrNull {
+            it.number == entrance.number - 1
+        }?.let { prevEntrance ->
+            if (prevEntrance.endApartments >= fromApartment) {
+                changeApartmentInterval(prevEntrance, prevEntrance.startApartments, fromApartment - 1)
             }
         }
-        fragment.taskItem.entrances.firstOrNull{
-            it.number == entrance.number+1
-        }?.let{ nextEntrance ->
-            if(nextEntrance.startApartments <= toApartment){
-                changeApartmentInterval(nextEntrance, toApartment+1, nextEntrance.endApartments)
+        fragment.taskItem.entrances.firstOrNull {
+            it.number == entrance.number + 1
+        }?.let { nextEntrance ->
+            if (nextEntrance.startApartments <= toApartment) {
+                changeApartmentInterval(nextEntrance, toApartment + 1, nextEntrance.endApartments)
             }
         }
     }
@@ -334,6 +341,42 @@ class ReportPresenter(val fragment: ReportFragment) {
         }
     }
 
+    fun onEntranceButtonStateChanged(newState: Int) {
+        val index = fragment.apartmentAdapter.data.indexOfFirst {
+            it is ApartmentListModel.Entrance
+        }
+        val item = fragment.apartmentAdapter.data[index] as ApartmentListModel.Entrance
+        val newItem = item.copy(state = newState)
+        fragment.apartmentAdapter.data[index] = newItem
+        fragment.apartmentAdapter.notifyItemChanged(index)
+
+        bgScope.launch {
+            application().tasksRepository.saveApartmentResult(
+                fragment.taskItem,
+                fragment.entrance,
+                ApartmentListModel.Apartment(-1, 1, newItem.state)
+            )
+        }
+    }
+
+    fun onLookoutButtonStateChanged(newState: Int) {
+        val index = fragment.apartmentAdapter.data.indexOfFirst {
+            it is ApartmentListModel.Lookout
+        }
+        val item = fragment.apartmentAdapter.data[index] as ApartmentListModel.Lookout
+        val newItem = item.copy(state = newState)
+        fragment.apartmentAdapter.data[index] = newItem
+        fragment.apartmentAdapter.notifyItemChanged(index)
+
+        bgScope.launch {
+            application().tasksRepository.saveApartmentResult(
+                fragment.taskItem,
+                fragment.entrance,
+                ApartmentListModel.Apartment(-2, 1, newItem.state)
+            )
+        }
+    }
+
     fun onDeliveryWrongChanged() {
         fragment.deliveryWrong = !fragment.deliveryWrong
         fragment.layout_error_button?.setSelectButtonActive(fragment.deliveryWrong)
@@ -349,6 +392,7 @@ class ReportPresenter(val fragment: ReportFragment) {
     fun onLookupChanged() {
         fragment.hasLookup = !fragment.hasLookup
         fragment.lookout?.setSelectButtonActive(fragment.hasLookup)
+
         bgScope.launch {
             fragment.allTaskItems.forEach {
                 application().tasksRepository.insertEntranceResult(
@@ -356,6 +400,16 @@ class ReportPresenter(val fragment: ReportFragment) {
                     fragment.entrance,
                     hasLookupPost = fragment.hasLookup
                 )
+            }
+
+            if (fragment.hasLookup) {
+                fragment.apartmentListAddLookout()
+            } else {
+                fragment.apartmentListRemoveLookout()
+            }
+
+            withContext(Dispatchers.Main){
+                fragment.apartmentAdapter.notifyDataSetChanged()
             }
         }
     }
@@ -401,11 +455,11 @@ class ReportPresenter(val fragment: ReportFragment) {
                 val apartment = (it as ApartmentListModel.Apartment)
                 if (apartment.state and change != targetState) {
                     apartment.state = apartment.state xor change
-                    when(change){
-                        1 -> if(apartment.state and 4 > 0) apartment.state = apartment.state xor 4
-                        4 -> if(apartment.state and 1 > 0) apartment.state = apartment.state xor 1
-                        16 -> if(apartment.state and 32 > 0) apartment.state = apartment.state xor 32
-                        32 -> if(apartment.state and 16 > 0) apartment.state = apartment.state xor 16
+                    when (change) {
+                        1 -> if (apartment.state and 4 > 0) apartment.state = apartment.state xor 4
+                        4 -> if (apartment.state and 1 > 0) apartment.state = apartment.state xor 1
+                        16 -> if (apartment.state and 32 > 0) apartment.state = apartment.state xor 32
+                        32 -> if (apartment.state and 16 > 0) apartment.state = apartment.state xor 16
                     }
                 }
             }
