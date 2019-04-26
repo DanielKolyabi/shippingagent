@@ -1,6 +1,7 @@
 package ru.relabs.kurjercontroller.ui.fragments.taskList
 
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,10 +10,12 @@ import android.widget.AutoCompleteTextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_tasklist.*
+import kotlinx.android.synthetic.main.include_hint_container.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
+import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.models.TaskModel
@@ -20,6 +23,7 @@ import ru.relabs.kurjercontroller.ui.fragments.ISearchableFragment
 import ru.relabs.kurjercontroller.ui.fragments.taskList.delegates.HeaderDelegate
 import ru.relabs.kurjercontroller.ui.fragments.taskList.delegates.LoaderDelegate
 import ru.relabs.kurjercontroller.ui.fragments.taskList.delegates.TaskDelegate
+import ru.relabs.kurjercontroller.ui.helpers.HintHelper
 import java.util.*
 
 class TaskListFragment : Fragment(), ISearchableFragment {
@@ -54,6 +58,7 @@ class TaskListFragment : Fragment(), ISearchableFragment {
     }
 
     var shouldNetworkUpdate: Boolean = false
+    private lateinit var hintHelper: HintHelper
     val presenter = TaskListPresenter(this)
     val adapter = DelegateAdapter<TaskListModel>().apply {
         addDelegate(HeaderDelegate())
@@ -66,6 +71,14 @@ class TaskListFragment : Fragment(), ISearchableFragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        hintHelper = HintHelper(
+            hint_container,
+            this.resources.getString(R.string.task_list_hint_text),
+            false,
+            activity!!.getSharedPreferences(
+                BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE
+            )
+        )
 
         presenter.updateStartButton()
 

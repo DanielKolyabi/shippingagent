@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.ui.fragments.addressList
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,10 +10,12 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_address_list.*
 import kotlinx.android.synthetic.main.fragment_tasklist.*
+import kotlinx.android.synthetic.main.include_hint_container.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
+import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
@@ -21,7 +24,7 @@ import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressList
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListLoaderDelegate
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListSortingDelegate
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListTaskItemDelegate
-import ru.relabs.kurjercontroller.ui.helpers.TaskAddressSorter
+import ru.relabs.kurjercontroller.ui.helpers.HintHelper
 
 /**
  * Created by ProOrange on 18.03.2019.
@@ -65,6 +68,7 @@ class AddressListFragment : Fragment(), ISearchableFragment {
     }
 
 
+    private lateinit var hintHelper: HintHelper
     var taskIds: List<Int> = listOf()
     val tasks: MutableList<TaskModel> = mutableListOf()
 
@@ -78,6 +82,14 @@ class AddressListFragment : Fragment(), ISearchableFragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        hintHelper = HintHelper(
+            hint_container,
+            resources.getString(R.string.address_list_hint_text),
+            false,
+            activity!!.getSharedPreferences(
+                BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE
+            )
+        )
 
         address_list?.layoutManager = LinearLayoutManager(context)
         address_list?.adapter = adapter

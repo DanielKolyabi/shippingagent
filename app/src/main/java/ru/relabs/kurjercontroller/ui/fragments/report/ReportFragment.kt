@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
+import android.text.Html
 import android.text.TextWatcher
 import android.view.*
 import android.view.inputmethod.EditorInfo
@@ -14,10 +15,12 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_report.*
+import kotlinx.android.synthetic.main.include_hint_container.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
+import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.database.entities.EntranceResultEntity
@@ -28,6 +31,7 @@ import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.*
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportPhotosListModel
+import ru.relabs.kurjercontroller.ui.helpers.HintHelper
 
 /**
  * Created by ProOrange on 15.04.2019.
@@ -40,6 +44,7 @@ class ReportFragment : Fragment() {
     var apartmentAdapter = DelegateAdapter<ApartmentListModel>()
     val photosAdapter = DelegateAdapter<ReportPhotosListModel>()
 
+    private lateinit var hintHelper: HintHelper
     var keyAdapter: ArrayAdapter<String>? = null
     var euroKeyAdapter: ArrayAdapter<String>? = null
     var callback: Callback? = null
@@ -50,8 +55,30 @@ class ReportFragment : Fragment() {
     var allTaskItems: List<TaskItemModel> = listOf()
     var saved: EntranceResultEntity? = null
 
+    fun updateHintHelperMaximumHeight() {
+
+        hintHelper?.maxHeight = (appartaments_list?.height ?: 0) + (hint_container?.height ?: 0)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        hintHelper = HintHelper(
+            hint_container,
+            "",
+            false,
+            activity!!.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
+        )
+        showHintText(taskItem.notes)
+
+        hint_container.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+
+            override fun onGlobalLayout() {
+                hint_container?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
+
+                updateHintHelperMaximumHeight()
+            }
+        });
 
         allTaskItems = callback?.getAllTaskItems() ?: listOf(taskItem)
 
@@ -107,6 +134,12 @@ class ReportFragment : Fragment() {
         } else {
             setControlsLocked(false)
         }
+    }
+
+    fun showHintText(notes: List<String>) {
+        hint_text.text = Html.fromHtml((3 downTo 1).map {
+            "<b>Пр. $it</b><br/>" + notes.getOrElse(it-1) { "" }
+        }.joinToString("<br/>"))
     }
 
     private fun refreshData() {
