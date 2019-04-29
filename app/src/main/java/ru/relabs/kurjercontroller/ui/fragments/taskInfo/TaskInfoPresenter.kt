@@ -1,5 +1,7 @@
 package ru.relabs.kurjercontroller.ui.fragments.taskInfo
 
+import kotlinx.android.synthetic.main.fragment_taskinfo.*
+import kotlinx.android.synthetic.main.fragment_tasklist.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,7 +29,11 @@ class TaskInfoPresenter(val fragment: TaskInfoFragment) {
 
     fun onShowMapClicked() {
         application().router.navigateTo(
-            YandexMapScreen(fragment.task.taskItems.map { it.address })
+            YandexMapScreen(
+                fragment.task.taskItems.map { it.address }
+            ) { address ->
+                fragment.targetAddress = address
+            }
         )
     }
 }

@@ -43,7 +43,13 @@ data class TaskItemReportModel(
     @SerializedName("publisher_id")
     val publisherId: Int,
     @SerializedName("mailbox_type")
-    val mailboxType: Int
+    val mailboxType: Int,
+    val lat: Double,
+    val long: Double,
+    @SerializedName("gps_time")
+    val gpsTime: DateTime,
+    @SerializedName("entrance_closed")
+    val entranceClosed: Boolean
 )
 
 data class PhotoReportModel(

@@ -52,7 +52,9 @@ class AddressListPresenter(val fragment: AddressListFragment) {
     }
 
     fun onAddressMapClicked(addressModel: AddressModel) {
-        application().router.navigateTo(YandexMapScreen(listOf(addressModel)))
+        application().router.navigateTo(YandexMapScreen(listOf(addressModel)){ address ->
+            return@YandexMapScreen
+        })
     }
 
     fun onCloseTaskClicked() {
@@ -154,6 +156,10 @@ class AddressListPresenter(val fragment: AddressListFragment) {
     }
 
     fun onMapClicked() {
-        application().router.navigateTo(YandexMapScreen(fragment.tasks.flatMap { it.taskItems }.map { it.address }))
+        application().router.navigateTo(
+            YandexMapScreen(fragment.tasks.flatMap { it.taskItems }.map { it.address }){ address ->
+                fragment.targetAddress = address
+            }
+        )
     }
 }

@@ -40,6 +40,7 @@ class ReportFragment : Fragment() {
 
     var deliveryWrong: Boolean = false
     var hasLookup: Boolean = false
+    var entranceClosed: Boolean = false
     var mailboxType: Int = 1
     var apartmentAdapter = DelegateAdapter<ApartmentListModel>()
     val photosAdapter = DelegateAdapter<ReportPhotosListModel>()
@@ -93,6 +94,19 @@ class ReportFragment : Fragment() {
             arrayListOf("загрузка")
         )
 
+        bindDelegates()
+        bindControl()
+        refreshData()
+
+        if (entrance.state == EntranceModel.CLOSED) {
+            setControlsLocked(true)
+        } else {
+            setControlsLocked(false)
+        }
+    }
+
+    private fun bindDelegates() {
+
         apartmentAdapter.addDelegate(
             ApartmentDelegate(
                 { apartment, buttonGroup ->
@@ -125,15 +139,6 @@ class ReportFragment : Fragment() {
         photosAdapter.addDelegate(ReportBlankMultiPhotoDelegate { holder ->
             presenter.onBlankMultiPhotoClicked()
         })
-
-        bindControl()
-        refreshData()
-
-        if (entrance.state == EntranceModel.CLOSED) {
-            setControlsLocked(true)
-        } else {
-            setControlsLocked(false)
-        }
     }
 
     fun showHintText(notes: List<String>) {
@@ -156,7 +161,7 @@ class ReportFragment : Fragment() {
         refreshData()
     }
 
-    private fun setControlsLocked(locked: Boolean) {
+    fun setControlsLocked(locked: Boolean) {
         appartaments_from?.isEnabled = !locked
         appartaments_to?.isEnabled = !locked
         entrance_euro_key?.isEnabled = !locked
@@ -167,6 +172,8 @@ class ReportFragment : Fragment() {
         lookout?.isEnabled = !locked
         close_button?.isEnabled = !locked
         user_explanation_input?.isEnabled = !locked
+        mailbox_type?.isEnabled = !locked
+        entrance_closed?.isEnabled = !locked
     }
 
     fun updateEditable() {
@@ -211,7 +218,6 @@ class ReportFragment : Fragment() {
 
         presenter.bgScope.launch(Dispatchers.Main) {
             loadKeys(saved)
-
         }
 
         saved?.let { saved ->
@@ -231,6 +237,10 @@ class ReportFragment : Fragment() {
             if (saved.mailboxType != null) {
                 mailboxType = saved.mailboxType
                 updateMailboxTypeText()
+            }
+            if (saved.entranceClosed != null){
+                entranceClosed = saved.entranceClosed
+                updateEntranceClosed()
             }
         }
 
@@ -340,6 +350,10 @@ class ReportFragment : Fragment() {
     }
 
     private fun bindControl() {
+        entrance_closed?.setOnClickListener {
+            presenter.onEntranceClosedChanged()
+        }
+
         mailbox_type?.setOnClickListener {
             presenter.onEntranceMailboxTypeChanged()
         }
@@ -373,7 +387,7 @@ class ReportFragment : Fragment() {
             override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
             override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
             override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean =
-                entrance.state == EntranceModel.CLOSED
+                entrance.state == EntranceModel.CLOSED || entranceClosed
         }
 
         photos_list?.addOnItemTouchListener(listClickInterceptor)
@@ -482,6 +496,13 @@ class ReportFragment : Fragment() {
     override fun onDestroy() {
         presenter.bgScope.terminate()
         super.onDestroy()
+    }
+
+    fun updateEntranceClosed() {
+        entrance_closed?.setSelectButtonActive(entranceClosed)
+        setControlsLocked(entranceClosed)
+        entrance_closed?.isEnabled = true
+        close_button?.isEnabled = true
     }
 
     companion object {

@@ -54,10 +54,19 @@ class ReportScreen(
     }
 }
 
-class YandexMapScreen(private val addresses: List<AddressModel>) :
+class YandexMapScreen(
+    private val addresses: List<AddressModel>,
+    private val onAddressClicked: suspend (address: AddressModel) -> Unit
+) :
     SupportAppScreen() {
     override fun getFragment(): Fragment {
-        return YandexMapFragment.newInstance(addresses.map { it.id })
+        return YandexMapFragment.newInstance(addresses.map { it.id }).apply {
+            setCallback(object: YandexMapFragment.Callback{
+                override suspend fun onAddressClicked(address: AddressModel) {
+                    this@YandexMapScreen.onAddressClicked(address)
+                }
+            })
+        }
     }
 }
 

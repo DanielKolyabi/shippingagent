@@ -277,7 +277,8 @@ class TaskRepository(val db: AppDatabase) {
         floors: Int? = null,
         key: String? = null,
         euroKey: String? = null,
-        mailboxType: Int? = null
+        mailboxType: Int? = null,
+        entranceClosed: Boolean? = null
     ) = withContext(Dispatchers.IO) {
         var saved = db.entranceResultDao().getByEntrance(taskItem.taskId, taskItem.id, entrance.number)
         if (saved == null) {
@@ -296,7 +297,8 @@ class TaskRepository(val db: AppDatabase) {
                     floors,
                     key,
                     euroKey,
-                    mailboxType
+                    mailboxType,
+                    entranceClosed
                 )
             )
             return@withContext
@@ -312,6 +314,7 @@ class TaskRepository(val db: AppDatabase) {
         if (key != null) saved = saved.copy(key = key)
         if (euroKey != null) saved = saved.copy(euroKey = euroKey)
         if (mailboxType != null) saved = saved.copy(mailboxType = mailboxType)
+        if (entranceClosed != null) saved = saved.copy(entranceClosed = entranceClosed)
 
         db.entranceResultDao().update(saved)
     }
@@ -367,7 +370,7 @@ class TaskRepository(val db: AppDatabase) {
     }
 
 
-    suspend fun saveTaskReport(taskItem: TaskItemModel, entrance: EntranceModel, publisher: PublisherModel) =
+    suspend fun saveTaskReport(taskItem: TaskItemModel, entrance: EntranceModel, publisher: PublisherModel, location: GPSCoordinatesModel) =
         withContext(Dispatchers.IO) {
             val entranceResult = loadEntranceResult(taskItem, entrance)
             val apartmentResults = loadEntranceApartments(taskItem, entrance)
@@ -391,7 +394,11 @@ class TaskRepository(val db: AppDatabase) {
                 apartmentResults.map { ApartmentResult(it.number, it.state, it.buttonGroup) },
                 DateTime.now(),
                 publisher.id,
-                entranceResult?.mailboxType ?: entrance.mailboxType
+                entranceResult?.mailboxType ?: entrance.mailboxType,
+                location.lat,
+                location.long,
+                location.time,
+                entranceResult?.entranceClosed ?: false
             )
 
             db.entranceReportDao().insert(report)

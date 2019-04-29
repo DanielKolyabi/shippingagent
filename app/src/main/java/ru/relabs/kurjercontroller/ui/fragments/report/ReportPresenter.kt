@@ -223,7 +223,8 @@ class ReportPresenter(val fragment: ReportFragment) {
                 isDeliveryWrong = null,
                 floors = null,
                 description = null,
-                code = null
+                code = null,
+                entranceClosed = null
             )
         } else {
             fragment.saved?.apartmentFrom = from
@@ -477,6 +478,19 @@ class ReportPresenter(val fragment: ReportFragment) {
                         it as ApartmentListModel.Apartment
                     )
                 }
+        }
+    }
+
+    fun onEntranceClosedChanged() {
+        fragment.entranceClosed = !fragment.entranceClosed
+        fragment.updateEntranceClosed()
+
+        bgScope.launch {
+            fragment.allTaskItems.forEach {
+                application().tasksRepository.insertEntranceResult(
+                    it, fragment.entrance, entranceClosed = fragment.entranceClosed
+                )
+            }
         }
     }
 

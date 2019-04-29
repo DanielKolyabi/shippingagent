@@ -13,6 +13,7 @@ import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.application.UserModel
+import ru.relabs.kurjercontroller.models.GPSCoordinatesModel
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI.api
 import ru.relabs.kurjercontroller.network.NetworkHelper
 import ru.relabs.kurjercontroller.network.models.ErrorUtils
@@ -75,6 +76,8 @@ class LoginPresenter(val fragment: LoginFragment) {
                     application().user.restoreUserCredentials()
                 }
 
+
+                application().currentLocation = GPSCoordinatesModel(0.0, 0.0, DateTime(0))
                 application().sendPushToken(null)
                 application().tasksRepository.getAvailableEntranceKeys(response.token, true)
                 application().tasksRepository.getAvailableEntranceEuroKeys(response.token, true)

@@ -8,11 +8,16 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_taskinfo.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.CustomLog
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.application
+import ru.relabs.kurjercontroller.models.AddressModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
@@ -23,6 +28,7 @@ class TaskInfoFragment : Fragment() {
 
     lateinit var task: TaskModel
 
+    var targetAddress: AddressModel? = null
     val presenter = TaskInfoPresenter(this)
     val adapter = DelegateAdapter<TaskInfoModel>().apply {
         addDelegate(InfoAddressesHeaderDelegate())
@@ -42,7 +48,30 @@ class TaskInfoFragment : Fragment() {
             !(task.androidState == TaskModel.EXAMINED || task.androidState == TaskModel.STARTED || task.androidState == TaskModel.COMPLETED)
 
         bindControls()
-        populateList(task)
+        if(adapter.data.isEmpty()) {
+            populateList(task)
+        }
+
+        targetAddress?.let {
+            //HACK. List won't scroll without timeout ¯\_(ツ)_/¯
+            presenter.bgScope.launch {
+                delay(250)
+                withContext(Dispatchers.Main){
+                    scrollToAddress(it)
+                }
+            }
+        }
+    }
+
+    private fun scrollToAddress(address: AddressModel) {
+        val idx = adapter.data.indexOfFirst {
+            (it as? TaskInfoModel.TaskItem)?.taskItem?.address?.idnd == address.idnd
+        }
+        if (idx < 0) {
+            return
+        }
+
+        task_items_list?.smoothScrollToPosition(idx)
     }
 
     private fun bindControls() {

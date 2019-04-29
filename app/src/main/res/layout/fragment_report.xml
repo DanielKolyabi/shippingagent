@@ -181,6 +181,18 @@
             app:layout_constraintStart_toEndOf="@id/lookout"
             app:layout_constraintBottom_toBottomOf="@+id/lookout"/>
 
+
+    <Button
+            android:id="@+id/entrance_closed"
+            android:layout_width="60dp"
+            android:layout_height="40dp"
+            android:text="@string/entrance_closed_label"
+            android:layout_marginStart="4dp"
+            android:elevation="0dp"
+            app:layout_constraintTop_toTopOf="@+id/lookout"
+            app:layout_constraintStart_toEndOf="@id/mailbox_type"
+            app:layout_constraintBottom_toBottomOf="@+id/lookout"/>
+
     <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"

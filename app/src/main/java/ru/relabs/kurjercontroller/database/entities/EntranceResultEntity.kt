@@ -36,5 +36,7 @@ data class EntranceResultEntity(
     @ColumnInfo(name = "euro_key")
     val euroKey: String?,
     @ColumnInfo(name = "mailbox_type")
-    val mailboxType: Int?
+    val mailboxType: Int?,
+    @ColumnInfo(name = "entrance_closed")
+    val entranceClosed: Boolean?
 )

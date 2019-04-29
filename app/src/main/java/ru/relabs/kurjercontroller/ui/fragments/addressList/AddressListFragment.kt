@@ -12,11 +12,13 @@ import kotlinx.android.synthetic.main.fragment_address_list.*
 import kotlinx.android.synthetic.main.fragment_tasklist.*
 import kotlinx.android.synthetic.main.include_hint_container.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
+import ru.relabs.kurjercontroller.models.AddressModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.ISearchableFragment
@@ -30,6 +32,8 @@ import ru.relabs.kurjercontroller.ui.helpers.HintHelper
  * Created by ProOrange on 18.03.2019.
  */
 class AddressListFragment : Fragment(), ISearchableFragment {
+    var targetAddress: AddressModel? = null
+
     override fun onSearchItems(filter: String): List<String> {
         if (filter.contains(",")) {
             return adapter.data.asSequence()
@@ -110,8 +114,29 @@ class AddressListFragment : Fragment(), ISearchableFragment {
                 presenter.checkTasks()
             }
         }
+
+        targetAddress?.let {
+            //HACK. List won't scroll without timeout ¯\_(ツ)_/¯
+            presenter.bgScope.launch {
+                delay(250)
+                withContext(Dispatchers.Main) {
+                    scrollToAddress(it)
+                }
+            }
+        }
     }
 
+
+    private fun scrollToAddress(address: AddressModel) {
+        val idx = adapter.data.indexOfFirst {
+            (it as? AddressListModel.Address)?.taskItems?.firstOrNull()?.address?.idnd == address.idnd
+        }
+        if (idx < 0) {
+            return
+        }
+
+        address_list?.smoothScrollToPosition(idx)
+    }
 
     fun updateCloseTaskButtonVisibility() {
         close_button.setVisible(tasks.size == 1)

@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.database.models.ApartmentResult
+import java.util.*
 
 /**
  * Created by ProOrange on 19.03.2019.
@@ -42,5 +43,13 @@ data class EntranceReportEntity(
     @ColumnInfo(name = "publisher_id")
     val publisherId: Int,
     @ColumnInfo(name = "mailbox_type")
-    val mailboxType: Int
+    val mailboxType: Int,
+    @ColumnInfo(name = "gps_lat")
+    val gpsLat: Double,
+    @ColumnInfo(name = "gps_long")
+    val gpsLong: Double,
+    @ColumnInfo(name = "gps_time")
+    val gpsTime: DateTime,
+    @ColumnInfo(name = "entrance_closed")
+    val entranceClosed: Boolean
 )

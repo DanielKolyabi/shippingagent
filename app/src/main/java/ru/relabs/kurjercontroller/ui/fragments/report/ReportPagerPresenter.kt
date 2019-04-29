@@ -48,13 +48,16 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
     }
 
     private fun onEntranceClosed(task: TaskModel, taskItem: TaskItemModel, entrance: EntranceModel) {
+        val location = application().currentLocation
         bgScope.launch {
             var shouldRefreshUI = true
 
             application().tasksRepository.saveTaskReport(
                 taskItem,
                 entrance,
-                task.publishers.first { it.name == taskItem.publisherName })
+                task.publishers.first { it.name == taskItem.publisherName },
+                location
+            )
 
             application().tasksRepository.closeEntrance(taskItem.taskId, taskItem.id, entrance.number)
 

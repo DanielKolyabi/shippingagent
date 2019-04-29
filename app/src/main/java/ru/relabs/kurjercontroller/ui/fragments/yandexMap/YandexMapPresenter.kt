@@ -13,9 +13,12 @@ class YandexMapPresenter(val fragment: YandexMapFragment) {
         bgScope.launch {
             fragment.addresses = fragment.addressIds.mapNotNull{
                 application().tasksRepository.getAddress(it)
+            }.distinctBy {
+                it.idnd
             }
             withContext(Dispatchers.Main){
                 fragment.showAddresses()
+                fragment.makeFocus(fragment.addresses)
             }
         }
     }
