@@ -481,7 +481,7 @@ class ReportPresenter(val fragment: ReportFragment) {
         }
     }
 
-    fun onEntranceClosedChanged() {
+    fun onIsEntranceClosedChanged() {
         fragment.entranceClosed = !fragment.entranceClosed
         fragment.updateEntranceClosed()
 

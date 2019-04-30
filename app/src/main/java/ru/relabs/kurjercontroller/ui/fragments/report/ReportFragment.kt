@@ -27,6 +27,8 @@ import ru.relabs.kurjercontroller.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
+import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.*
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
@@ -105,38 +107,48 @@ class ReportFragment : Fragment() {
         }
     }
 
+    private fun isClosed() = entrance.state == EntranceModel.CLOSED || entranceClosed
+
     private fun bindDelegates() {
 
         apartmentAdapter.addDelegate(
             ApartmentDelegate(
                 { apartment, buttonGroup ->
+                    if(isClosed()) return@ApartmentDelegate
                     presenter.onApartmentButtonGroupChanged(apartment, buttonGroup)
                 },
                 { apartment, newState ->
+                    if(isClosed()) return@ApartmentDelegate
                     presenter.onApartmentButtonStateChanged(apartment, newState)
                 },
                 { apartment, change ->
+                    if(isClosed()) return@ApartmentDelegate
                     presenter.onAllApartmentsButtonStateChanged(apartment, change)
                 }
             )
         )
         apartmentAdapter.addDelegate(
             EntranceDelegate { newState ->
+                if(isClosed()) return@EntranceDelegate
                 presenter.onEntranceButtonStateChanged(newState)
             }
         )
         apartmentAdapter.addDelegate(
             LookoutDelegate { newState ->
+                if(isClosed()) return@LookoutDelegate
                 presenter.onLookoutButtonStateChanged(newState)
             }
         )
         photosAdapter.addDelegate(ReportPhotoDelegate { holder ->
+            if(isClosed()) return@ReportPhotoDelegate
             presenter.onRemovePhotoClicked(holder)
         })
         photosAdapter.addDelegate(ReportBlankPhotoDelegate { holder ->
+            if(isClosed()) return@ReportBlankPhotoDelegate
             presenter.onBlankPhotoClicked()
         })
         photosAdapter.addDelegate(ReportBlankMultiPhotoDelegate { holder ->
+            if(isClosed()) return@ReportBlankMultiPhotoDelegate
             presenter.onBlankMultiPhotoClicked()
         })
     }
@@ -173,7 +185,16 @@ class ReportFragment : Fragment() {
         close_button?.isEnabled = !locked
         user_explanation_input?.isEnabled = !locked
         mailbox_type?.isEnabled = !locked
-        entrance_closed?.isEnabled = !locked
+        updateCloseButtonActive()
+        updateIsEntranceClosedButton()
+    }
+
+    fun updateIsEntranceClosedButton(){
+        entrance_closed?.isEnabled = entrance.state == EntranceModel.CREATED
+    }
+
+    fun updateCloseButtonActive(){
+        close_button?.isEnabled = entrance.state == EntranceModel.CREATED
     }
 
     fun updateEditable() {
@@ -329,6 +350,7 @@ class ReportFragment : Fragment() {
                 ApartmentListModel.Apartment(it, buttonGroup = 0, state = 0)
             }
         )
+        apartmentAdapter.notifyDataSetChanged()
         presenter.bgScope.launch {
             val saves = application().tasksRepository.loadEntranceApartments(taskItem, entrance)
             saves.forEach { save ->
@@ -339,19 +361,22 @@ class ReportFragment : Fragment() {
                 apartmentAdapter.data[idx] = save
             }
 
+            apartmentListAddEntrance()
             if (hasLookup) {
                 apartmentListAddLookout()
             } else {
                 apartmentListRemoveLookout()
             }
-            apartmentListAddEntrance()
+            appartaments_list?.post{
+
+                apartmentAdapter.notifyDataSetChanged()
+            }
         }
-        apartmentAdapter.notifyDataSetChanged()
     }
 
     private fun bindControl() {
         entrance_closed?.setOnClickListener {
-            presenter.onEntranceClosedChanged()
+            presenter.onIsEntranceClosedChanged()
         }
 
         mailbox_type?.setOnClickListener {
@@ -359,7 +384,12 @@ class ReportFragment : Fragment() {
         }
 
         close_button?.setOnClickListener {
-            callback?.onEntranceClosed(task, taskItem, entrance)
+            context?.showError("Вы действительно хотите закрыть подъезд?", object: ErrorButtonsListener {
+                override fun positiveListener() {
+                    callback?.onEntranceClosed(task, taskItem, entrance)
+                }
+                override fun negativeListener() {}
+            }, "Да", "Нет", true)
         }
 
         entrance_key?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -381,17 +411,6 @@ class ReportFragment : Fragment() {
                 }
             }
         }
-
-
-        val listClickInterceptor = object : RecyclerView.OnItemTouchListener {
-            override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
-            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
-            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean =
-                entrance.state == EntranceModel.CLOSED || entranceClosed
-        }
-
-        photos_list?.addOnItemTouchListener(listClickInterceptor)
-        appartaments_list?.addOnItemTouchListener(listClickInterceptor)
 
         user_explanation_input?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
@@ -501,8 +520,6 @@ class ReportFragment : Fragment() {
     fun updateEntranceClosed() {
         entrance_closed?.setSelectButtonActive(entranceClosed)
         setControlsLocked(entranceClosed)
-        entrance_closed?.isEnabled = true
-        close_button?.isEnabled = true
     }
 
     companion object {

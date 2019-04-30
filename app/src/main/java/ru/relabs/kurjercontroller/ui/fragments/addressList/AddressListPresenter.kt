@@ -13,6 +13,7 @@ import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.activities.showErrorSuspend
 import ru.relabs.kurjercontroller.ui.fragments.ReportScreen
 import ru.relabs.kurjercontroller.ui.fragments.YandexMapScreen
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.YandexMapFragment
 import ru.relabs.kurjercontroller.ui.helpers.TaskAddressSorter
 
 /**
@@ -42,7 +43,13 @@ class AddressListPresenter(val fragment: AddressListFragment) {
                 Pair(task.parentTask, task.taskItem)
             }
 
-        application().router.navigateTo(ReportScreen(taskItemsOnAddress, clickedTask.taskItem.taskId, clickedTask.taskItem.id))
+        application().router.navigateTo(
+            ReportScreen(
+                taskItemsOnAddress,
+                clickedTask.taskItem.taskId,
+                clickedTask.taskItem.id
+            )
+        )
     }
 
     fun onSortingChanged(sortingMethod: Int) {
@@ -52,9 +59,17 @@ class AddressListPresenter(val fragment: AddressListFragment) {
     }
 
     fun onAddressMapClicked(addressModel: AddressModel) {
-        application().router.navigateTo(YandexMapScreen(listOf(addressModel)){ address ->
-            return@YandexMapScreen
-        })
+        application().router.navigateTo(
+            YandexMapScreen(
+                listOf(
+                    YandexMapFragment.AddressWithColor(
+                        addressModel,
+                        0
+                    )
+                )
+            ) { address ->
+                return@YandexMapScreen
+            })
     }
 
     fun onCloseTaskClicked() {
@@ -156,8 +171,19 @@ class AddressListPresenter(val fragment: AddressListFragment) {
     }
 
     fun onMapClicked() {
+        var colorIdx = 0
         application().router.navigateTo(
-            YandexMapScreen(fragment.tasks.flatMap { it.taskItems }.map { it.address }){ address ->
+            YandexMapScreen(
+                fragment.tasks
+                    .flatMap { it.taskItems }
+                    .groupBy { it.taskId }
+                    .mapKeys { colorIdx++ }
+                    .flatMap {
+                        it.value.map { taskItem ->
+                            YandexMapFragment.AddressWithColor(taskItem.address, it.key)
+                        }
+                    }
+            ) { address ->
                 fragment.targetAddress = address
             }
         )

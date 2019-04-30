@@ -1,7 +1,5 @@
 package ru.relabs.kurjercontroller.ui.fragments.taskInfo
 
-import kotlinx.android.synthetic.main.fragment_taskinfo.*
-import kotlinx.android.synthetic.main.fragment_tasklist.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -10,6 +8,7 @@ import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.ui.fragments.TaskItemExplanationScreen
 import ru.relabs.kurjercontroller.ui.fragments.YandexMapScreen
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.YandexMapFragment
 
 class TaskInfoPresenter(val fragment: TaskInfoFragment) {
     val bgScope = CancelableScope(Dispatchers.Default)
@@ -30,7 +29,7 @@ class TaskInfoPresenter(val fragment: TaskInfoFragment) {
     fun onShowMapClicked() {
         application().router.navigateTo(
             YandexMapScreen(
-                fragment.task.taskItems.map { it.address }
+                fragment.task.taskItems.map { YandexMapFragment.AddressWithColor(it.address, 0) }
             ) { address ->
                 fragment.targetAddress = address
             }

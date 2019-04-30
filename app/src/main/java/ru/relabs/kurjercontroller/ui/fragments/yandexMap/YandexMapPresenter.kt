@@ -11,14 +11,17 @@ class YandexMapPresenter(val fragment: YandexMapFragment) {
 
     fun loadAddresses() {
         bgScope.launch {
-            fragment.addresses = fragment.addressIds.mapNotNull{
-                application().tasksRepository.getAddress(it)
+
+            fragment.addresses = fragment.addressIds.mapNotNull {
+                val address = application().tasksRepository.getAddress(it.id) ?: return@mapNotNull null
+                return@mapNotNull YandexMapFragment.AddressWithColor(address, it.colorId)
             }.distinctBy {
-                it.idnd
+                it.address.idnd
             }
-            withContext(Dispatchers.Main){
+
+            withContext(Dispatchers.Main) {
                 fragment.showAddresses()
-                fragment.makeFocus(fragment.addresses)
+                fragment.makeFocus(fragment.addresses.map { it.address })
             }
         }
     }
