@@ -108,6 +108,7 @@ class ReportFragment : Fragment() {
     }
 
     private fun isClosed() = entrance.state == EntranceModel.CLOSED || entranceClosed
+    private fun isPhotoAvailable() = entrance.state == EntranceModel.CREATED
 
     private fun bindDelegates() {
 
@@ -140,15 +141,15 @@ class ReportFragment : Fragment() {
             }
         )
         photosAdapter.addDelegate(ReportPhotoDelegate { holder ->
-            if(isClosed()) return@ReportPhotoDelegate
+            if(!isPhotoAvailable()) return@ReportPhotoDelegate
             presenter.onRemovePhotoClicked(holder)
         })
         photosAdapter.addDelegate(ReportBlankPhotoDelegate { holder ->
-            if(isClosed()) return@ReportBlankPhotoDelegate
+            if(!isPhotoAvailable()) return@ReportBlankPhotoDelegate
             presenter.onBlankPhotoClicked()
         })
         photosAdapter.addDelegate(ReportBlankMultiPhotoDelegate { holder ->
-            if(isClosed()) return@ReportBlankMultiPhotoDelegate
+            if(!isPhotoAvailable()) return@ReportBlankMultiPhotoDelegate
             presenter.onBlankMultiPhotoClicked()
         })
     }
