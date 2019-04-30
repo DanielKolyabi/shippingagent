@@ -20,6 +20,8 @@ import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.models.AddressModel
 import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
+import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.ISearchableFragment
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListAddressDelegate
@@ -102,7 +104,11 @@ class AddressListFragment : Fragment(), ISearchableFragment {
             presenter.onMapClicked()
         }
         close_button?.setOnClickListener {
-            presenter.onCloseTaskClicked()
+            context?.showError("Вы действительно хотите закрыть задание?", object: ErrorButtonsListener{
+                override fun positiveListener() {
+                    presenter.onCloseTaskClicked()
+                }
+            }, "Да", "Нет", true)
         }
         updateCloseTaskButtonVisibility()
 

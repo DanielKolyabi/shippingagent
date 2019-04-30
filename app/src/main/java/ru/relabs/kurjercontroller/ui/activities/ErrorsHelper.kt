@@ -11,8 +11,8 @@ import ru.relabs.kurjercontroller.CustomLog
  */
 
 interface ErrorButtonsListener {
-    fun positiveListener()
-    fun negativeListener()
+    fun positiveListener(){}
+    fun negativeListener(){}
 }
 
 suspend fun Context.showErrorSuspend(

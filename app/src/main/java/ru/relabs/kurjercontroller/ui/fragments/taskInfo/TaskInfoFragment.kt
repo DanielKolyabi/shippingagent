@@ -143,8 +143,6 @@ class TaskInfoFragment : Fragment() {
                     override fun positiveListener() {
                         application().router.exit()
                     }
-
-                    override fun negativeListener() {}
                 })
                 return
             }

@@ -389,7 +389,6 @@ class ReportFragment : Fragment() {
                 override fun positiveListener() {
                     callback?.onEntranceClosed(task, taskItem, entrance)
                 }
-                override fun negativeListener() {}
             }, "Да", "Нет", true)
         }
 

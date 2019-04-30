@@ -134,13 +134,15 @@ class AddressListPresenter(val fragment: AddressListFragment) {
             fragment.tasks.addAll(tasks)
             applySorting()
 
+            withContext(Dispatchers.Main){
+                fragment.updateCloseTaskButtonVisibility()
+            }
+
             if (fragment.tasks.isEmpty()) {
                 fragment.context?.showErrorSuspend("Что-то сломалось :(", object : ErrorButtonsListener {
                     override fun positiveListener() {
                         application().router.exit()
                     }
-
-                    override fun negativeListener() {}
                 }, "Назад")
             } else {
                 fragment.showLoading(false)
