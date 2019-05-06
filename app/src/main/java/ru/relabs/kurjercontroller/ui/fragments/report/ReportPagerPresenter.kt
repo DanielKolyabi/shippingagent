@@ -47,19 +47,33 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
         fragment.view_pager?.currentItem = 0
     }
 
-    private fun onEntranceClosed(task: TaskModel, taskItem: TaskItemModel, entrance: EntranceModel) {
+    fun onEntranceClosedRemote(taskId: Int, taskItemId: Int, entranceNumber: Int) {
+        val task = fragment.tasks.first { it.id == taskId }
+        val taskItem = task.taskItems.first { it.id == taskItemId }
+        val entrance = taskItem.entrances.first { it.number == entranceNumber }
+        onEntranceClosed(task, taskItem, entrance, false)
+    }
+
+    private fun onEntranceClosed(
+        task: TaskModel,
+        taskItem: TaskItemModel,
+        entrance: EntranceModel,
+        useDatabase: Boolean = true
+    ) {
         val location = application().currentLocation
         bgScope.launch {
             var shouldRefreshUI = true
 
-            application().tasksRepository.saveTaskReport(
-                taskItem,
-                entrance,
-                task.publishers.first { it.name == taskItem.publisherName },
-                location
-            )
+            if (useDatabase) {
+                application().tasksRepository.saveTaskReport(
+                    taskItem,
+                    entrance,
+                    task.publishers.first { it.name == taskItem.publisherName },
+                    location
+                )
 
-            application().tasksRepository.closeEntrance(taskItem.taskId, taskItem.id, entrance.number)
+                application().tasksRepository.closeEntrance(taskItem.taskId, taskItem.id, entrance.number)
+            }
 
             val idx = fragment.taskItems.indexOfFirst {
                 it.id == taskItem.id && it.taskId == task.id

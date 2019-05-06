@@ -1,6 +1,7 @@
 package ru.relabs.kurjercontroller
 
 import android.content.Intent
+import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +19,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(pushToken: String) {
         super.onNewToken(pushToken)
+        Log.d("Firebase", "Got token $pushToken")
         bgScope.launch(Dispatchers.Default) {
             (application as? MyApplication)?.let {
                 it.savePushToken(pushToken)
@@ -27,6 +29,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(msg: RemoteMessage) {
+        Log.d("Firebase", "$msg")
         bgScope.launch(Dispatchers.Main) {
             processMessageData(msg.data)
         }
@@ -51,19 +54,27 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             }
         }
         if (data.containsKey("tasks_update")) {
+            val taskId = data.getOrElse("task_id", {null})?.toIntOrNull()
             val int = Intent().apply {
                 putExtra("tasks_changed", true)
+                putExtra("task_id", taskId)
                 action = "NOW"
             }
             sendBroadcast(int)
         }
         if (data.containsKey("closed_task_id")) {
             run {
-                val taskItemId = data["closed_task_id"]?.toIntOrNull()
+                val taskId = data["closed_task_id"]?.toIntOrNull()
+                taskId ?: return@run
+                val taskItemId = data["closed_task_item_id"]?.toIntOrNull()
                 taskItemId ?: return@run
+                val entranceNumber = data["closed_entrance_number"]?.toIntOrNull()
+                entranceNumber ?: return@run
 
                 val int = Intent().apply {
+                    putExtra("task_closed", taskId)
                     putExtra("task_item_closed", taskItemId)
+                    putExtra("entrance_number_closed", entranceNumber)
                     action = "NOW"
                 }
                 sendBroadcast(int)

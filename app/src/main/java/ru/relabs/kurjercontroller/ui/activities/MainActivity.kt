@@ -1,8 +1,6 @@
 package ru.relabs.kurjercontroller.ui.activities
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
+import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.KeyEvent
@@ -24,6 +22,7 @@ import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.ISearchableFragment
 import ru.relabs.kurjercontroller.ui.fragments.LoginScreen
 import ru.relabs.kurjercontroller.ui.fragments.SearchInputAdapter
+import ru.relabs.kurjercontroller.ui.fragments.TaskListScreen
 import ru.relabs.kurjercontroller.ui.fragments.addressList.AddressListFragment
 import ru.relabs.kurjercontroller.ui.fragments.entrancesList.EntrancesListFragment
 import ru.relabs.kurjercontroller.ui.fragments.filters.FiltersFragment
@@ -40,6 +39,50 @@ import ru.terrakok.cicerone.commands.Command
 
 class MainActivity : AppCompatActivity() {
     val bgScope = CancelableScope(Dispatchers.Main)
+    private var needRefreshShowed = false
+    private var needForceRefresh = false
+
+    private var intentFilter = IntentFilter("NOW")
+    private val broadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            intent ?: return
+//            if (intent.getBooleanExtra("network_disabled", false)) {
+//                showNetworkDisabledError(!blockingNetworkDisabled)
+//            }
+            if (intent.getBooleanExtra("tasks_changed", false)) {
+                if (needRefreshShowed) return
+                needRefreshShowed = true
+                showTasksRefreshDialog(true)
+            }
+            if (intent.getIntExtra("task_closed", 0) != 0) {
+                val repository = application().tasksRepository
+                bgScope.launch(Dispatchers.Default) {
+                    val taskId = intent.getIntExtra("task_closed", -1)
+                    val taskItemId = intent.getIntExtra("task_item_closed", -1)
+                    val entranceNumber = intent.getIntExtra("entrance_number_closed", -1)
+                    if (taskId == -1 || taskItemId == -1 || entranceNumber == -1) {
+                        return@launch
+                    }
+                    repository.closeEntrance(taskId, taskItemId, entranceNumber)
+                }
+            }
+        }
+    }
+
+    private fun showTasksRefreshDialog(cancelable: Boolean) {
+        val negative = if (cancelable) "Позже" else ""
+        showError("Необходимо обновить список заданий.", object : ErrorButtonsListener {
+            override fun positiveListener() {
+                needRefreshShowed = false
+                needForceRefresh = false
+                application().router.backTo(TaskListScreen(true))
+            }
+
+            override fun negativeListener() {
+                needForceRefresh = true
+            }
+        }, "Ок", negative)
+    }
 
     private val navigator = object : SupportAppNavigator(this, supportFragmentManager, R.id.fragment_container) {
 
@@ -77,6 +120,8 @@ class MainActivity : AppCompatActivity() {
 
         bindBackstackListener()
         bindControls()
+
+        registerReceiver(broadcastReceiver, intentFilter)
     }
 
     private fun bindControls() {

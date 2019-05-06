@@ -1,6 +1,9 @@
 package ru.relabs.kurjercontroller.ui.fragments.addressList
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,6 +22,7 @@ import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.models.AddressModel
+import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
@@ -35,6 +39,33 @@ import ru.relabs.kurjercontroller.ui.helpers.HintHelper
  */
 class AddressListFragment : Fragment(), ISearchableFragment {
     var targetAddress: AddressModel? = null
+    private val broadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            intent ?: return
+            val taskId = intent.getIntExtra("task_closed", 0)
+            val taskItemId = intent.getIntExtra("task_item_closed", 0)
+            val entranceNumber = intent.getIntExtra("entrance_number_closed", 0)
+
+            for (task in tasks) {
+                if (task.id == taskId) {
+                    for (taskItem in task.taskItems) {
+                        if (taskItem.id == taskItemId) {
+                            for (entrance in taskItem.entrances) {
+                                if (entrance.number == entranceNumber) {
+                                    entrance.state = EntranceModel.CLOSED
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            presenter.bgScope.launch {
+                presenter.applySorting()
+            }
+        }
+    }
+    private val intentFilter = IntentFilter("NOW")
 
     override fun onSearchItems(filter: String): List<String> {
         if (filter.contains(",")) {
@@ -88,6 +119,7 @@ class AddressListFragment : Fragment(), ISearchableFragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         hintHelper = HintHelper(
             hint_container,
             resources.getString(R.string.address_list_hint_text),
@@ -104,7 +136,7 @@ class AddressListFragment : Fragment(), ISearchableFragment {
             presenter.onMapClicked()
         }
         close_button?.setOnClickListener {
-            context?.showError("Вы действительно хотите закрыть задание?", object: ErrorButtonsListener{
+            context?.showError("Вы действительно хотите закрыть задание?", object : ErrorButtonsListener {
                 override fun positiveListener() {
                     presenter.onCloseTaskClicked()
                 }
@@ -174,9 +206,11 @@ class AddressListFragment : Fragment(), ISearchableFragment {
         arguments?.let {
             taskIds = it.getIntArray("task_ids")?.toList() ?: listOf()
         }
+        activity?.registerReceiver(broadcastReceiver, intentFilter)
     }
 
     override fun onDestroy() {
+        activity?.unregisterReceiver(broadcastReceiver)
         presenter.bgScope.terminate()
         super.onDestroy()
     }
