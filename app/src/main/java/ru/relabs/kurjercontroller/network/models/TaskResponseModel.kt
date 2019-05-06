@@ -20,6 +20,8 @@ data class TaskResponseModel(
     val endControlDate: Date,
     val description: String,
     val iteration: Int,
+    @SerializedName("first_examined_device_id")
+    val firstExaminedDeviceId: String?,
 
     val items: List<TaskItemResponseModel>,
     val publishers: List<TaskPublisherResponseModel>,
@@ -39,7 +41,8 @@ data class TaskResponseModel(
             taskItems = items.map { it.toModel() },
             publishers = publishers.map{it.toModel()},
             taskFilters = filters.toModel(),
-            iteration = iteration
+            iteration = iteration,
+            firstExaminedDeviceId = firstExaminedDeviceId
         )
     }
 }

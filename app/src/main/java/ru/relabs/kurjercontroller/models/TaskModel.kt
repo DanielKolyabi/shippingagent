@@ -44,7 +44,8 @@ data class TaskModel(
     val taskItems: List<TaskItemModel>,
     val taskFilters: TaskFiltersModel?,
     val state: Int,
-    val iteration: Int
+    val iteration: Int,
+    val firstExaminedDeviceId: String?
 ) : Parcelable {
 
     val androidState: Int
@@ -65,7 +66,8 @@ data class TaskModel(
             description = description,
             endControlDate = endControlDate,
             startControlDate = startControlDate,
-            iteration = iteration
+            iteration = iteration,
+            firstExaminedDeviceId = firstExaminedDeviceId
         )
 
     constructor(parcel: Parcel) : this(
@@ -80,7 +82,8 @@ data class TaskModel(
         parcel.createTypedArrayList(TaskItemModel).orEmpty(),
         parcel.readParcelable(TaskFiltersModel::class.java.classLoader),
         parcel.readInt(),
-        parcel.readInt()
+        parcel.readInt(),
+        parcel.readString().orEmpty()
     ) {
     }
 
@@ -97,6 +100,7 @@ data class TaskModel(
         parcel.writeParcelable(taskFilters, flags)
         parcel.writeInt(state)
         parcel.writeInt(iteration)
+        parcel.writeString(firstExaminedDeviceId)
     }
 
     override fun describeContents(): Int {
