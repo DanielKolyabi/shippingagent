@@ -11,6 +11,7 @@ import ru.relabs.kurjercontroller.database.AppDatabase
 import ru.relabs.kurjercontroller.database.entities.*
 import ru.relabs.kurjercontroller.database.models.ApartmentResult
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
+import ru.relabs.kurjercontroller.logError
 import ru.relabs.kurjercontroller.models.*
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI.api
@@ -422,8 +423,13 @@ class TaskRepository(val db: AppDatabase) {
             if (!withRefresh && availableEntranceEuroKeys.isEmpty()) {
                 availableEntranceEuroKeys = db.entranceEuroKeysDao().all.map { it.key }
             }
-            if (withRefresh || availableEntranceEuroKeys.isEmpty()) {
-                availableEntranceEuroKeys = api.getAvailableEntranceEuroKeys(token).await()
+            if ((withRefresh || availableEntranceEuroKeys.isEmpty()) && token.isNotBlank()) {
+                availableEntranceEuroKeys = try {
+                    api.getAvailableEntranceEuroKeys(token).await()
+                }catch (e: Exception){
+                    e.logError()
+                    listOf()
+                }
                 db.entranceEuroKeysDao().clear()
                 db.entranceEuroKeysDao().insertAll(availableEntranceEuroKeys.map { EntranceEuroKeyEntity(0, it) })
             }

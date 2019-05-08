@@ -2,17 +2,24 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'io.fabric'
+
+repositories{
+    maven {
+        url "http://maven.google.com/"
+        maven { url 'https://maven.fabric.io/public' }
+    }
+}
 
 android {
-//    signingConfigs {
-//        config {
-//            keyAlias 'controller'
-//            keyPassword 'relabs'
-//            storeFile file('H:/BackupsWindowsReinstall/work/DeliveryManProject/android_deliveryman_client/2017abix.dat')
-//            storePassword 'relabs'
-//        }
-//    }
-
+    signingConfigs {
+        config {
+            keyAlias 'controller'
+            keyPassword 'relabs'
+            storeFile file('H:\\BackupsWindowsReinstall\\work\\DeliveryManProject\\android_deliveryman_controller\\key.jks')
+            storePassword 'relabs'
+        }
+    }
 
     compileSdkVersion 28
     defaultConfig {
@@ -29,16 +36,16 @@ android {
     }
     buildTypes {
         debug {
-            buildConfigField("String", "API_URL", '"http://warp.courr.ru:8084"')
+            buildConfigField("String", "API_URL", '"https://courrmobileapi.courr.ru"')//http://warp.courr.ru:8084"')
             buildConfigField("String", "YA_KEY", '"9be78b32-1265-4157-bf15-999b8d747a5c"')
-//            signingConfig signingConfigs.config
+            signingConfig signingConfigs.config
         }
         release {
             buildConfigField("String", "API_URL", '"https://courrmobileapi.courr.ru"')
             buildConfigField("String", "YA_KEY", '"9be78b32-1265-4157-bf15-999b8d747a5c"')
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-//            signingConfig signingConfigs.config
+            signingConfig signingConfigs.config
         }
     }
 }
@@ -77,6 +84,10 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-core:16.0.8'
     implementation 'com.google.firebase:firebase-messaging:17.6.0'
+
+    implementation('com.crashlytics.sdk.android:crashlytics:2.10.0@aar') {
+        transitive = true;
+    }
 }
 
 apply plugin: 'com.google.gms.google-services'
