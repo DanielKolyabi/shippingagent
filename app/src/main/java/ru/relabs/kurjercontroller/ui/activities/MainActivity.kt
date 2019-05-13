@@ -2,6 +2,7 @@ package ru.relabs.kurjercontroller.ui.activities
 
 import android.content.*
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
@@ -338,6 +339,15 @@ class MainActivity : AppCompatActivity() {
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             permissions.add(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.FOREGROUND_SERVICE
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                permissions.add(android.Manifest.permission.FOREGROUND_SERVICE)
+            }
         }
 
         PermissionHelper.showPermissionsRequest(this, permissions.toTypedArray(), false)

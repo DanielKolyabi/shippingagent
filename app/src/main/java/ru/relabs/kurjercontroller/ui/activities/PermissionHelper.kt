@@ -18,6 +18,7 @@ object PermissionHelper {
                 android.Manifest.permission.READ_EXTERNAL_STORAGE -> "Доступ к чтению файлов"
                 android.Manifest.permission.ACCESS_FINE_LOCATION -> "Доступ к получению местоположения"
                 android.Manifest.permission.REQUEST_INSTALL_PACKAGES -> "Разрешать устанавливать приложения"
+                android.Manifest.permission.FOREGROUND_SERVICE -> "Запускать фоновый сервис"
                 else -> "Неизвестно"
             } + "\n"
         }
