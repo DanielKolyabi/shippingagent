@@ -115,48 +115,51 @@ class ReportFragment : Fragment() {
         apartmentAdapter.addDelegate(
             ApartmentDelegate(
                 { apartment, buttonGroup ->
-                    if(isClosed()) return@ApartmentDelegate
+                    if (isClosed()) return@ApartmentDelegate
                     presenter.onApartmentButtonGroupChanged(apartment, buttonGroup)
                 },
                 { apartment, newState ->
-                    if(isClosed()) return@ApartmentDelegate
+                    if (isClosed()) return@ApartmentDelegate
                     presenter.onApartmentButtonStateChanged(apartment, newState)
                 },
                 { apartment, change ->
-                    if(isClosed()) return@ApartmentDelegate
+                    if (isClosed()) return@ApartmentDelegate
                     presenter.onAllApartmentsButtonStateChanged(apartment, change)
+                },
+                { apartment ->
+                    presenter.onApartmentDescriptionClicked(apartment)
                 }
             )
         )
         apartmentAdapter.addDelegate(
             EntranceDelegate { newState ->
-                if(isClosed()) return@EntranceDelegate
+                if (isClosed()) return@EntranceDelegate
                 presenter.onEntranceButtonStateChanged(newState)
             }
         )
         apartmentAdapter.addDelegate(
             LookoutDelegate { newState ->
-                if(isClosed()) return@LookoutDelegate
+                if (isClosed()) return@LookoutDelegate
                 presenter.onLookoutButtonStateChanged(newState)
             }
         )
         photosAdapter.addDelegate(ReportPhotoDelegate { holder ->
-            if(!isPhotoAvailable()) return@ReportPhotoDelegate
+            if (!isPhotoAvailable()) return@ReportPhotoDelegate
             presenter.onRemovePhotoClicked(holder)
         })
         photosAdapter.addDelegate(ReportBlankPhotoDelegate { holder ->
-            if(!isPhotoAvailable()) return@ReportBlankPhotoDelegate
+            if (!isPhotoAvailable()) return@ReportBlankPhotoDelegate
             presenter.onBlankPhotoClicked()
         })
         photosAdapter.addDelegate(ReportBlankMultiPhotoDelegate { holder ->
-            if(!isPhotoAvailable()) return@ReportBlankMultiPhotoDelegate
+            if (!isPhotoAvailable()) return@ReportBlankMultiPhotoDelegate
             presenter.onBlankMultiPhotoClicked()
         })
     }
 
     fun showHintText(notes: List<String>) {
         hint_text.text = Html.fromHtml((3 downTo 1).map {
-            "<b>Пр. $it</b><br/>" + notes.getOrElse(it-1) { "" }
+            "<b>Пр. $it</b><br/>" + notes.getOrElse(it - 1) { "" }
         }.joinToString("<br/>"))
     }
 
@@ -190,11 +193,11 @@ class ReportFragment : Fragment() {
         updateIsEntranceClosedButton()
     }
 
-    fun updateIsEntranceClosedButton(){
+    fun updateIsEntranceClosedButton() {
         entrance_closed?.isEnabled = entrance.state == EntranceModel.CREATED
     }
 
-    fun updateCloseButtonActive(){
+    fun updateCloseButtonActive() {
         close_button?.isEnabled = entrance.state == EntranceModel.CREATED
     }
 
@@ -260,7 +263,7 @@ class ReportFragment : Fragment() {
                 mailboxType = saved.mailboxType
                 updateMailboxTypeText()
             }
-            if (saved.entranceClosed != null){
+            if (saved.entranceClosed != null) {
                 entranceClosed = saved.entranceClosed
                 updateEntranceClosed()
             }
@@ -295,6 +298,9 @@ class ReportFragment : Fragment() {
                 entrance_euro_key?.setSelection(pos)
             }
         }
+
+        presenter.onEntranceKeyChanged(entrance_key.selectedItem?.toString() ?: "ошибка")
+        presenter.onEntranceEuroKeyChanged(entrance_euro_key.selectedItem?.toString() ?: "ошибка")
 
         withContext(Dispatchers.Main) {
             keyAdapter?.notifyDataSetChanged()
@@ -368,7 +374,7 @@ class ReportFragment : Fragment() {
             } else {
                 apartmentListRemoveLookout()
             }
-            appartaments_list?.post{
+            appartaments_list?.post {
 
                 apartmentAdapter.notifyDataSetChanged()
             }
@@ -385,7 +391,7 @@ class ReportFragment : Fragment() {
         }
 
         close_button?.setOnClickListener {
-            context?.showError("Вы действительно хотите закрыть подъезд?", object: ErrorButtonsListener {
+            context?.showError("Вы действительно хотите закрыть подъезд?", object : ErrorButtonsListener {
                 override fun positiveListener() {
                     callback?.onEntranceClosed(task, taskItem, entrance)
                 }

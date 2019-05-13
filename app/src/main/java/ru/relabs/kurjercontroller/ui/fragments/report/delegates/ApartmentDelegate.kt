@@ -14,7 +14,8 @@ import ru.relabs.kurjercontroller.ui.fragments.report.holders.ApartmentHolder
 class ApartmentDelegate(
     private val onButtonGroupChanged: (apartmentNumber: Int, buttonGroup: Int) -> Unit,
     private val onStateChanged: (apartmentNumber: Int, state: Int) -> Unit,
-    private val onLongStateChanged: (apartmentNumber: Int, change: Int) -> Unit
+    private val onLongStateChanged: (apartmentNumber: Int, change: Int) -> Unit,
+    val onDescriptionClicked: (apartmentNumber: Int) -> Unit
 ) : IAdapterDelegate<ApartmentListModel> {
     override fun isForViewType(data: List<ApartmentListModel>, position: Int): Boolean {
         return data[position] is ApartmentListModel.Apartment
@@ -33,7 +34,8 @@ class ApartmentDelegate(
             LayoutInflater.from(parent.context).inflate(R.layout.holder_report_appartament, parent, false),
             onButtonGroupChanged,
             onStateChanged,
-            onLongStateChanged
+            onLongStateChanged,
+            onDescriptionClicked
         )
     }
 }

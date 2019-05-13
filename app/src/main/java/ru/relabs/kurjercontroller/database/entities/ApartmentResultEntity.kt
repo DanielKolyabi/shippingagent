@@ -26,5 +26,6 @@ data class ApartmentResultEntity(
     @ColumnInfo(name = "button_group")
     val buttonGroup: Int,
     @ColumnInfo(name = "button_state")
-    val buttonState: Int
+    val buttonState: Int,
+    val description: String
 )

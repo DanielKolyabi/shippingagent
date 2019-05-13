@@ -9,5 +9,6 @@ data class ApartmentResult(
     val number: Int,
     val state: Int,
     @SerializedName("button_group")
-    val buttonGroup: Int
+    val buttonGroup: Int,
+    val description: String
 )

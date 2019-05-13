@@ -1,11 +1,14 @@
 package ru.relabs.kurjercontroller.ui.fragments.report
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.MediaStore
+import android.text.InputType
+import android.widget.EditText
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_report.*
 import kotlinx.coroutines.Dispatchers
@@ -410,7 +413,7 @@ class ReportPresenter(val fragment: ReportFragment) {
                 fragment.apartmentListRemoveLookout()
             }
 
-            withContext(Dispatchers.Main){
+            withContext(Dispatchers.Main) {
                 fragment.apartmentAdapter.notifyDataSetChanged()
             }
         }
@@ -492,6 +495,33 @@ class ReportPresenter(val fragment: ReportFragment) {
                 )
             }
         }
+    }
+
+    fun onApartmentDescriptionClicked(apartment: Int) {
+        val index = fragment.apartmentAdapter.data.indexOfFirst {
+            (it as? ApartmentListModel.Apartment)?.number == apartment
+        }
+        val item = fragment.apartmentAdapter.data[index] as ApartmentListModel.Apartment
+
+        val input = EditText(fragment.context).apply {
+            inputType = InputType.TYPE_CLASS_TEXT
+            setText(item.description)
+        }
+
+        AlertDialog.Builder(fragment.context)
+            .setTitle("Описание")
+            .setView(input)
+            .setPositiveButton("Ок") { _, _ ->
+                bgScope.launch {
+                    item.description = input.text.toString()
+                    withContext(Dispatchers.Main){
+                        fragment.apartmentAdapter.notifyItemChanged(index)
+                    }
+                    application().tasksRepository.saveApartmentResult(fragment.taskItem, fragment.entrance, item)
+                }
+            }
+            .setNegativeButton("Отмена"){ _, _ -> }
+            .show()
     }
 
     val bgScope = CancelableScope(Dispatchers.Default)

@@ -4,6 +4,7 @@ import android.view.View
 import androidx.viewpager.widget.ViewPager
 import kotlinx.android.synthetic.main.holder_report_appartament.view.*
 import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
+import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 import ru.relabs.kurjercontroller.ui.fragments.report.adapters.ApartmentButtonsPagerAdapter
 
@@ -15,7 +16,8 @@ class ApartmentHolder(
     itemView: View,
     val onButtonGroupChanged: (apartmentNumber: Int, buttonGroup: Int) -> Unit,
     val onStateChanged: (apartmentNumber: Int, state: Int) -> Unit,
-    val onLongStateChanged: (apartmentNumber: Int, change: Int) -> Unit
+    val onLongStateChanged: (apartmentNumber: Int, change: Int) -> Unit,
+    val onDescriptionClicked: (apartmentNumber: Int) -> Unit
 ) : BaseViewHolder<ApartmentListModel>(itemView) {
     var item: ApartmentListModel? = null
 
@@ -36,6 +38,9 @@ class ApartmentHolder(
         this.item = item
         if (item !is ApartmentListModel.Apartment) return
 
+        itemView.description_button?.setOnClickListener {
+            onDescriptionClicked(item.number)
+        }
         itemView.appartament_number?.text = item.number.toString()
         itemView.buttons_list?.adapter = ApartmentButtonsPagerAdapter(
             itemView.context,

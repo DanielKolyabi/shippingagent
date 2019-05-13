@@ -4,6 +4,7 @@ import android.view.View
 import androidx.viewpager.widget.ViewPager
 import kotlinx.android.synthetic.main.holder_report_appartament.view.*
 import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
+import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 import ru.relabs.kurjercontroller.ui.fragments.report.adapters.ApartmentButtonsPagerAdapter
 
@@ -26,6 +27,7 @@ class LookoutHolder(
             return@setOnTouchListener true
         }
 
+        itemView.description_button?.setVisible(false)
         itemView.appartament_number?.text = "Вахта"
         itemView.buttons_list?.adapter = ApartmentButtonsPagerAdapter(
             itemView.context,

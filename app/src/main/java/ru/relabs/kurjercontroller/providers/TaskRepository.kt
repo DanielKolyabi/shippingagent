@@ -338,7 +338,8 @@ class TaskRepository(val db: AppDatabase) {
                 entrance.number,
                 apartment.number,
                 apartment.buttonGroup,
-                apartment.state
+                apartment.state,
+                apartment.description
             )
         )
     }
@@ -351,7 +352,8 @@ class TaskRepository(val db: AppDatabase) {
             ApartmentListModel.Apartment(
                 it.apartmentNumber,
                 it.buttonGroup,
-                it.buttonState
+                it.buttonState,
+                it.description
             )
         }
     }
@@ -365,7 +367,8 @@ class TaskRepository(val db: AppDatabase) {
         return@withContext ApartmentListModel.Apartment(
             data.apartmentNumber,
             data.buttonGroup,
-            data.buttonState
+            data.buttonState,
+            data.description
         )
 
     }
@@ -392,7 +395,7 @@ class TaskRepository(val db: AppDatabase) {
                 entranceResult?.isDeliveryWrong ?: false,
                 entranceResult?.hasLookupPost ?: false,
                 application().user.getUserCredentials()?.token ?: "",
-                apartmentResults.map { ApartmentResult(it.number, it.state, it.buttonGroup) },
+                apartmentResults.map { ApartmentResult(it.number, it.state, it.buttonGroup, it.description) },
                 DateTime.now(),
                 publisher.id,
                 entranceResult?.mailboxType ?: entrance.mailboxType,
