@@ -8,6 +8,7 @@ import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.database.AppDatabase
 import ru.relabs.kurjercontroller.models.EntrancePhotoModel
 import ru.relabs.kurjercontroller.models.GPSCoordinatesModel
+import ru.relabs.kurjercontroller.providers.TaskRepository
 
 /**
  * Created by ProOrange on 19.03.2019.
@@ -27,10 +28,10 @@ data class EntrancePhotoEntity(
     @ColumnInfo(name = "entrance_number")
     var entranceNumber: Int
 ) {
-    suspend fun toModel(db: AppDatabase): EntrancePhotoModel = withContext(Dispatchers.IO) {
-        val taskItem = db.taskItemDao().getByTaskItemId(taskId, taskItemId)?.toModel(db)
+    suspend fun toModel(repository: TaskRepository): EntrancePhotoModel = withContext(Dispatchers.IO) {
+        val taskItem = repository.db.taskItemDao().getByTaskItemId(taskId, taskItemId)?.toModel(repository)
             ?: throw Exception("TaskItem ${taskItemId} not found")
-        val entrance = db.entranceDao().getByNumber(taskId, taskItemId, entranceNumber)?.toModel()
+        val entrance = repository.db.entranceDao().getByNumber(taskId, taskItemId, entranceNumber)?.toModel()
             ?: throw Exception("Entrance ${taskItemId} ${entranceNumber} not found")
 
         EntrancePhotoModel(

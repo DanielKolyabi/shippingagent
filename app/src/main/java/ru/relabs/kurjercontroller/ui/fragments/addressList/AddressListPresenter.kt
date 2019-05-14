@@ -93,7 +93,7 @@ class AddressListPresenter(val fragment: AddressListFragment) {
 
         fragment.tasks.forEach { task ->
             items.addAll(
-                task.getTaskItems().map {
+                task.taskItems.map {
                     AddressListModel.TaskItem(it, task)
                 }
             )

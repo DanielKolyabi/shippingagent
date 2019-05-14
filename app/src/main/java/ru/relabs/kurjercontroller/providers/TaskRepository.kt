@@ -60,7 +60,7 @@ class TaskRepository(val db: AppDatabase) {
     suspend fun closeTaskStatus(task: TaskModel): TaskModel = taskChangeStatus(task, TaskModel.COMPLETED)
 
     suspend fun mergeTasks(newTasks: List<TaskModel>): MergeResult = withContext(Dispatchers.IO) {
-//        Log.d("Merge", "Start " + DateTime.now().millis.toString())
+        //        Log.d("Merge", "Start " + DateTime.now().millis.toString())
         val result = merge(newTasks) {
             if (it.state.toAndroidState() == TaskModel.CREATED) {
                 receiveTaskStatus(it)
@@ -120,13 +120,12 @@ class TaskRepository(val db: AppDatabase) {
                     } else {
                         result.isNewTasksAdded = true
                         appearedTasks.add(task)
-//                        onNewTaskAppear(task)
                     }
                 } else {
-                    //TODO: Save filters
+                    saveFilters(task)
+
                     result.isNewTasksAdded = true
                     appearedTasks.add(task)
-//                    onNewTaskAppear(task)
                 }
             }
 
@@ -138,9 +137,6 @@ class TaskRepository(val db: AppDatabase) {
             newTasks.filter { it.id in savedTasksIDs }.forEach { task ->
                 val savedTask = db.taskDao().getById(task.id) ?: return@forEach
                 //Игнорируем задания с фильтрами, т.к. нет возможности на месте получить список TaskItems
-                if (task.filtered) {
-                    return@forEach
-                }
 
                 if (task.androidState == TaskModel.CANCELED) {
                     if (savedTask.state.toAndroidState() == TaskModel.STARTED) {
@@ -185,20 +181,34 @@ class TaskRepository(val db: AppDatabase) {
         return result
     }
 
+    private fun saveFilters(task: TaskModel) {
+        db.filtersDao().insertAll(task.taskFilters.brigades.map {
+            FilterEntity(0, task.id, FilterEntity.BRIGADE_FILTER, it.id, it.name, it.fixed)
+        })
+        db.filtersDao().insertAll(task.taskFilters.publishers.map {
+            FilterEntity(0, task.id, FilterEntity.PUBLISHER_FILTER, it.id, it.name, it.fixed)
+        })
+        db.filtersDao().insertAll(task.taskFilters.users.map {
+            FilterEntity(0, task.id, FilterEntity.USER_FILTER, it.id, it.name, it.fixed)
+        })
+        db.filtersDao().insertAll(task.taskFilters.districts.map {
+            FilterEntity(0, task.id, FilterEntity.DISTRICT_FILTER, it.id, it.name, it.fixed)
+        })
+        db.filtersDao().insertAll(task.taskFilters.regions.map {
+            FilterEntity(0, task.id, FilterEntity.REGION_FILTER, it.id, it.name, it.fixed)
+        })
+    }
+
     suspend fun removeReport(db: AppDatabase, report: EntranceReportEntity) = withContext(Dispatchers.IO) {
         db.entranceReportDao().delete(report)
         db.entrancePhotoDao().getEntrancePhoto(report.taskItemId, report.entranceNumber).forEach {
             //Delete photo
-            removePhoto(it.toModel(db))
+            removePhoto(it.toModel(this@TaskRepository))
         }
     }
 
     suspend fun getTasks(): List<TaskModel> = withContext(Dispatchers.IO) {
-        return@withContext db.taskDao().all.map { it.toModel(db) }
-    }
-
-    suspend fun getTaskItems(taskId: Int): List<TaskItemModel> = withContext(Dispatchers.IO) {
-        return@withContext db.taskItemDao().getByTaskId(taskId).map { it.toModel(db) }
+        return@withContext db.taskDao().all.map { it.toModel(this@TaskRepository) }
     }
 
     suspend fun getAddress(addressId: Int): AddressModel? = withContext(Dispatchers.IO) {
@@ -206,7 +216,7 @@ class TaskRepository(val db: AppDatabase) {
     }
 
     suspend fun getTask(taskId: Int): TaskModel? = withContext(Dispatchers.IO) {
-        return@withContext db.taskDao().getById(taskId)?.toModel(db)
+        return@withContext db.taskDao().getById(taskId)?.toModel(this@TaskRepository)
     }
 
     suspend fun closeAllTasks() = withContext(Dispatchers.IO) {
@@ -216,9 +226,8 @@ class TaskRepository(val db: AppDatabase) {
     }
 
     suspend fun closeTaskById(taskId: Int) = withContext(Dispatchers.IO) {
-        db.taskPublisherDao().getByTaskId(taskId)
-            .forEach { db.taskPublisherDao().delete(it) }
-
+        db.taskPublisherDao().deleteByTaskId(taskId)
+        db.filtersDao().deleteByTaskId(taskId)
         db.taskItemDao().getByTaskId(taskId)
             .forEach { taskItem ->
                 db.entranceDao().getByTaskItemId(taskItem.taskId, taskItem.taskItemId)
@@ -252,7 +261,7 @@ class TaskRepository(val db: AppDatabase) {
             CustomLog.writeToFile("closeEntrance: Can't find taskItem $taskItemId")
             return@withContext
         }
-        val task = db.taskDao().getById(taskItem.taskId)?.toModel(db) ?: run {
+        val task = db.taskDao().getById(taskItem.taskId)?.toModel(this@TaskRepository) ?: run {
             CustomLog.writeToFile("closeEntrance: Can't find task ${taskItem.taskId}")
             return@withContext
         }
@@ -262,6 +271,19 @@ class TaskRepository(val db: AppDatabase) {
         }
     }
 
+    suspend fun loadTaskFilters(taskId: Int): TaskFiltersModel = withContext(Dispatchers.IO) {
+        val filters = db.filtersDao().getByTaskId(taskId).groupBy { it.type }.mapValues { entry ->
+            entry.value.map { FilterModel(it.filterId, it.name, it.fixed) }.toMutableList()
+        }
+
+        return@withContext TaskFiltersModel(
+            filters.getOrElse(FilterEntity.PUBLISHER_FILTER, { mutableListOf() }),
+            filters.getOrElse(FilterEntity.DISTRICT_FILTER, { mutableListOf() }),
+            filters.getOrElse(FilterEntity.REGION_FILTER, { mutableListOf() }),
+            filters.getOrElse(FilterEntity.BRIGADE_FILTER, { mutableListOf() }),
+            filters.getOrElse(FilterEntity.USER_FILTER, { mutableListOf() })
+        )
+    }
 
     suspend fun removePhoto(entrancePhoto: EntrancePhotoModel) = withContext(Dispatchers.IO) {
         db.entrancePhotoDao().deleteById(entrancePhoto.id)
@@ -275,7 +297,7 @@ class TaskRepository(val db: AppDatabase) {
     suspend fun loadEntrancePhotos(taskItem: TaskItemModel, entrance: EntranceModel): List<EntrancePhotoModel> =
         withContext(Dispatchers.IO) {
             return@withContext db.entrancePhotoDao().getEntrancePhoto(taskItem.id, entrance.number).map {
-                it.toModel(db)
+                it.toModel(this@TaskRepository)
             }
         }
 

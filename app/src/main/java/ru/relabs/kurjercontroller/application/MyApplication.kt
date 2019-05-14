@@ -8,25 +8,23 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.os.StrictMode
-import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.room.Room
 import com.google.firebase.iid.FirebaseInstanceId
 import com.yandex.mapkit.MapKitFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.BuildConfig
+import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.database.AppDatabase
 import ru.relabs.kurjercontroller.models.GPSCoordinatesModel
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 import ru.relabs.kurjercontroller.providers.TaskRepository
-import ru.relabs.kurjercontroller.providers.interfaces.ITaskRepository
 import ru.terrakok.cicerone.Cicerone
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.Router
-import java.lang.Math.sqrt
 import java.util.*
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 /**
  * Created by ProOrange on 18.03.2019.
@@ -71,7 +69,9 @@ class MyApplication : Application() {
             .databaseBuilder(applicationContext, AppDatabase::class.java, "deliverycontroller")
             .fallbackToDestructiveMigration()
             .build()
-
+        CancelableScope(Dispatchers.IO).launch {
+            database.clearAllTables()
+        }
         tasksRepository = TaskRepository(database)
 
         MapKitFactory.setApiKey(BuildConfig.YA_KEY)
@@ -126,7 +126,10 @@ class MyApplication : Application() {
 
         if (pushToken != null) {
             try {
-                DeliveryServerAPI.api.sendPushToken((user.getUserCredentials() as UserModel.Authorized).token, pushToken)
+                DeliveryServerAPI.api.sendPushToken(
+                    (user.getUserCredentials() as UserModel.Authorized).token,
+                    pushToken
+                )
             } catch (e: Exception) {
                 e.printStackTrace()
             }

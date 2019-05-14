@@ -22,7 +22,11 @@ class TaskHolder(
     override fun onBindViewHolder(item: TaskListModel) {
         if (item !is TaskListModel.TaskItem) return
 
-        view.title.text = item.task.publishers.joinToString("\n", transform = {it.name})
+        if(item.task.filtered){
+            view.title.text = "Фильтров: ${item.task.taskFilters.all.size}"
+        }else{
+            view.title.text = item.task.publishers.joinToString("\n", transform = {it.name})
+        }
 
         view.selected_icon.setOnClickListener {
             onSelectedClicked(this.adapterPosition)

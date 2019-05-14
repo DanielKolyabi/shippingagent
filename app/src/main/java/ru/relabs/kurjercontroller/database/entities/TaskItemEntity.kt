@@ -6,9 +6,9 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import ru.relabs.kurjercontroller.database.AppDatabase
 import ru.relabs.kurjercontroller.models.AddressModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
+import ru.relabs.kurjercontroller.providers.TaskRepository
 
 /**
  * Created by ProOrange on 19.03.2019.
@@ -34,7 +34,7 @@ data class TaskItemEntity(
     val addressId: Int,
     val notes: List<String>
 ) {
-    suspend fun toModel(db: AppDatabase): TaskItemModel = withContext(Dispatchers.IO) {
+    suspend fun toModel(repository: TaskRepository): TaskItemModel = withContext(Dispatchers.IO) {
         return@withContext TaskItemModel(
             id = taskItemId,
             defaultReportType = defaultReportType,
@@ -42,8 +42,8 @@ data class TaskItemEntity(
             required = required,
             taskId = taskId,
             publisherName = publisherName,
-            address = db.addressDao().getById(addressId)?.toModel() ?: AddressModel.blank(),
-            entrances = db.entranceDao().getByTaskItemId(taskId, taskItemId).map { it.toModel() }.toMutableList()
+            address = repository.db.addressDao().getById(addressId)?.toModel() ?: AddressModel.blank(),
+            entrances = repository.db.entranceDao().getByTaskItemId(taskId, taskItemId).map { it.toModel() }.toMutableList()
         )
     }
 }

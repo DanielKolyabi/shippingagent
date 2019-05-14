@@ -42,7 +42,7 @@ data class TaskModel(
     val storages: List<String>,
     val publishers: List<PublisherModel>,
     val taskItems: List<TaskItemModel>,
-    val taskFilters: TaskFiltersModel?,
+    val taskFilters: TaskFiltersModel,
     val state: Int,
     val iteration: Int,
     val firstExaminedDeviceId: String?,
@@ -51,11 +51,6 @@ data class TaskModel(
 
     val androidState: Int
         get() = state.toAndroidState()
-
-    suspend fun getTaskItems(): List<TaskItemModel> = withContext(Dispatchers.IO) {
-        //TODO: Filters loading
-        return@withContext taskItems
-    }
 
     fun toEntity(): TaskEntity =
         TaskEntity(

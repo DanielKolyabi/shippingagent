@@ -85,7 +85,7 @@ class TaskInfoFragment : Fragment() {
     }
 
     private fun populateList(task: TaskModel) {
-        if (task.taskFilters?.all?.isNotEmpty() == true) {
+        if (task.filtered) {
             populateListFilters(task)
         } else {
             populateListAddresses(task)
@@ -106,23 +106,21 @@ class TaskInfoFragment : Fragment() {
         adapter.data.clear()
         adapter.data.add(TaskInfoModel.Task(task))
         adapter.data.add(TaskInfoModel.DetailsFiltersTableHeader)
-        if (task.taskFilters != null) {
-            adapter.data.addAll(task.taskFilters.publishers.map {
-                TaskInfoModel.FilterItem("Издатель", it)
-            })
-            adapter.data.addAll(task.taskFilters.brigades.map {
-                TaskInfoModel.FilterItem("Бригада", it)
-            })
-            adapter.data.addAll(task.taskFilters.users.map {
-                TaskInfoModel.FilterItem("Распространитель", it)
-            })
-            adapter.data.addAll(task.taskFilters.districts.map {
-                TaskInfoModel.FilterItem("Округ", it)
-            })
-            adapter.data.addAll(task.taskFilters.regions.map {
-                TaskInfoModel.FilterItem("Район", it)
-            })
-        }
+        adapter.data.addAll(task.taskFilters.publishers.map {
+            TaskInfoModel.FilterItem("Издатель", it)
+        })
+        adapter.data.addAll(task.taskFilters.brigades.map {
+            TaskInfoModel.FilterItem("Бригада", it)
+        })
+        adapter.data.addAll(task.taskFilters.users.map {
+            TaskInfoModel.FilterItem("Распространитель", it)
+        })
+        adapter.data.addAll(task.taskFilters.districts.map {
+            TaskInfoModel.FilterItem("Округ", it)
+        })
+        adapter.data.addAll(task.taskFilters.regions.map {
+            TaskInfoModel.FilterItem("Район", it)
+        })
         adapter.notifyDataSetChanged()
     }
 

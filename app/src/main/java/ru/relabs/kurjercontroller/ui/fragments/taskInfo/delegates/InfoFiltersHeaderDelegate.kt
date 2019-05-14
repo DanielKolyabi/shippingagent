@@ -7,6 +7,7 @@ import ru.relabs.kurjer.ui.delegateAdapter.IAdapterDelegate
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.TaskInfoModel
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.holders.InfoTableAddressesHeaderHolder
+import ru.relabs.kurjercontroller.ui.fragments.taskInfo.holders.InfoTableFiltersHeaderHolder
 
 /**
  * Created by ProOrange on 29.08.2018.
@@ -21,7 +22,7 @@ class InfoFiltersHeaderDelegate : IAdapterDelegate<TaskInfoModel> {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<TaskInfoModel> {
-        return InfoTableAddressesHeaderHolder(
+        return InfoTableFiltersHeaderHolder(
             LayoutInflater.from(parent.context).inflate(
                 R.layout.holder_task_details_filter_list_header,
                 parent,
