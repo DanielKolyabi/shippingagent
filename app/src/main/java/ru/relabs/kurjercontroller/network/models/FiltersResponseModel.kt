@@ -23,14 +23,16 @@ data class FiltersResponseModel(
 }
 
 data class FilterResponseModel(
-    //TODO: Filters
-    val id: Int
+    val id: Int,
+    val name: String,
+    val fixed: Boolean
+
 ) {
     fun toModel(): FilterModel {
         return FilterModel(
             id = id,
-            name = "",
-            fixed = false
+            name = name,
+            fixed = fixed
         )
     }
 }

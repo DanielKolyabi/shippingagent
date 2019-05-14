@@ -126,10 +126,11 @@ class TaskListPresenter(val fragment: TaskListFragment) {
             return@withContext
         }
 
+        fragment.showLoading(true, true)
+
         application().tasksRepository.getAvailableEntranceKeys(user.token, true)
         application().tasksRepository.getAvailableEntranceEuroKeys(user.token, true)
 
-        fragment.showLoading(true, true)
         networkUpdateStarted = true
         val tasks = try {
             application().tasksRepository.loadRemoteTasks(user.token)

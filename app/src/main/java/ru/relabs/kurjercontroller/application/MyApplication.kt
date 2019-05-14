@@ -71,6 +71,7 @@ class MyApplication : Application() {
             .databaseBuilder(applicationContext, AppDatabase::class.java, "deliverycontroller")
             .fallbackToDestructiveMigration()
             .build()
+
         tasksRepository = TaskRepository(database)
 
         MapKitFactory.setApiKey(BuildConfig.YA_KEY)

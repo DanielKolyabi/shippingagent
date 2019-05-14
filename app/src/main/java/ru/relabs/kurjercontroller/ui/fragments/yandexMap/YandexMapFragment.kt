@@ -136,39 +136,40 @@ class YandexMapFragment : Fragment() {
         presenter.bgScope.terminate()
     }
 
-    fun makeFocus(addresses: List<AddressModel>) {
+    private fun getCameraPosition(addresses: List<AddressModel>): CameraPosition {
         when {
             addresses.isEmpty() -> {
-                mapview?.map?.move(
-                    CameraPosition(
-                        Point(application().currentLocation.lat, application().currentLocation.long),
-                        14f, 0f, 0f
-                    )
+                return CameraPosition(
+                    Point(application().currentLocation.lat, application().currentLocation.long),
+                    14f, 0f, 0f
                 )
             }
             addresses.size == 1 -> {
                 val address = addresses.first()
-                mapview?.map?.move(
-                    CameraPosition(
-                        Point(address.lat, address.long),
-                        14f, 0f, 0f
-                    )
+                return CameraPosition(
+                    Point(address.lat, address.long),
+                    14f, 0f, 0f
                 )
             }
             else -> {
-                val filtered = addresses.filter{it.lat != 0.0 && it.long != 0.0}
+                val filtered = addresses.filter { it.lat != 0.0 && it.long != 0.0 }
                 val minLat = filtered.minBy { it.lat }?.lat
                 val maxLat = filtered.maxBy { it.lat }?.lat
                 val minLong = filtered.minBy { it.long }?.long
                 val maxLong = filtered.maxBy { it.long }?.long
                 if (minLat == null || maxLat == null || minLong == null || maxLong == null) {
-                    makeFocus(listOfNotNull(addresses.firstOrNull()))
-                    return
+                    return getCameraPosition(listOfNotNull(addresses.firstOrNull()))
+
                 }
-                val position = mapview?.map?.cameraPosition(BoundingBox(Point(minLat, minLong), Point(maxLat, maxLong)))
-                mapview?.map?.move(position)
+                return mapview?.map?.cameraPosition(BoundingBox(Point(minLat, minLong), Point(maxLat, maxLong)))
+                    ?: getCameraPosition(listOfNotNull(addresses.firstOrNull()))
             }
         }
+    }
+
+    fun makeFocus(addresses: List<AddressModel>) {
+
+        mapview?.map?.move(getCameraPosition(addresses))
     }
 
     companion object {

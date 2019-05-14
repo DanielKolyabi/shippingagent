@@ -30,7 +30,8 @@ data class TaskEntity(
     val state: Int,
     val iteration: Int,
     @ColumnInfo(name = "first_examined_device_id")
-    val firstExaminedDeviceId: String?
+    val firstExaminedDeviceId: String?,
+    val filtered: Boolean
 ) {
     suspend fun toModel(db: AppDatabase): TaskModel = withContext(Dispatchers.IO) {
         return@withContext TaskModel(
@@ -46,7 +47,8 @@ data class TaskEntity(
             publishers = db.taskPublisherDao().getByTaskId(id).map { it.toModel() },
             taskItems = db.taskItemDao().getByTaskId(id).map { it.toModel(db) },
             iteration = iteration,
-            firstExaminedDeviceId = firstExaminedDeviceId
+            firstExaminedDeviceId = firstExaminedDeviceId,
+            filtered = filtered
         )
     }
 }

@@ -26,7 +26,8 @@ data class TaskResponseModel(
     val items: List<TaskItemResponseModel>,
     val publishers: List<TaskPublisherResponseModel>,
     val storages: List<String>,
-    val filters: FiltersResponseModel
+    val filters: FiltersResponseModel,
+    val filtered: Boolean
 ) {
     fun toModel(): TaskModel {
         return TaskModel(
@@ -42,7 +43,8 @@ data class TaskResponseModel(
             publishers = publishers.map{it.toModel()},
             taskFilters = filters.toModel(),
             iteration = iteration,
-            firstExaminedDeviceId = firstExaminedDeviceId
+            firstExaminedDeviceId = firstExaminedDeviceId,
+            filtered = filtered
         )
     }
 }
