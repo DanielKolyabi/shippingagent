@@ -2,8 +2,6 @@ package ru.relabs.kurjercontroller.models
 
 import android.os.Parcel
 import android.os.Parcelable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.database.entities.TaskEntity
 
@@ -52,6 +50,15 @@ data class TaskModel(
     val androidState: Int
         get() = state.toAndroidState()
 
+    val name: String
+        get() {
+            return if(filtered){
+                description.ifEmpty { "Фильтров: ${taskFilters.all.size}" }
+            }else{
+                publishers.joinToString("\n", transform = {it.name})
+            }
+        }
+
     fun toEntity(): TaskEntity =
         TaskEntity(
             id = id,
@@ -99,7 +106,7 @@ data class TaskModel(
         parcel.writeInt(state)
         parcel.writeInt(iteration)
         parcel.writeString(firstExaminedDeviceId)
-        parcel.writeByte(if(filtered) 1 else 0)
+        parcel.writeByte(if (filtered) 1 else 0)
     }
 
     override fun describeContents(): Int {

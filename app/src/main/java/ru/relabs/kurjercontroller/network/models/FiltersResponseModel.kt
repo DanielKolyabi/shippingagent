@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.network.models
 
+import ru.relabs.kurjercontroller.database.entities.FilterEntity
 import ru.relabs.kurjercontroller.models.FilterModel
 import ru.relabs.kurjercontroller.models.TaskFiltersModel
 
@@ -25,14 +26,16 @@ data class FiltersResponseModel(
 data class FilterResponseModel(
     val id: Int,
     val name: String,
-    val fixed: Boolean
-
+    val fixed: Boolean,
+    val type: Int
 ) {
     fun toModel(): FilterModel {
         return FilterModel(
             id = id,
             name = name,
-            fixed = fixed
+            fixed = fixed,
+            active = fixed,
+            type = type
         )
     }
 }

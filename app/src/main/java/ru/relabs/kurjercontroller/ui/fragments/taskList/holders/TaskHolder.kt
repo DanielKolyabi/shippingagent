@@ -22,11 +22,7 @@ class TaskHolder(
     override fun onBindViewHolder(item: TaskListModel) {
         if (item !is TaskListModel.TaskItem) return
 
-        if(item.task.filtered){
-            view.title.text = "Фильтров: ${item.task.taskFilters.all.size}"
-        }else{
-            view.title.text = item.task.publishers.joinToString("\n", transform = {it.name})
-        }
+        view.title.text = item.task.name
 
         view.selected_icon.setOnClickListener {
             onSelectedClicked(this.adapterPosition)
@@ -37,9 +33,9 @@ class TaskHolder(
         }
 
         view.active_icon.setVisible(item.task.androidState >= TaskModel.EXAMINED)
-        if(item.task.firstExaminedDeviceId?.isNotBlank() == true && item.task.firstExaminedDeviceId != application().deviceUUID){
+        if (item.task.firstExaminedDeviceId?.isNotBlank() == true && item.task.firstExaminedDeviceId != application().deviceUUID) {
             view.active_icon.setColorFilter(Color.GREEN, PorterDuff.Mode.SRC_IN)
-        }else{
+        } else {
             view.active_icon.setColorFilter(Color.WHITE, PorterDuff.Mode.MULTIPLY)
         }
 

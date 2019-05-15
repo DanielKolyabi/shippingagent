@@ -1,7 +1,6 @@
 package ru.relabs.kurjercontroller.providers
 
 import android.util.Log
-import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
@@ -79,123 +78,121 @@ class TaskRepository(val db: AppDatabase) {
         val savedTasksIDs = db.taskDao().all.map { it.id }
         val newTasksIDs = newTasks.map { it.id }
         val appearedTasks = mutableListOf<TaskModel>()
-        val result = db.withTransaction {
-            val result = MergeResult(false, false)
+        val result = MergeResult(false, false)
 
-            //Задача отсутствует в ответе от сервера (удалено)
-            db.taskDao().all.filter { it.id !in newTasksIDs }.forEach { task ->
-                closeTaskById(task.id)
-                result.isTasksChanged = true
-                Log.d("merge", "Close task: ${task.id}")
+        //Задача отсутствует в ответе от сервера (удалено)
+        db.taskDao().all.filter { it.id !in newTasksIDs }.forEach { task ->
+            closeTaskById(task.id)
+            result.isTasksChanged = true
+            Log.d("merge", "Close task: ${task.id}")
+        }
+
+        //Задача не присутствует в сохранённых (новая)
+        newTasks.filter { it.id !in savedTasksIDs }.forEach { task ->
+            if (task.androidState == TaskModel.CANCELED) {
+                Log.d("merge", "New task ${task.id} passed due 12 status")
+                return@forEach
             }
-
-            //Задача не присутствует в сохранённых (новая)
-            newTasks.filter { it.id !in savedTasksIDs }.forEach { task ->
-                if (task.androidState == TaskModel.CANCELED) {
-                    Log.d("merge", "New task ${task.id} passed due 12 status")
-                    return@forEach
-                }
-                //Add task
-                val newTaskId = db.taskDao().insert(task.toEntity())
-                Log.d("merge", "Add task ID: $newTaskId")
-                var openedEntrances = 0
-                db.taskPublisherDao().insertAll(task.publishers.map { it.toEntity() })
-                if (!task.filtered) {
-                    task.taskItems.forEach { item ->
-                        db.addressDao().insert(item.address.toEntity())
-                        db.taskItemDao().insert(item.toEntity())
-                        item.entrances.forEach { entrance ->
-                            val entity = entrance.toEntity(item.taskId, item.id)
-                            if (db.entranceReportDao().getByNumber(entity.taskItemId, entity.number) != null) {
-                                entity.state = EntranceModel.CLOSED
-                            }
-                            db.entranceDao().insert(entity)
-                            if (entity.state == EntranceModel.CREATED) {
-                                openedEntrances++
-                            }
+            //Add task
+            val newTaskId = db.taskDao().insert(task.toEntity())
+            Log.d("merge", "Add task ID: $newTaskId")
+            var openedEntrances = 0
+            db.taskPublisherDao().insertAll(task.publishers.map { it.toEntity() })
+            if (!task.filtered) {
+                task.taskItems.forEach { item ->
+                    db.addressDao().insert(item.address.toEntity())
+                    db.taskItemDao().insert(item.toEntity())
+                    item.entrances.forEach { entrance ->
+                        val entity = entrance.toEntity(item.taskId, item.id)
+                        if (db.entranceReportDao().getByNumber(entity.taskItemId, entity.number) != null) {
+                            entity.state = EntranceModel.CLOSED
+                        }
+                        db.entranceDao().insert(entity)
+                        if (entity.state == EntranceModel.CREATED) {
+                            openedEntrances++
                         }
                     }
-                    if (openedEntrances <= 0) {
-                        closeTaskById(newTaskId.toInt())
-                    } else {
-                        result.isNewTasksAdded = true
-                        appearedTasks.add(task)
-                    }
+                }
+                if (openedEntrances <= 0) {
+                    closeTaskById(newTaskId.toInt())
                 } else {
-                    saveFilters(task)
-
                     result.isNewTasksAdded = true
                     appearedTasks.add(task)
                 }
+            } else {
+                saveFilters(task)
+
+                result.isNewTasksAdded = true
+                appearedTasks.add(task)
             }
-
-            //Задача есть и на сервере и на клиенте (мерж)
-            /*
-            Если она закрыта | выполнена на сервере - удалить с клиента
-            Если итерация > сохранённой | состояние отличается от сохранённого и сохранённое != начато |
-             */
-            newTasks.filter { it.id in savedTasksIDs }.forEach { task ->
-                val savedTask = db.taskDao().getById(task.id) ?: return@forEach
-                //Игнорируем задания с фильтрами, т.к. нет возможности на месте получить список TaskItems
-
-                if (task.androidState == TaskModel.CANCELED) {
-                    if (savedTask.state.toAndroidState() == TaskModel.STARTED) {
-                        //Уведомили что задание уже в работе
-                        db.sendQueryDao().insert(
-                            SendQueryItemEntity(
-                                0,
-                                BuildConfig.API_URL + "/api/v1/controller/tasks/${savedTask.id}/accepted?token=" + application().user.getUserCredentials()?.token.orEmpty(),
-                                ""
-                            )
-                        )
-                    } else {
-                        closeTaskById(savedTask.id)
-                    }
-                } else if (task.androidState == TaskModel.COMPLETED) {
-                    closeTaskById(savedTask.id)
-                    return@forEach
-                } else if (
-                    (savedTask.iteration < task.iteration)
-                    || (task.state != savedTask.state && savedTask.state.toAndroidState() != TaskModel.STARTED)
-                ) {
-
-                    db.taskDao().update(task.toEntity())
-                    db.taskPublisherDao().insertAll(task.publishers.map { it.toEntity() })
-                    task.taskItems.forEach { taskItem ->
-                        db.addressDao().insert(taskItem.address.toEntity())
-                        db.taskItemDao().insert(taskItem.toEntity())
-                        taskItem.entrances.forEach { entrance ->
-                            val entity = entrance.toEntity(taskItem.taskId, taskItem.id)
-                            if (db.entranceReportDao().getByNumber(entity.taskItemId, entity.number) != null) {
-                                entity.state = EntranceModel.CLOSED
-                            }
-                            db.entranceDao().insert(entity)
-                        }
-                    }
-                    result.isTasksChanged = true
-                }
-            }
-            return@withTransaction result
         }
+
+        //Задача есть и на сервере и на клиенте (мерж)
+        /*
+        Если она закрыта | выполнена на сервере - удалить с клиента
+        Если итерация > сохранённой | состояние отличается от сохранённого и сохранённое != начато |
+         */
+        newTasks.filter { it.id in savedTasksIDs }.forEach { task ->
+            val savedTask = db.taskDao().getById(task.id) ?: return@forEach
+            //Игнорируем задания с фильтрами, т.к. нет возможности на месте получить список TaskItems
+
+            if (task.androidState == TaskModel.CANCELED) {
+                if (savedTask.state.toAndroidState() == TaskModel.STARTED) {
+                    //Уведомили что задание уже в работе
+                    db.sendQueryDao().insert(
+                        SendQueryItemEntity(
+                            0,
+                            BuildConfig.API_URL + "/api/v1/controller/tasks/${savedTask.id}/accepted?token=" + application().user.getUserCredentials()?.token.orEmpty(),
+                            ""
+                        )
+                    )
+                } else {
+                    closeTaskById(savedTask.id)
+                }
+            } else if (task.androidState == TaskModel.COMPLETED) {
+                closeTaskById(savedTask.id)
+                return@forEach
+            } else if (
+                (savedTask.iteration < task.iteration)
+                || (task.state != savedTask.state && savedTask.state.toAndroidState() != TaskModel.STARTED)
+            ) {
+
+                db.taskDao().update(task.toEntity())
+                db.taskPublisherDao().insertAll(task.publishers.map { it.toEntity() })
+                task.taskItems.forEach { taskItem ->
+                    db.addressDao().insert(taskItem.address.toEntity())
+                    db.taskItemDao().insert(taskItem.toEntity())
+                    taskItem.entrances.forEach { entrance ->
+                        val entity = entrance.toEntity(taskItem.taskId, taskItem.id)
+                        if (db.entranceReportDao().getByNumber(entity.taskItemId, entity.number) != null) {
+                            entity.state = EntranceModel.CLOSED
+                        }
+                        db.entranceDao().insert(entity)
+                    }
+                }
+                result.isTasksChanged = true
+            }
+        }
+
         appearedTasks.forEach { onNewTaskAppear(it) }
         return result
     }
 
-    private fun saveFilters(task: TaskModel) {
+    suspend fun saveFilters(task: TaskModel) = withContext(Dispatchers.IO) {
         db.filtersDao().insertAll(task.taskFilters.brigades.map {
-            FilterEntity(0, task.id, FilterEntity.BRIGADE_FILTER, it.id, it.name, it.fixed)
+            FilterEntity(0, task.id, FilterEntity.BRIGADE_FILTER, it.id, it.name, it.fixed, it.active)
         })
         db.filtersDao().insertAll(task.taskFilters.publishers.map {
-            FilterEntity(0, task.id, FilterEntity.PUBLISHER_FILTER, it.id, it.name, it.fixed)
+            FilterEntity(0, task.id, FilterEntity.PUBLISHER_FILTER, it.id, it.name, it.fixed, it.active)
         })
         db.filtersDao().insertAll(task.taskFilters.users.map {
-            FilterEntity(0, task.id, FilterEntity.USER_FILTER, it.id, it.name, it.fixed)
+            FilterEntity(0, task.id, FilterEntity.USER_FILTER, it.id, it.name, it.fixed, it.active)
         })
         db.filtersDao().insertAll(task.taskFilters.districts.map {
-            FilterEntity(0, task.id, FilterEntity.DISTRICT_FILTER, it.id, it.name, it.fixed)
+            FilterEntity(0, task.id, FilterEntity.DISTRICT_FILTER, it.id, it.name, it.fixed, it.active)
         })
         db.filtersDao().insertAll(task.taskFilters.regions.map {
-            FilterEntity(0, task.id, FilterEntity.REGION_FILTER, it.id, it.name, it.fixed)
+            FilterEntity(0, task.id, FilterEntity.REGION_FILTER, it.id, it.name, it.fixed, it.active)
         })
     }
 
@@ -273,7 +270,7 @@ class TaskRepository(val db: AppDatabase) {
 
     suspend fun loadTaskFilters(taskId: Int): TaskFiltersModel = withContext(Dispatchers.IO) {
         val filters = db.filtersDao().getByTaskId(taskId).groupBy { it.type }.mapValues { entry ->
-            entry.value.map { FilterModel(it.filterId, it.name, it.fixed) }.toMutableList()
+            entry.value.map { FilterModel(it.filterId, it.name, it.fixed, it.active, it.type) }.toMutableList()
         }
 
         return@withContext TaskFiltersModel(

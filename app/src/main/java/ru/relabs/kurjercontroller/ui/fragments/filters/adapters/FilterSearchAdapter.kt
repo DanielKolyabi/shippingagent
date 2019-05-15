@@ -1,4 +1,4 @@
-package ru.relabs.kurjercontroller.ui.fragments.filters
+package ru.relabs.kurjercontroller.ui.fragments.filters.adapters
 
 import android.content.Context
 import android.view.LayoutInflater

@@ -10,7 +10,7 @@ import androidx.room.PrimaryKey
  */
 @Entity(
     tableName = "filters",
-    indices = [Index(value = ["task_id", "filter_id"], unique = true)]
+    indices = [Index(value = ["task_id", "filter_id", "filter_type"], unique = true)]
 )
 data class FilterEntity(
     @PrimaryKey(autoGenerate = true)
@@ -23,7 +23,8 @@ data class FilterEntity(
     @ColumnInfo(name = "filter_id")
     val filterId: Int,
     val name: String,
-    val fixed: Boolean
+    val fixed: Boolean,
+    val active: Boolean
 ) {
     companion object {
         const val PUBLISHER_FILTER = 0

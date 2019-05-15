@@ -2,12 +2,10 @@ package ru.relabs.kurjercontroller.ui.fragments
 
 import androidx.fragment.app.Fragment
 import ru.relabs.kurjercontroller.models.AddressModel
-import ru.relabs.kurjercontroller.models.TaskFiltersModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.fragments.addressList.AddressListFragment
-import ru.relabs.kurjercontroller.ui.fragments.filters.FILTERS_REQUEST_CODE
-import ru.relabs.kurjercontroller.ui.fragments.filters.FiltersFragment
+import ru.relabs.kurjercontroller.ui.fragments.filters.FiltersPagerFragment
 import ru.relabs.kurjercontroller.ui.fragments.login.LoginFragment
 import ru.relabs.kurjercontroller.ui.fragments.report.ReportPagerFragment
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.TaskInfoFragment
@@ -82,10 +80,13 @@ class TaskItemExplanationScreen(private val taskItem: TaskItemModel) : SupportAp
     }
 }
 
-class FiltersScreen(val target: Fragment, val filters: TaskFiltersModel? = null) : SupportAppScreen() {
+class FiltersScreen(
+    val tasks: List<TaskModel>,
+    private val onAllFiltersApplied: () -> Unit
+) : SupportAppScreen() {
     override fun getFragment(): Fragment {
-        return FiltersFragment.newInstance(filters).apply {
-            setTargetFragment(target, FILTERS_REQUEST_CODE)
-        }
+        val fragment = FiltersPagerFragment.newInstance(tasks)
+        fragment.onAllFiltersApplied = onAllFiltersApplied
+        return fragment
     }
 }

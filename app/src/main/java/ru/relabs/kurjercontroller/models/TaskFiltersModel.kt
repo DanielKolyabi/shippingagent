@@ -68,18 +68,24 @@ data class TaskFiltersModel(
 data class FilterModel(
     val id: Int,
     val name: String,
-    val fixed: Boolean
+    val fixed: Boolean,
+    var active: Boolean,
+    val type: Int
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
         parcel.readString().orEmpty(),
-        parcel.readByte() != 0.toByte()
+        parcel.readByte() != 0.toByte(),
+        parcel.readByte() != 0.toByte(),
+        parcel.readInt()
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(id)
         parcel.writeString(name)
         parcel.writeByte(if (fixed) 1 else 0)
+        parcel.writeByte(if (active) 1 else 0)
+        parcel.writeInt(type)
     }
 
     override fun describeContents(): Int {

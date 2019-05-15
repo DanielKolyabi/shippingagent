@@ -125,6 +125,11 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(broadcastReceiver, intentFilter)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(broadcastReceiver)
+    }
+
     private fun bindControls() {
         back_button?.setOnClickListener {
             onBackPressed()

@@ -2,6 +2,7 @@ package ru.relabs.kurjercontroller.ui.fragments.filters
 
 import android.content.Context
 import android.graphics.Point
+import android.media.Image
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -22,6 +23,7 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
     private val tags: MutableList<Pair<Int, FilterModel>> = mutableListOf()
     var onFilterAppear: ((filter: FilterModel) -> Unit)? = null
     var onFilterDisappear: ((filter: FilterModel) -> Unit)? = null
+    var onFilterActiveChangedPredicate: ((filter: FilterModel, newActiveState: Boolean) -> Boolean)? = null
 
     val currentTags = tags.map {
         it.second
@@ -31,16 +33,40 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
         init(context)
     }
 
+    private fun changeTagIcon(view: ImageView, tag: FilterModel){
+        val drawable = if(tag.fixed){
+            if(tag.active) {
+                context.getDrawable(R.drawable.ic_filter_active)
+            }else{
+                context.getDrawable(R.drawable.ic_filter_not_active)
+            }
+        }else{
+            context.getDrawable(R.drawable.ic_remove_filter)
+        }
+        view.setImageDrawable(drawable)
+    }
 
+    private fun bindTagControl(view: ImageView, tag: FilterModel){
+        if(tag.fixed){
+            view.setOnClickListener {
+                if(onFilterActiveChangedPredicate?.invoke(tag, !tag.active) == true) {
+                    tag.active = !tag.active
+                    changeTagIcon(view, tag)
+                }
+            }
+        }else{
+            view.setOnClickListener {
+                remove(tag)
+            }
+        }
+    }
 
     fun add(tag: FilterModel) {
         val view = LayoutInflater.from(context).inflate(R.layout.item_filter, this, false)
         view.findViewById<TextView>(R.id.text).text = tag.name
         view.findViewById<ImageView>(R.id.close_icon).apply {
-            setOnClickListener {
-                remove(tag)
-            }
-            setVisible(!tag.fixed)
+            changeTagIcon(this, tag)
+            bindTagControl(this, tag)
         }
         val lpc = (view.layoutParams as? LinearLayout.LayoutParams)
         lpc?.setMargins(2, 2, 2, 2)

@@ -12,6 +12,7 @@ import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.models.FilterModel
 import ru.relabs.kurjercontroller.models.TaskFiltersModel
 import ru.relabs.kurjercontroller.network.MockFilterSearch
+import ru.relabs.kurjercontroller.ui.fragments.filters.adapters.FilterSearchAdapter
 import java.lang.ref.WeakReference
 
 
@@ -19,9 +20,9 @@ import java.lang.ref.WeakReference
  * Created by ProOrange on 18.03.2019.
  */
 
-const val FILTERS_REQUEST_CODE = 1
+class FiltersFragment : Fragment() {
 
-class FiltersFragment() : Fragment() {
+    var onStartClicked: ((filters: TaskFiltersModel) -> Unit)? = null
 
     lateinit var filters: TaskFiltersModel
     val presenter = FiltersPresenter(this)
@@ -31,8 +32,16 @@ class FiltersFragment() : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        bindControl()
+
         fillAllFilters()
         bindAllFilterControls()
+    }
+
+    private fun bindControl() {
+        start_button.setOnClickListener {
+            onStartClicked?.invoke(filters)
+        }
     }
 
     private fun bindFilterControl(textView: AutoCompleteTextView, container: FilterTagLayout, filterName: String) {
@@ -43,8 +52,22 @@ class FiltersFragment() : Fragment() {
             container.onFilterDisappear = {
                 allFilters.remove(it)
             }
+            container.onFilterActiveChangedPredicate = { filter, newActive ->
+                if (newActive) {
+                    true
+                } else {
+                    allFilters.filter { it.type == filter.type && it.active }.size > 1
+                }
+            }
 
-            textView.setAdapter(FilterSearchAdapter(it, filterSearch, filterName, WeakReference(allFilters)))
+            textView.setAdapter(
+                FilterSearchAdapter(
+                    it,
+                    filterSearch,
+                    filterName,
+                    WeakReference(allFilters)
+                )
+            )
             textView.onItemClickListener = object : AdapterView.OnItemClickListener {
                 override fun onItemClick(adapter: AdapterView<*>?, view: View?, pos: Int, p3: Long) {
                     val item = adapter?.getItemAtPosition(pos) as? FilterModel
@@ -57,11 +80,11 @@ class FiltersFragment() : Fragment() {
     }
 
     private fun bindAllFilterControls() {
-        bindFilterControl(publisher_filter, publisher_filters, "izd")
-        bindFilterControl(brigade_filter, brigade_filters, "izd")
-        bindFilterControl(district_filter, district_filters, "izd")
-        bindFilterControl(region_filter, region_filters, "izd")
-        bindFilterControl(user_filter, user_filters, "izd")
+        bindFilterControl(publisher_filter, publisher_filters, "publisher")
+        bindFilterControl(brigade_filter, brigade_filters, "brigade")
+        bindFilterControl(district_filter, district_filters, "district")
+        bindFilterControl(region_filter, region_filters, "region")
+        bindFilterControl(user_filter, user_filters, "user")
     }
 
     private fun fillAllFilters() {

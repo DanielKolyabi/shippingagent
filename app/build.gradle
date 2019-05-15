@@ -30,14 +30,24 @@ android {
         versionName "1.6"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+    flavorDimensions "default"
+    productFlavors{
+        production{
+            buildConfigField("String", "API_URL", '"https://courrmobileapi.courr.ru"')
+        }
+        remoteDebug{
+            buildConfigField("String", "API_URL", '"http://warp.courr.ru:8084"')
+        }
+        localDebug{
+            buildConfigField("String", "API_URL", '"http://192.168.250.176:8081"')
+        }
+    }
     buildTypes {
         debug {
-            buildConfigField("String", "API_URL", '"http://warp.courr.ru:8084"')
             buildConfigField("String", "YA_KEY", '"9be78b32-1265-4157-bf15-999b8d747a5c"')
             signingConfig signingConfigs.config
         }
         release {
-            buildConfigField("String", "API_URL", '"https://courrmobileapi.courr.ru"')
             buildConfigField("String", "YA_KEY", '"9be78b32-1265-4157-bf15-999b8d747a5c"')
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

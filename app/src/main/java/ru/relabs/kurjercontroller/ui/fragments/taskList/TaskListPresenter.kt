@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.ui.fragments.taskList
 
+import androidx.lifecycle.Lifecycle
 import kotlinx.android.synthetic.main.fragment_tasklist.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -10,6 +11,7 @@ import ru.relabs.kurjercontroller.models.toAndroidState
 import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.activities.showErrorSuspend
 import ru.relabs.kurjercontroller.ui.fragments.AddressListScreen
+import ru.relabs.kurjercontroller.ui.fragments.FiltersScreen
 import ru.relabs.kurjercontroller.ui.fragments.TaskInfoScreen
 
 class TaskListPresenter(val fragment: TaskListFragment) {
@@ -90,10 +92,24 @@ class TaskListPresenter(val fragment: TaskListFragment) {
         val selectedTasks = fragment.adapter.data.filter {
             (it as? TaskListModel.TaskItem)?.selected ?: false
         }.mapNotNull {
-            (it as? TaskListModel.TaskItem)?.task?.id
+            (it as? TaskListModel.TaskItem)?.task
         }
 
-        application().router.navigateTo(AddressListScreen(selectedTasks))
+        val selectedFilteredTasks = selectedTasks.filter { it.filtered }
+        if (selectedFilteredTasks.isNotEmpty()) {
+            application().router.navigateTo(FiltersScreen(selectedFilteredTasks) {
+                //TODO: Reload TaskItems
+                //Загруженные TaskItems отправить в базу данных
+                //Если загрузить не удалось:
+                //--Если в базе есть - взять из неё
+                //--Если нет - уведомить пользователя о невозможности получить данные и исключить задание
+                //----Если были исключены все задания - уведомить пользователя и оставить на текущем экране
+                application().router.replaceScreen(AddressListScreen(selectedTasks.map { it.id }))
+            })
+        } else {
+            application().router.navigateTo(AddressListScreen(selectedTasks.map { it.id }))
+        }
+
     }
 
     fun onOnlineClicked() {

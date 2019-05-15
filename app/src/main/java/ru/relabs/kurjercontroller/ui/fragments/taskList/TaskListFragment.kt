@@ -110,6 +110,15 @@ class TaskListFragment : Fragment(), ISearchableFragment {
 
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        presenter.bgScope.cancel()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        presenter.bgScope.terminate()
+    }
 
     suspend fun showLoading(visible: Boolean, clear: Boolean = false) = withContext(Dispatchers.Main) {
         if (visible) {
