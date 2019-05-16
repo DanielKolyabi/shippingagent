@@ -9,6 +9,7 @@ import android.widget.Filter
 import android.widget.Filterable
 import android.widget.TextView
 import kotlinx.coroutines.runBlocking
+import ru.relabs.kurjercontroller.logError
 import ru.relabs.kurjercontroller.models.FilterModel
 import ru.relabs.kurjercontroller.network.IFilterSearch
 import ru.relabs.kurjercontroller.orEmpty
@@ -20,7 +21,7 @@ import java.lang.ref.WeakReference
 class FilterSearchAdapter(
     context: Context,
     val filterSearch: IFilterSearch,
-    val filterName: String,
+    val filterType: Int,
     val selectedFiltersReference: WeakReference<MutableList<FilterModel>>
 ) : ArrayAdapter<FilterModel>(context, 0), Filterable {
     private val results: MutableList<FilterModel> = mutableListOf()
@@ -42,15 +43,22 @@ class FilterSearchAdapter(
     val filterObj = object : Filter() {
         override fun performFiltering(constraint: CharSequence?): FilterResults {
             val filters = runBlocking {
-                filterSearch.searchFilter(
-                    filterName,
+                filterSearch.searchFilters(
+                    filterType,
                     constraint.toString(),
                     selectedFiltersReference.get().orEmpty()
                 ).await()
             }
+            if(filters.error != null){
+                filters.error.logError()
+                return FilterResults().apply{
+                    values = null
+                    count = 0
+                }
+            }
             return FilterResults().apply {
-                values = filters
-                count = filters.size
+                values = filters.result
+                count = filters.result.size
             }
         }
 

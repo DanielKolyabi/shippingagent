@@ -7,5 +7,10 @@ import ru.relabs.kurjercontroller.models.FilterModel
  * Created by ProOrange on 22.03.2019.
  */
 interface IFilterSearch {
-    fun searchFilter(filterName: String, filterValue: String, selectedFilters: List<FilterModel>): Deferred<List<FilterModel>>
+    fun searchFilters(filterType: Int, filterValue: String, selectedFilters: List<FilterModel>): Deferred<FiltersResultOrError>
 }
+
+data class FiltersResultOrError(
+    val result: List<FilterModel> = listOf(),
+    val error: Exception? = null
+)

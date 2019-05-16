@@ -13,10 +13,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import ru.relabs.kurjercontroller.BuildConfig
-import ru.relabs.kurjercontroller.network.models.AuthResponseModel
-import ru.relabs.kurjercontroller.network.models.StatusResponse
-import ru.relabs.kurjercontroller.network.models.TaskItemReportModel
-import ru.relabs.kurjercontroller.network.models.TaskResponseModel
+import ru.relabs.kurjercontroller.network.models.*
 import java.lang.reflect.Type
 import java.util.concurrent.TimeUnit
 
@@ -124,6 +121,9 @@ object DeliveryServerAPI {
 
         @GET("api/v1/controller/euro_keys")
         fun getAvailableEntranceEuroKeys(@Query("token") token: String): Deferred<List<String>>
+
+        @POST("api/v1/controller/tasks/filters")
+        fun searchFilters(@Query("token") token: String, @Body req: SearchFiltersRequest): Deferred<List<FilterResponseModel>>
     }
 
     val api = retrofit.create(IDeliveryServerAPI::class.java)

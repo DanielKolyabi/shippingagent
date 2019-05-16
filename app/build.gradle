@@ -32,13 +32,13 @@ android {
     }
     flavorDimensions "default"
     productFlavors{
-        production{
+        productServer{
             buildConfigField("String", "API_URL", '"https://courrmobileapi.courr.ru"')
         }
-        remoteDebug{
+        debugServer{
             buildConfigField("String", "API_URL", '"http://warp.courr.ru:8084"')
         }
-        localDebug{
+        localServer{
             buildConfigField("String", "API_URL", '"http://192.168.250.176:8081"')
         }
     }

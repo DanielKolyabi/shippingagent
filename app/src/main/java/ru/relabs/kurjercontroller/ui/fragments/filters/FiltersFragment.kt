@@ -9,9 +9,11 @@ import android.widget.AutoCompleteTextView
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_filters.*
 import ru.relabs.kurjercontroller.R
+import ru.relabs.kurjercontroller.application
+import ru.relabs.kurjercontroller.database.entities.FilterEntity
 import ru.relabs.kurjercontroller.models.FilterModel
 import ru.relabs.kurjercontroller.models.TaskFiltersModel
-import ru.relabs.kurjercontroller.network.MockFilterSearch
+import ru.relabs.kurjercontroller.network.RemoteFilterSearch
 import ru.relabs.kurjercontroller.ui.fragments.filters.adapters.FilterSearchAdapter
 import java.lang.ref.WeakReference
 
@@ -26,7 +28,7 @@ class FiltersFragment : Fragment() {
 
     lateinit var filters: TaskFiltersModel
     val presenter = FiltersPresenter(this)
-    val filterSearch = MockFilterSearch
+    val filterSearch = RemoteFilterSearch(presenter.bgScope, application().user.getUserCredentials()?.token ?: "")
     val allFilters: MutableList<FilterModel> = mutableListOf()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -44,7 +46,7 @@ class FiltersFragment : Fragment() {
         }
     }
 
-    private fun bindFilterControl(textView: AutoCompleteTextView, container: FilterTagLayout, filterName: String) {
+    private fun bindFilterControl(textView: AutoCompleteTextView, container: FilterTagLayout, filterType: Int) {
         context?.let {
             container.onFilterAppear = {
                 allFilters.add(it)
@@ -64,7 +66,7 @@ class FiltersFragment : Fragment() {
                 FilterSearchAdapter(
                     it,
                     filterSearch,
-                    filterName,
+                    filterType,
                     WeakReference(allFilters)
                 )
             )
@@ -80,11 +82,11 @@ class FiltersFragment : Fragment() {
     }
 
     private fun bindAllFilterControls() {
-        bindFilterControl(publisher_filter, publisher_filters, "publisher")
-        bindFilterControl(brigade_filter, brigade_filters, "brigade")
-        bindFilterControl(district_filter, district_filters, "district")
-        bindFilterControl(region_filter, region_filters, "region")
-        bindFilterControl(user_filter, user_filters, "user")
+        bindFilterControl(publisher_filter, publisher_filters, FilterEntity.PUBLISHER_FILTER)
+        bindFilterControl(brigade_filter, brigade_filters, FilterEntity.BRIGADE_FILTER)
+        bindFilterControl(district_filter, district_filters, FilterEntity.DISTRICT_FILTER)
+        bindFilterControl(region_filter, region_filters, FilterEntity.REGION_FILTER)
+        bindFilterControl(user_filter, user_filters, FilterEntity.USER_FILTER)
     }
 
     private fun fillAllFilters() {
