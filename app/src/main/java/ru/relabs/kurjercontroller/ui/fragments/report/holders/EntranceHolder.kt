@@ -35,7 +35,8 @@ class EntranceHolder(
             { newState ->
                 onStateChanged(newState)
             },
-            {}
+            {},
+            false
         )
         itemView.buttons_list?.currentItem = 1
     }

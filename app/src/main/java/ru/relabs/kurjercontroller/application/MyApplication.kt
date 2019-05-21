@@ -69,9 +69,6 @@ class MyApplication : Application() {
             .databaseBuilder(applicationContext, AppDatabase::class.java, "deliverycontroller")
             .fallbackToDestructiveMigration()
             .build()
-        CancelableScope(Dispatchers.IO).launch {
-            database.clearAllTables()
-        }
         tasksRepository = TaskRepository(database)
 
         MapKitFactory.setApiKey(BuildConfig.YA_KEY)

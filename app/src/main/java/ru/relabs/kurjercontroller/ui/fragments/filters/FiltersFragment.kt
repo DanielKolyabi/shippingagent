@@ -42,7 +42,7 @@ class FiltersFragment : Fragment() {
 
     private fun bindControl() {
         start_button.setOnClickListener {
-            onStartClicked?.invoke(filters)
+            onStartClicked?.invoke(presenter.toTaskFiltersModel(allFilters))
         }
     }
 
@@ -104,9 +104,11 @@ class FiltersFragment : Fragment() {
 
     private fun fillFilters(view: FilterTagLayout?, filters: List<FilterModel>) {
         view ?: return
-        filters.forEach {
-            view.add(it)
-        }
+        filters
+            .sortedByDescending { it.fixed }
+            .forEach {
+                view.add(it)
+            }
     }
 
 

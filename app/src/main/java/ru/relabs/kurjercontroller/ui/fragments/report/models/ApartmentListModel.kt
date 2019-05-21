@@ -7,7 +7,7 @@ package ru.relabs.kurjercontroller.ui.fragments.report.models
 sealed class ApartmentListModel {
     data class Apartment(
         val number: Int,
-        val buttonGroup: Int = 0,
+        var buttonGroup: Int = 0,
         var state: Int = 0,
         var description: String = ""
     ): ApartmentListModel()

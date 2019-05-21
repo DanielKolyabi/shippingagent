@@ -17,7 +17,8 @@ data class EntranceModel(
     var endApartments: Int,
     val floors: Int,
     val mailboxType: Int,
-    var state: Int
+    var state: Int,
+    val hasLookout: Boolean
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
@@ -28,7 +29,8 @@ data class EntranceModel(
         parcel.readInt(),
         parcel.readInt(),
         parcel.readInt(),
-        parcel.readInt()
+        parcel.readInt(),
+        parcel.readInt() != 0
     ) {
     }
 
@@ -42,6 +44,7 @@ data class EntranceModel(
         parcel.writeInt(floors)
         parcel.writeInt(mailboxType)
         parcel.writeInt(state)
+        parcel.writeInt(if (hasLookout) 1 else 0)
     }
 
     override fun describeContents(): Int {
@@ -61,7 +64,8 @@ data class EntranceModel(
             mailboxType = mailboxType,
             startApartments = startApartments,
             number = number,
-            taskId = taskId
+            taskId = taskId,
+            hasLookout = hasLookout
         )
 
     companion object CREATOR : Parcelable.Creator<EntranceModel> {

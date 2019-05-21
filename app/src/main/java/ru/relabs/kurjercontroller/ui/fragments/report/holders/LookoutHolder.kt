@@ -35,7 +35,8 @@ class LookoutHolder(
             { newState ->
                 onStateChanged(newState)
             },
-            {}
+            {},
+            false
         )
         itemView.buttons_list?.currentItem = 0
     }

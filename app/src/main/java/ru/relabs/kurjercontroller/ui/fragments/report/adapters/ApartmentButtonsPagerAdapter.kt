@@ -9,6 +9,7 @@ import kotlinx.android.synthetic.main.holder_report_appartament_button_group_add
 import kotlinx.android.synthetic.main.holder_report_appartament_button_group_main.view.*
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
+import ru.relabs.kurjercontroller.ui.extensions.setVisible
 
 /**
  * Created by ProOrange on 16.04.2019.
@@ -18,7 +19,8 @@ class ApartmentButtonsPagerAdapter(
     val context: Context?,
     var state: Int,
     val onStateChanged: (newState: Int) -> Unit,
-    val onLongStateChanged: (change: Int) -> Unit
+    val onLongStateChanged: (change: Int) -> Unit,
+    val brokenVisible: Boolean = true
 ) : PagerAdapter() {
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
@@ -37,7 +39,7 @@ class ApartmentButtonsPagerAdapter(
             }
             view.yes_button_main?.setOnClickListener {
                 state = state xor 1
-                if(state and 4 > 0){
+                if (state and 4 > 0) {
                     state = state xor 4
                 }
                 onStateChanged(state)
@@ -58,7 +60,7 @@ class ApartmentButtonsPagerAdapter(
             }
             view.no_button_main?.setOnClickListener {
                 state = state xor 4
-                if(state and 1 > 0){
+                if (state and 1 > 0) {
                     state = state xor 1
                 }
                 onStateChanged(state)
@@ -80,7 +82,7 @@ class ApartmentButtonsPagerAdapter(
             }
             view.yes_button_addition?.setOnClickListener {
                 state = state xor 16
-                if(state and 32 > 0){
+                if (state and 32 > 0) {
                     state = state xor 32
                 }
                 onStateChanged(state)
@@ -92,7 +94,7 @@ class ApartmentButtonsPagerAdapter(
             }
             view.no_button_addition?.setOnClickListener {
                 state = state xor 32
-                if(state and 16 > 0){
+                if (state and 16 > 0) {
                     state = state xor 16
                 }
                 onStateChanged(state)
@@ -115,6 +117,9 @@ class ApartmentButtonsPagerAdapter(
         view.broken_button_addition?.setSelectButtonActive(state and 8 > 0)
         view.yes_button_addition?.setSelectButtonActive(state and 16 > 0)
         view.no_button_addition?.setSelectButtonActive(state and 32 > 0)
+
+        view.broken_button_addition?.setVisible(brokenVisible)
+        view.broken_button_main?.setVisible(brokenVisible)
 
         return view
     }

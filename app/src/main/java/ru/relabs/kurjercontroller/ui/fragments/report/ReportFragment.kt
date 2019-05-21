@@ -2,6 +2,7 @@ package ru.relabs.kurjercontroller.ui.fragments.report
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.Html
@@ -11,6 +12,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -41,7 +43,7 @@ import ru.relabs.kurjercontroller.ui.helpers.HintHelper
 class ReportFragment : Fragment() {
 
     var deliveryWrong: Boolean = false
-    var hasLookup: Boolean = false
+    var hasLookout: Boolean = false
     var entranceClosed: Boolean = false
     var mailboxType: Int = 1
     var apartmentAdapter = DelegateAdapter<ApartmentListModel>()
@@ -58,6 +60,8 @@ class ReportFragment : Fragment() {
     var allTaskItems: List<TaskItemModel> = listOf()
     var saved: EntranceResultEntity? = null
 
+    var defaultButtonBackground: Drawable? = null
+
     fun updateHintHelperMaximumHeight() {
 
         hintHelper?.maxHeight = (appartaments_list?.height ?: 0) + (hint_container?.height ?: 0)
@@ -66,6 +70,8 @@ class ReportFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        defaultButtonBackground = mailbox_euro?.background
+
         hintHelper = HintHelper(
             hint_container,
             "",
@@ -73,6 +79,7 @@ class ReportFragment : Fragment() {
             activity!!.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
         )
         showHintText(taskItem.notes)
+        updateApartmentListBackground(0)
 
         hint_container.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
 
@@ -81,7 +88,7 @@ class ReportFragment : Fragment() {
 
                 updateHintHelperMaximumHeight()
             }
-        });
+        })
 
         allTaskItems = callback?.getAllTaskItems() ?: listOf(taskItem)
 
@@ -158,9 +165,10 @@ class ReportFragment : Fragment() {
     }
 
     fun showHintText(notes: List<String>) {
-        hint_text.text = Html.fromHtml((3 downTo 1).map {
+        val text = Html.fromHtml("<b>Код: ${entrance.code}</b><br/>" + (3 downTo 1).map {
             "<b>Пр. $it</b><br/>" + notes.getOrElse(it - 1) { "" }
         }.joinToString("<br/>"))
+        hint_text.text = text
     }
 
     private fun refreshData() {
@@ -188,7 +196,7 @@ class ReportFragment : Fragment() {
         lookout?.isEnabled = !locked
         close_button?.isEnabled = !locked
         user_explanation_input?.isEnabled = !locked
-        mailbox_type?.isEnabled = !locked
+        mailbox_euro?.isEnabled = !locked
         updateCloseButtonActive()
         updateIsEntranceClosedButton()
     }
@@ -213,21 +221,24 @@ class ReportFragment : Fragment() {
         }
     }
 
-    fun updateMailboxTypeText() {
-        mailbox_type?.text = if (mailboxType == 1) {
-            "щелев"
-        } else {
-            "евро"
+    fun updateMailboxTypeText(withOutline: Boolean = false) {
+        mailbox_euro?.setSelectButtonActive(mailboxType == 1)
+        mailbox_gap?.setSelectButtonActive(mailboxType == 2)
+        if (withOutline) {
+            if (mailboxType == 1) {
+                mailbox_euro.showOutline(true)
+            } else {
+                mailbox_gap.showOutline(true)
+            }
         }
     }
 
     private suspend fun fillData() = withContext(Dispatchers.Main) {
         appartaments_from?.setText(entrance.startApartments.toString())
         appartaments_to?.setText(entrance.endApartments.toString())
-        entrance_code?.setText(entrance.code)
 
         mailboxType = entrance.mailboxType
-        updateMailboxTypeText()
+        updateMailboxTypeText(true)
 
         entrance_key?.adapter = keyAdapter
         entrance_euro_key?.adapter = euroKeyAdapter
@@ -241,6 +252,11 @@ class ReportFragment : Fragment() {
 
         floors?.setText(entrance.floors.toString())
 
+        if(entrance.hasLookout){
+            hasLookout = entrance.hasLookout
+            lookout?.showOutline(true)
+        }
+
         presenter.bgScope.launch(Dispatchers.Main) {
             loadKeys(saved)
         }
@@ -252,7 +268,7 @@ class ReportFragment : Fragment() {
             if (saved.description != null) user_explanation_input?.setText(saved.description)
             if (saved.floors != null) floors?.setText(saved.floors.toString())
             if (saved.hasLookupPost != null) {
-                hasLookup = saved.hasLookupPost
+                hasLookout = saved.hasLookupPost
                 lookout?.setSelectButtonActive(saved.hasLookupPost)
             }
             if (saved.isDeliveryWrong != null) {
@@ -334,6 +350,12 @@ class ReportFragment : Fragment() {
         }
 
 
+    fun apartmentListRemoveEntrance() {
+        apartmentAdapter.data.removeAll {
+            it is ApartmentListModel.Entrance
+        }
+    }
+
     fun apartmentListAddLookout() =
         presenter.bgScope.launch(Dispatchers.IO) {
             val saved = application().tasksRepository.loadEntranceApartment(taskItem, entrance, -2)
@@ -368,12 +390,20 @@ class ReportFragment : Fragment() {
                 apartmentAdapter.data[idx] = save
             }
 
-            apartmentListAddEntrance()
-            if (hasLookup) {
-                apartmentListAddLookout()
-            } else {
+            val buttonGroup =
+                (apartmentAdapter.data.firstOrNull { it is ApartmentListModel.Apartment } as? ApartmentListModel.Apartment)?.buttonGroup
+            if (buttonGroup == 0) {
+                apartmentListRemoveEntrance()
                 apartmentListRemoveLookout()
+            } else {
+                apartmentListAddEntrance()
+                if (hasLookout) {
+                    apartmentListAddLookout()
+                } else {
+                    apartmentListRemoveLookout()
+                }
             }
+
             appartaments_list?.post {
 
                 apartmentAdapter.notifyDataSetChanged()
@@ -386,7 +416,10 @@ class ReportFragment : Fragment() {
             presenter.onIsEntranceClosedChanged()
         }
 
-        mailbox_type?.setOnClickListener {
+        mailbox_euro?.setOnClickListener {
+            presenter.onEntranceMailboxTypeChanged()
+        }
+        mailbox_gap?.setOnClickListener {
             presenter.onEntranceMailboxTypeChanged()
         }
 
@@ -498,7 +531,7 @@ class ReportFragment : Fragment() {
             presenter.onDeliveryWrongChanged()
         }
         lookout?.setOnClickListener {
-            presenter.onLookupChanged()
+            presenter.onLookoutChanged()
         }
     }
 
@@ -518,6 +551,10 @@ class ReportFragment : Fragment() {
         }
     }
 
+    fun Button.showOutline(showed: Boolean) {
+        background = if (showed) resources.getDrawable(R.drawable.button_outline, null) else defaultButtonBackground
+    }
+
     override fun onDestroy() {
         presenter.bgScope.terminate()
         super.onDestroy()
@@ -526,6 +563,14 @@ class ReportFragment : Fragment() {
     fun updateEntranceClosed() {
         entrance_closed?.setSelectButtonActive(entranceClosed)
         setControlsLocked(entranceClosed)
+    }
+
+    fun updateApartmentListBackground(buttonGroup: Int) {
+        appartaments_list.background =
+            resources.getDrawable(
+                if (buttonGroup == 0) R.drawable.apartment_list_main_bg else R.drawable.apartment_list_secong_bg,
+                null
+            )
     }
 
     companion object {

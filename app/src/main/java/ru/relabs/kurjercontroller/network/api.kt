@@ -26,7 +26,7 @@ object DeliveryServerAPI {
     private val interceptor = HttpLoggingInterceptor()
 
     init {
-        interceptor.level = HttpLoggingInterceptor.Level.BASIC
+        interceptor.level = HttpLoggingInterceptor.Level.BODY
     }
 
     val timeoutInterceptor = object : Interceptor {

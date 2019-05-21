@@ -33,7 +33,9 @@ data class EntranceEntity(
     val floors: Int,
     @ColumnInfo(name = "mailbox_type")
     val mailboxType: Int,
-    var state: Int
+    var state: Int,
+    @ColumnInfo(name = "has_lookout")
+    val hasLookout: Boolean
 ) {
     fun toModel(): EntranceModel {
         return EntranceModel(
@@ -45,7 +47,8 @@ data class EntranceEntity(
             endApartments = endApartments,
             floors = floors,
             mailboxType = mailboxType,
-            startApartments = startApartments
+            startApartments = startApartments,
+            hasLookout = hasLookout
         )
     }
 }

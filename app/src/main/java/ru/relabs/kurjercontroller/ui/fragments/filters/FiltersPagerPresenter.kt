@@ -16,7 +16,7 @@ class FiltersPagerPresenter(val fragment: FiltersPagerFragment) {
         newFilters: TaskFiltersModel
     ) {
         bgScope.launch(Dispatchers.IO) {
-            application().tasksRepository.saveFilters(task)
+            application().tasksRepository.saveFilters(task, newFilters)
 
             withContext(Dispatchers.Main){
                 fragment.tasks.removeAll { it.id == task.id }

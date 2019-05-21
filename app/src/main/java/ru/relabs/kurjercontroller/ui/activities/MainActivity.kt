@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.relabs.kurjercontroller.*
 import ru.relabs.kurjercontroller.application.MyApplication
+import ru.relabs.kurjercontroller.ui.extensions.hideKeyboard
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.ISearchableFragment
 import ru.relabs.kurjercontroller.ui.fragments.LoginScreen
@@ -194,10 +195,7 @@ class MainActivity : AppCompatActivity() {
 
                 current.onItemSelected(search_input?.text.toString(), search_input)
 
-                (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)?.hideSoftInputFromWindow(
-                    search_input.windowToken,
-                    0
-                )
+                hideKeyboard(search_input)
 
                 setSearchInputVisible(false)
                 setTitleVisible(true)
@@ -312,10 +310,7 @@ class MainActivity : AppCompatActivity() {
             if (current is TaskListFragment) {
                 setDeviceIdButtonVisible(true)
             }
-            (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)?.hideSoftInputFromWindow(
-                search_input.windowToken,
-                0
-            )
+            hideKeyboard(search_input)
 
         } else {
             application().router.exit()

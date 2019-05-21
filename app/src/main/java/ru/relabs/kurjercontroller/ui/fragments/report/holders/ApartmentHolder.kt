@@ -28,10 +28,17 @@ class ApartmentHolder(
 
             override fun onPageSelected(position: Int) {
                 (item as? ApartmentListModel.Apartment)?.let {
-                    onButtonGroupChanged(it.number, position)
+                    //Because if change page through model and send notifyItemChanged - onPageSelected called
+                    if(it.buttonGroup != position) {
+                        onButtonGroupChanged(it.number, position)
+                    }
                 }
             }
         })
+    }
+
+    fun scrollToButtonGroup(group: Int){
+        itemView.buttons_list?.setCurrentItem(group, true)
     }
 
     override fun onBindViewHolder(item: ApartmentListModel) {

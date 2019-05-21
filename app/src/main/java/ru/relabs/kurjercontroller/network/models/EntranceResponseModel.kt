@@ -18,7 +18,9 @@ data class EntranceResponseModel(
     @SerializedName("mailbox_type")
     val mailboxType: Int,
     @SerializedName("state")
-    val state: Int
+    val state: Int,
+    @SerializedName("lookout")
+    val hasLookout: Boolean
 ) {
     fun toModel(): EntranceModel {
         return EntranceModel(
@@ -30,7 +32,8 @@ data class EntranceResponseModel(
             endApartments = endAppartaments,
             code = code.orEmpty(),
             key = key,
-            euroKey = euroKey
+            euroKey = euroKey,
+            hasLookout = hasLookout
         )
     }
 

@@ -19,10 +19,12 @@ import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
+import ru.relabs.kurjercontroller.logError
 import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.EntrancePhotoModel
 import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
+import ru.relabs.kurjercontroller.ui.fragments.report.holders.ApartmentHolder
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportPhotosListModel
 import java.io.File
@@ -155,9 +157,7 @@ class ReportPresenter(val fragment: ReportFragment) {
         return photoFile
     }
 
-    private fun onPhotoCreated() {
-        fragment.updateEditable()
-    }
+    private fun onPhotoCreated() {}
 
 
     fun onDescriptionChanged() {
@@ -302,7 +302,6 @@ class ReportPresenter(val fragment: ReportFragment) {
 
         fragment.photosAdapter.data.removeAt(holder.adapterPosition)
         fragment.photosAdapter.notifyItemRemoved(holder.adapterPosition)
-        fragment.updateEditable()
     }
 
     fun onFloorsChanged() {
@@ -320,15 +319,38 @@ class ReportPresenter(val fragment: ReportFragment) {
     }
 
     fun onApartmentButtonGroupChanged(apartment: Int, buttonGroup: Int) {
-        val index = fragment.apartmentAdapter.data.indexOfFirst {
-            (it as? ApartmentListModel.Apartment)?.number == apartment
+
+        try {
+            fragment.apartmentAdapter.data.forEachIndexed { index, apartmentListModel ->
+                if (apartmentListModel !is ApartmentListModel.Apartment) return@forEachIndexed
+
+                apartmentListModel.buttonGroup = buttonGroup
+                (fragment.appartaments_list?.findViewHolderForAdapterPosition(index) as? ApartmentHolder)?.scrollToButtonGroup(
+                    buttonGroup
+                )
+            }
+        } catch (e: java.lang.Exception) {
+            e.logError()
+            return
         }
-        val item = fragment.apartmentAdapter.data[index] as ApartmentListModel.Apartment
-        val newItem = item.copy(buttonGroup = buttonGroup)
-        fragment.apartmentAdapter.data[index] = newItem
+
+        fragment.apartmentListRemoveEntrance()
+        fragment.apartmentListRemoveLookout()
+        if (buttonGroup == 1) {
+            fragment.apartmentListAddEntrance()
+        } else if (buttonGroup == 0) {
+            if (fragment.hasLookout) {
+                fragment.apartmentListAddLookout()
+            }
+        }
+        fragment.updateApartmentListBackground(buttonGroup)
+        fragment.apartmentAdapter.notifyItemRangeChanged(0, 2)
 
         bgScope.launch {
-            application().tasksRepository.saveApartmentResult(fragment.taskItem, fragment.entrance, newItem)
+            application().tasksRepository.saveApartmentResults(
+                fragment.taskItem,
+                fragment.entrance,
+                fragment.apartmentAdapter.data.mapNotNull { it as? ApartmentListModel.Apartment })
         }
     }
 
@@ -394,20 +416,22 @@ class ReportPresenter(val fragment: ReportFragment) {
         }
     }
 
-    fun onLookupChanged() {
-        fragment.hasLookup = !fragment.hasLookup
-        fragment.lookout?.setSelectButtonActive(fragment.hasLookup)
+    fun onLookoutChanged() {
+        fragment.hasLookout = !fragment.hasLookout
+        fragment.lookout?.setSelectButtonActive(fragment.hasLookout)
 
         bgScope.launch {
             fragment.allTaskItems.forEach {
                 application().tasksRepository.insertEntranceResult(
                     it,
                     fragment.entrance,
-                    hasLookupPost = fragment.hasLookup
+                    hasLookupPost = fragment.hasLookout
                 )
             }
 
-            if (fragment.hasLookup) {
+            val shouldAddLookout =
+                (fragment.apartmentAdapter.data.first { it is ApartmentListModel.Apartment } as? ApartmentListModel.Apartment)?.buttonGroup == 0
+            if (fragment.hasLookout && shouldAddLookout) {
                 fragment.apartmentListAddLookout()
             } else {
                 fragment.apartmentListRemoveLookout()
@@ -514,13 +538,13 @@ class ReportPresenter(val fragment: ReportFragment) {
             .setPositiveButton("Ок") { _, _ ->
                 bgScope.launch {
                     item.description = input.text.toString()
-                    withContext(Dispatchers.Main){
+                    withContext(Dispatchers.Main) {
                         fragment.apartmentAdapter.notifyItemChanged(index)
                     }
                     application().tasksRepository.saveApartmentResult(fragment.taskItem, fragment.entrance, item)
                 }
             }
-            .setNegativeButton("Отмена"){ _, _ -> }
+            .setNegativeButton("Отмена") { _, _ -> }
             .show()
     }
 

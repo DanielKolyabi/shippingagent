@@ -178,23 +178,24 @@ class TaskRepository(val db: AppDatabase) {
         return result
     }
 
-    suspend fun saveFilters(task: TaskModel) = withContext(Dispatchers.IO) {
-        db.filtersDao().insertAll(task.taskFilters.brigades.map {
-            FilterEntity(0, task.id, FilterEntity.BRIGADE_FILTER, it.id, it.name, it.fixed, it.active)
-        })
-        db.filtersDao().insertAll(task.taskFilters.publishers.map {
-            FilterEntity(0, task.id, FilterEntity.PUBLISHER_FILTER, it.id, it.name, it.fixed, it.active)
-        })
-        db.filtersDao().insertAll(task.taskFilters.users.map {
-            FilterEntity(0, task.id, FilterEntity.USER_FILTER, it.id, it.name, it.fixed, it.active)
-        })
-        db.filtersDao().insertAll(task.taskFilters.districts.map {
-            FilterEntity(0, task.id, FilterEntity.DISTRICT_FILTER, it.id, it.name, it.fixed, it.active)
-        })
-        db.filtersDao().insertAll(task.taskFilters.regions.map {
-            FilterEntity(0, task.id, FilterEntity.REGION_FILTER, it.id, it.name, it.fixed, it.active)
-        })
-    }
+    suspend fun saveFilters(task: TaskModel, filters: TaskFiltersModel = task.taskFilters) =
+        withContext(Dispatchers.IO) {
+            db.filtersDao().insertAll(filters.brigades.map {
+                FilterEntity(0, task.id, FilterEntity.BRIGADE_FILTER, it.id, it.name, it.fixed, it.active)
+            })
+            db.filtersDao().insertAll(filters.publishers.map {
+                FilterEntity(0, task.id, FilterEntity.PUBLISHER_FILTER, it.id, it.name, it.fixed, it.active)
+            })
+            db.filtersDao().insertAll(filters.users.map {
+                FilterEntity(0, task.id, FilterEntity.USER_FILTER, it.id, it.name, it.fixed, it.active)
+            })
+            db.filtersDao().insertAll(filters.districts.map {
+                FilterEntity(0, task.id, FilterEntity.DISTRICT_FILTER, it.id, it.name, it.fixed, it.active)
+            })
+            db.filtersDao().insertAll(filters.regions.map {
+                FilterEntity(0, task.id, FilterEntity.REGION_FILTER, it.id, it.name, it.fixed, it.active)
+            })
+        }
 
     suspend fun removeReport(db: AppDatabase, report: EntranceReportEntity) = withContext(Dispatchers.IO) {
         db.entranceReportDao().delete(report)
@@ -375,18 +376,41 @@ class TaskRepository(val db: AppDatabase) {
         )
     }
 
+
+    suspend fun saveApartmentResults(
+        taskItem: TaskItemModel,
+        entrance: EntranceModel,
+        apartments: List<ApartmentListModel.Apartment>
+    ) = withContext(Dispatchers.IO) {
+        db.apartmentResultDao().insertAll(
+            apartments.map { apartment ->
+                ApartmentResultEntity(
+                    0,
+                    taskItem.taskId,
+                    taskItem.id,
+                    entrance.number,
+                    apartment.number,
+                    apartment.buttonGroup,
+                    apartment.state,
+                    apartment.description
+                )
+            }
+        )
+    }
+
     suspend fun loadEntranceApartments(
         taskItem: TaskItemModel,
         entrance: EntranceModel
     ): List<ApartmentListModel.Apartment> = withContext(Dispatchers.IO) {
-        return@withContext db.apartmentResultDao().getByEntrance(taskItem.taskId, taskItem.id, entrance.number).map {
-            ApartmentListModel.Apartment(
-                it.apartmentNumber,
-                it.buttonGroup,
-                it.buttonState,
-                it.description
-            )
-        }
+        return@withContext db.apartmentResultDao().getByEntrance(taskItem.taskId, taskItem.id, entrance.number)
+            .map {
+                ApartmentListModel.Apartment(
+                    it.apartmentNumber,
+                    it.buttonGroup,
+                    it.buttonState,
+                    it.description
+                )
+            }
     }
 
     suspend fun loadEntranceApartment(
