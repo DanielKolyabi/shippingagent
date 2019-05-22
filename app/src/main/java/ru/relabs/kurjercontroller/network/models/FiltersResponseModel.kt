@@ -23,6 +23,11 @@ data class FiltersResponseModel(
 
 }
 
+data class FilteredTasksCountResponse(
+    val count: Int
+)
+
+
 data class FilterResponseModel(
     val id: Int,
     val name: String,

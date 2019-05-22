@@ -1,11 +1,14 @@
 package ru.relabs.kurjercontroller.ui.fragments.taskList
 
-import androidx.lifecycle.Lifecycle
+import android.util.Log
 import kotlinx.android.synthetic.main.fragment_tasklist.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.application
+import ru.relabs.kurjercontroller.models.TaskFiltersModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.models.toAndroidState
 import ru.relabs.kurjercontroller.ui.activities.showError
@@ -113,12 +116,34 @@ class TaskListPresenter(val fragment: TaskListFragment) {
     }
 
     fun onOnlineClicked() {
-//        bgScope.launch {
-//            val taskFilters = application().tasksRepository.getTask(15).taskFilters
-//            withContext(Dispatchers.Main) {
-//                application().router.navigateTo(FiltersScreen(fragment, taskFilters))
-//            }
-//        }
+        bgScope.launch {
+            withContext(Dispatchers.Main) {
+                application().router.navigateTo(
+                    FiltersScreen(
+                        listOf(
+                            TaskModel(
+                                -1,
+                                -1,
+                                "",
+                                DateTime(),
+                                DateTime(),
+                                "",
+                                listOf(),
+                                listOf(),
+                                listOf(),
+                                TaskFiltersModel.blank(),
+                                0,
+                                0,
+                                null,
+                                true
+                            )
+                        )
+                    ) {
+                        Log.d("Filters", "Applied")
+                    }
+                )
+            }
+        }
     }
 
     suspend fun loadTasks() = withContext(Dispatchers.IO) {

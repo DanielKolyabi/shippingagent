@@ -46,13 +46,19 @@ class FiltersFragment : Fragment() {
         }
     }
 
+    fun setStartButtonCount(count: String) {
+        start_button.text = resources.getString(R.string.filter_apply_button, count)
+    }
+
     private fun bindFilterControl(textView: AutoCompleteTextView, container: FilterTagLayout, filterType: Int) {
         context?.let {
-            container.onFilterAppear = {
-                allFilters.add(it)
+            container.onFilterAppear = { filter ->
+                allFilters.add(filter)
+                presenter.loadFilteredTasksCount(allFilters)
             }
-            container.onFilterDisappear = {
-                allFilters.remove(it)
+            container.onFilterDisappear = { filter ->
+                allFilters.remove(filter)
+                presenter.loadFilteredTasksCount(allFilters)
             }
             container.onFilterActiveChangedPredicate = { filter, newActive ->
                 if (newActive) {
@@ -60,6 +66,9 @@ class FiltersFragment : Fragment() {
                 } else {
                     allFilters.filter { it.type == filter.type && it.active }.size > 1
                 }
+            }
+            container.onFilterActiveChanged = {
+                presenter.loadFilteredTasksCount(allFilters)
             }
 
             textView.setAdapter(
@@ -70,6 +79,10 @@ class FiltersFragment : Fragment() {
                     WeakReference(allFilters)
                 )
             )
+            textView.threshold = 0
+            textView.setOnClickListener {
+                textView?.showDropDown()
+            }
             textView.onItemClickListener = object : AdapterView.OnItemClickListener {
                 override fun onItemClick(adapter: AdapterView<*>?, view: View?, pos: Int, p3: Long) {
                     val item = adapter?.getItemAtPosition(pos) as? FilterModel

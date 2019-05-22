@@ -44,7 +44,7 @@
                     app:layout_constraintTop_toTopOf="@id/publisher_filter"
                     app:layout_constraintBottom_toBottomOf="@id/publisher_filter"
                     android:text="@string/edition_label"/>
-            <AutoCompleteTextView
+            <ru.relabs.kurjercontroller.ui.CustomView.InstantAutocompleteTextView
                     android:id="@+id/publisher_filter"
                     android:layout_width="0dp"
                     android:layout_marginTop="8dp"
@@ -71,7 +71,7 @@
                     app:layout_constraintTop_toTopOf="@id/district_filter"
                     app:layout_constraintBottom_toBottomOf="@id/district_filter"
                     android:text="@string/district_filter_label"/>
-            <AutoCompleteTextView
+            <ru.relabs.kurjercontroller.ui.CustomView.InstantAutocompleteTextView
                     android:id="@+id/district_filter"
                     android:layout_width="0dp"
                     android:layout_marginTop="8dp"
@@ -97,7 +97,7 @@
                     app:layout_constraintTop_toTopOf="@id/region_filter"
                     app:layout_constraintBottom_toBottomOf="@id/region_filter"
                     android:text="@string/region_filter_label"/>
-            <AutoCompleteTextView
+            <ru.relabs.kurjercontroller.ui.CustomView.InstantAutocompleteTextView
                     android:id="@+id/region_filter"
                     android:layout_width="0dp"
                     android:layout_marginTop="8dp"
@@ -122,7 +122,7 @@
                     app:layout_constraintTop_toTopOf="@id/brigade_filter"
                     app:layout_constraintBottom_toBottomOf="@id/brigade_filter"
                     android:text="@string/brigade_label"/>
-            <AutoCompleteTextView
+            <ru.relabs.kurjercontroller.ui.CustomView.InstantAutocompleteTextView
                     android:id="@+id/brigade_filter"
                     android:layout_width="0dp"
                     android:layout_marginTop="8dp"
@@ -148,7 +148,7 @@
                     app:layout_constraintTop_toTopOf="@id/user_filter"
                     app:layout_constraintBottom_toBottomOf="@id/user_filter"
                     android:text="@string/user_filter_label"/>
-            <AutoCompleteTextView
+            <ru.relabs.kurjercontroller.ui.CustomView.InstantAutocompleteTextView
                     android:id="@+id/user_filter"
                     android:layout_width="0dp"
                     android:layout_marginTop="8dp"

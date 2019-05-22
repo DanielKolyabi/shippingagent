@@ -252,7 +252,7 @@ class ReportFragment : Fragment() {
 
         floors?.setText(entrance.floors.toString())
 
-        if(entrance.hasLookout){
+        if (entrance.hasLookout) {
             hasLookout = entrance.hasLookout
             lookout?.showOutline(true)
         }
@@ -566,11 +566,12 @@ class ReportFragment : Fragment() {
     }
 
     fun updateApartmentListBackground(buttonGroup: Int) {
-        appartaments_list.background =
+        list_background.setImageDrawable(
             resources.getDrawable(
                 if (buttonGroup == 0) R.drawable.apartment_list_main_bg else R.drawable.apartment_list_secong_bg,
                 null
             )
+        )
     }
 
     companion object {

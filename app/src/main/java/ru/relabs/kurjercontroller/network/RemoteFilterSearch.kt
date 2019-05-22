@@ -30,7 +30,10 @@ class RemoteFilterSearch(val scope: CancelableScope, val token: String) : IFilte
                         filterType,
                         filterValue,
                         selectedFilters
-                            .filter { it.active }
+                            .filter {
+                                if(it.fixed) it.active
+                                else true
+                            }
                             .map { FilterResponseModel(it.id, it.name, it.fixed, it.type) }
                     )
                 ).await()

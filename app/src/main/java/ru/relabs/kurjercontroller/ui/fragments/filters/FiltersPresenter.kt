@@ -1,19 +1,54 @@
 package ru.relabs.kurjercontroller.ui.fragments.filters
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.CancelableScope
+import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.database.entities.FilterEntity
+import ru.relabs.kurjercontroller.logError
 import ru.relabs.kurjercontroller.models.FilterModel
 import ru.relabs.kurjercontroller.models.TaskFiltersModel
+import ru.relabs.kurjercontroller.network.DeliveryServerAPI
+import ru.relabs.kurjercontroller.network.models.FilterResponseModel
+import ru.relabs.kurjercontroller.network.models.FiltersRequest
 
 /**
  * Created by ProOrange on 18.03.2019.
  */
 
-class FiltersPresenter(val fragment: FiltersFragment){
+class FiltersPresenter(val fragment: FiltersFragment) {
     val bgScope = CancelableScope(Dispatchers.Default)
+    var loadFilterCountJob: Job? = null
 
-    fun toTaskFiltersModel(filters: List<FilterModel>): TaskFiltersModel{
+    fun loadFilteredTasksCount(filters: List<FilterModel>) {
+        val token = application().user.getUserCredentials()?.token
+        if (token == null) {
+            fragment.setStartButtonCount("Ошибка")
+            return
+        }
+        loadFilterCountJob?.cancel()
+        loadFilterCountJob = bgScope.launch {
+            val count = try {
+                DeliveryServerAPI.api.countFilteredTasks(token, FiltersRequest(filters.filter {
+                    if (it.fixed) return@filter it.active
+                    else true
+                }.map {
+                    FilterResponseModel(it.id, it.name, it.fixed, it.type)
+                })).await().count.toString()
+
+            } catch (e: Exception) {
+                e.logError()
+                "Ошибка"
+            }
+            withContext(Dispatchers.Main) {
+                fragment?.setStartButtonCount(count)
+            }
+        }
+    }
+
+    fun toTaskFiltersModel(filters: List<FilterModel>): TaskFiltersModel {
 
         return TaskFiltersModel(
             filters.filter { it.type == FilterEntity.PUBLISHER_FILTER }.toMutableList(),

@@ -14,3 +14,9 @@ data class SearchFiltersRequest (
     val filters: List<FilterResponseModel>
 ){
 }
+
+data class FiltersRequest (
+    @SerializedName("selected_filters")
+    val filters: List<FilterResponseModel>
+){
+}

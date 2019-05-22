@@ -44,7 +44,7 @@
     <string name="string_fitler_label">Улица:</string>
     <string name="district_filter_label">Округ:</string>
     <string name="region_filter_label">Район:</string>
-    <string name="filter_apply_button">Начать (%d)</string>
+    <string name="filter_apply_button">Начать (%s)</string>
     <string name="entrance_list_back">Назазд</string>
     <string name="task_online_button">Онлайн</string>
     <string name="control_dates_label">Даты контроля:</string>

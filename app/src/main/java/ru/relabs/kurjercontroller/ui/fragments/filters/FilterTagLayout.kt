@@ -24,6 +24,7 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
     var onFilterAppear: ((filter: FilterModel) -> Unit)? = null
     var onFilterDisappear: ((filter: FilterModel) -> Unit)? = null
     var onFilterActiveChangedPredicate: ((filter: FilterModel, newActiveState: Boolean) -> Boolean)? = null
+    var onFilterActiveChanged: ((filter: FilterModel) -> Unit)? = null
 
     val currentTags = tags.map {
         it.second
@@ -52,6 +53,7 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
                 if(onFilterActiveChangedPredicate?.invoke(tag, !tag.active) == true) {
                     tag.active = !tag.active
                     changeTagIcon(view, tag)
+                    onFilterActiveChanged?.invoke(tag)
                 }
             }
         }else{
