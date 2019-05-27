@@ -591,6 +591,35 @@ class TaskRepository(val db: AppDatabase) {
         return@withContext entity.toModel(this@TaskRepository)
     }
 
+    suspend fun isMergeNeeded(newTasks: List<TaskModel>): Boolean = withContext(Dispatchers.IO){
+        val savedTasksIDs = db.taskDao().all.map { it.id }
+        val newTasksIDs = newTasks.map { it.id }
+        val appearedTasks = mutableListOf<TaskModel>()
+
+        db.taskDao().all.filter { it.id !in newTasksIDs && !it.isOnline }.forEach { task ->
+            return@withContext true
+        }
+        newTasks.filter { it.id !in savedTasksIDs }.forEach { task ->
+            return@withContext true
+        }
+        newTasks.filter { it.id in savedTasksIDs }.forEach { task ->
+            val savedTask = db.taskDao().getById(task.id) ?: return@forEach
+            if (task.androidState == TaskModel.CANCELED) {
+                if (savedTask.state.toAndroidState() != TaskModel.STARTED) {
+                    return@withContext true
+                }
+            } else if (task.androidState == TaskModel.COMPLETED) {
+                return@withContext true
+            } else if (
+                (savedTask.iteration < task.iteration)
+                || (task.state != savedTask.state && savedTask.state.toAndroidState() != TaskModel.STARTED)
+            ) {
+                return@withContext true
+            }
+        }
+        return@withContext false
+    }
+
 
     data class MergeResult(
         var isTasksChanged: Boolean,

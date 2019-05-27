@@ -10,10 +10,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.application.MyApplication
 import ru.relabs.kurjercontroller.database.AppDatabase
 import ru.relabs.kurjercontroller.database.entities.EntranceReportEntity
 import ru.relabs.kurjercontroller.database.entities.SendQueryItemEntity
+import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 import ru.relabs.kurjercontroller.network.NetworkHelper
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
@@ -92,24 +94,21 @@ class ReportService : Service() {
                         }
                     } else if (System.currentTimeMillis() - lastTasksChecking > 25 * 60 * 1000) {
                         //TODO: Check if merge need
-//                        val app = MyApplication.instance
-//                        val user = app.user.getUserCredentials() ?: continue
-//                        val time = DateTime().toString("yyyy-MM-dd'T'HH:mm:ss")
-//                        try {
-//                            val tasks = DeliveryServerAPI.api.getTasks(user.token, time).await()
-//                            if (PersistenceHelper.isMergeNeeded(
-//                                    app.database,
-//                                    tasks.map { it.toTaskModel(app.deviceUUID) })
-//                            ) {
-//                                val int = Intent().apply {
-//                                    putExtra("tasks_changed", true)
-//                                    action = "NOW"
-//                                }
-//                                sendBroadcast(int)
-//                            }
-//                        } catch (e: Exception) {
-//                            e.logError()
-//                        }
+                        val user = application().user.getUserCredentials() ?: continue
+                        val time = DateTime().toString("yyyy-MM-dd'T'HH:mm:ss")
+                        try {
+                            val tasks = DeliveryServerAPI.api.getTasks(user.token, time).await()
+                            if (application().tasksRepository.isMergeNeeded(tasks.map { it.toModel() })
+                            ) {
+                                val int = Intent().apply {
+                                    putExtra("tasks_changed", true)
+                                    action = "NOW"
+                                }
+                                sendBroadcast(int)
+                            }
+                        } catch (e: Exception) {
+                            e.logError()
+                        }
                         lastTasksChecking = System.currentTimeMillis()
                     }
                 }
