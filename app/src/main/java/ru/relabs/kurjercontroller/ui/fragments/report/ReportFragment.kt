@@ -567,10 +567,10 @@ class ReportFragment : Fragment() {
 
     fun updateApartmentListBackground(buttonGroup: Int) {
         list_background.setImageDrawable(
-            resources.getDrawable(
-                if (buttonGroup == 0) R.drawable.apartment_list_main_bg else R.drawable.apartment_list_secong_bg,
+            if (buttonGroup == 0) resources.getDrawable(
+                R.drawable.apartment_list_main_bg,
                 null
-            )
+            ) else null
         )
     }
 

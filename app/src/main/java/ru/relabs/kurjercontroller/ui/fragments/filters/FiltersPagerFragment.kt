@@ -32,7 +32,7 @@ class FiltersPagerFragment : Fragment() {
 
     private fun updatePagerAdapter() {
         val manager = fragmentManager ?: return
-        pagerAdapter = FiltersPagerAdapter(tasks, manager){ task, newFilters ->
+        pagerAdapter = FiltersPagerAdapter(tasks, manager) { task, newFilters ->
             presenter.onStartClicked(task, newFilters)
         }
         view_pager?.adapter = pagerAdapter
@@ -63,7 +63,7 @@ class FiltersPagerFragment : Fragment() {
         fun newInstance(tasks: List<TaskModel>) =
             FiltersPagerFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelableArrayList("tasks", ArrayList(tasks))
+                    putParcelableArrayList("tasks", ArrayList(tasks.map { it.copy(taskItems = listOf()) }))
                 }
             }
     }

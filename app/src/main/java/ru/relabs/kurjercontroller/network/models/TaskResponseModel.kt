@@ -44,7 +44,8 @@ data class TaskResponseModel(
             taskFilters = filters.toModel(),
             iteration = iteration,
             firstExaminedDeviceId = firstExaminedDeviceId,
-            filtered = filtered
+            filtered = filtered,
+            isOnline = false
         )
     }
 }

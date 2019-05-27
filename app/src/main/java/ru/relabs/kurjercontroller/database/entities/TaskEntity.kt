@@ -2,19 +2,20 @@ package ru.relabs.kurjercontroller.database.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
-import ru.relabs.kurjercontroller.database.AppDatabase
-import ru.relabs.kurjercontroller.models.TaskFiltersModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.providers.TaskRepository
 
 /**
  * Created by ProOrange on 19.03.2019.
  */
-@Entity(tableName = "tasks")
+@Entity(
+    tableName = "tasks"
+)
 data class TaskEntity(
     @PrimaryKey
     val id: Int, //id_ct
@@ -31,7 +32,9 @@ data class TaskEntity(
     val iteration: Int,
     @ColumnInfo(name = "first_examined_device_id")
     val firstExaminedDeviceId: String?,
-    val filtered: Boolean
+    val filtered: Boolean,
+    @ColumnInfo(name = "is_online")
+    val isOnline: Boolean = false
 ) {
     suspend fun toModel(repository: TaskRepository): TaskModel = withContext(Dispatchers.IO) {
         return@withContext TaskModel(
@@ -48,7 +51,8 @@ data class TaskEntity(
             taskItems = repository.db.taskItemDao().getByTaskId(id).map { it.toModel(repository) },
             iteration = iteration,
             firstExaminedDeviceId = firstExaminedDeviceId,
-            filtered = filtered
+            filtered = filtered,
+            isOnline = isOnline
         )
     }
 }

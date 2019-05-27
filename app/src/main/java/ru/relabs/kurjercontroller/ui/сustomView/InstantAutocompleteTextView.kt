@@ -1,4 +1,4 @@
-package ru.relabs.kurjercontroller.ui.CustomView
+package ru.relabs.kurjercontroller.ui.сustomView
 
 import android.content.Context
 import android.graphics.Rect

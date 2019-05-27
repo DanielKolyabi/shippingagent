@@ -21,6 +21,7 @@ class FiltersPagerPresenter(val fragment: FiltersPagerFragment) {
             withContext(Dispatchers.Main){
                 fragment.tasks.removeAll { it.id == task.id }
                 if (fragment.tasks.size == 0) {
+                    application().router.exit()
                     fragment.onAllFiltersApplied?.invoke()
                 } else {
                     fragment.pagerAdapter.tasks = fragment.tasks

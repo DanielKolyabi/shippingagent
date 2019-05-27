@@ -8,7 +8,9 @@ import ru.relabs.kurjercontroller.models.TaskModel
 
 sealed class TaskListModel {
 
-    object Loader : TaskListModel()
+    data class Loader(
+        val text: String = ""
+    ) : TaskListModel()
     data class TaskItem(
         val task: TaskModel,
         var selected: Boolean = false,

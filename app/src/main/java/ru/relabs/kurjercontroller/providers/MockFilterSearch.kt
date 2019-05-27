@@ -1,8 +1,10 @@
-package ru.relabs.kurjercontroller.network
+package ru.relabs.kurjercontroller.providers
 
 import kotlinx.coroutines.*
 import ru.relabs.kurjercontroller.database.entities.FilterEntity
 import ru.relabs.kurjercontroller.models.FilterModel
+import ru.relabs.kurjercontroller.providers.interfaces.FiltersResultOrError
+import ru.relabs.kurjercontroller.providers.interfaces.IFilterSearch
 
 /**
  * Created by ProOrange on 22.03.2019.

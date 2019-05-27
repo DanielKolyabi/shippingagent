@@ -22,10 +22,13 @@ interface TaskItemEntityDao {
     fun update(item: TaskItemEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(item: TaskItemEntity)
+    fun insert(item: TaskItemEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(item: List<TaskItemEntity>)
+
+    @Query("DELETE FROM task_items WHERE task_id = :taskId")
+    fun deleteByTaskId(taskId: Int)
 
     @Delete
     fun delete(item: TaskItemEntity)

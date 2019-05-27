@@ -29,4 +29,10 @@ interface TaskEntityDao {
 
     @Query("DELETE FROM tasks WHERE id = :id")
     fun deleteById(id: Int)
+
+    @Query("DELETE FROM tasks WHERE is_online = 1")
+    fun deleteOnlineTask()
+
+    @Query("SELECT * FROM tasks WHERE is_online = 1")
+    fun getOnlineTask(): TaskEntity?
 }

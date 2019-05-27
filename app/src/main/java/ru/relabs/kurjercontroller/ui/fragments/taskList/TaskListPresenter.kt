@@ -1,21 +1,25 @@
 package ru.relabs.kurjercontroller.ui.fragments.taskList
 
-import android.util.Log
+import android.widget.ImageView
 import kotlinx.android.synthetic.main.fragment_tasklist.*
+import kotlinx.android.synthetic.main.holder_tasklist_task.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.CancelableScope
+import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.TaskFiltersModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.models.toAndroidState
 import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.activities.showErrorSuspend
+import ru.relabs.kurjercontroller.ui.extensions.performFlash
 import ru.relabs.kurjercontroller.ui.fragments.AddressListScreen
 import ru.relabs.kurjercontroller.ui.fragments.FiltersScreen
+import ru.relabs.kurjercontroller.ui.fragments.OnlineFiltersScreen
 import ru.relabs.kurjercontroller.ui.fragments.TaskInfoScreen
+import ru.relabs.kurjercontroller.ui.fragments.taskList.holders.TaskHolder
 
 class TaskListPresenter(val fragment: TaskListFragment) {
     val bgScope = CancelableScope(Dispatchers.Default)
@@ -100,14 +104,35 @@ class TaskListPresenter(val fragment: TaskListFragment) {
 
         val selectedFilteredTasks = selectedTasks.filter { it.filtered }
         if (selectedFilteredTasks.isNotEmpty()) {
+            val token = application().user.getUserCredentials()?.token
+            if (token == null) {
+                fragment.context?.showError("Что-то пошло не так. Ошибка: token_not_found")
+                return
+            }
+
             application().router.navigateTo(FiltersScreen(selectedFilteredTasks) {
-                //TODO: Reload TaskItems
-                //Загруженные TaskItems отправить в базу данных
-                //Если загрузить не удалось:
-                //--Если в базе есть - взять из неё
-                //--Если нет - уведомить пользователя о невозможности получить данные и исключить задание
-                //----Если были исключены все задания - уведомить пользователя и оставить на текущем экране
-                application().router.replaceScreen(AddressListScreen(selectedTasks.map { it.id }))
+                fragment.showLoading(true, text = "Загрузка адресов")
+                bgScope.launch {
+
+                    selectedFilteredTasks.forEach {
+                        val reloadedDbTask = application().tasksRepository.getTask(it.id) ?: return@forEach
+                        try {
+                            application().tasksRepository.reloadFilteredTaskItems(
+                                token,
+                                reloadedDbTask
+                            )
+                        } catch (e: Exception) {
+                            //TODO:
+                            //--Если в базе нет заданий нет - уведомить пользователя о невозможности получить данные и исключить задание
+                            //----Если были исключены все задания - уведомить пользователя и оставить на текущем экране
+                        }
+                    }
+
+                    fragment.showLoadingAsync(false)
+                    withContext(Dispatchers.Main){
+                        application().router.navigateTo(AddressListScreen(selectedTasks.map { it.id }))
+                    }
+                }
             })
         } else {
             application().router.navigateTo(AddressListScreen(selectedTasks.map { it.id }))
@@ -116,42 +141,54 @@ class TaskListPresenter(val fragment: TaskListFragment) {
     }
 
     fun onOnlineClicked() {
+        bgScope.launch(Dispatchers.Main) {
+            val exists = application().tasksRepository.isOnlineTaskExists()
+            if (exists) {
+                val idx = fragment.adapter.data.indexOfFirst {
+                    (it is TaskListModel.TaskItem) && it.task.isOnline
+                }
+                val holderView = fragment.tasks_list?.findViewHolderForAdapterPosition(idx) as? TaskHolder
+                holderView?.setSelected()
+                updateStartButton()
+                return@launch
+            }
+            val token = application().user.getUserCredentials()?.token
+            if (token == null) {
+                fragment.context?.showError("Произошла ошибка")
+                return@launch
+            }
+
+            application().router.navigateTo(
+                OnlineFiltersScreen {
+                    application().router.exit()
+                    onOnlineFiltersReceived(it, token)
+                }
+            )
+        }
+    }
+
+    fun onOnlineFiltersReceived(filters: TaskFiltersModel, token: String) {
+        fragment.showLoading(true, text = "Загрузка адресов")
         bgScope.launch {
+            val task = application().tasksRepository.createOnlineTask(filters)
+            val newTask = try {
+                application().tasksRepository.reloadFilteredTaskItems(token, task)
+            } catch (e: java.lang.Exception) {
+                fragment.context?.showError("Не удалось загрузить список адресов.")
+                return@launch
+            }
+
             withContext(Dispatchers.Main) {
-                application().router.navigateTo(
-                    FiltersScreen(
-                        listOf(
-                            TaskModel(
-                                -1,
-                                -1,
-                                "",
-                                DateTime(),
-                                DateTime(),
-                                "",
-                                listOf(),
-                                listOf(),
-                                listOf(),
-                                TaskFiltersModel.blank(),
-                                0,
-                                0,
-                                null,
-                                true
-                            )
-                        )
-                    ) {
-                        Log.d("Filters", "Applied")
-                    }
-                )
+                fragment.showLoading(false)
+                application().router.navigateTo(AddressListScreen(listOf(newTask.id)))
             }
         }
     }
 
     suspend fun loadTasks() = withContext(Dispatchers.IO) {
-        fragment.showLoading(true)
         fragment.populateTaskList(application().tasksRepository.getTasks().filter {
             it.state.toAndroidState() != TaskModel.COMPLETED && it.state.toAndroidState() != TaskModel.CANCELED
         })
-        fragment.showLoading(false)
 
         withContext(Dispatchers.Main) { updateStartButton() }
     }
@@ -167,7 +204,7 @@ class TaskListPresenter(val fragment: TaskListFragment) {
             return@withContext
         }
 
-        fragment.showLoading(true, true)
+        fragment.showLoadingAsync(true, true, "Загрузка заданий")
 
         application().tasksRepository.getAvailableEntranceKeys(user.token, true)
         application().tasksRepository.getAvailableEntranceEuroKeys(user.token, true)
@@ -181,7 +218,7 @@ class TaskListPresenter(val fragment: TaskListFragment) {
             return@withContext
         }
         val mergeResult = application().tasksRepository.mergeTasks(tasks)
-        fragment.showLoading(false)
+        fragment.showLoadingAsync(false)
         networkUpdateStarted = false
         loadTasks()
 

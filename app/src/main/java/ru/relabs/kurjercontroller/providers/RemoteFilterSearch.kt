@@ -1,4 +1,4 @@
-package ru.relabs.kurjercontroller.network
+package ru.relabs.kurjercontroller.providers
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
@@ -6,15 +6,19 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.models.FilterModel
+import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 import ru.relabs.kurjercontroller.network.models.FilterResponseModel
 import ru.relabs.kurjercontroller.network.models.SearchFiltersRequest
+import ru.relabs.kurjercontroller.providers.interfaces.FiltersResultOrError
+import ru.relabs.kurjercontroller.providers.interfaces.IFilterSearch
 
 /**
  * Created by ProOrange on 16.05.2019.
  */
 
 
-class RemoteFilterSearch(val scope: CancelableScope, val token: String) : IFilterSearch {
+class RemoteFilterSearch(val scope: CancelableScope, val token: String) :
+    IFilterSearch {
     var searchJob: Job? = null
     override fun searchFilters(
         filterType: Int,
@@ -30,11 +34,8 @@ class RemoteFilterSearch(val scope: CancelableScope, val token: String) : IFilte
                         filterType,
                         filterValue,
                         selectedFilters
-                            .filter {
-                                if(it.fixed) it.active
-                                else true
-                            }
-                            .map { FilterResponseModel(it.id, it.name, it.fixed, it.type) }
+                            .filter { it.isActive() }
+                            .map { it.toFilterResponseModel() }
                     )
                 ).await()
             } catch (e: Exception) {
@@ -42,7 +43,23 @@ class RemoteFilterSearch(val scope: CancelableScope, val token: String) : IFilte
                 return@launch
             }
 
-            deferred.complete(FiltersResultOrError(result = result.map { it.toModel() }))
+            val filteredResult = result.filter { resultFilter ->
+                selectedFilters.firstOrNull {
+                    it.type == resultFilter.type && it.id == resultFilter.id
+                } == null
+            }
+
+            if (filteredResult.isEmpty()) {
+                deferred.complete(
+                    FiltersResultOrError(
+                        error = Exception(
+                            "Nothing found after filtering"
+                        )
+                    )
+                )
+            }
+
+            deferred.complete(FiltersResultOrError(result = filteredResult.map { it.toModel() }))
         }
         return deferred
     }

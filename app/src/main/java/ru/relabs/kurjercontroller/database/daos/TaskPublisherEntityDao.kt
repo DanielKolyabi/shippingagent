@@ -31,6 +31,6 @@ interface TaskPublisherEntityDao {
     @Delete
     fun delete(item: TaskPublisherEntity)
 
-    @Query("DELETE FROM filters WHERE task_id = :taskId")
+    @Query("DELETE FROM task_publishers WHERE task_id = :taskId")
     fun deleteByTaskId(taskId: Int)
 }

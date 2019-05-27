@@ -11,7 +11,7 @@ import android.widget.TextView
 import kotlinx.coroutines.runBlocking
 import ru.relabs.kurjercontroller.logError
 import ru.relabs.kurjercontroller.models.FilterModel
-import ru.relabs.kurjercontroller.network.IFilterSearch
+import ru.relabs.kurjercontroller.providers.interfaces.IFilterSearch
 import ru.relabs.kurjercontroller.orEmpty
 import java.lang.ref.WeakReference
 
@@ -70,6 +70,7 @@ class FilterSearchAdapter(
                 }
                 notifyDataSetChanged()
             } else {
+                results.clear()
                 notifyDataSetInvalidated()
             }
         }

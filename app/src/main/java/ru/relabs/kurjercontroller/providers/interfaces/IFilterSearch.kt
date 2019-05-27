@@ -1,4 +1,4 @@
-package ru.relabs.kurjercontroller.network
+package ru.relabs.kurjercontroller.providers.interfaces
 
 import kotlinx.coroutines.Deferred
 import ru.relabs.kurjercontroller.models.FilterModel

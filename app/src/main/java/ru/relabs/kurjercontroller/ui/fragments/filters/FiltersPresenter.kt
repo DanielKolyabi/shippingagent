@@ -11,7 +11,6 @@ import ru.relabs.kurjercontroller.logError
 import ru.relabs.kurjercontroller.models.FilterModel
 import ru.relabs.kurjercontroller.models.TaskFiltersModel
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
-import ru.relabs.kurjercontroller.network.models.FilterResponseModel
 import ru.relabs.kurjercontroller.network.models.FiltersRequest
 
 /**
@@ -31,12 +30,10 @@ class FiltersPresenter(val fragment: FiltersFragment) {
         loadFilterCountJob?.cancel()
         loadFilterCountJob = bgScope.launch {
             val count = try {
-                DeliveryServerAPI.api.countFilteredTasks(token, FiltersRequest(filters.filter {
-                    if (it.fixed) return@filter it.active
-                    else true
-                }.map {
-                    FilterResponseModel(it.id, it.name, it.fixed, it.type)
-                })).await().count.toString()
+                DeliveryServerAPI.api.countFilteredTasks(
+                    token,
+                    FiltersRequest.fromFiltersList(filters)
+                ).await().count.toString()
 
             } catch (e: Exception) {
                 e.logError()

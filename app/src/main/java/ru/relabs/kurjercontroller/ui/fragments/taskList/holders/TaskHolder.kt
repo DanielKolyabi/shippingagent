@@ -8,6 +8,7 @@ import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.ui.extensions.performFlash
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.taskList.TaskListModel
 
@@ -19,9 +20,12 @@ class TaskHolder(
     val onSelectedClicked: (position: Int) -> Unit,
     val onTaskClicked: (position: Int) -> Unit
 ) : BaseViewHolder<TaskListModel>(view) {
+    var item: TaskListModel.TaskItem? = null
+
     override fun onBindViewHolder(item: TaskListModel) {
         if (item !is TaskListModel.TaskItem) return
 
+        this.item = item
         view.title.text = item.task.name
 
         view.selected_icon.setOnClickListener {
@@ -39,17 +43,19 @@ class TaskHolder(
             view.active_icon.setColorFilter(Color.WHITE, PorterDuff.Mode.MULTIPLY)
         }
 
-        if (item.selected) {
-            setIsSelected(true)
-        } else {
-            setIsSelected(false)
-        }
+        setIsSelected(item.selected)
 
         if (item.hasAddressIntersection) {
             view.setBackgroundColor(Color.GRAY)
         } else {
             view.setBackgroundColor(Color.TRANSPARENT)
         }
+    }
+
+    fun setSelected() {
+        item?.selected = true
+        setIsSelected(true)
+        itemView.performFlash()
     }
 
     fun setIsSelected(active: Boolean) {

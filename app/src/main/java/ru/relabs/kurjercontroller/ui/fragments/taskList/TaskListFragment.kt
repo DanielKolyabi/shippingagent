@@ -4,11 +4,13 @@ package ru.relabs.kurjercontroller.ui.fragments.taskList
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AutoCompleteTextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_tasklist.*
 import kotlinx.android.synthetic.main.include_hint_container.*
 import kotlinx.coroutines.Dispatchers
@@ -58,6 +60,9 @@ class TaskListFragment : Fragment(), ISearchableFragment {
     }
 
     var shouldNetworkUpdate: Boolean = false
+    var isPaused: Boolean = true
+    var shouldShowLoadingOnResume: Boolean = false
+    var loadingTextOnResume: String = ""
     private lateinit var hintHelper: HintHelper
     val presenter = TaskListPresenter(this)
     val adapter = DelegateAdapter<TaskListModel>().apply {
@@ -68,6 +73,12 @@ class TaskListFragment : Fragment(), ISearchableFragment {
         ))
         addDelegate(LoaderDelegate())
     }
+
+    override fun onPause() {
+        super.onPause()
+        isPaused = true
+    }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -85,6 +96,14 @@ class TaskListFragment : Fragment(), ISearchableFragment {
         tasks_list?.layoutManager = LinearLayoutManager(context)
         tasks_list?.adapter = adapter
 
+        tasks_list?.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
+            override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
+
+            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean =
+                adapter.data.firstOrNull() is TaskListModel.Loader
+            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+        })
+
         start_button?.setOnClickListener {
             presenter.onStartClicked()
         }
@@ -97,17 +116,20 @@ class TaskListFragment : Fragment(), ISearchableFragment {
             }
         }
 
-        if (shouldNetworkUpdate) {
-            presenter.bgScope.launch {
+        presenter.bgScope.launch {
+            if (shouldNetworkUpdate) {
                 presenter.performNetworkUpdate()
                 shouldNetworkUpdate = false
-            }
-        } else {
-            presenter.bgScope.launch {
+            } else {
                 presenter.loadTasks()
+                if (shouldShowLoadingOnResume) {
+                    showLoadingAsync(true, text = loadingTextOnResume)
+                    shouldShowLoadingOnResume = false
+                }
             }
         }
 
+        isPaused = false
     }
 
     override fun onDestroyView() {
@@ -120,14 +142,20 @@ class TaskListFragment : Fragment(), ISearchableFragment {
         presenter.bgScope.terminate()
     }
 
-    suspend fun showLoading(visible: Boolean, clear: Boolean = false) = withContext(Dispatchers.Main) {
+
+    fun showLoading(visible: Boolean, clear: Boolean = false, text: String = ""){
+        if (isPaused) {
+            shouldShowLoadingOnResume = visible
+            loadingTextOnResume = text
+            return
+        }
         if (visible) {
             if (clear) {
                 adapter.data.clear()
             }
             start_button?.isEnabled = false
             online_button?.isEnabled = false
-            adapter.data.add(0, TaskListModel.Loader)
+            adapter.data.add(0, TaskListModel.Loader(text))
             adapter.notifyDataSetChanged()
         } else {
             online_button?.isEnabled = true
@@ -137,6 +165,11 @@ class TaskListFragment : Fragment(), ISearchableFragment {
             }
             adapter.notifyDataSetChanged()
         }
+    }
+
+    suspend fun showLoadingAsync(visible: Boolean, clear: Boolean = false, text: String = "") = withContext(Dispatchers.Main) {
+
+        showLoading(visible, clear, text)
     }
 
     suspend fun populateTaskList(tasks: List<TaskModel>) = withContext(Dispatchers.Main) {

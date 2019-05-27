@@ -1,8 +1,7 @@
-package ru.relabs.kurjercontroller.ui.fragments.filters
+package ru.relabs.kurjercontroller.ui.сustomView
 
 import android.content.Context
 import android.graphics.Point
-import android.media.Image
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -13,7 +12,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.models.FilterModel
-import ru.relabs.kurjercontroller.ui.extensions.setVisible
 
 
 class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
@@ -26,9 +24,6 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
     var onFilterActiveChangedPredicate: ((filter: FilterModel, newActiveState: Boolean) -> Boolean)? = null
     var onFilterActiveChanged: ((filter: FilterModel) -> Unit)? = null
 
-    val currentTags = tags.map {
-        it.second
-    }
 
     init {
         init(context)
@@ -83,6 +78,7 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
 
         onFilterAppear?.invoke(tag)
         addView(view)
+
     }
 
     fun remove(tag: FilterModel) {
@@ -124,7 +120,7 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
             val child = getChildAt(i)
 
             if (child.visibility == View.GONE)
-                return
+                continue
 
             //Get the maximum size of the child
             child.measure(
@@ -155,7 +151,6 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
         var maxWidth = 0
         var childState = 0
         var mLeftWidth = 0
-        var rowCount = 0
 
         // Iterate through all childrens, measuring them and computing our dimensions
         // from their size.
@@ -168,12 +163,12 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
             // Measure the child.
             measureChild(child, widthMeasureSpec, heightMeasureSpec)
 
-            maxWidth += Math.max(maxWidth, child.measuredWidth)
             mLeftWidth += child.measuredWidth
+            maxWidth = Math.max(maxWidth, mLeftWidth)
 
-            if (mLeftWidth / deviceWidth > rowCount) {
+            if (mLeftWidth > deviceWidth*0.9) {
                 maxHeight += child.measuredHeight
-                rowCount++
+                mLeftWidth = child.measuredWidth
             } else {
                 maxHeight = Math.max(maxHeight, child.measuredHeight)
             }

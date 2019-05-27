@@ -15,6 +15,7 @@ import ru.relabs.kurjercontroller.logError
 import ru.relabs.kurjercontroller.models.*
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI.api
+import ru.relabs.kurjercontroller.network.models.FiltersRequest
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 
 /**
@@ -81,7 +82,7 @@ class TaskRepository(val db: AppDatabase) {
         val result = MergeResult(false, false)
 
         //Задача отсутствует в ответе от сервера (удалено)
-        db.taskDao().all.filter { it.id !in newTasksIDs }.forEach { task ->
+        db.taskDao().all.filter { it.id !in newTasksIDs && !it.isOnline }.forEach { task ->
             closeTaskById(task.id)
             result.isTasksChanged = true
             Log.d("merge", "Close task: ${task.id}")
@@ -180,6 +181,8 @@ class TaskRepository(val db: AppDatabase) {
 
     suspend fun saveFilters(task: TaskModel, filters: TaskFiltersModel = task.taskFilters) =
         withContext(Dispatchers.IO) {
+            db.filtersDao().deleteByTaskId(task.id)
+
             db.filtersDao().insertAll(filters.brigades.map {
                 FilterEntity(0, task.id, FilterEntity.BRIGADE_FILTER, it.id, it.name, it.fixed, it.active)
             })
@@ -503,6 +506,90 @@ class TaskRepository(val db: AppDatabase) {
             }
             return@withContext availableEntranceEuroKeys
         }
+
+    suspend fun reloadFilteredTaskItems(token: String, task: TaskModel): TaskModel = withContext(Dispatchers.IO) {
+        val data = try {
+            api.getFilteredTaskItems(token, FiltersRequest.fromFiltersList(task.taskFilters.all)).await()
+        } catch (e: java.lang.Exception) {
+            e.logError()
+            e.fillInStackTrace()
+            throw e
+        }
+
+        val newTask = data.toModel(task)
+
+        //CLEAR
+        db.taskPublisherDao().deleteByTaskId(task.id)
+        db.taskItemDao().getByTaskId(task.id)
+            .forEach { taskItem ->
+                db.entranceDao().getByTaskItemId(taskItem.taskId, taskItem.taskItemId)
+                    .forEach {
+                        deleteEntrance(taskItem.taskId, taskItem.taskItemId, it.number)
+                    }
+
+                db.addressDao().deleteById(taskItem.addressId)
+
+                db.taskItemDao().delete(taskItem)
+            }
+
+        //INSERT NEW
+        db.taskPublisherDao().insertAll(newTask.publishers.map { it.toEntity() })
+        db.addressDao().insertAll(newTask.taskItems.map { it.address.toEntity() })
+        db.taskItemDao().insertAll(newTask.taskItems.map { it.toEntity() })
+        newTask.taskItems.forEach { taskItem ->
+
+            db.entranceDao()
+                .insertAll(
+                    taskItem.entrances
+                        .map { it.toEntity(taskId = taskItem.taskId, taskItemId = taskItem.id) }
+                )
+        }
+
+        return@withContext newTask
+    }
+
+    suspend fun getOnlineTask(): TaskModel? = withContext(Dispatchers.IO) {
+        db.taskDao().getOnlineTask()?.toModel(this@TaskRepository)
+    }
+
+    suspend fun isOnlineTaskExists(): Boolean = withContext(Dispatchers.IO) {
+        db.taskDao().getOnlineTask() != null
+    }
+
+    suspend fun createOnlineTask(filters: TaskFiltersModel): TaskModel = withContext(Dispatchers.IO) {
+        db.taskDao().deleteOnlineTask()
+        val startDate = DateTime().apply {
+            minusMillis(millisOfDay)
+        }
+        val entity = TaskEntity(
+            id = -1,
+            filtered = true,
+            userId = -1,
+            description = "Онлайн задание",
+            initiator = "Онлайн",
+            startControlDate = startDate,
+            endControlDate = startDate.plusDays(1),
+            firstExaminedDeviceId = null,
+            iteration = 0,
+            state = TaskModel.STARTED.toSiriusState(),
+            storages = listOf(),
+            isOnline = true
+        )
+        val taskId = db.taskDao().insert(entity)
+        db.filtersDao().insertAll(filters.all.map {
+            FilterEntity(
+                id = 0,
+                taskId = taskId.toInt(),
+                active = it.active,
+                fixed = it.fixed,
+                filterId = it.id,
+                name = it.name,
+                type = it.type
+            )
+        })
+
+        return@withContext entity.toModel(this@TaskRepository)
+    }
 
 
     data class MergeResult(

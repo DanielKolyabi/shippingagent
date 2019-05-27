@@ -44,7 +44,8 @@ data class TaskModel(
     val state: Int,
     val iteration: Int,
     val firstExaminedDeviceId: String?,
-    val filtered: Boolean
+    val filtered: Boolean,
+    val isOnline: Boolean
 ) : Parcelable {
 
     val androidState: Int
@@ -71,7 +72,8 @@ data class TaskModel(
             startControlDate = startControlDate,
             iteration = iteration,
             firstExaminedDeviceId = firstExaminedDeviceId,
-            filtered = filtered
+            filtered = filtered,
+            isOnline = isOnline
         )
 
     constructor(parcel: Parcel) : this(
@@ -88,6 +90,7 @@ data class TaskModel(
         parcel.readInt(),
         parcel.readInt(),
         parcel.readString().orEmpty(),
+        parcel.readByte() > 0,
         parcel.readByte() > 0
     ) {
     }
@@ -107,6 +110,7 @@ data class TaskModel(
         parcel.writeInt(iteration)
         parcel.writeString(firstExaminedDeviceId)
         parcel.writeByte(if (filtered) 1 else 0)
+        parcel.writeByte(if (isOnline) 1 else 0)
     }
 
     override fun describeContents(): Int {

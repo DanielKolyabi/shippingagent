@@ -128,6 +128,8 @@ object DeliveryServerAPI {
         @POST("api/v1/controller/tasks/filtered_count")
         fun countFilteredTasks(@Query("token") token: String, @Body req: FiltersRequest): Deferred<FilteredTasksCountResponse>
 
+        @POST("api/v1/controller/tasks/filtered")
+        fun getFilteredTaskItems(@Query("token") token: String, @Body req: FiltersRequest): Deferred<FilteredTaskDataResponseModel>
     }
 
     val api = retrofit.create(IDeliveryServerAPI::class.java)

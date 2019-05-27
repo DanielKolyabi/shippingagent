@@ -2,6 +2,7 @@ package ru.relabs.kurjercontroller.models
 
 import android.os.Parcel
 import android.os.Parcelable
+import ru.relabs.kurjercontroller.network.models.FilterResponseModel
 import ru.relabs.kurjercontroller.orEmpty
 
 /**
@@ -72,6 +73,13 @@ data class FilterModel(
     var active: Boolean,
     val type: Int
 ) : Parcelable {
+
+    fun isActive() = if(fixed) active else true
+
+    fun toFilterResponseModel(): FilterResponseModel =
+        FilterResponseModel(id, name, fixed, type)
+
+
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
         parcel.readString().orEmpty(),

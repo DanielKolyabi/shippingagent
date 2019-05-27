@@ -26,7 +26,6 @@ import ru.relabs.kurjercontroller.ui.fragments.LoginScreen
 import ru.relabs.kurjercontroller.ui.fragments.SearchInputAdapter
 import ru.relabs.kurjercontroller.ui.fragments.TaskListScreen
 import ru.relabs.kurjercontroller.ui.fragments.addressList.AddressListFragment
-import ru.relabs.kurjercontroller.ui.fragments.entrancesList.EntrancesListFragment
 import ru.relabs.kurjercontroller.ui.fragments.filters.FiltersFragment
 import ru.relabs.kurjercontroller.ui.fragments.login.LoginFragment
 import ru.relabs.kurjercontroller.ui.fragments.report.ReportPagerFragment
@@ -272,10 +271,6 @@ class MainActivity : AppCompatActivity() {
             is TaskItemExplanationFragment -> {
                 back_button?.setVisible(true)
                 changeTitle("Пояснения к заданию")
-            }
-            is EntrancesListFragment -> {
-                back_button?.setVisible(true)
-                changeTitle("Список подъездов")
             }
             is YandexMapFragment -> {
                 back_button?.setVisible(true)

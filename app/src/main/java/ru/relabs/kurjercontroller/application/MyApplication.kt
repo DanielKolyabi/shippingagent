@@ -13,6 +13,7 @@ import androidx.room.Room
 import com.google.firebase.iid.FirebaseInstanceId
 import com.yandex.mapkit.MapKitFactory
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.BuildConfig
@@ -70,6 +71,9 @@ class MyApplication : Application() {
             .fallbackToDestructiveMigration()
             .build()
         tasksRepository = TaskRepository(database)
+//        GlobalScope.launch(Dispatchers.IO) {
+//            database.clearAllTables()
+//        }
 
         MapKitFactory.setApiKey(BuildConfig.YA_KEY)
     }

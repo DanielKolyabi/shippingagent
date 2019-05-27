@@ -13,7 +13,8 @@ import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.database.entities.FilterEntity
 import ru.relabs.kurjercontroller.models.FilterModel
 import ru.relabs.kurjercontroller.models.TaskFiltersModel
-import ru.relabs.kurjercontroller.network.RemoteFilterSearch
+import ru.relabs.kurjercontroller.providers.RemoteFilterSearch
+import ru.relabs.kurjercontroller.ui.сustomView.FilterTagLayout
 import ru.relabs.kurjercontroller.ui.fragments.filters.adapters.FilterSearchAdapter
 import java.lang.ref.WeakReference
 
@@ -28,16 +29,26 @@ class FiltersFragment : Fragment() {
 
     lateinit var filters: TaskFiltersModel
     val presenter = FiltersPresenter(this)
-    val filterSearch = RemoteFilterSearch(presenter.bgScope, application().user.getUserCredentials()?.token ?: "")
+    val filterSearch = RemoteFilterSearch(
+        presenter.bgScope,
+        application().user.getUserCredentials()?.token ?: ""
+    )
     val allFilters: MutableList<FilterModel> = mutableListOf()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        bindControl()
+        setStartButtonCount("0")
 
+        bindControl()
         fillAllFilters()
         bindAllFilterControls()
+
+
+        if (allFilters.any { it.isActive() }) {
+            presenter.loadFilteredTasksCount(allFilters)
+        }
+
     }
 
     private fun bindControl() {
@@ -64,21 +75,21 @@ class FiltersFragment : Fragment() {
                 if (newActive) {
                     true
                 } else {
-                    allFilters.filter { it.type == filter.type && it.active }.size > 1
+                    allFilters.filter { it.isActive() }.size > 1
                 }
             }
             container.onFilterActiveChanged = {
                 presenter.loadFilteredTasksCount(allFilters)
             }
 
-            textView.setAdapter(
-                FilterSearchAdapter(
+            val adapter = FilterSearchAdapter(
                     it,
                     filterSearch,
                     filterType,
                     WeakReference(allFilters)
                 )
-            )
+
+            textView.setAdapter(adapter)
             textView.threshold = 0
             textView.setOnClickListener {
                 textView?.showDropDown()
@@ -87,6 +98,10 @@ class FiltersFragment : Fragment() {
                 override fun onItemClick(adapter: AdapterView<*>?, view: View?, pos: Int, p3: Long) {
                     val item = adapter?.getItemAtPosition(pos) as? FilterModel
                     item ?: return
+                    if (allFilters.contains(item)) {
+                        textView.setText("")
+                        return
+                    }
                     container.add(item)
                     textView.setText("")
                 }

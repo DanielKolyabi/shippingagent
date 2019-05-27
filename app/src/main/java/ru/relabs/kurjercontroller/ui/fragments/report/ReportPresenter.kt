@@ -399,7 +399,7 @@ class ReportPresenter(val fragment: ReportFragment) {
             application().tasksRepository.saveApartmentResult(
                 fragment.taskItem,
                 fragment.entrance,
-                ApartmentListModel.Apartment(-2, 1, newItem.state)
+                ApartmentListModel.Apartment(-2, 0, newItem.state)
             )
         }
     }
