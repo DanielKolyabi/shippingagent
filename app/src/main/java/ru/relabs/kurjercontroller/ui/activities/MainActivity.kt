@@ -2,8 +2,10 @@ package ru.relabs.kurjercontroller.ui.activities
 
 import android.content.*
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -19,6 +21,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.relabs.kurjercontroller.*
 import ru.relabs.kurjercontroller.application.MyApplication
+import ru.relabs.kurjercontroller.network.DeliveryServerAPI
+import ru.relabs.kurjercontroller.network.NetworkHelper
+import ru.relabs.kurjercontroller.network.models.UpdateInfo
 import ru.relabs.kurjercontroller.ui.extensions.hideKeyboard
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.ISearchableFragment
@@ -36,6 +41,9 @@ import ru.relabs.kurjercontroller.ui.fragments.yandexMap.YandexMapFragment
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import ru.terrakok.cicerone.android.support.SupportAppScreen
 import ru.terrakok.cicerone.commands.Command
+import java.io.File
+import java.net.URL
+import kotlin.math.roundToInt
 
 
 class MainActivity : AppCompatActivity() {
@@ -116,6 +124,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         loading?.setVisible(false)
         requestPermissions()
+        loading.setVisible(true)
+        checkUpdates()
 
         application().router.newRootScreen(LoginScreen())
 
@@ -208,6 +218,97 @@ class MainActivity : AppCompatActivity() {
             return@setOnEditorActionListener false
         }
     }
+
+
+    fun checkUpdates() {
+        if (!NetworkHelper.isNetworkAvailable(this)) {
+            loading.setVisible(false)
+            showError("Не удалось получить информацию об обновлениях.")
+            return
+        }
+
+        bgScope.launch(Dispatchers.Main) {
+            try {
+                val updateInfo = DeliveryServerAPI.api.getUpdateInfo().await()
+                if (updateInfo.last_required.version <= BuildConfig.VERSION_CODE
+                    && updateInfo.last_optional.version <= BuildConfig.VERSION_CODE) {
+                    loading.setVisible(false)
+                    return@launch
+                }
+
+                if (processUpdate(updateInfo.last_required)) return@launch
+                if (processUpdate(updateInfo.last_optional)) return@launch
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                loading.setVisible(false)
+                showError("Не удалось получить информацию об обновлениях.")
+            }
+        }
+    }
+
+
+    private fun processUpdate(updateInfo: UpdateInfo): Boolean {
+        if (updateInfo.version > BuildConfig.VERSION_CODE) {
+
+            showError("Доступно новое обновление.", object : ErrorButtonsListener {
+                override fun positiveListener() {
+                    try {
+                        Log.d("updates", "Try install from ${updateInfo.url}")
+                        installUpdate(URL(updateInfo.url))
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        loading.setVisible(false)
+                        showError("Не удалось установить обновление")
+                    }
+                }
+
+                override fun negativeListener() {
+                    loading.setVisible(false)
+                }
+
+            }, "Установить", if (updateInfo.isRequired) "" else "Напомнить позже")
+            return true
+        }
+        return false
+    }
+
+    fun installUpdate(url: URL) {
+        bgScope.launch(Dispatchers.IO) {
+            var file: File?
+            try {
+                progress_bar.isIndeterminate = false
+                file = NetworkHelper.loadUpdateFile(url) { current, total ->
+                    val percents = current.toFloat() / total.toFloat()
+                    bgScope.launch(Dispatchers.Main) {
+                        loader_progress_text.setVisible(true)
+                        loader_progress_text.setText("Загрузка: ${(percents * 100).roundToInt()}%")
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                bgScope.launch(Dispatchers.Main) {
+                    loader_progress_text.setVisible(false)
+                    loading.setVisible(false)
+                    progress_bar.isIndeterminate = true
+                    showError("Не удалось загрузить файл обновления.")
+                }
+                return@launch
+            }
+
+            bgScope.launch(Dispatchers.Main) {
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive")
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                progress_bar.isIndeterminate = true
+                loader_progress_text.setVisible(false)
+                loading.setVisible(false)
+                startActivity(intent)
+            }
+        }
+    }
+
 
     private fun bindBackstackListener() {
         supportFragmentManager.addOnBackStackChangedListener {
@@ -335,6 +436,7 @@ class MainActivity : AppCompatActivity() {
         ) {
             permissions.add(android.Manifest.permission.READ_EXTERNAL_STORAGE)
         }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             if (ContextCompat.checkSelfPermission(
                     this,

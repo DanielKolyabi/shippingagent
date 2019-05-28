@@ -4,8 +4,10 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.models.AddressModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.providers.TaskRepository
@@ -32,7 +34,9 @@ data class TaskItemEntity(
     val required: Boolean,
     @ColumnInfo(name = "address_id")
     val addressId: Int,
-    val notes: List<String>
+    val notes: List<String>,
+    @ColumnInfo(name = "close_time")
+    val closeTime: DateTime?
 ) {
     suspend fun toModel(repository: TaskRepository): TaskItemModel = withContext(Dispatchers.IO) {
         return@withContext TaskItemModel(
@@ -43,7 +47,8 @@ data class TaskItemEntity(
             taskId = taskId,
             publisherName = publisherName,
             address = repository.db.addressDao().getById(addressId)?.toModel() ?: AddressModel.blank(),
-            entrances = repository.db.entranceDao().getByTaskItemId(taskId, taskItemId).map { it.toModel() }.toMutableList()
+            entrances = repository.db.entranceDao().getByTaskItemId(taskId, taskItemId).map { it.toModel() }.toMutableList(),
+            closeTime = closeTime
         )
     }
 }

@@ -1,20 +1,19 @@
 package ru.relabs.kurjercontroller.ui.fragments.taskList
 
-import android.widget.ImageView
 import kotlinx.android.synthetic.main.fragment_tasklist.*
-import kotlinx.android.synthetic.main.holder_tasklist_task.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.CancelableScope
-import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.TaskFiltersModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.models.toAndroidState
+import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
+import ru.relabs.kurjercontroller.ui.activities.showErrorAsync
 import ru.relabs.kurjercontroller.ui.activities.showErrorSuspend
-import ru.relabs.kurjercontroller.ui.extensions.performFlash
 import ru.relabs.kurjercontroller.ui.fragments.AddressListScreen
 import ru.relabs.kurjercontroller.ui.fragments.FiltersScreen
 import ru.relabs.kurjercontroller.ui.fragments.OnlineFiltersScreen
@@ -113,7 +112,7 @@ class TaskListPresenter(val fragment: TaskListFragment) {
             application().router.navigateTo(FiltersScreen(selectedFilteredTasks) {
                 fragment.showLoading(true, text = "Загрузка адресов")
                 bgScope.launch {
-
+                    val notLoadedTasks = mutableListOf<TaskModel>()
                     selectedFilteredTasks.forEach {
                         val reloadedDbTask = application().tasksRepository.getTask(it.id) ?: return@forEach
                         try {
@@ -122,15 +121,39 @@ class TaskListPresenter(val fragment: TaskListFragment) {
                                 reloadedDbTask
                             )
                         } catch (e: Exception) {
-                            //TODO:
-                            //--Если в базе нет заданий нет - уведомить пользователя о невозможности получить данные и исключить задание
-                            //----Если были исключены все задания - уведомить пользователя и оставить на текущем экране
+                            if (it.taskItems.isEmpty()) {
+                                notLoadedTasks.add(it)
+                            }
+                        }
+                    }
+
+                    if (notLoadedTasks.isNotEmpty()) {
+                        if (notLoadedTasks.size == selectedTasks.size) {
+                            fragment.context?.showErrorAsync(
+                                "Не удалось загрузить адреса",
+                                object : ErrorButtonsListener {
+                                    override fun positiveListener() {
+                                        fragment.showLoading(false)
+                                    }
+                                })
+                            return@launch
+                        } else {
+                            fragment.context?.showErrorAsync(
+                                "Не удалось загрузить адреса для заданий:\n${notLoadedTasks.joinToString { it.name + "\n" }}\nЗадания были исключены"
+                            )
                         }
                     }
 
                     fragment.showLoadingAsync(false)
-                    withContext(Dispatchers.Main){
-                        application().router.navigateTo(AddressListScreen(selectedTasks.map { it.id }))
+                    withContext(Dispatchers.Main) {
+                        application().router.navigateTo(AddressListScreen(selectedTasks
+                            .filter { selected ->
+                                notLoadedTasks.none { notLoaded ->
+                                    notLoaded.id == selected.id
+                                }
+                            }
+                            .map { it.id })
+                        )
                     }
                 }
             })
@@ -185,7 +208,20 @@ class TaskListPresenter(val fragment: TaskListFragment) {
         }
     }
 
+    suspend fun removeOutdatedOnlineTask() = withContext(Dispatchers.IO) {
+        val rep = application().tasksRepository
+        rep.getOnlineTask()?.let {
+            if (it.endControlDate.plusHours(1) < DateTime().apply {
+                    minusMillis(millisOfDay)
+                }) {
+                rep.closeTaskById(it.id)
+            }
+        }
+    }
+
     suspend fun loadTasks() = withContext(Dispatchers.IO) {
+        removeOutdatedOnlineTask()
+
         fragment.populateTaskList(application().tasksRepository.getTasks().filter {
             it.state.toAndroidState() != TaskModel.COMPLETED && it.state.toAndroidState() != TaskModel.CANCELED
         })
@@ -215,6 +251,7 @@ class TaskListPresenter(val fragment: TaskListFragment) {
         } catch (e: Exception) {
             fragment.context?.showErrorSuspend("Не удалось получить список заданий.")
             networkUpdateStarted = false
+            fragment.showLoadingAsync(false)
             return@withContext
         }
         val mergeResult = application().tasksRepository.mergeTasks(tasks)

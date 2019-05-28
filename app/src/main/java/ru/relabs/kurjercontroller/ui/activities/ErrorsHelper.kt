@@ -47,3 +47,13 @@ fun Context.showError(
         CustomLog.writeToFile(CustomLog.getStacktraceAsString(e))
     }
 }
+
+suspend fun Context.showErrorAsync(
+    errorMessage: String,
+    listener: ErrorButtonsListener? = null,
+    forcePositiveButtonName: String = "Ок",
+    forceNegativeButtonName: String = "",
+    cancelable: Boolean = false
+) = withContext(Dispatchers.Main){
+    showError(errorMessage, listener, forcePositiveButtonName, forceNegativeButtonName, cancelable)
+}

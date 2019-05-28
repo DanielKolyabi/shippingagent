@@ -1,5 +1,7 @@
 package ru.relabs.kurjercontroller.ui.fragments.filters
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -22,9 +24,10 @@ import java.lang.ref.WeakReference
 /**
  * Created by ProOrange on 18.03.2019.
  */
-
+const val ADDRESS_LIMIT = 300
 class FiltersFragment : Fragment() {
 
+    var defaultTextColor: ColorStateList? = null
     var onStartClicked: ((filters: TaskFiltersModel) -> Unit)? = null
 
     lateinit var filters: TaskFiltersModel
@@ -37,7 +40,7 @@ class FiltersFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        defaultTextColor = start_button.textColors
         setStartButtonCount("0")
 
         bindControl()
@@ -58,6 +61,14 @@ class FiltersFragment : Fragment() {
     }
 
     fun setStartButtonCount(count: String) {
+        val intCount = count.toIntOrNull()
+        if(intCount == null || intCount > ADDRESS_LIMIT || intCount < 1){
+            start_button.setTextColor(Color.RED)
+            start_button.isEnabled = false
+        }else{
+            start_button.setTextColor(defaultTextColor)
+            start_button.isEnabled = true
+        }
         start_button.text = resources.getString(R.string.filter_apply_button, count)
     }
 

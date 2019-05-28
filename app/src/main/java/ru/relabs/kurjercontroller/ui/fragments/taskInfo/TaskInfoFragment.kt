@@ -61,6 +61,7 @@ class TaskInfoFragment : Fragment() {
                 }
             }
         }
+
     }
 
     private fun scrollToAddress(address: AddressModel) {

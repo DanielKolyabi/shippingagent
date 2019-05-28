@@ -558,9 +558,8 @@ class TaskRepository(val db: AppDatabase) {
 
     suspend fun createOnlineTask(filters: TaskFiltersModel): TaskModel = withContext(Dispatchers.IO) {
         db.taskDao().deleteOnlineTask()
-        val startDate = DateTime().apply {
-            minusMillis(millisOfDay)
-        }
+        val currentDate = DateTime()
+        val startDate = currentDate.minusMillis(currentDate.millisOfDay)
         val entity = TaskEntity(
             id = -1,
             filtered = true,

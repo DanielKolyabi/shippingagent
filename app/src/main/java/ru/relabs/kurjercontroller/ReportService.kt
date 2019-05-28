@@ -93,7 +93,6 @@ class ReportService : Service() {
                             e.logError()
                         }
                     } else if (System.currentTimeMillis() - lastTasksChecking > 25 * 60 * 1000) {
-                        //TODO: Check if merge need
                         val user = application().user.getUserCredentials() ?: continue
                         val time = DateTime().toString("yyyy-MM-dd'T'HH:mm:ss")
                         try {

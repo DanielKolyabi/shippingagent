@@ -6,6 +6,7 @@ import kotlinx.android.synthetic.main.holder_addr_list_address.view.*
 import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.models.AddressModel
+import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.ui.fragments.addressList.AddressListModel
 
 
@@ -13,7 +14,7 @@ import ru.relabs.kurjercontroller.ui.fragments.addressList.AddressListModel
  * Created by ProOrange on 11.08.2018.
  */
 class AddressListAddressHolder(
-    private val onMapClick: (address: AddressModel) -> Unit,
+    private val onMapClick: (items: List<TaskItemModel>) -> Unit,
     itemView: View
 ) : BaseViewHolder<AddressListModel>(itemView) {
     override fun onBindViewHolder(item: AddressListModel) {
@@ -35,8 +36,7 @@ class AddressListAddressHolder(
         }
 
         itemView.map_icon.setOnClickListener {
-            val address = item.taskItems[0].address
-            onMapClick(address)
+            onMapClick(item.taskItems)
         }
     }
 }

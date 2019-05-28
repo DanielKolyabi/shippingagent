@@ -109,6 +109,9 @@ object DeliveryServerAPI {
         @POST("api/v1/push_token")
         fun sendPushToken(@Query("token") token: String, @Query("push_token") pushToken: String): Deferred<StatusResponse>
 
+        @GET("api/v1/controller/update")
+        fun getUpdateInfo(): Deferred<UpdateInfoResponse>
+
         @POST("api/v1/coords")
         fun sendGPS(@Query("token") token: String, @Query("lat") lat: Double, @Query("long") long: Double, @Query("time") time: String): Deferred<StatusResponse>
 

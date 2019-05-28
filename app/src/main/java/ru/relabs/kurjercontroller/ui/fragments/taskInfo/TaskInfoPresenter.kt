@@ -6,6 +6,7 @@ import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.TaskItemModel
+import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.fragments.TaskItemExplanationScreen
 import ru.relabs.kurjercontroller.ui.fragments.YandexMapScreen
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.YandexMapFragment
@@ -27,9 +28,13 @@ class TaskInfoPresenter(val fragment: TaskInfoFragment) {
     }
 
     fun onShowMapClicked() {
+        if(fragment.task.taskItems.isEmpty()){
+            fragment.context?.showError("Адреса не загружены")
+            return
+        }
         application().router.navigateTo(
             YandexMapScreen(
-                fragment.task.taskItems.map { YandexMapFragment.AddressWithColor(it.address, 0) }
+                fragment.task.taskItems.map { YandexMapFragment.AddressWithColor(it.address, it.placemarkColor) }
             ) { address ->
                 fragment.targetAddress = address
             }

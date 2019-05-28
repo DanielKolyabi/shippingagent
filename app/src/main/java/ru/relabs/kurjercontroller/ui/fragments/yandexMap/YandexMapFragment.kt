@@ -23,19 +23,6 @@ import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.AddressModel
 
-
-val PLACEMARK_COLORS = listOf(
-    Color.BLUE,
-    Color.YELLOW,
-    Color.RED,
-    Color.MAGENTA,
-    Color.GREEN,
-    Color.CYAN,
-    Color.GRAY,
-    Color.WHITE,
-    Color.BLACK
-)
-
 class YandexMapFragment : Fragment() {
     private lateinit var userLocationLayer: UserLocationLayer
     var addressIds: List<AddressIdWithColor> = listOf()
@@ -71,7 +58,7 @@ class YandexMapFragment : Fragment() {
             val ctx = context ?: return
             val point = Point(address.lat, address.long)
 
-            val color = PLACEMARK_COLORS.get(addressWithColor.colorId % PLACEMARK_COLORS.size)
+            val color = addressWithColor.color
 
             mapview.map.mapObjects
                 .addPlacemark(Point(address.lat, address.long), ColoredIconProvider(ctx, color))
@@ -180,7 +167,7 @@ class YandexMapFragment : Fragment() {
                 arguments = Bundle().apply {
                     putParcelableArrayList(
                         "address_ids",
-                        ArrayList(addresses.map { AddressIdWithColor(it.address.id, it.colorId) })
+                        ArrayList(addresses.map { AddressIdWithColor(it.address.id, it.color) })
                     )
                 }
             }
@@ -188,7 +175,7 @@ class YandexMapFragment : Fragment() {
 
     data class AddressIdWithColor(
         val id: Int,
-        val colorId: Int
+        val color: Int = Color.BLUE
     ) : Parcelable {
         constructor(parcel: Parcel) : this(
             parcel.readInt(),
@@ -198,7 +185,7 @@ class YandexMapFragment : Fragment() {
 
         override fun writeToParcel(parcel: Parcel, flags: Int) {
             parcel.writeInt(id)
-            parcel.writeInt(colorId)
+            parcel.writeInt(color)
         }
 
         override fun describeContents(): Int {
@@ -218,7 +205,7 @@ class YandexMapFragment : Fragment() {
 
     data class AddressWithColor(
         val address: AddressModel,
-        val colorId: Int
+        val color: Int = Color.BLUE
     ) : Parcelable {
         constructor(parcel: Parcel) : this(
             parcel.readParcelable(AddressModel::class.java.classLoader),
@@ -228,7 +215,7 @@ class YandexMapFragment : Fragment() {
 
         override fun writeToParcel(parcel: Parcel, flags: Int) {
             parcel.writeParcelable(address, flags)
-            parcel.writeInt(colorId)
+            parcel.writeInt(color)
         }
 
         override fun describeContents(): Int {

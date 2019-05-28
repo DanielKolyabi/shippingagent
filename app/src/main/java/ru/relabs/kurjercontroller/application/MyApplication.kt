@@ -71,9 +71,9 @@ class MyApplication : Application() {
             .fallbackToDestructiveMigration()
             .build()
         tasksRepository = TaskRepository(database)
-//        GlobalScope.launch(Dispatchers.IO) {
-//            database.clearAllTables()
-//        }
+        GlobalScope.launch(Dispatchers.IO) {
+            database.clearAllTables()
+        }
 
         MapKitFactory.setApiKey(BuildConfig.YA_KEY)
     }

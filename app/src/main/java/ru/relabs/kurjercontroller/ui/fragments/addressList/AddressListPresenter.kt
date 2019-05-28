@@ -1,11 +1,12 @@
 package ru.relabs.kurjercontroller.ui.fragments.addressList
 
+import android.graphics.Color
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.models.AddressModel
+import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.models.toAndroidState
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
@@ -58,16 +59,19 @@ class AddressListPresenter(val fragment: AddressListFragment) {
         }
     }
 
-    fun onAddressMapClicked(addressModel: AddressModel) {
+    fun onAddressMapClicked(items: List<TaskItemModel>) {
+        val item = items.firstOrNull { it.closeTime != null } ?: items.first()
+        val color = item.placemarkColor
+
         application().router.navigateTo(
             YandexMapScreen(
                 listOf(
                     YandexMapFragment.AddressWithColor(
-                        addressModel,
-                        0
+                        item.address,
+                        color
                     )
                 )
-            ) { address ->
+            ) { _ ->
                 return@YandexMapScreen
             })
     }
@@ -134,7 +138,7 @@ class AddressListPresenter(val fragment: AddressListFragment) {
             fragment.tasks.addAll(tasks)
             applySorting()
 
-            withContext(Dispatchers.Main){
+            withContext(Dispatchers.Main) {
                 fragment.updateCloseTaskButtonVisibility()
             }
 
@@ -174,20 +178,52 @@ class AddressListPresenter(val fragment: AddressListFragment) {
 
     fun onMapClicked() {
         var colorIdx = 0
+        var lastTaskId = 0
+
         application().router.navigateTo(
             YandexMapScreen(
                 fragment.tasks
-                    .flatMap { it.taskItems }
-                    .groupBy { it.taskId }
-                    .mapKeys { colorIdx++ }
-                    .flatMap {
-                        it.value.map { taskItem ->
-                            YandexMapFragment.AddressWithColor(taskItem.address, it.key)
+                    .flatMap { task ->
+                        task.taskItems.map { item -> item }
+                    }
+                    .groupBy {
+                        it.address.idnd
+                    }
+                    .mapNotNull {
+                        it.value.firstOrNull { it.closeTime != null } ?: it.value.firstOrNull()
+                    }
+                    .sortedBy { it.taskId }
+                    .map { item ->
+                        if (item.closeTime != null) {
+                            YandexMapFragment.AddressWithColor(item.address, item.placemarkColor)
+                        } else {
+                            if(lastTaskId != item.taskId){
+                                lastTaskId = item.taskId
+                                colorIdx ++
+                            }
+                            YandexMapFragment.AddressWithColor(
+                                item.address,
+                                PLACEMARK_COLORS[colorIdx % PLACEMARK_COLORS.size]
+                            )
                         }
                     }
+
             ) { address ->
                 fragment.targetAddress = address
             }
         )
     }
 }
+
+
+val PLACEMARK_COLORS = listOf(
+    Color.BLUE,
+    Color.YELLOW,
+    Color.RED,
+    Color.MAGENTA,
+    Color.GREEN,
+    Color.CYAN,
+    Color.GRAY,
+    Color.WHITE,
+    Color.BLACK
+)

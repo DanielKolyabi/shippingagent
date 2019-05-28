@@ -1,7 +1,9 @@
 package ru.relabs.kurjercontroller.network.models
 
 import com.google.gson.annotations.SerializedName
+import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.models.TaskItemModel
+import java.util.*
 
 data class TaskItemResponseModel(
     val id: Int,
@@ -12,7 +14,8 @@ data class TaskItemResponseModel(
     val required: Boolean,
     @SerializedName("order_name")
     val publisherName: String,
-
+    @SerializedName("close_time")
+    val closeTime: Date?,
 
     val address: AddressResponseModel,
     val entrances: List<EntranceResponseModel>,
@@ -29,7 +32,8 @@ data class TaskItemResponseModel(
             defaultReportType = defaultReportType,
             notes = notes,
             entrances = entrances.map { it.toModel() }.toMutableList(),
-            address = address.toModel()
+            address = address.toModel(),
+            closeTime = closeTime?.let { DateTime(it) }
         )
     }
 

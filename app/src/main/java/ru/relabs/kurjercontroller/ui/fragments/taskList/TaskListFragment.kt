@@ -144,9 +144,9 @@ class TaskListFragment : Fragment(), ISearchableFragment {
 
 
     fun showLoading(visible: Boolean, clear: Boolean = false, text: String = ""){
+        shouldShowLoadingOnResume = visible
+        loadingTextOnResume = text
         if (isPaused) {
-            shouldShowLoadingOnResume = visible
-            loadingTextOnResume = text
             return
         }
         if (visible) {

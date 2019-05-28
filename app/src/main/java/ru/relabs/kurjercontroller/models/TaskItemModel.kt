@@ -1,7 +1,10 @@
 package ru.relabs.kurjercontroller.models
 
+import android.graphics.Color
 import android.os.Parcel
 import android.os.Parcelable
+import org.joda.time.DateTime
+import org.joda.time.Seconds
 import ru.relabs.kurjercontroller.database.entities.TaskItemEntity
 import ru.relabs.kurjercontroller.orEmpty
 
@@ -17,10 +20,24 @@ data class TaskItemModel(
     val required: Boolean,
     val address: AddressModel,
     val entrances: MutableList<EntranceModel>,
-    val notes: List<String>
+    val notes: List<String>,
+    val closeTime: DateTime? = null
 ) : Parcelable {
     val isClosed: Boolean
         get() = entrances.none { it.state == EntranceModel.CREATED }
+
+    val placemarkColor: Int
+        get() = if (closeTime == null) {
+            Color.BLUE
+        } else {
+            val diff = Seconds.secondsBetween(closeTime, DateTime()).seconds
+            when {
+                diff < 1.5 * 60 * 60 -> Color.GREEN
+                diff < 3 * 60 * 60 -> Color.argb(255, 255, 140, 0)
+                else -> Color.RED
+            }
+        }
+
 
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
@@ -30,7 +47,14 @@ data class TaskItemModel(
         parcel.readByte() != 0.toByte(),
         parcel.readParcelable(AddressModel::class.java.classLoader) ?: AddressModel.blank(),
         parcel.createTypedArrayList(EntranceModel).orEmpty(),
-        parcel.createStringArrayList().orEmpty()
+        parcel.createStringArrayList().orEmpty(),
+        parcel.readLong().let {
+            if (it > 0) {
+                DateTime(it)
+            } else {
+                null
+            }
+        }
     ) {
     }
 
@@ -43,6 +67,7 @@ data class TaskItemModel(
         parcel.writeParcelable(address, flags)
         parcel.writeTypedList(entrances)
         parcel.writeStringList(notes)
+        parcel.writeLong(closeTime?.millis ?: -1)
     }
 
     override fun describeContents(): Int {
@@ -58,7 +83,8 @@ data class TaskItemModel(
             defaultReportType = defaultReportType,
             required = required,
             publisherName = publisherName,
-            addressId = address.id
+            addressId = address.id,
+            closeTime = closeTime
         )
 
     companion object CREATOR : Parcelable.Creator<TaskItemModel> {
