@@ -27,6 +27,12 @@ class AddressListPresenter(val fragment: AddressListFragment) {
 
     fun changeSortingMethod(sorting: Int) {
         sortingMethod = sorting
+        if(fragment.tasks.size == 1
+            && fragment.tasks.first().filtered
+            && sortingMethod == TaskAddressSorter.STANDART){
+
+            sortingMethod = TaskAddressSorter.CLOSE_TIME
+        }
         bgScope.launch(Dispatchers.Default) {
             applySorting()
         }
@@ -85,7 +91,11 @@ class AddressListPresenter(val fragment: AddressListFragment) {
 
         bgScope.launch(Dispatchers.IO) {
             fragment.showLoading(true)
-            application().tasksRepository.closeTaskStatus(fragment.tasks.first())
+            if(fragment.tasks.first().isOnline){
+                application().tasksRepository.closeTaskById(fragment.tasks.first().id)
+            }else{
+                application().tasksRepository.closeTaskStatus(fragment.tasks.first())
+            }
             withContext(Dispatchers.Main) {
                 application().router.exit()
             }
@@ -110,7 +120,7 @@ class AddressListPresenter(val fragment: AddressListFragment) {
 
 
             if (fragment.tasks.size == 1) {
-                fragment.adapter.data.add(AddressListModel.SortingItem(sortingMethod))
+                fragment.adapter.data.add(AddressListModel.SortingItem(sortingMethod, fragment.tasks.first().filtered))
             }
             fragment.adapter.data.addAll(prepared)
 
@@ -121,8 +131,11 @@ class AddressListPresenter(val fragment: AddressListFragment) {
     private fun prepareTaskItemsForList(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel> {
         val sorted = if (sortingMethod == TaskAddressSorter.ALPHABETIC) {
             TaskAddressSorter.sortTaskItemsAlphabetic(taskItems)
+        } else if(sortingMethod == TaskAddressSorter.CLOSE_TIME) {
+            TaskAddressSorter.sortTaskItemsCloseTime(taskItems)
         } else {
             TaskAddressSorter.sortTaskItemsStandart(taskItems)
+
         }
 
         return TaskAddressSorter.getAddressesWithTasksList(sorted)

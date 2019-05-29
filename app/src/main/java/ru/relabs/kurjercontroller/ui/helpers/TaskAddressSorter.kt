@@ -24,6 +24,22 @@ object TaskAddressSorter {
         return result
     }
 
+    fun sortTaskItemsCloseTime(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
+        return taskItems.sortedWith(compareByDescending<AddressListModel.TaskItem> { it.taskItem.closeTime }
+            .thenBy { it.taskItem.address.city }
+            .thenBy { it.taskItem.address.street }
+            .thenBy { it.taskItem.address.house }
+            .thenBy { it.taskItem.address.houseName }
+            .thenBy { !it.taskItem.isClosed }
+        ).groupBy {
+            it.taskItem.address.idnd
+        }.toList().sortedBy {
+            !it.second.any { !it.taskItem.isClosed }
+        }.toMap().flatMap {
+            it.value
+        }
+    }
+
     fun sortTaskItemsStandart(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
         return taskItems.sortedWith(compareBy<AddressListModel.TaskItem> { it.taskItem.address.city }
             .thenBy { it.taskItem.address.street }
@@ -66,6 +82,7 @@ object TaskAddressSorter {
         }
     }
 
-    val STANDART = 1
-    val ALPHABETIC = 2
+    const val STANDART = 1
+    const val ALPHABETIC = 2
+    const val CLOSE_TIME = 3
 }

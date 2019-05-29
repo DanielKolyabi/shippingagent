@@ -24,6 +24,7 @@
     <string name="close_task_button">Закрыть задание</string>
     <string name="show_task_on_map">Показать на карте</string>
     <string name="sort_standart_button">Стандартная</string>
+    <string name="sort_by_time_button">По времени</string>
     <string name="sort_alphabetic_button">По алфавиту</string>
     <string name="user_explanation_hint">Ваше примечание</string>
     <string name="delimeter">-</string>

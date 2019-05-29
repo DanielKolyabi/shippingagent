@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.AutoCompleteTextView
 import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_filters.*
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.application
@@ -58,11 +59,14 @@ class FiltersFragment : Fragment() {
         start_button.setOnClickListener {
             onStartClicked?.invoke(presenter.toTaskFiltersModel(allFilters))
         }
+        reload_button?.setOnClickListener {
+            presenter.loadFilteredTasksCount(allFilters)
+        }
     }
 
     fun setStartButtonCount(count: String) {
         val intCount = count.toIntOrNull()
-        if(intCount == null || intCount > ADDRESS_LIMIT || intCount < 1){
+        if(intCount == null || intCount > ADDRESS_LIMIT || intCount <= 0){
             start_button.setTextColor(Color.RED)
             start_button.isEnabled = false
         }else{

@@ -17,6 +17,6 @@ sealed class AddressListModel {
         val parentTask: TaskModel
     ) : AddressListModel()
 
-    data class SortingItem(val sortType: Int) : AddressListModel()
+    data class SortingItem(val selectedSortType: Int, val isTaskFiltered: Boolean = false) : AddressListModel()
     object Loader : AddressListModel()
 }

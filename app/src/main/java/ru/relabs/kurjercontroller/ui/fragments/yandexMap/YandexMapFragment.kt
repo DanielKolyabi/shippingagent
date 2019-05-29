@@ -91,9 +91,8 @@ class YandexMapFragment : Fragment() {
         mapview.map.move(
             CameraPosition(point, 14f, 0f, 0f)
         )
-//        userLocationLayer = mapview.map.userLocationLayer
-//        userLocationLayer.isEnabled = true
-//        userLocationLayer.isHeadingEnabled = true
+        userLocationLayer = mapview.map.userLocationLayer
+        userLocationLayer.isEnabled = true
 
         my_position.setOnClickListener {
             mapview.map.move(

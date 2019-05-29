@@ -177,7 +177,7 @@ class AddressListFragment : Fragment(), ISearchableFragment {
     }
 
     fun updateCloseTaskButtonVisibility() {
-        close_button.setVisible(tasks.size == 1)
+        close_button?.setVisible(tasks.size == 1)
     }
 
     suspend fun showLoading(visible: Boolean) = withContext(Dispatchers.Main) {

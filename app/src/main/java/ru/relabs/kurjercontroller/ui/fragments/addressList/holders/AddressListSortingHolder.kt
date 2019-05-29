@@ -22,7 +22,16 @@ class AddressListSortingHolder(itemView: View, val onSortingChanged: (sortingMet
             onSortingChanged(TaskAddressSorter.STANDART)
             setEnabledSorting(TaskAddressSorter.STANDART)
         }
-        setEnabledSorting(item.sortType) //default
+
+        itemView.sort_standart.text = itemView.resources.getString(
+            if (item.isTaskFiltered) {
+                R.string.sort_by_time_button
+            } else {
+                R.string.sort_standart_button
+            }
+        )
+
+        setEnabledSorting(item.selectedSortType) //default
     }
 
     fun setEnabledSorting(sortingMethod: Int) {
