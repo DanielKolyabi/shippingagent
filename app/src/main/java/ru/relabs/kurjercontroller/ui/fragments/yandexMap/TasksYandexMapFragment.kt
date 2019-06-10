@@ -93,6 +93,7 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
     override fun onControlListPopulation() {
         adapter.data.add(YandexMapModel.MyPosition)
         adapter.data.add(YandexMapModel.CommonLayer)
+        adapter.data.add(YandexMapModel.PredefinedAddressesLayer)
         tasks.filter { it.filtered }.forEach {
             adapter.data.add(YandexMapModel.TaskLayer(it))
         }
@@ -150,6 +151,21 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
             adapter.data.firstOrNull { it is YandexMapModel.TaskLayer && it.task.id == task.id } ?: return@withContext
         (layer as YandexMapModel.TaskLayer).loading = loading
         adapter.notifyDataSetChanged()
+    }
+
+    fun showPredefinedAddresses() {
+        clearMap()
+
+        tasks
+            .filter {
+                !it.filtered
+            }
+            .flatMap {
+                it.taskItems
+            }.map {
+                AddressWithColor(it.address, it.placemarkColor)
+            }.forEach(::showAddress)
+
     }
 
     companion object {

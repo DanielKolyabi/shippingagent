@@ -11,5 +11,6 @@ sealed class YandexMapModel {
 
     object MyPosition : YandexMapModel()
     object CommonLayer : YandexMapModel()
+    object PredefinedAddressesLayer : YandexMapModel()
     data class TaskLayer(val task: TaskModel, var loading: Boolean = false) : YandexMapModel()
 }

@@ -9,6 +9,8 @@ import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.base.BaseYandexMapPresenter
 
 class AddressYandexMapPresenter(override val fragment: AddressYandexMapFragment): BaseYandexMapPresenter(fragment) {
+    override fun onPredefinedAddressesLayerSelected() {}
+
     override fun onTaskLayerSelected(taskModel: TaskModel) {}
 
     override fun onCommonLayerSelected() {}

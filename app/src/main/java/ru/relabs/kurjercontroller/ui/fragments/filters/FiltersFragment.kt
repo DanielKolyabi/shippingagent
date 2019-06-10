@@ -67,13 +67,13 @@ class FiltersFragment : Fragment() {
     fun setStartButtonCount(count: String) {
         val intCount = count.toIntOrNull()
         if(intCount == null || intCount > BuildConfig.MAX_ADDRESSES_IN_FILTERS || intCount < 0){
-            start_button.setTextColor(Color.RED)
-            start_button.isEnabled = false
+            start_button?.setTextColor(Color.RED)
+            start_button?.isEnabled = false
         }else{
-            start_button.setTextColor(Color.BLACK)
-            start_button.isEnabled = true
+            start_button?.setTextColor(Color.BLACK)
+            start_button?.isEnabled = true
         }
-        start_button.text = resources.getString(R.string.filter_apply_button, count)
+        start_button?.text = resources.getString(R.string.filter_apply_button, count)
     }
 
     private fun bindFilterControl(textView: InstantAutocompleteTextView, container: FilterTagLayout, filterType: Int) {

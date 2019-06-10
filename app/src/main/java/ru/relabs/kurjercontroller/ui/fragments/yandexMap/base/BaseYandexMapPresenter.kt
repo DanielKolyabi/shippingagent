@@ -18,4 +18,5 @@ abstract class BaseYandexMapPresenter(open val fragment: BaseYandexMapFragment) 
 
     abstract fun onTaskLayerSelected(taskModel: TaskModel)
     abstract fun onCommonLayerSelected()
+    abstract fun onPredefinedAddressesLayerSelected()
 }

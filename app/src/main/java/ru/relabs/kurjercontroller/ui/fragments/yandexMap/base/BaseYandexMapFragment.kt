@@ -24,6 +24,7 @@ import ru.relabs.kurjercontroller.ui.fragments.yandexMap.ColoredIconProvider
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.YandexMapModel
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.delegates.CommonLayerDelegate
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.delegates.MyPositionDelegate
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.delegates.PredefinedAddressesLayerDelegate
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.delegates.TaskLayerDelegate
 
 abstract class BaseYandexMapFragment : Fragment() {
@@ -38,6 +39,10 @@ abstract class BaseYandexMapFragment : Fragment() {
         addDelegate(CommonLayerDelegate {
             setSelectedControlButton(it)
             presenter.onCommonLayerSelected()
+        })
+        addDelegate(PredefinedAddressesLayerDelegate {
+            setSelectedControlButton(it)
+            presenter.onPredefinedAddressesLayerSelected()
         })
         addDelegate(TaskLayerDelegate {
             setSelectedControlButton(it)

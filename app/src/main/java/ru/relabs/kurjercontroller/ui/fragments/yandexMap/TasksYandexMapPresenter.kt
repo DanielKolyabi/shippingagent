@@ -14,6 +14,10 @@ import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.base.BaseYandexMapPresenter
 
 class TasksYandexMapPresenter(override val fragment: TasksYandexMapFragment) : BaseYandexMapPresenter(fragment) {
+    override fun onPredefinedAddressesLayerSelected() {
+        fragment.showPredefinedAddresses()
+        fragment.add_button?.setVisible(false)
+    }
 
     override fun onTaskLayerSelected(taskModel: TaskModel) {
         fragment.showTask(taskModel)

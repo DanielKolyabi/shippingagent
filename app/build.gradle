@@ -26,8 +26,8 @@ android {
         applicationId "ru.relabs.kurjercontroller"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 2
-        versionName "2"
+        versionCode 3
+        versionName "3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         buildConfigField("int", "MAX_ADDRESSES_IN_FILTERS", "500")
