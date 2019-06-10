@@ -33,8 +33,8 @@ data class TaskItemModel(
             val diff = Seconds.secondsBetween(closeTime, DateTime()).seconds
             when {
                 diff < 1.5 * 60 * 60 -> Color.GREEN
-                diff < 3 * 60 * 60 -> Color.argb(255, 255, 140, 0)
-                else -> Color.RED
+                diff < 3 * 60 * 60 -> Color.YELLOW
+                else -> Color.MAGENTA
             }
         }
 

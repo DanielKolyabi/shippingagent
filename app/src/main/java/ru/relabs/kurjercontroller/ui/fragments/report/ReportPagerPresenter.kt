@@ -48,10 +48,13 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
     }
 
     fun onEntranceClosedRemote(taskId: Int, taskItemId: Int, entranceNumber: Int) {
-        val task = fragment.tasks.first { it.id == taskId }
-        val taskItem = task.taskItems.first { it.id == taskItemId }
-        val entrance = taskItem.entrances.first { it.number == entranceNumber }
-        onEntranceClosed(task, taskItem, entrance, false)
+        val task = fragment.tasks.firstOrNull { it.id == taskId }
+        val taskItem = task?.taskItems?.firstOrNull { it.id == taskItemId }
+        val entrance = taskItem?.entrances?.firstOrNull { it.number == entranceNumber }
+        if(task != null && taskItem != null && entrance != null){
+
+            onEntranceClosed(task, taskItem, entrance, false)
+        }
     }
 
     private fun onEntranceClosed(

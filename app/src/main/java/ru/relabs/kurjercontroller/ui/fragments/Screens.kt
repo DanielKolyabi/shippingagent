@@ -6,6 +6,7 @@ import ru.relabs.kurjercontroller.models.TaskFiltersModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.fragments.addressList.AddressListFragment
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.AddressYandexMapFragment
 import ru.relabs.kurjercontroller.ui.fragments.filters.FiltersFragment
 import ru.relabs.kurjercontroller.ui.fragments.filters.FiltersPagerFragment
 import ru.relabs.kurjercontroller.ui.fragments.login.LoginFragment
@@ -13,7 +14,9 @@ import ru.relabs.kurjercontroller.ui.fragments.report.ReportPagerFragment
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.TaskInfoFragment
 import ru.relabs.kurjercontroller.ui.fragments.taskItemExplanation.TaskItemExplanationFragment
 import ru.relabs.kurjercontroller.ui.fragments.taskList.TaskListFragment
-import ru.relabs.kurjercontroller.ui.fragments.yandexMap.YandexMapFragment
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.AddressWithColor
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.TasksYandexMapFragment
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.base.BaseYandexMapFragment
 import ru.terrakok.cicerone.android.support.SupportAppScreen
 
 /**
@@ -54,16 +57,33 @@ class ReportScreen(
     }
 }
 
-class YandexMapScreen(
-    private val addresses: List<YandexMapFragment.AddressWithColor>,
+class TasksYandexMapScreen(
+    private val tasks: List<TaskModel>,
+    private val onAddressClicked: suspend (address: AddressModel) -> Unit,
+    private val onNewAddressesAdded: () -> Unit
+) : SupportAppScreen() {
+    override fun getFragment(): Fragment {
+        return TasksYandexMapFragment.newInstance(tasks).apply {
+            setOnClickCallback(object : BaseYandexMapFragment.Callback {
+                override suspend fun onAddressClicked(address: AddressModel) {
+                    this@TasksYandexMapScreen.onAddressClicked(address)
+                }
+            })
+            this.onNewTaskItemsAdded = onNewAddressesAdded
+        }
+    }
+}
+
+class AddressYandexMapScreen(
+    private val addresses: List<AddressWithColor>,
     private val onAddressClicked: suspend (address: AddressModel) -> Unit
 ) :
     SupportAppScreen() {
     override fun getFragment(): Fragment {
-        return YandexMapFragment.newInstance(addresses).apply {
-            setCallback(object : YandexMapFragment.Callback {
+        return AddressYandexMapFragment.newInstance(addresses).apply {
+            setOnClickCallback(object : BaseYandexMapFragment.Callback {
                 override suspend fun onAddressClicked(address: AddressModel) {
-                    this@YandexMapScreen.onAddressClicked(address)
+                    this@AddressYandexMapScreen.onAddressClicked(address)
                 }
             })
         }

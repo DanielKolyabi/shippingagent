@@ -76,7 +76,7 @@ class ReportFragment : Fragment() {
             hint_container,
             "",
             false,
-            activity!!.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
+            activity?.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
         )
         showHintText(taskItem.notes)
         updateApartmentListBackground(0)
@@ -221,7 +221,12 @@ class ReportFragment : Fragment() {
         }
     }
 
+    fun updateEuroKeysLocked(){
+        entrance_euro_key.isEnabled = mailboxType != 1
+    }
+
     fun updateMailboxTypeText(withOutline: Boolean = false) {
+        updateEuroKeysLocked()
         mailbox_euro?.setSelectButtonActive(mailboxType == 1)
         mailbox_gap?.setSelectButtonActive(mailboxType == 2)
         if (withOutline) {

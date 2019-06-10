@@ -18,6 +18,10 @@ class InstantAutocompleteTextView(
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, R.attr.autoCompleteTextViewStyle)
     constructor(context: Context) : this(context, null)
 
+    fun performFiltering(){
+        performFiltering(text, 0)
+    }
+
     override fun enoughToFilter(): Boolean {
         return true
     }

@@ -11,6 +11,7 @@ import android.widget.AutoCompleteTextView
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_filters.*
+import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.database.entities.FilterEntity
@@ -19,16 +20,16 @@ import ru.relabs.kurjercontroller.models.TaskFiltersModel
 import ru.relabs.kurjercontroller.providers.RemoteFilterSearch
 import ru.relabs.kurjercontroller.ui.сustomView.FilterTagLayout
 import ru.relabs.kurjercontroller.ui.fragments.filters.adapters.FilterSearchAdapter
+import ru.relabs.kurjercontroller.ui.сustomView.InstantAutocompleteTextView
 import java.lang.ref.WeakReference
 
 
 /**
  * Created by ProOrange on 18.03.2019.
  */
-const val ADDRESS_LIMIT = 300
+
 class FiltersFragment : Fragment() {
 
-    var defaultTextColor: ColorStateList? = null
     var onStartClicked: ((filters: TaskFiltersModel) -> Unit)? = null
 
     lateinit var filters: TaskFiltersModel
@@ -41,7 +42,6 @@ class FiltersFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        defaultTextColor = start_button.textColors
         setStartButtonCount("0")
 
         bindControl()
@@ -66,31 +66,33 @@ class FiltersFragment : Fragment() {
 
     fun setStartButtonCount(count: String) {
         val intCount = count.toIntOrNull()
-        if(intCount == null || intCount > ADDRESS_LIMIT || intCount <= 0){
+        if(intCount == null || intCount > BuildConfig.MAX_ADDRESSES_IN_FILTERS || intCount < 0){
             start_button.setTextColor(Color.RED)
             start_button.isEnabled = false
         }else{
-            start_button.setTextColor(defaultTextColor)
+            start_button.setTextColor(Color.BLACK)
             start_button.isEnabled = true
         }
         start_button.text = resources.getString(R.string.filter_apply_button, count)
     }
 
-    private fun bindFilterControl(textView: AutoCompleteTextView, container: FilterTagLayout, filterType: Int) {
+    private fun bindFilterControl(textView: InstantAutocompleteTextView, container: FilterTagLayout, filterType: Int) {
         context?.let {
             container.onFilterAppear = { filter ->
                 allFilters.add(filter)
                 presenter.loadFilteredTasksCount(allFilters)
+                textView?.performFiltering()
             }
             container.onFilterDisappear = { filter ->
                 allFilters.remove(filter)
                 presenter.loadFilteredTasksCount(allFilters)
+                textView?.performFiltering()
             }
             container.onFilterActiveChangedPredicate = { filter, newActive ->
                 if (newActive) {
                     true
                 } else {
-                    allFilters.filter { it.isActive() }.size > 1
+                    allFilters.filter { it.type == filter.type && it.isActive() }.size > 1
                 }
             }
             container.onFilterActiveChanged = {
@@ -108,17 +110,18 @@ class FiltersFragment : Fragment() {
             textView.threshold = 0
             textView.setOnClickListener {
                 textView?.showDropDown()
+                textView?.performFiltering()
             }
             textView.onItemClickListener = object : AdapterView.OnItemClickListener {
                 override fun onItemClick(adapter: AdapterView<*>?, view: View?, pos: Int, p3: Long) {
                     val item = adapter?.getItemAtPosition(pos) as? FilterModel
                     item ?: return
                     if (allFilters.contains(item)) {
-                        textView.setText("")
+                        textView?.setText("")
                         return
                     }
-                    container.add(item)
-                    textView.setText("")
+                    container?.add(item)
+                    textView?.setText("")
                 }
             }
         }

@@ -47,6 +47,8 @@ class RemoteFilterSearch(val scope: CancelableScope, val token: String) :
                 selectedFilters.firstOrNull {
                     it.type == resultFilter.type && it.id == resultFilter.id
                 } == null
+            }.sortedBy {
+                it.name
             }
 
             if (filteredResult.isEmpty()) {

@@ -48,7 +48,7 @@ data class TaskEntity(
             storages = storages,
             taskFilters = repository.loadTaskFilters(id),
             publishers = repository.db.taskPublisherDao().getByTaskId(id).map { it.toModel() },
-            taskItems = repository.db.taskItemDao().getByTaskId(id).map { it.toModel(repository) },
+            taskItems = repository.db.taskItemDao().getByTaskId(id).map { it.toModel(repository) }.toMutableList(),
             iteration = iteration,
             firstExaminedDeviceId = firstExaminedDeviceId,
             filtered = filtered,

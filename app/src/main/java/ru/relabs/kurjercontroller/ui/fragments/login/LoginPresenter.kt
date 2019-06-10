@@ -26,6 +26,8 @@ import ru.relabs.kurjercontroller.ui.fragments.TaskListScreen
  * Created by ProOrange on 18.03.2019.
  */
 
+const val INVALID_TOKEN_ERROR_CODE = 4
+
 class LoginPresenter(val fragment: LoginFragment) {
     val bgScope = CancelableScope(Dispatchers.Default)
     private var isPasswordRemembered = false
@@ -65,7 +67,11 @@ class LoginPresenter(val fragment: LoginFragment) {
                     api.loginByToken(pwd, application().deviceUUID, time).await()
 
                 if (response.error != null) {
-                    fragment.activity()?.showErrorSuspend("Ошибка №${response.error.code}\n${response.error.message}")
+                    var errMessage = response.error.message
+                    if (response.error.code == INVALID_TOKEN_ERROR_CODE) {
+                        errMessage = "Введите заново пароль"
+                    }
+                    fragment.activity()?.showErrorSuspend("Ошибка №${response.error.code}\n$errMessage")
                     return@launch
                 }
 
@@ -103,6 +109,7 @@ class LoginPresenter(val fragment: LoginFragment) {
 
                 if (e.code() == 502) {
                     showOfflineLoginOffer()
+                    fragment.setLoginButtonLoading(false)
                     return@launch
                 }
 

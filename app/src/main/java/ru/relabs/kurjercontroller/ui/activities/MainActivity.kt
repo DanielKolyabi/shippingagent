@@ -37,7 +37,7 @@ import ru.relabs.kurjercontroller.ui.fragments.report.ReportPagerFragment
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.TaskInfoFragment
 import ru.relabs.kurjercontroller.ui.fragments.taskItemExplanation.TaskItemExplanationFragment
 import ru.relabs.kurjercontroller.ui.fragments.taskList.TaskListFragment
-import ru.relabs.kurjercontroller.ui.fragments.yandexMap.YandexMapFragment
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.AddressYandexMapFragment
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import ru.terrakok.cicerone.android.support.SupportAppScreen
 import ru.terrakok.cicerone.commands.Command
@@ -373,7 +373,7 @@ class MainActivity : AppCompatActivity() {
                 back_button?.setVisible(true)
                 changeTitle("Пояснения к заданию")
             }
-            is YandexMapFragment -> {
+            is AddressYandexMapFragment -> {
                 back_button?.setVisible(true)
             }
             is FiltersFragment -> {

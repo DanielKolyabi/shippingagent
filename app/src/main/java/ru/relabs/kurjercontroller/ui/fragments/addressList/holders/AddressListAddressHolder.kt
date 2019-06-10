@@ -7,6 +7,7 @@ import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.models.AddressModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
+import ru.relabs.kurjercontroller.ui.extensions.performFlash
 import ru.relabs.kurjercontroller.ui.fragments.addressList.AddressListModel
 
 
@@ -38,5 +39,9 @@ class AddressListAddressHolder(
         itemView.map_icon.setOnClickListener {
             onMapClick(item.taskItems)
         }
+    }
+
+    fun flashSelectedColor() {
+        itemView.performFlash()
     }
 }

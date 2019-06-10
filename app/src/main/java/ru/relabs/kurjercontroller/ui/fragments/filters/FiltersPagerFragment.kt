@@ -63,7 +63,7 @@ class FiltersPagerFragment : Fragment() {
         fun newInstance(tasks: List<TaskModel>) =
             FiltersPagerFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelableArrayList("tasks", ArrayList(tasks.map { it.copy(taskItems = listOf()) }))
+                    putParcelableArrayList("tasks", ArrayList(tasks.map { it.copy(taskItems = mutableListOf()) }))
                 }
             }
     }

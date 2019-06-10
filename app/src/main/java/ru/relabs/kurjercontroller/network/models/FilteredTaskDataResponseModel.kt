@@ -22,7 +22,7 @@ data class FilteredTaskDataResponseModel(
             initiator = filteredTask.initiator,
             userId = filteredTask.userId,
             storages = storages,
-            taskItems = items.map { it.copy(taskId = filteredTask.id).toModel() },
+            taskItems = items.map { it.copy(taskId = filteredTask.id).toModel() }.toMutableList(),
             publishers = publishers.map { it.copy(taskId = filteredTask.id).toModel() },
             taskFilters = filteredTask.taskFilters,
             iteration = filteredTask.iteration,

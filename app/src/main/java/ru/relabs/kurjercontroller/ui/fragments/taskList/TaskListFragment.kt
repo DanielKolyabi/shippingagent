@@ -25,6 +25,8 @@ import ru.relabs.kurjercontroller.ui.fragments.ISearchableFragment
 import ru.relabs.kurjercontroller.ui.fragments.taskList.delegates.HeaderDelegate
 import ru.relabs.kurjercontroller.ui.fragments.taskList.delegates.LoaderDelegate
 import ru.relabs.kurjercontroller.ui.fragments.taskList.delegates.TaskDelegate
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.AddressYandexMapFragment
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.base.BaseYandexMapFragment
 import ru.relabs.kurjercontroller.ui.helpers.HintHelper
 import java.util.*
 
@@ -86,10 +88,11 @@ class TaskListFragment : Fragment(), ISearchableFragment {
             hint_container,
             this.resources.getString(R.string.task_list_hint_text),
             false,
-            activity!!.getSharedPreferences(
+            activity?.getSharedPreferences(
                 BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE
             )
         )
+        BaseYandexMapFragment.savedCameraPosition = null
 
         presenter.updateStartButton()
 

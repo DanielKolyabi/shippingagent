@@ -1,0 +1,231 @@
+package ru.relabs.kurjercontroller.ui.fragments.yandexMap.base
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.core.graphics.ColorUtils
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.geometry.BoundingBox
+import com.yandex.mapkit.geometry.Circle
+import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.map.CameraPosition
+import com.yandex.mapkit.user_location.UserLocationLayer
+import kotlinx.android.synthetic.main.fragment_yandex_map.*
+import kotlinx.coroutines.launch
+import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
+import ru.relabs.kurjercontroller.R
+import ru.relabs.kurjercontroller.application
+import ru.relabs.kurjercontroller.models.AddressModel
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.AddressWithColor
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.ColoredIconProvider
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.YandexMapModel
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.delegates.CommonLayerDelegate
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.delegates.MyPositionDelegate
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.delegates.TaskLayerDelegate
+
+abstract class BaseYandexMapFragment : Fragment() {
+    private lateinit var userLocationLayer: UserLocationLayer
+    abstract val presenter: BaseYandexMapPresenter
+    private var onClickCallback: Callback? = null
+
+    val adapter = DelegateAdapter<YandexMapModel>().apply {
+        addDelegate(MyPositionDelegate {
+            presenter.onMyPositionClicked()
+        })
+        addDelegate(CommonLayerDelegate {
+            setSelectedControlButton(it)
+            presenter.onCommonLayerSelected()
+        })
+        addDelegate(TaskLayerDelegate {
+            setSelectedControlButton(it)
+            (it as? YandexMapModel.TaskLayer)?.let {
+                presenter.onTaskLayerSelected(it.task)
+            }
+        })
+    }
+
+    private fun setSelectedControlButton(selectedModel: YandexMapModel?) {
+        if(selectedModel is YandexMapModel.MyPosition) return
+        adapter.data.forEach {
+            it.selected = false
+        }
+        selectedModel?.selected = true
+
+        adapter.notifyDataSetChanged()
+    }
+
+    fun setOnClickCallback(callback: Callback) {
+        this.onClickCallback = callback
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_yandex_map, container, false)
+    }
+
+    fun showAddress(addressWithColor: AddressWithColor) {
+        val address = addressWithColor.address
+        if (address.lat != 0.0 && address.long != 0.0) {
+            val ctx = context ?: return
+            val point = Point(address.lat, address.long)
+
+            val color = addressWithColor.color
+
+            mapview.map.mapObjects
+                .addPlacemark(
+                    Point(address.lat, address.long),
+                    ColoredIconProvider(ctx, color)
+                )
+                .addTapListener { _, _ ->
+                    presenter.bgScope.launch {
+                        onClickCallback?.onAddressClicked(address)
+                    }
+                    application().router.exit()
+                    return@addTapListener true
+                }
+
+            mapview.map.mapObjects.addCircle(
+                Circle(point, 50f),
+                color,
+                2f,
+                ColorUtils.setAlphaComponent(color, 80)
+            )
+        }
+    }
+
+    fun clearMap() {
+        mapview.map.mapObjects.clear()
+    }
+
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        MapKitFactory.initialize(this.context)
+
+        val point = Point(application().currentLocation.lat, application().currentLocation.long)
+        mapview.map.isRotateGesturesEnabled = false
+        mapview.map.move(
+            CameraPosition(point, 14f, 0f, 0f)
+        )
+
+        userLocationLayer = mapview.map.userLocationLayer
+        userLocationLayer.isEnabled = true
+
+        controls_list?.layoutManager = LinearLayoutManager(context)
+        controls_list?.adapter = adapter
+
+        populateControlList()
+    }
+
+    abstract fun onControlListPopulation()
+    fun populateControlList(){
+        adapter.data.clear()
+        onControlListPopulation()
+        adapter.notifyDataSetChanged()
+        setSelectedControlButton(YandexMapModel.CommonLayer)
+
+        adapter.data.firstOrNull { it !is YandexMapModel.MyPosition }?.let {
+            when (it) {
+                is YandexMapModel.TaskLayer -> {
+                    presenter.onTaskLayerSelected(it.task)
+                }
+                is YandexMapModel.CommonLayer -> {
+                    presenter.onCommonLayerSelected()
+                }
+            }
+
+            setSelectedControlButton(it)
+        }
+    }
+    override fun onStop() {
+        super.onStop()
+        presenter.bgScope.cancel()
+        MapKitFactory.getInstance().onStop()
+        mapview.onStop()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        MapKitFactory.getInstance().onStart()
+        mapview.onStart()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        presenter.bgScope.terminate()
+    }
+
+    abstract fun shouldSaveCameraPosition(): Boolean
+
+    override fun onPause() {
+        super.onPause()
+        if (shouldSaveCameraPosition()) {
+            savedCameraPosition = mapview?.map?.cameraPosition
+        }
+    }
+
+    fun getCameraPosition(addresses: List<AddressModel>): CameraPosition {
+        when {
+            addresses.isEmpty() -> {
+                return CameraPosition(
+                    Point(application().currentLocation.lat, application().currentLocation.long),
+                    14f, 0f, 0f
+                )
+            }
+            addresses.size == 1 -> {
+                val address = addresses.first()
+                return CameraPosition(
+                    Point(address.lat, address.long),
+                    14f, 0f, 0f
+                )
+            }
+            else -> {
+                val filtered = addresses.filter { it.lat != 0.0 && it.long != 0.0 }
+                val minLat = filtered.minBy { it.lat }?.lat
+                val maxLat = filtered.maxBy { it.lat }?.lat
+                val minLong = filtered.minBy { it.long }?.long
+                val maxLong = filtered.maxBy { it.long }?.long
+                if (minLat == null || maxLat == null || minLong == null || maxLong == null) {
+                    return getCameraPosition(listOfNotNull(addresses.firstOrNull()))
+
+                }
+                return mapview?.map?.cameraPosition(BoundingBox(Point(minLat, minLong), Point(maxLat, maxLong)))
+                    ?: getCameraPosition(listOfNotNull(addresses.firstOrNull()))
+            }
+        }
+    }
+
+    fun makeFocus(addresses: List<AddressModel>) {
+
+        mapview?.map?.move(
+            savedCameraPosition
+                ?: getCameraPosition(addresses)
+        )
+        savedCameraPosition = null
+    }
+
+    fun moveCameraToUser() {
+        mapview.map.move(
+            userLocationLayer.cameraPosition() ?: CameraPosition(
+                Point(application().currentLocation.lat, application().currentLocation.long),
+                14f, 0f, 0f
+            )
+        )
+    }
+
+    companion object {
+
+        var savedCameraPosition: CameraPosition? = null
+    }
+
+
+    interface Callback {
+        suspend fun onAddressClicked(address: AddressModel)
+    }
+}
+

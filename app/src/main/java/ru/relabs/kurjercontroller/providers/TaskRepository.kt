@@ -507,6 +507,12 @@ class TaskRepository(val db: AppDatabase) {
             return@withContext availableEntranceEuroKeys
         }
 
+    suspend fun saveTaskItem(taskItem: TaskItemModel) = withContext(Dispatchers.IO){
+        db.addressDao().insert(taskItem.address.toEntity())
+        db.taskItemDao().insert(taskItem.toEntity())
+        db.entranceDao().insertAll(taskItem.entrances.map{it.toEntity(taskItem.taskId, taskItem.id)})
+    }
+
     suspend fun reloadFilteredTaskItems(token: String, task: TaskModel): TaskModel = withContext(Dispatchers.IO) {
         val data = try {
             api.getFilteredTaskItems(token, FiltersRequest.fromFiltersList(task.taskFilters.all)).await()

@@ -8,8 +8,9 @@ import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.fragments.TaskItemExplanationScreen
-import ru.relabs.kurjercontroller.ui.fragments.YandexMapScreen
-import ru.relabs.kurjercontroller.ui.fragments.yandexMap.YandexMapFragment
+import ru.relabs.kurjercontroller.ui.fragments.AddressYandexMapScreen
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.AddressWithColor
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.AddressYandexMapFragment
 
 class TaskInfoPresenter(val fragment: TaskInfoFragment) {
     val bgScope = CancelableScope(Dispatchers.Default)
@@ -33,8 +34,8 @@ class TaskInfoPresenter(val fragment: TaskInfoFragment) {
             return
         }
         application().router.navigateTo(
-            YandexMapScreen(
-                fragment.task.taskItems.map { YandexMapFragment.AddressWithColor(it.address, it.placemarkColor) }
+            AddressYandexMapScreen(
+                fragment.task.taskItems.map { AddressWithColor(it.address, it.placemarkColor) }
             ) { address ->
                 fragment.targetAddress = address
             }

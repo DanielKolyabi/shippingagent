@@ -32,6 +32,8 @@ import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressList
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListLoaderDelegate
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListSortingDelegate
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListTaskItemDelegate
+import ru.relabs.kurjercontroller.ui.fragments.addressList.holders.AddressListAddressHolder
+import ru.relabs.kurjercontroller.ui.fragments.addressList.holders.AddressListTaskItemHolder
 import ru.relabs.kurjercontroller.ui.helpers.HintHelper
 
 /**
@@ -39,6 +41,8 @@ import ru.relabs.kurjercontroller.ui.helpers.HintHelper
  */
 class AddressListFragment : Fragment(), ISearchableFragment {
     var targetAddress: AddressModel? = null
+    var shouldReloadData: Boolean = false
+
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             intent ?: return
@@ -124,7 +128,7 @@ class AddressListFragment : Fragment(), ISearchableFragment {
             hint_container,
             resources.getString(R.string.address_list_hint_text),
             false,
-            activity!!.getSharedPreferences(
+            activity?.getSharedPreferences(
                 BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE
             )
         )
@@ -144,7 +148,8 @@ class AddressListFragment : Fragment(), ISearchableFragment {
         }
         updateCloseTaskButtonVisibility()
 
-        if (adapter.data.isEmpty()) {
+        if (adapter.data.isEmpty() || shouldReloadData) {
+            shouldReloadData = false
             presenter.preloadTasks()
         } else {
             presenter.bgScope.launch {
@@ -159,6 +164,7 @@ class AddressListFragment : Fragment(), ISearchableFragment {
                 delay(250)
                 withContext(Dispatchers.Main) {
                     scrollToAddress(it)
+                    targetAddress = null
                 }
             }
         }
@@ -173,7 +179,12 @@ class AddressListFragment : Fragment(), ISearchableFragment {
             return
         }
 
-        address_list?.smoothScrollToPosition(idx)
+        address_list?.scrollToPosition(idx)
+
+        address_list?.post {
+            val holder = address_list?.findViewHolderForAdapterPosition(idx) as? AddressListAddressHolder
+            holder?.flashSelectedColor()
+        }
     }
 
     fun updateCloseTaskButtonVisibility() {

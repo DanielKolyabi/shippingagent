@@ -39,7 +39,7 @@ data class TaskResponseModel(
             initiator = initiator,
             userId = userId,
             storages = storages,
-            taskItems = items.map { it.toModel() },
+            taskItems = items.map { it.toModel() }.toMutableList(),
             publishers = publishers.map{it.toModel()},
             taskFilters = filters.toModel(),
             iteration = iteration,

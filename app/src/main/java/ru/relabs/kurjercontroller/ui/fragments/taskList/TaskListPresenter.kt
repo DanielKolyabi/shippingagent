@@ -38,18 +38,29 @@ class TaskListPresenter(val fragment: TaskListFragment) {
             fragment.context?.showError("Вы должны ознакомиться с заданием")
             return
         }
+        val clickedItem = (fragment.adapter.data[pos] as TaskListModel.TaskItem)
+        val selectedTasks = getSelectedTasks()
+        val selectedFilteredTasksCount = selectedTasks.count { it.task.filtered }
+        if (selectedFilteredTasksCount >= 3 && !clickedItem.selected && clickedItem.task.filtered) {
+            fragment.context?.showError("Невозможно выбрать более 3 заданий с фильтрами")
+            return
+        }
 
-        (fragment.adapter.data[pos] as TaskListModel.TaskItem).selected =
-            !(fragment.adapter.data[pos] as TaskListModel.TaskItem).selected
+        clickedItem.selected = !clickedItem.selected
         fragment.adapter.notifyItemChanged(pos)
 
         markIntersectedTasks()
         updateStartButton()
     }
 
+    private fun getSelectedTasks(): List<TaskListModel.TaskItem> =
+        fragment.adapter.data
+            .filter { it is TaskListModel.TaskItem && it.selected }
+            .mapNotNull { it as? TaskListModel.TaskItem }
+
     private fun markIntersectedTasks() {
         val tasks = fragment.adapter.data
-        val selectedTasks = tasks.filter { it is TaskListModel.TaskItem && it.selected }
+        val selectedTasks = getSelectedTasks()
         val oldStates = tasks.map {
             if (it !is TaskListModel.TaskItem) false
             else it.hasAddressIntersection
@@ -95,11 +106,7 @@ class TaskListPresenter(val fragment: TaskListFragment) {
     }
 
     fun onStartClicked() {
-        val selectedTasks = fragment.adapter.data.filter {
-            (it as? TaskListModel.TaskItem)?.selected ?: false
-        }.mapNotNull {
-            (it as? TaskListModel.TaskItem)?.task
-        }
+        val selectedTasks = getSelectedTasks().map { it.task }
 
         val selectedFilteredTasks = selectedTasks.filter { it.filtered }
         if (selectedFilteredTasks.isNotEmpty()) {

@@ -14,7 +14,7 @@ class HintHelper(
     val hintContainer: View,
     val text: String,
     private var expanded: Boolean = false,
-    val preferences: SharedPreferences,
+    val preferences: SharedPreferences?,
     var maxHeight: Int = 200 * hintContainer.resources.displayMetrics.density.toInt()
 ) {
 
@@ -34,12 +34,12 @@ class HintHelper(
         hintContainer.font_minus.setOnClickListener {
             setFontSmaller()
         }
-        changeFont(preferences.getFloat("hint_font_size", 12f))
+        changeFont(preferences?.getFloat("hint_font_size", 12f) ?: 12f)
     }
 
     private fun changeFont(spFontSize: Float) {
         if (spFontSize < 12 || spFontSize > 26) return
-        preferences.edit().putFloat("hint_font_size", spFontSize).apply()
+        preferences?.edit()?.putFloat("hint_font_size", spFontSize)?.apply()
         hintContainer.hint_text.textSize = spFontSize
     }
 

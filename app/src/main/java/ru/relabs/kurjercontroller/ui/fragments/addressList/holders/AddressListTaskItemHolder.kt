@@ -5,6 +5,7 @@ import android.view.View
 import kotlinx.android.synthetic.main.holder_addr_list_task.view.*
 import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
 import ru.relabs.kurjercontroller.R
+import ru.relabs.kurjercontroller.ui.extensions.performFlash
 import ru.relabs.kurjercontroller.ui.fragments.addressList.AddressListModel
 
 /**
@@ -36,5 +37,10 @@ class AddressListTaskItemHolder(
         } else {
             itemView.task_button.setBackgroundColor(itemView.resources.getColor(R.color.button_material_light))
         }
+    }
+
+    fun flashSelectedColor(){
+
+        itemView.performFlash()
     }
 }

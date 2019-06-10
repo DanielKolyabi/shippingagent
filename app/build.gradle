@@ -29,6 +29,10 @@ android {
         versionCode 2
         versionName "2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("int", "MAX_ADDRESSES_IN_FILTERS", "500")
+        buildConfigField("String", "YA_KEY", '"9be78b32-1265-4157-bf15-999b8d747a5c"')
+        signingConfig signingConfigs.config
     }
     flavorDimensions "default"
     productFlavors{
@@ -39,19 +43,15 @@ android {
             buildConfigField("String", "API_URL", '"http://warp.courr.ru:8084"')
         }
         localServer{
-            buildConfigField("String", "API_URL", '"http://192.168.1.176:8081"')
+            buildConfigField("String", "API_URL", '"http://192.168.250.176:8081"')
         }
     }
     buildTypes {
         debug {
-            buildConfigField("String", "YA_KEY", '"9be78b32-1265-4157-bf15-999b8d747a5c"')
-            signingConfig signingConfigs.config
         }
         release {
-            buildConfigField("String", "YA_KEY", '"9be78b32-1265-4157-bf15-999b8d747a5c"')
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.config
         }
     }
 }
@@ -92,6 +92,7 @@ dependencies {
 
     implementation 'joda-time:joda-time:2.10.1'
 
+    implementation "com.google.android.gms:play-services-location:16.0.0"
     implementation 'com.google.firebase:firebase-core:16.0.8'
     implementation 'com.google.firebase:firebase-messaging:17.6.0'
 
