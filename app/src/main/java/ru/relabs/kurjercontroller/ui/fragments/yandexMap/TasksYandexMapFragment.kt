@@ -92,10 +92,14 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
 
     override fun onControlListPopulation() {
         adapter.data.add(YandexMapModel.MyPosition)
-        adapter.data.add(YandexMapModel.CommonLayer)
-        adapter.data.add(YandexMapModel.PredefinedAddressesLayer)
-        tasks.filter { it.filtered }.forEach {
-            adapter.data.add(YandexMapModel.TaskLayer(it))
+        if (tasks.size > 1) {
+            adapter.data.add(YandexMapModel.CommonLayer)
+            adapter.data.add(YandexMapModel.PredefinedAddressesLayer)
+            tasks.filter { it.filtered }.forEach {
+                adapter.data.add(YandexMapModel.TaskLayer(it))
+            }
+        } else {
+            tasks.firstOrNull()?.let { showTask(it) }
         }
     }
 

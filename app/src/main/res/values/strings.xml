@@ -29,10 +29,10 @@
     <string name="user_explanation_hint">Ваше примечание</string>
     <string name="delimeter">-</string>
     <string name="entrance_code">Код:</string>
-    <string name="entrance_euro_key">Евро:</string>
+    <string name="entrance_euro_key">Евро🔑:</string>
     <string name="layout_error">ПСНР</string>
     <string name="lookout">Вахта</string>
-    <string name="entrance_key">Ключ:</string>
+    <string name="entrance_key">Подъезд🔑:</string>
     <string name="close_entrance_button">Закрыть подъезд</string>
     <string name="broken">Слом</string>
     <string name="not_confirmed">Нет</string>

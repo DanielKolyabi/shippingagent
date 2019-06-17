@@ -9,6 +9,8 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.os.StrictMode
 import androidx.core.content.ContextCompat
+import androidx.emoji.bundled.BundledEmojiCompatConfig
+import androidx.emoji.text.EmojiCompat
 import androidx.room.Room
 import com.google.firebase.iid.FirebaseInstanceId
 import com.yandex.mapkit.MapKitFactory
@@ -62,6 +64,7 @@ class MyApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        EmojiCompat.init(BundledEmojiCompatConfig(this))
         StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder().build())
         instance = this
         cicerone = Cicerone.create()

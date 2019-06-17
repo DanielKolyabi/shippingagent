@@ -221,7 +221,7 @@ class ReportFragment : Fragment() {
         }
     }
 
-    fun updateEuroKeysLocked(){
+    fun updateEuroKeysLocked() {
         entrance_euro_key.isEnabled = mailboxType != 1
     }
 
@@ -310,6 +310,11 @@ class ReportFragment : Fragment() {
             if (pos != null && pos >= 0) {
                 entrance_key?.setSelection(pos)
             }
+        } else {
+            val pos = keyAdapter?.getPosition("Нет")
+            if (pos != null && pos >= 0) {
+                entrance_key?.setSelection(pos)
+            }
         }
 
         if (entrance.euroKey.isNotBlank() || saved?.euroKey?.isNotBlank() == true) {
@@ -317,6 +322,11 @@ class ReportFragment : Fragment() {
             val pos = euroKeyAdapter?.getPosition(key)
             if (pos != null && pos >= 0) {
                 entrance_euro_key?.setSelection(pos)
+            }
+        } else {
+            val pos = keyAdapter?.getPosition("Нет")
+            if (pos != null && pos >= 0) {
+                entrance_key?.setSelection(pos)
             }
         }
 
@@ -399,7 +409,12 @@ class ReportFragment : Fragment() {
                 (apartmentAdapter.data.firstOrNull { it is ApartmentListModel.Apartment } as? ApartmentListModel.Apartment)?.buttonGroup
             if (buttonGroup == 0) {
                 apartmentListRemoveEntrance()
-                apartmentListRemoveLookout()
+
+                if (hasLookout) {
+                    apartmentListAddLookout()
+                } else {
+                    apartmentListRemoveLookout()
+                }
             } else {
                 apartmentListAddEntrance()
                 if (hasLookout) {

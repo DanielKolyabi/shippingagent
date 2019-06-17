@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.core.graphics.ColorUtils
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.BoundingBox
 import com.yandex.mapkit.geometry.Circle
@@ -121,7 +122,7 @@ abstract class BaseYandexMapFragment : Fragment() {
         userLocationLayer = mapview.map.userLocationLayer
         userLocationLayer.isEnabled = true
 
-        controls_list?.layoutManager = LinearLayoutManager(context)
+        controls_list?.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         controls_list?.adapter = adapter
 
         populateControlList()
