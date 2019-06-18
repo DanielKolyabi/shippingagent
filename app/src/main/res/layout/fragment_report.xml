@@ -110,7 +110,7 @@
             android:layout_marginEnd="4dp"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-    <androidx.emoji.widget.EmojiTextView
+    <TextView
             android:id="@+id/entrance_key_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -119,6 +119,29 @@
             app:layout_constraintTop_toBottomOf="@+id/appartaments_from"
             app:layout_constraintStart_toStartOf="parent"/>
 
+    <ImageView
+            android:id="@+id/entrance_key_label_icon"
+            android:padding="2dp"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toEndOf="@id/entrance_key_label"
+            app:layout_constraintTop_toTopOf="@id/entrance_key_label"
+            app:layout_constraintBottom_toBottomOf="@id/entrance_key_label"
+            android:src="@drawable/ic_key"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"/>
+
+    <ImageView
+            android:id="@+id/entrance_euro_key_label_icon"
+            android:padding="2dp"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toEndOf="@id/entrance_euro_key_label"
+            app:layout_constraintTop_toTopOf="@id/entrance_euro_key_label"
+            app:layout_constraintBottom_toBottomOf="@id/entrance_euro_key_label"
+            android:src="@drawable/ic_key"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"/>
 
     <Spinner
             android:id="@+id/entrance_key"
@@ -126,11 +149,11 @@
             android:layout_marginEnd="4dp"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="@id/guideline"
-            app:layout_constraintStart_toEndOf="@id/entrance_key_label"
+            app:layout_constraintStart_toEndOf="@id/entrance_key_label_icon"
             app:layout_constraintTop_toTopOf="@id/entrance_key_label"
             app:layout_constraintBottom_toBottomOf="@id/entrance_key_label"/>
 
-    <androidx.emoji.widget.EmojiTextView
+    <TextView
             android:id="@+id/entrance_euro_key_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -145,7 +168,7 @@
             android:id="@+id/entrance_euro_key"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toEndOf="@+id/entrance_euro_key_label"
+            app:layout_constraintStart_toEndOf="@+id/entrance_euro_key_label_icon"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/entrance_euro_key_label"
             app:layout_constraintBottom_toBottomOf="@+id/entrance_euro_key_label"/>
@@ -285,5 +308,5 @@
             android:layout_height="wrap_content"
             android:id="@+id/guideline"
             android:orientation="vertical"
-    app:layout_constraintGuide_percent="0.55"/>
+            app:layout_constraintGuide_percent="0.55"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

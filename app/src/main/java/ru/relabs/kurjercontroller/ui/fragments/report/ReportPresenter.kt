@@ -157,7 +157,9 @@ class ReportPresenter(val fragment: ReportFragment) {
         return photoFile
     }
 
-    private fun onPhotoCreated() {}
+    private fun onPhotoCreated() {
+        fragment.updateEditable()
+    }
 
 
     fun onDescriptionChanged() {
@@ -302,6 +304,7 @@ class ReportPresenter(val fragment: ReportFragment) {
 
         fragment.photosAdapter.data.removeAt(holder.adapterPosition)
         fragment.photosAdapter.notifyItemRemoved(holder.adapterPosition)
+        fragment.updateEditable()
     }
 
     fun onFloorsChanged() {
@@ -321,13 +324,11 @@ class ReportPresenter(val fragment: ReportFragment) {
     fun onApartmentButtonGroupChanged(apartment: Int, buttonGroup: Int) {
 
         try {
-            fragment.apartmentAdapter.data.forEachIndexed { index, apartmentListModel ->
+            val data = fragment.apartmentAdapter.data.toList()
+            data.forEachIndexed { index, apartmentListModel ->
                 if (apartmentListModel !is ApartmentListModel.Apartment) return@forEachIndexed
 
                 apartmentListModel.buttonGroup = buttonGroup
-                (fragment.appartaments_list?.findViewHolderForAdapterPosition(index) as? ApartmentHolder)?.scrollToButtonGroup(
-                    buttonGroup
-                )
             }
         } catch (e: java.lang.Exception) {
             e.logError()
@@ -344,13 +345,15 @@ class ReportPresenter(val fragment: ReportFragment) {
             }
         }
         fragment.updateApartmentListBackground(buttonGroup)
-        fragment.apartmentAdapter.notifyItemRangeChanged(0, 2)
+        fragment.apartmentAdapter.notifyDataSetChanged()
 
         bgScope.launch {
+            val data = fragment.apartmentAdapter.data.toList()
+
             application().tasksRepository.saveApartmentResults(
                 fragment.taskItem,
                 fragment.entrance,
-                fragment.apartmentAdapter.data.mapNotNull { it as? ApartmentListModel.Apartment })
+                data.mapNotNull { it as? ApartmentListModel.Apartment })
         }
     }
 

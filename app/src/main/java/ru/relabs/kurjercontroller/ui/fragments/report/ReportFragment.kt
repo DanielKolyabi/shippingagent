@@ -185,6 +185,20 @@ class ReportFragment : Fragment() {
         refreshData()
     }
 
+    fun setControlsLockedDueEntranceClosed(locked: Boolean){
+        entrance_euro_key?.isEnabled = !locked
+        entrance_key?.isEnabled = !locked
+        layout_error_button?.isEnabled = !locked
+        lookout?.isEnabled = !locked
+        close_button?.isEnabled = !locked
+        user_explanation_input?.isEnabled = !locked
+        mailbox_euro?.isEnabled = !locked
+        mailbox_gap?.isEnabled = !locked
+
+        updateCloseButtonActive()
+        updateIsEntranceClosedButton()
+    }
+
     fun setControlsLocked(locked: Boolean) {
         appartaments_from?.isEnabled = !locked
         appartaments_to?.isEnabled = !locked
@@ -197,6 +211,8 @@ class ReportFragment : Fragment() {
         close_button?.isEnabled = !locked
         user_explanation_input?.isEnabled = !locked
         mailbox_euro?.isEnabled = !locked
+        mailbox_gap?.isEnabled = !locked
+
         updateCloseButtonActive()
         updateIsEntranceClosedButton()
     }
@@ -222,20 +238,13 @@ class ReportFragment : Fragment() {
     }
 
     fun updateEuroKeysLocked() {
-        entrance_euro_key.isEnabled = mailboxType != 1
+        entrance_euro_key.isEnabled = mailboxType == 1
     }
 
-    fun updateMailboxTypeText(withOutline: Boolean = false) {
+    fun updateMailboxTypeText() {
         updateEuroKeysLocked()
         mailbox_euro?.setSelectButtonActive(mailboxType == 1)
         mailbox_gap?.setSelectButtonActive(mailboxType == 2)
-        if (withOutline) {
-            if (mailboxType == 1) {
-                mailbox_euro.showOutline(true)
-            } else {
-                mailbox_gap.showOutline(true)
-            }
-        }
     }
 
     private suspend fun fillData() = withContext(Dispatchers.Main) {
@@ -243,7 +252,7 @@ class ReportFragment : Fragment() {
         appartaments_to?.setText(entrance.endApartments.toString())
 
         mailboxType = entrance.mailboxType
-        updateMailboxTypeText(true)
+        updateMailboxTypeText()
 
         entrance_key?.adapter = keyAdapter
         entrance_euro_key?.adapter = euroKeyAdapter
@@ -259,7 +268,6 @@ class ReportFragment : Fragment() {
 
         if (entrance.hasLookout) {
             hasLookout = entrance.hasLookout
-            lookout?.showOutline(true)
         }
 
         presenter.bgScope.launch(Dispatchers.Main) {
@@ -571,10 +579,6 @@ class ReportFragment : Fragment() {
         }
     }
 
-    fun Button.showOutline(showed: Boolean) {
-        background = if (showed) resources.getDrawable(R.drawable.button_outline, null) else defaultButtonBackground
-    }
-
     override fun onDestroy() {
         presenter.bgScope.terminate()
         super.onDestroy()
@@ -582,7 +586,7 @@ class ReportFragment : Fragment() {
 
     fun updateEntranceClosed() {
         entrance_closed?.setSelectButtonActive(entranceClosed)
-        setControlsLocked(entranceClosed)
+        setControlsLockedDueEntranceClosed(entranceClosed)
     }
 
     fun updateApartmentListBackground(buttonGroup: Int) {

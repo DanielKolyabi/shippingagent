@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.ui.fragments.report.holders
 
+import android.view.MotionEvent
 import android.view.View
 import androidx.viewpager.widget.ViewPager
 import kotlinx.android.synthetic.main.holder_report_appartament.view.*

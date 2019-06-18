@@ -64,7 +64,6 @@ class MyApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        EmojiCompat.init(BundledEmojiCompatConfig(this))
         StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder().build())
         instance = this
         cicerone = Cicerone.create()
