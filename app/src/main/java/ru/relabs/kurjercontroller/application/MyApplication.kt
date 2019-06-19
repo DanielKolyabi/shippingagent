@@ -9,17 +9,11 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.os.StrictMode
 import androidx.core.content.ContextCompat
-import androidx.emoji.bundled.BundledEmojiCompatConfig
-import androidx.emoji.text.EmojiCompat
 import androidx.room.Room
 import com.google.firebase.iid.FirebaseInstanceId
 import com.yandex.mapkit.MapKitFactory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.BuildConfig
-import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.database.AppDatabase
 import ru.relabs.kurjercontroller.models.GPSCoordinatesModel
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
@@ -40,6 +34,8 @@ class MyApplication : Application() {
         get() = cicerone.router
     val navigatorHolder: NavigatorHolder
         get() = cicerone.navigatorHolder
+
+    var lastRequiredAppVersion = 0
 
     private var locationManager: LocationManager? = null
     var currentLocation = GPSCoordinatesModel(0.0, 0.0, DateTime(0))

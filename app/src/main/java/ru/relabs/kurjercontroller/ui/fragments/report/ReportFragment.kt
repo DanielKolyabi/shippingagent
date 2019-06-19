@@ -120,17 +120,28 @@ class ReportFragment : Fragment() {
     private fun bindDelegates() {
 
         apartmentAdapter.addDelegate(
-            ApartmentDelegate(
-                { apartment, buttonGroup ->
-                    if (isClosed()) return@ApartmentDelegate
-                    presenter.onApartmentButtonGroupChanged(apartment, buttonGroup)
-                },
+            ApartmentMainDelegate(
                 { apartment, newState ->
-                    if (isClosed()) return@ApartmentDelegate
+                    if (isClosed()) return@ApartmentMainDelegate
                     presenter.onApartmentButtonStateChanged(apartment, newState)
                 },
                 { apartment, change ->
-                    if (isClosed()) return@ApartmentDelegate
+                    if (isClosed()) return@ApartmentMainDelegate
+                    presenter.onAllApartmentsButtonStateChanged(apartment, change)
+                },
+                { apartment ->
+                    presenter.onApartmentDescriptionClicked(apartment)
+                }
+            )
+        )
+        apartmentAdapter.addDelegate(
+            ApartmentAdditionDelegate(
+                { apartment, newState ->
+                    if (isClosed()) return@ApartmentAdditionDelegate
+                    presenter.onApartmentButtonStateChanged(apartment, newState)
+                },
+                { apartment, change ->
+                    if (isClosed()) return@ApartmentAdditionDelegate
                     presenter.onAllApartmentsButtonStateChanged(apartment, change)
                 },
                 { apartment ->
@@ -399,7 +410,7 @@ class ReportFragment : Fragment() {
         apartmentAdapter.data.clear()
         apartmentAdapter.data.addAll(
             ((saved?.apartmentFrom ?: entrance.startApartments)..(saved?.apartmentTo ?: entrance.endApartments)).map {
-                ApartmentListModel.Apartment(it, buttonGroup = 0, state = 0)
+                ApartmentListModel.Apartment(it, buttonGroup = taskItem.defaultReportType, state = 0)
             }
         )
         apartmentAdapter.notifyDataSetChanged()
@@ -435,6 +446,7 @@ class ReportFragment : Fragment() {
             appartaments_list?.post {
 
                 apartmentAdapter.notifyDataSetChanged()
+                updateApartmentListTypeButton()
             }
         }
     }
@@ -450,7 +462,9 @@ class ReportFragment : Fragment() {
         mailbox_gap?.setOnClickListener {
             presenter.onEntranceMailboxTypeChanged()
         }
-
+        list_type_button?.setOnClickListener {
+            presenter.onApartmentButtonGroupChanged()
+        }
         close_button?.setOnClickListener {
             context?.showError("Вы действительно хотите закрыть подъезд?", object : ErrorButtonsListener {
                 override fun positiveListener() {
@@ -596,6 +610,18 @@ class ReportFragment : Fragment() {
                 null
             ) else null
         )
+    }
+
+    fun updateApartmentListTypeButton() {
+        val app = apartmentAdapter.data.firstOrNull{ it is ApartmentListModel.Apartment } as? ApartmentListModel.Apartment
+        app ?: return
+        if(app.buttonGroup == 0){
+            list_type_button.text = "Опрос"
+            list_type_button.setSelectButtonActive(false)
+        }else{
+            list_type_button.text = "БезОп"
+            list_type_button.setSelectButtonActive(true)
+        }
     }
 
     companion object {

@@ -15,7 +15,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
+import ru.relabs.kurjercontroller.activity
+import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.network.NetworkHelper
+import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
 
@@ -64,6 +67,14 @@ class LoginFragment : Fragment() {
         }
         login_button?.isEnabled = true
         login_button.setOnClickListener {
+            if(application().lastRequiredAppVersion > BuildConfig.VERSION_CODE){
+                activity()?.showError("Необходимо обновить приложение.", object: ErrorButtonsListener {
+                    override fun positiveListener() {
+                        activity()?.checkUpdates()
+                    }
+                }, "Обновить")
+                return@setOnClickListener
+            }
             if (!NetworkHelper.isNetworkEnabled(context)) {
                 activity?.showError("Необходимо включить передачу данных")
                 return@setOnClickListener

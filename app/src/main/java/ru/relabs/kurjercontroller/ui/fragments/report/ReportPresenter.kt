@@ -321,7 +321,12 @@ class ReportPresenter(val fragment: ReportFragment) {
         }
     }
 
-    fun onApartmentButtonGroupChanged(apartment: Int, buttonGroup: Int) {
+    fun onApartmentButtonGroupChanged() {
+
+        val app = fragment.apartmentAdapter.data.firstOrNull{ it is ApartmentListModel.Apartment } as? ApartmentListModel.Apartment
+        app ?: return
+
+        val buttonGroup = if(app.buttonGroup == 0) 1 else 0
 
         try {
             val data = fragment.apartmentAdapter.data.toList()
@@ -355,6 +360,8 @@ class ReportPresenter(val fragment: ReportFragment) {
                 fragment.entrance,
                 data.mapNotNull { it as? ApartmentListModel.Apartment })
         }
+
+        fragment.updateApartmentListTypeButton()
     }
 
     fun onApartmentButtonStateChanged(apartment: Int, newState: Int) {

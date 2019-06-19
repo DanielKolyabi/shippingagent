@@ -230,6 +230,7 @@ class MainActivity : AppCompatActivity() {
         bgScope.launch(Dispatchers.Main) {
             try {
                 val updateInfo = DeliveryServerAPI.api.getUpdateInfo().await()
+                application().lastRequiredAppVersion = updateInfo?.last_required?.version ?: 0
                 if (updateInfo.last_required.version <= BuildConfig.VERSION_CODE
                     && updateInfo.last_optional.version <= BuildConfig.VERSION_CODE) {
                     loading.setVisible(false)
