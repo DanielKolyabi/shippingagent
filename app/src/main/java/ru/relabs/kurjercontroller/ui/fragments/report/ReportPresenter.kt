@@ -24,7 +24,6 @@ import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.EntrancePhotoModel
 import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
-import ru.relabs.kurjercontroller.ui.fragments.report.holders.ApartmentHolder
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportPhotosListModel
 import java.io.File
@@ -323,10 +322,11 @@ class ReportPresenter(val fragment: ReportFragment) {
 
     fun onApartmentButtonGroupChanged() {
 
-        val app = fragment.apartmentAdapter.data.firstOrNull{ it is ApartmentListModel.Apartment } as? ApartmentListModel.Apartment
+        val app =
+            fragment.apartmentAdapter.data.firstOrNull { it is ApartmentListModel.Apartment } as? ApartmentListModel.Apartment
         app ?: return
 
-        val buttonGroup = if(app.buttonGroup == 0) 1 else 0
+        val buttonGroup = if (app.buttonGroup == 0) 1 else 0
 
         try {
             val data = fragment.apartmentAdapter.data.toList()

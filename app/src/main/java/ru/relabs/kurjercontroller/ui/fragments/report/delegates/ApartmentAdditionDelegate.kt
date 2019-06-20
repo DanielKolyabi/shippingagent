@@ -7,8 +7,6 @@ import ru.relabs.kurjer.ui.delegateAdapter.IAdapterDelegate
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.ui.fragments.report.holders.ApartmentAdditionHolder
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
-import ru.relabs.kurjercontroller.ui.fragments.report.holders.ApartmentHolder
-import ru.relabs.kurjercontroller.ui.fragments.report.holders.ApartmentMainHolder
 
 /**
  * Created by ProOrange on 11.08.2018.

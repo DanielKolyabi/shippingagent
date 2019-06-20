@@ -17,6 +17,7 @@ import ru.relabs.kurjercontroller.database.entities.EntranceReportEntity
 import ru.relabs.kurjercontroller.database.entities.SendQueryItemEntity
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 import ru.relabs.kurjercontroller.network.NetworkHelper
+import ru.relabs.kurjercontroller.ui.activities.MainActivity
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
@@ -32,12 +33,6 @@ class ReportService : Service() {
 
     private fun notification(body: String): Notification {
         val channelId = "controller_notification_channel"
-        val pi = PendingIntent.getService(
-            this,
-            0,
-            Intent(this, ReportService::class.java).apply { putExtra("stopService", true) },
-            PendingIntent.FLAG_CANCEL_CURRENT
-        )
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel =
@@ -52,7 +47,6 @@ class ReportService : Service() {
             .setContentText(body)
             .setSmallIcon(R.drawable.ic_arrow)
             .setWhen(System.currentTimeMillis())
-            .addAction(R.drawable.ic_stop_black_24dp, "Отключить", pi)
             .setChannelId(channelId)
             .setOnlyAlertOnce(true)
             .build()
@@ -65,6 +59,7 @@ class ReportService : Service() {
         }
 
         startForeground(1, notification("Сервис отправки данных."))
+        isRunning = true
 
         val db = MyApplication.instance.database
         var lastTasksChecking = System.currentTimeMillis()
@@ -76,6 +71,11 @@ class ReportService : Service() {
                 if (NetworkHelper.isNetworkAvailable(applicationContext)) {
                     val sendQuery = getSendQuery(db)
                     val reportQuery = getReportQuery(db)
+
+                    if(sendQuery == null && reportQuery == null && !MainActivity.isRunning) {
+                        stopSelf()
+                    }
+
                     if (reportQuery != null) {
                         try {
                             sendReportQuery(db, reportQuery)
@@ -169,6 +169,11 @@ class ReportService : Service() {
     override fun onDestroy() {
         thread?.cancel()
         stopForeground(true)
+        isRunning = false
         super.onDestroy()
+    }
+
+    companion object{
+        var isRunning: Boolean = false
     }
 }

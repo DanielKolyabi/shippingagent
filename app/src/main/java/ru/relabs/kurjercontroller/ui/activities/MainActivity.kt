@@ -18,6 +18,7 @@ import androidx.fragment.app.FragmentTransaction
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.relabs.kurjercontroller.*
 import ru.relabs.kurjercontroller.application.MyApplication
@@ -48,6 +49,8 @@ import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
     val bgScope = CancelableScope(Dispatchers.Main)
+    val serviceCheckingScope = CancelableScope(Dispatchers.Default)
+
     private var needRefreshShowed = false
     private var needForceRefresh = false
 
@@ -389,12 +392,23 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        serviceCheckingScope.launch {
+            while(true){
+                if(!ReportService.isRunning){
+                    startService(Intent(this@MainActivity, ReportService::class.java))
+                }
+                delay(15000)
+            }
+        }
+        isRunning = true
         application().enableLocationListening()
         application().navigatorHolder.setNavigator(navigator)
     }
 
     override fun onPause() {
         super.onPause()
+        serviceCheckingScope.cancel()
+        isRunning = false
         application().disableLocationListening()
         application().navigatorHolder.removeNavigator()
     }
@@ -467,5 +481,9 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.findFragmentByTag("fragment")
                 ?.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
+    }
+
+    companion object{
+        var isRunning: Boolean = false
     }
 }
