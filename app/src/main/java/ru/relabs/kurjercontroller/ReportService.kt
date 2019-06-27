@@ -73,7 +73,9 @@ class ReportService : Service() {
                     val reportQuery = getReportQuery(db)
 
                     if(sendQuery == null && reportQuery == null && !MainActivity.isRunning) {
+                        stopForeground(true)
                         stopSelf()
+                        break
                     }
 
                     if (reportQuery != null) {

@@ -4,7 +4,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
 import ru.relabs.kurjer.ui.delegateAdapter.IAdapterDelegate
-import ru.relabs.kurjercontroller.ui.fragments.yandexMap.YandexMapModel
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.models.YandexMapModel
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.holders.ButtonHolder
 
 class MyPositionDelegate(

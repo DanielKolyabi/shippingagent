@@ -3,11 +3,9 @@ package ru.relabs.kurjercontroller.ui.fragments.yandexMap.holders
 import android.graphics.Color
 import android.view.View
 import android.widget.Button
-import kotlinx.android.synthetic.main.activity_main.view.*
 import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
-import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
-import ru.relabs.kurjercontroller.ui.fragments.yandexMap.YandexMapModel
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.models.YandexMapModel
 
 /**
  * Created by ProOrange on 06.06.2019.

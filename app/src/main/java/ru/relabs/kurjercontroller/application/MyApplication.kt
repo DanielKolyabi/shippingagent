@@ -10,6 +10,8 @@ import android.os.Bundle
 import android.os.StrictMode
 import androidx.core.content.ContextCompat
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.google.firebase.iid.FirebaseInstanceId
 import com.yandex.mapkit.MapKitFactory
 import org.joda.time.DateTime
@@ -64,9 +66,15 @@ class MyApplication : Application() {
         instance = this
         cicerone = Cicerone.create()
         deviceUUID = getOrGenerateDeviceUUID()
+        val migration34_35 = object: Migration(34, 35) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE task_items ADD COLUMN deliveryman_id INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         database = Room
             .databaseBuilder(applicationContext, AppDatabase::class.java, "deliverycontroller")
-            .fallbackToDestructiveMigration()
+            .addMigrations(migration34_35)
             .build()
         tasksRepository = TaskRepository(database)
 //        GlobalScope.launch(Dispatchers.IO) {

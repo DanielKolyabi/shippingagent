@@ -7,12 +7,12 @@ import android.view.ViewGroup
 import androidx.core.graphics.ColorUtils
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.BoundingBox
 import com.yandex.mapkit.geometry.Circle
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
+import com.yandex.mapkit.map.MapObject
 import com.yandex.mapkit.user_location.UserLocationLayer
 import kotlinx.android.synthetic.main.fragment_yandex_map.*
 import kotlinx.coroutines.launch
@@ -22,16 +22,15 @@ import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.AddressModel
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.AddressWithColor
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.ColoredIconProvider
-import ru.relabs.kurjercontroller.ui.fragments.yandexMap.YandexMapModel
-import ru.relabs.kurjercontroller.ui.fragments.yandexMap.delegates.CommonLayerDelegate
-import ru.relabs.kurjercontroller.ui.fragments.yandexMap.delegates.MyPositionDelegate
-import ru.relabs.kurjercontroller.ui.fragments.yandexMap.delegates.PredefinedAddressesLayerDelegate
-import ru.relabs.kurjercontroller.ui.fragments.yandexMap.delegates.TaskLayerDelegate
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.DeliverymanIconProvider
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.delegates.*
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.models.YandexMapModel
 
 abstract class BaseYandexMapFragment : Fragment() {
     private lateinit var userLocationLayer: UserLocationLayer
     abstract val presenter: BaseYandexMapPresenter
     private var onClickCallback: Callback? = null
+    private val deliverymansIcons: MutableList<MapObject> = mutableListOf()
 
     val adapter = DelegateAdapter<YandexMapModel>().apply {
         addDelegate(MyPositionDelegate {
@@ -51,10 +50,13 @@ abstract class BaseYandexMapFragment : Fragment() {
                 presenter.onTaskLayerSelected(it.task)
             }
         })
+        addDelegate(LoadDeliverymansDelegate {
+            presenter.loadDeliverymanPositions()
+        })
     }
 
     private fun setSelectedControlButton(selectedModel: YandexMapModel?) {
-        if(selectedModel is YandexMapModel.MyPosition) return
+        if (selectedModel is YandexMapModel.MyPosition) return
         adapter.data.forEach {
             it.selected = false
         }
@@ -128,9 +130,35 @@ abstract class BaseYandexMapFragment : Fragment() {
         populateControlList()
     }
 
+    fun updateDeliverymanPositions() {
+        deliverymansIcons.forEach {
+            try {
+                mapview.map.mapObjects.remove(it)
+            } catch (e: Exception) {
+            }
+        }
+        deliverymansIcons.clear()
+
+        context?.let { ctx ->
+
+            presenter.deliverymanPositions.forEach {
+                with(mapview.map.mapObjects) {
+                    deliverymansIcons.add(
+                        addPlacemark(
+                            Point(it.lat.toDouble(), it.long.toDouble()),
+                            DeliverymanIconProvider(ctx, it.name)
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     abstract fun onControlListPopulation()
-    fun populateControlList(){
+    fun populateControlList() {
         adapter.data.clear()
+        adapter.data.add(YandexMapModel.MyPosition)
+        adapter.data.add(YandexMapModel.LoadDeliverymans(false))
         onControlListPopulation()
         adapter.notifyDataSetChanged()
         setSelectedControlButton(YandexMapModel.CommonLayer)
@@ -148,6 +176,7 @@ abstract class BaseYandexMapFragment : Fragment() {
             setSelectedControlButton(it)
         }
     }
+
     override fun onStop() {
         super.onStop()
         presenter.bgScope.cancel()
@@ -222,6 +251,15 @@ abstract class BaseYandexMapFragment : Fragment() {
                 14f, 0f, 0f
             )
         )
+    }
+
+    fun setDeliverymanPositionsLoading(loading: Boolean) {
+        val idx = adapter.data.indexOfFirst { it is YandexMapModel.LoadDeliverymans }
+        if (idx < 0) {
+            return
+        }
+        (adapter.data[idx] as? YandexMapModel.LoadDeliverymans)?.loading = loading
+        adapter.notifyItemChanged(idx)
     }
 
     companion object {

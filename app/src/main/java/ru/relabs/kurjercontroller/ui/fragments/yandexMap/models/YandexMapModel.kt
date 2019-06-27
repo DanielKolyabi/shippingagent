@@ -1,4 +1,4 @@
-package ru.relabs.kurjercontroller.ui.fragments.yandexMap
+package ru.relabs.kurjercontroller.ui.fragments.yandexMap.models
 
 import ru.relabs.kurjercontroller.models.TaskModel
 
@@ -13,4 +13,5 @@ sealed class YandexMapModel {
     object CommonLayer : YandexMapModel()
     object PredefinedAddressesLayer : YandexMapModel()
     data class TaskLayer(val task: TaskModel, var loading: Boolean = false) : YandexMapModel()
+    data class LoadDeliverymans(var loading: Boolean = false): YandexMapModel()
 }

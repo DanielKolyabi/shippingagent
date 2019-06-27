@@ -130,6 +130,7 @@ class ReportFragment : Fragment() {
                     presenter.onAllApartmentsButtonStateChanged(apartment, change)
                 },
                 { apartment ->
+                    if (isClosed()) return@ApartmentMainDelegate
                     presenter.onApartmentDescriptionClicked(apartment)
                 }
             )
@@ -145,6 +146,7 @@ class ReportFragment : Fragment() {
                     presenter.onAllApartmentsButtonStateChanged(apartment, change)
                 },
                 { apartment ->
+                    if (isClosed()) return@ApartmentAdditionDelegate
                     presenter.onApartmentDescriptionClicked(apartment)
                 }
             )
@@ -202,7 +204,6 @@ class ReportFragment : Fragment() {
         layout_error_button?.isEnabled = !locked
         lookout?.isEnabled = !locked
         close_button?.isEnabled = !locked
-        user_explanation_input?.isEnabled = !locked
         mailbox_euro?.isEnabled = !locked
         mailbox_gap?.isEnabled = !locked
 

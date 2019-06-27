@@ -7,10 +7,9 @@ import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.ui.activities.showError
-import ru.relabs.kurjercontroller.ui.fragments.TaskItemExplanationScreen
 import ru.relabs.kurjercontroller.ui.fragments.AddressYandexMapScreen
+import ru.relabs.kurjercontroller.ui.fragments.TaskItemExplanationScreen
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.AddressWithColor
-import ru.relabs.kurjercontroller.ui.fragments.yandexMap.AddressYandexMapFragment
 
 class TaskInfoPresenter(val fragment: TaskInfoFragment) {
     val bgScope = CancelableScope(Dispatchers.Default)
@@ -29,13 +28,14 @@ class TaskInfoPresenter(val fragment: TaskInfoFragment) {
     }
 
     fun onShowMapClicked() {
-        if(fragment.task.taskItems.isEmpty()){
+        if (fragment.task.taskItems.isEmpty()) {
             fragment.context?.showError("Адреса не загружены")
             return
         }
         application().router.navigateTo(
             AddressYandexMapScreen(
-                fragment.task.taskItems.map { AddressWithColor(it.address, it.placemarkColor) }
+                fragment.task.taskItems.map { AddressWithColor(it.address, it.placemarkColor) },
+                fragment.task.taskItems.map { it.deliverymanId }
             ) { address ->
                 fragment.targetAddress = address
             }

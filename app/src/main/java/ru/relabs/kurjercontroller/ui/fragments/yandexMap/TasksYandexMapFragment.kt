@@ -13,6 +13,7 @@ import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.base.BaseYandexMapFragment
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.models.YandexMapModel
 
 class TasksYandexMapFragment : BaseYandexMapFragment() {
 
@@ -91,7 +92,6 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
     }
 
     override fun onControlListPopulation() {
-        adapter.data.add(YandexMapModel.MyPosition)
         if (tasks.size > 1) {
             adapter.data.add(YandexMapModel.CommonLayer)
             adapter.data.add(YandexMapModel.PredefinedAddressesLayer)
@@ -111,6 +111,9 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
     }
 
     fun getSelectedLayer(): YandexMapModel? {
+        if(tasks.size == 1){
+            return YandexMapModel.TaskLayer(tasks.first())
+        }
         return adapter.data.firstOrNull { it.selected }
     }
 

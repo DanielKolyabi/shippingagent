@@ -12,6 +12,7 @@ class AddressYandexMapFragment : BaseYandexMapFragment() {
 
     var addressIds: List<AddressIdWithColor> = listOf()
     var addresses: List<AddressWithColor> = listOf()
+    var deliverymanIds: List<Int> = listOf()
     override val presenter = AddressYandexMapPresenter(this)
 
 
@@ -22,6 +23,7 @@ class AddressYandexMapFragment : BaseYandexMapFragment() {
             if (addressIds.size < 2) {
                 savedCameraPosition = null
             }
+            deliverymanIds = it.getIntArray("deliveryman_ids").toList()
         }
     }
 
@@ -35,19 +37,18 @@ class AddressYandexMapFragment : BaseYandexMapFragment() {
         addresses.forEach(::showAddress)
     }
 
-    override fun onControlListPopulation() {
-        adapter.data.add(YandexMapModel.MyPosition)
-    }
+    override fun onControlListPopulation() {}
 
     companion object {
         @JvmStatic
-        fun newInstance(addresses: List<AddressWithColor>) =
+        fun newInstance(addresses: List<AddressWithColor>, deliverymanIds: List<Int>) =
             AddressYandexMapFragment().apply {
                 arguments = Bundle().apply {
                     putParcelableArrayList(
                         "address_ids",
                         ArrayList(addresses.map { AddressIdWithColor(it.address.id, it.color) })
                     )
+                    putIntArray("deliveryman_ids", deliverymanIds.toIntArray())
                 }
             }
     }

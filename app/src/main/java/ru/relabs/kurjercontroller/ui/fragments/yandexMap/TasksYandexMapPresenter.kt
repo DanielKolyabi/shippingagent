@@ -12,8 +12,18 @@ import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 import ru.relabs.kurjercontroller.network.models.FiltersRequest
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.base.BaseYandexMapPresenter
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.models.YandexMapModel
 
 class TasksYandexMapPresenter(override val fragment: TasksYandexMapFragment) : BaseYandexMapPresenter(fragment) {
+    override fun getDeliverymanIDs(): List<Int> {
+        return fragment.tasks
+            .flatMap {
+                it.taskItems
+            }.map {
+                it.deliverymanId
+            }.distinct()
+    }
+
     override fun onPredefinedAddressesLayerSelected() {
         fragment.showPredefinedAddresses()
         fragment.add_button?.setVisible(false)
@@ -77,17 +87,18 @@ class TasksYandexMapPresenter(override val fragment: TasksYandexMapFragment) : B
         }
     }
 
-    fun addNewTaskItems(selectedLayer: YandexMapModel.TaskLayer, newTaskItems: List<TaskItemModel>) = bgScope.launch(Dispatchers.IO) {
-        selectedLayer.task.taskItems.addAll(newTaskItems)
+    fun addNewTaskItems(selectedLayer: YandexMapModel.TaskLayer, newTaskItems: List<TaskItemModel>) =
+        bgScope.launch(Dispatchers.IO) {
+            selectedLayer.task.taskItems.addAll(newTaskItems)
 
-        newTaskItems.forEach {
-            application().tasksRepository.saveTaskItem(it)
-        }
+            newTaskItems.forEach {
+                application().tasksRepository.saveTaskItem(it)
+            }
 
-        withContext(Dispatchers.Main) {
-            fragment.add_button?.isEnabled = true
-            fragment.updateAddButton()
-            fragment.showTask(selectedLayer.task)
+            withContext(Dispatchers.Main) {
+                fragment.add_button?.isEnabled = true
+                fragment.updateAddButton()
+                fragment.showTask(selectedLayer.task)
+            }
         }
-    }
 }

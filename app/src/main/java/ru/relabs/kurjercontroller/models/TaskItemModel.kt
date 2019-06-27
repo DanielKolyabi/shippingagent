@@ -21,7 +21,8 @@ data class TaskItemModel(
     val address: AddressModel,
     val entrances: MutableList<EntranceModel>,
     val notes: List<String>,
-    val closeTime: DateTime? = null
+    val closeTime: DateTime? = null,
+    val deliverymanId: Int
 ) : Parcelable {
     val isClosed: Boolean
         get() = entrances.none { it.state == EntranceModel.CREATED }
@@ -54,9 +55,9 @@ data class TaskItemModel(
             } else {
                 null
             }
-        }
-    ) {
-    }
+        },
+        parcel.readInt()
+    )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(id)
@@ -68,6 +69,7 @@ data class TaskItemModel(
         parcel.writeTypedList(entrances)
         parcel.writeStringList(notes)
         parcel.writeLong(closeTime?.millis ?: -1)
+        parcel.writeInt(deliverymanId)
     }
 
     override fun describeContents(): Int {
@@ -84,7 +86,8 @@ data class TaskItemModel(
             required = required,
             publisherName = publisherName,
             addressId = address.id,
-            closeTime = closeTime
+            closeTime = closeTime,
+            deliverymanId = deliverymanId
         )
 
     companion object CREATOR : Parcelable.Creator<TaskItemModel> {

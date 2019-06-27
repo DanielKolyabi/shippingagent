@@ -1,23 +1,28 @@
 package ru.relabs.kurjercontroller.ui.fragments.yandexMap.holders
 
 import android.view.View
-import android.widget.Button
+import kotlinx.android.synthetic.main.holder_load_deliverymans.view.*
 import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
-import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
+import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.models.YandexMapModel
 
 /**
  * Created by ProOrange on 06.06.2019.
  */
-class ButtonHolder(
+class LoadDeliverymansHolder(
     val view: View,
     val onClicked: (YandexMapModel) -> Unit
 ) : BaseViewHolder<YandexMapModel>(view) {
     override fun onBindViewHolder(item: YandexMapModel) {
-        (view as Button).setSelectButtonActive(item.selected)
+        if (item !is YandexMapModel.LoadDeliverymans) return
 
-        view.setOnClickListener {
-            onClicked(item)
+        view.loading.setVisible(item.loading)
+
+        view.icon.setOnClickListener {
+            if (!item.loading) {
+
+                onClicked(item)
+            }
         }
     }
 }

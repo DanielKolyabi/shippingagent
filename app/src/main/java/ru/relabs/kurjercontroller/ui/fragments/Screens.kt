@@ -76,11 +76,12 @@ class TasksYandexMapScreen(
 
 class AddressYandexMapScreen(
     private val addresses: List<AddressWithColor>,
+    private val deliverymanIds: List<Int>,
     private val onAddressClicked: suspend (address: AddressModel) -> Unit
 ) :
     SupportAppScreen() {
     override fun getFragment(): Fragment {
-        return AddressYandexMapFragment.newInstance(addresses).apply {
+        return AddressYandexMapFragment.newInstance(addresses, deliverymanIds).apply {
             setOnClickCallback(object : BaseYandexMapFragment.Callback {
                 override suspend fun onAddressClicked(address: AddressModel) {
                     this@AddressYandexMapScreen.onAddressClicked(address)

@@ -38,6 +38,11 @@ object DeliveryServerAPI {
                     .withReadTimeout(120, TimeUnit.SECONDS)
                     .withWriteTimeout(120, TimeUnit.SECONDS)
                     .proceed(request)
+            } else if (request.url().toString().matches(Regex(".*/api/v1/request_coords.*"))) {
+                return chain.withConnectTimeout(5, TimeUnit.SECONDS)
+                    .withReadTimeout(25, TimeUnit.SECONDS)
+                    .withWriteTimeout(5, TimeUnit.SECONDS)
+                    .proceed(request)
             } else if (request.url().toString().matches(Regex(".*/api/v1/controller/tasks.*"))) {
                 return chain.withConnectTimeout(5, TimeUnit.SECONDS)
                     .withReadTimeout(7, TimeUnit.MINUTES)
@@ -111,6 +116,9 @@ object DeliveryServerAPI {
 
         @GET("api/v1/controller/update")
         fun getUpdateInfo(): Deferred<UpdateInfoResponse>
+
+        @GET("api/v1/request_coords")
+        fun requestUserPosition(@Query("user_id") id: Int): Deferred<UserLocationsResponse>
 
         @POST("api/v1/coords")
         fun sendGPS(@Query("token") token: String, @Query("lat") lat: Double, @Query("long") long: Double, @Query("time") time: String): Deferred<StatusResponse>

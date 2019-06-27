@@ -21,7 +21,10 @@ data class TaskItemResponseModel(
     val entrances: List<EntranceResponseModel>,
 
     @SerializedName("note")
-    val notes: List<String>
+    val notes: List<String>,
+
+    @SerializedName("deliveryman_id")
+    val deliverymanId: Int
 ) {
     fun toModel(): TaskItemModel {
         return TaskItemModel(
@@ -33,7 +36,8 @@ data class TaskItemResponseModel(
             notes = notes,
             entrances = entrances.map { it.toModel() }.toMutableList(),
             address = address.toModel(),
-            closeTime = closeTime?.let { DateTime(it) }
+            closeTime = closeTime?.let { DateTime(it) },
+            deliverymanId = deliverymanId
         )
     }
 

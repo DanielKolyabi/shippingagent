@@ -36,7 +36,9 @@ data class TaskItemEntity(
     val addressId: Int,
     val notes: List<String>,
     @ColumnInfo(name = "close_time")
-    val closeTime: DateTime?
+    val closeTime: DateTime?,
+    @ColumnInfo(name = "deliveryman_id")
+    val deliverymanId: Int
 ) {
     suspend fun toModel(repository: TaskRepository): TaskItemModel = withContext(Dispatchers.IO) {
         return@withContext TaskItemModel(
@@ -48,7 +50,8 @@ data class TaskItemEntity(
             publisherName = publisherName,
             address = repository.db.addressDao().getById(addressId)?.toModel() ?: AddressModel.blank(),
             entrances = repository.db.entranceDao().getByTaskItemId(taskId, taskItemId).map { it.toModel() }.toMutableList(),
-            closeTime = closeTime
+            closeTime = closeTime,
+            deliverymanId = deliverymanId
         )
     }
 }

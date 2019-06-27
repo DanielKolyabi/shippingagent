@@ -76,7 +76,8 @@ class AddressListPresenter(val fragment: AddressListFragment) {
                         item.address,
                         item.placemarkColor
                     )
-                )
+                ),
+                listOf(item.deliverymanId)
             ) {
                 return@AddressYandexMapScreen
             })
