@@ -26,7 +26,6 @@ data class TaskEntity(
     val startControlDate: DateTime,
     @ColumnInfo(name = "end_control_date")
     val endControlDate: DateTime,
-    val storages: List<String>,
     val description: String,
     val state: Int,
     val iteration: Int,
@@ -45,7 +44,7 @@ data class TaskEntity(
             endControlDate = endControlDate,
             startControlDate = startControlDate,
             state = state,
-            storages = storages,
+            storages = repository.db.taskStorageDao().getByTaskId(id).map { it.toModel() },
             taskFilters = repository.loadTaskFilters(id),
             publishers = repository.db.taskPublisherDao().getByTaskId(id).map { it.toModel() },
             taskItems = repository.db.taskItemDao().getByTaskId(id).map { it.toModel(repository) }.toMutableList(),

@@ -34,7 +34,7 @@ class InfoTableInfoHolder(itemView: View) : BaseViewHolder<TaskInfoModel>(itemVi
                 )
             }.joinToString("\n")
 
-            storage_text.text = task.storages.joinToString { "$it; " }
+            storage_text.text = task.storages.joinToString { "${it.address}; " }
             description_text.text = task.description
         }
     }

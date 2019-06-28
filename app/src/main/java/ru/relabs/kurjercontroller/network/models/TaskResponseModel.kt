@@ -25,7 +25,7 @@ data class TaskResponseModel(
 
     val items: List<TaskItemResponseModel>,
     val publishers: List<TaskPublisherResponseModel>,
-    val storages: List<String>,
+    val storages: List<StorageResponseModel>,
     val filters: FiltersResponseModel,
     val filtered: Boolean
 ) {
@@ -38,9 +38,9 @@ data class TaskResponseModel(
             description = description,
             initiator = initiator,
             userId = userId,
-            storages = storages,
+            storages = storages.map { it.toModel() },
             taskItems = items.map { it.toModel() }.toMutableList(),
-            publishers = publishers.map{it.toModel()},
+            publishers = publishers.map { it.toModel() },
             taskFilters = filters.toModel(),
             iteration = iteration,
             firstExaminedDeviceId = firstExaminedDeviceId,

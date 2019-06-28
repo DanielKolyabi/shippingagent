@@ -98,6 +98,7 @@ class TaskRepository(val db: AppDatabase) {
             val newTaskId = db.taskDao().insert(task.toEntity())
             Log.d("merge", "Add task ID: $newTaskId")
             var openedEntrances = 0
+            db.taskStorageDao().insertAll(task.storages.map { it.toEntity(task.id) })
             db.taskPublisherDao().insertAll(task.publishers.map { it.toEntity() })
             if (!task.filtered) {
                 task.taskItems.forEach { item ->
@@ -159,6 +160,7 @@ class TaskRepository(val db: AppDatabase) {
             ) {
 
                 db.taskDao().update(task.toEntity())
+                db.taskStorageDao().insertAll(task.storages.map { it.toEntity(task.id) })
                 db.taskPublisherDao().insertAll(task.publishers.map { it.toEntity() })
                 task.taskItems.forEach { taskItem ->
                     db.addressDao().insert(taskItem.address.toEntity())
@@ -507,10 +509,10 @@ class TaskRepository(val db: AppDatabase) {
             return@withContext availableEntranceEuroKeys
         }
 
-    suspend fun saveTaskItem(taskItem: TaskItemModel) = withContext(Dispatchers.IO){
+    suspend fun saveTaskItem(taskItem: TaskItemModel) = withContext(Dispatchers.IO) {
         db.addressDao().insert(taskItem.address.toEntity())
         db.taskItemDao().insert(taskItem.toEntity())
-        db.entranceDao().insertAll(taskItem.entrances.map{it.toEntity(taskItem.taskId, taskItem.id)})
+        db.entranceDao().insertAll(taskItem.entrances.map { it.toEntity(taskItem.taskId, taskItem.id) })
     }
 
     suspend fun reloadFilteredTaskItems(token: String, task: TaskModel): TaskModel = withContext(Dispatchers.IO) {
@@ -540,6 +542,7 @@ class TaskRepository(val db: AppDatabase) {
 
         //INSERT NEW
         db.taskPublisherDao().insertAll(newTask.publishers.map { it.toEntity() })
+        db.taskStorageDao().insertAll(newTask.storages.map { it.toEntity(newTask.id) })
         db.addressDao().insertAll(newTask.taskItems.map { it.address.toEntity() })
         db.taskItemDao().insertAll(newTask.taskItems.map { it.toEntity() })
         newTask.taskItems.forEach { taskItem ->
@@ -577,7 +580,6 @@ class TaskRepository(val db: AppDatabase) {
             firstExaminedDeviceId = null,
             iteration = 0,
             state = TaskModel.STARTED.toSiriusState(),
-            storages = listOf(),
             isOnline = true
         )
         val taskId = db.taskDao().insert(entity)
@@ -596,15 +598,14 @@ class TaskRepository(val db: AppDatabase) {
         return@withContext entity.toModel(this@TaskRepository)
     }
 
-    suspend fun isMergeNeeded(newTasks: List<TaskModel>): Boolean = withContext(Dispatchers.IO){
+    suspend fun isMergeNeeded(newTasks: List<TaskModel>): Boolean = withContext(Dispatchers.IO) {
         val savedTasksIDs = db.taskDao().all.map { it.id }
         val newTasksIDs = newTasks.map { it.id }
-        val appearedTasks = mutableListOf<TaskModel>()
 
-        db.taskDao().all.filter { it.id !in newTasksIDs && !it.isOnline }.forEach { task ->
+        db.taskDao().all.filter { it.id !in newTasksIDs && !it.isOnline }.forEach {
             return@withContext true
         }
-        newTasks.filter { it.id !in savedTasksIDs }.forEach { task ->
+        newTasks.filter { it.id !in savedTasksIDs }.forEach {
             return@withContext true
         }
         newTasks.filter { it.id in savedTasksIDs }.forEach { task ->

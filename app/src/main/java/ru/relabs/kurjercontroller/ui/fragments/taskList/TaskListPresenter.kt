@@ -6,10 +6,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.CancelableScope
+import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.TaskFiltersModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.models.toAndroidState
+import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.activities.showErrorAsync
@@ -170,8 +172,7 @@ class TaskListPresenter(val fragment: TaskListFragment) {
 
     }
 
-    fun onOnlineClicked() {
-        bgScope.launch(Dispatchers.Main) {
+    suspend fun startOnline() = withContext(Dispatchers.Main){
             val exists = application().tasksRepository.isOnlineTaskExists()
             if (exists) {
                 val idx = fragment.adapter.data.indexOfFirst {
@@ -180,12 +181,12 @@ class TaskListPresenter(val fragment: TaskListFragment) {
                 val holderView = fragment.tasks_list?.findViewHolderForAdapterPosition(idx) as? TaskHolder
                 holderView?.setSelected()
                 updateStartButton()
-                return@launch
+                return@withContext
             }
             val token = application().user.getUserCredentials()?.token
             if (token == null) {
                 fragment.context?.showError("Произошла ошибка")
-                return@launch
+                return@withContext
             }
 
             application().router.navigateTo(
@@ -194,6 +195,28 @@ class TaskListPresenter(val fragment: TaskListFragment) {
                     onOnlineFiltersReceived(it, token)
                 }
             )
+    }
+
+    fun onOnlineClicked() {
+        fragment.online_button?.isEnabled = false
+        val token = application().user.getUserCredentials()?.token ?: return
+        bgScope.launch(Dispatchers.IO) {
+            val hasAccess = try {
+                DeliveryServerAPI.api.hasOnlineAccess(token).await().status
+            }catch (e: Exception){
+                fragment.activity()?.showErrorAsync("Не удалось проверить права.")
+                return@launch
+            }finally {
+                withContext(Dispatchers.Main){
+                    fragment.online_button?.isEnabled = true
+                }
+            }
+
+            if(!hasAccess){
+                fragment.activity()?.showErrorAsync("У вас нет прав на составление заданий.")
+            }else{
+                startOnline()
+            }
         }
     }
 

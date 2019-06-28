@@ -77,7 +77,8 @@ class AddressListPresenter(val fragment: AddressListFragment) {
                         item.placemarkColor
                     )
                 ),
-                listOf(item.deliverymanId)
+                listOf(item.deliverymanId),
+                fragment.tasks.firstOrNull { it.id == item.taskId }?.storages ?: listOf()
             ) {
                 return@AddressYandexMapScreen
             })
@@ -190,9 +191,6 @@ class AddressListPresenter(val fragment: AddressListFragment) {
     }
 
     fun onMapClicked() {
-        var colorIdx = 0
-        var lastTaskId = 0
-
         application().router.navigateTo(
             TasksYandexMapScreen(
                 fragment.tasks,

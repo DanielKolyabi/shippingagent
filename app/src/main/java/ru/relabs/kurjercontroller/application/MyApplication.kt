@@ -10,8 +10,6 @@ import android.os.Bundle
 import android.os.StrictMode
 import androidx.core.content.ContextCompat
 import androidx.room.Room
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.google.firebase.iid.FirebaseInstanceId
 import com.yandex.mapkit.MapKitFactory
 import org.joda.time.DateTime
@@ -66,15 +64,10 @@ class MyApplication : Application() {
         instance = this
         cicerone = Cicerone.create()
         deviceUUID = getOrGenerateDeviceUUID()
-        val migration34_35 = object: Migration(34, 35) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("ALTER TABLE task_items ADD COLUMN deliveryman_id INTEGER NOT NULL DEFAULT 0")
-            }
-        }
 
         database = Room
             .databaseBuilder(applicationContext, AppDatabase::class.java, "deliverycontroller")
-            .addMigrations(migration34_35)
+            .fallbackToDestructiveMigration()
             .build()
         tasksRepository = TaskRepository(database)
 //        GlobalScope.launch(Dispatchers.IO) {
@@ -103,17 +96,16 @@ class MyApplication : Application() {
 
     fun getOrGenerateDeviceUUID(): String {
         val sharedPreferences = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
-        var deviceUUID = sharedPreferences.getString(
-            "device_uuid", "unknown"
-        )
 
-        if (deviceUUID == "unknown") {
-            deviceUUID = UUID.randomUUID().toString()
+        return sharedPreferences.getString(
+            "device_uuid", "unknown"
+        ).takeIf { it != "unknown" } ?: run {
+            val uuid = UUID.randomUUID().toString()
             sharedPreferences.edit()
-                .putString("device_uuid", deviceUUID)
+                .putString("device_uuid", uuid)
                 .apply()
+            return@run uuid
         }
-        return deviceUUID
     }
 
     fun disableLocationListening() {

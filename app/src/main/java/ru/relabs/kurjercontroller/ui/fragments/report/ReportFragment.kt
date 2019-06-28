@@ -167,11 +167,11 @@ class ReportFragment : Fragment() {
             if (!isPhotoAvailable()) return@ReportPhotoDelegate
             presenter.onRemovePhotoClicked(holder)
         })
-        photosAdapter.addDelegate(ReportBlankPhotoDelegate { holder ->
+        photosAdapter.addDelegate(ReportBlankPhotoDelegate {
             if (!isPhotoAvailable()) return@ReportBlankPhotoDelegate
             presenter.onBlankPhotoClicked()
         })
-        photosAdapter.addDelegate(ReportBlankMultiPhotoDelegate { holder ->
+        photosAdapter.addDelegate(ReportBlankMultiPhotoDelegate {
             if (!isPhotoAvailable()) return@ReportBlankMultiPhotoDelegate
             presenter.onBlankMultiPhotoClicked()
         })
@@ -513,7 +513,7 @@ class ReportFragment : Fragment() {
             }
         })
 
-        appartaments_from?.setOnEditorActionListener { v, actionId, event ->
+        appartaments_from?.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH ||
                 actionId == EditorInfo.IME_ACTION_DONE ||
                 actionId == EditorInfo.IME_ACTION_NEXT ||
@@ -531,13 +531,13 @@ class ReportFragment : Fragment() {
             }
             return@setOnEditorActionListener false
         }
-        appartaments_from?.setOnFocusChangeListener { view, hasFocus ->
+        appartaments_from?.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 appartaments_from?.setText((saved?.apartmentFrom ?: entrance.startApartments).toString())
             }
         }
 
-        appartaments_to?.setOnEditorActionListener { v, actionId, event ->
+        appartaments_to?.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH ||
                 actionId == EditorInfo.IME_ACTION_DONE ||
                 actionId == EditorInfo.IME_ACTION_NEXT ||

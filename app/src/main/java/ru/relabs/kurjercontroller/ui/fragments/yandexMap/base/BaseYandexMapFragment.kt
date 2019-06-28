@@ -106,6 +106,24 @@ abstract class BaseYandexMapFragment : Fragment() {
         }
     }
 
+    fun showStorage(lat: Double, long: Double){
+        val ctx = context ?: return
+        val color = resources.getColor(R.color.black)
+
+        mapview.map.mapObjects
+            .addPlacemark(
+                Point(lat, long),
+                ColoredIconProvider(ctx, color)
+            )
+
+        mapview.map.mapObjects.addCircle(
+            Circle(Point(lat, long), 20f),
+            color,
+            2f,
+            ColorUtils.setAlphaComponent(color, 80)
+        )
+    }
+
     fun clearMap() {
         mapview.map.mapObjects.clear()
     }

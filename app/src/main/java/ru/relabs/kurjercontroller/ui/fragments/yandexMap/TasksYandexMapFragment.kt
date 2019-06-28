@@ -146,6 +146,10 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
 
         showedAddresses = addresses + newAddresses
         showedAddresses.forEach(::showAddress)
+
+        task.storages.forEach {
+            showStorage(it.lat.toDouble(), it.long.toDouble())
+        }
     }
 
     fun focusShowedAddresses() {

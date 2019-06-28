@@ -2,6 +2,7 @@ package ru.relabs.kurjercontroller.ui.fragments.yandexMap
 
 import android.os.Bundle
 import android.view.View
+import ru.relabs.kurjercontroller.models.StorageModel
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.base.BaseYandexMapFragment
 
 class AddressYandexMapFragment : BaseYandexMapFragment() {
@@ -13,6 +14,7 @@ class AddressYandexMapFragment : BaseYandexMapFragment() {
     var addressIds: List<AddressIdWithColor> = listOf()
     var addresses: List<AddressWithColor> = listOf()
     var deliverymanIds: List<Int> = listOf()
+    var storages: List<StorageModel> = listOf()
     override val presenter = AddressYandexMapPresenter(this)
 
 
@@ -24,6 +26,7 @@ class AddressYandexMapFragment : BaseYandexMapFragment() {
                 savedCameraPosition = null
             }
             deliverymanIds = it.getIntArray("deliveryman_ids").toList()
+            storages = it.getParcelableArrayList<StorageModel>("storages")?.toList() ?: listOf()
         }
     }
 
@@ -35,18 +38,25 @@ class AddressYandexMapFragment : BaseYandexMapFragment() {
 
     fun showAddresses() {
         addresses.forEach(::showAddress)
+        storages.forEach{
+            showStorage(it.lat.toDouble(), it.long.toDouble())
+        }
     }
 
     override fun onControlListPopulation() {}
 
     companion object {
         @JvmStatic
-        fun newInstance(addresses: List<AddressWithColor>, deliverymanIds: List<Int>) =
+        fun newInstance(addresses: List<AddressWithColor>, deliverymanIds: List<Int>, storages: List<StorageModel>) =
             AddressYandexMapFragment().apply {
                 arguments = Bundle().apply {
                     putParcelableArrayList(
                         "address_ids",
                         ArrayList(addresses.map { AddressIdWithColor(it.address.id, it.color) })
+                    )
+                    putParcelableArrayList(
+                        "storages",
+                        ArrayList(storages)
                     )
                     putIntArray("deliveryman_ids", deliverymanIds.toIntArray())
                 }

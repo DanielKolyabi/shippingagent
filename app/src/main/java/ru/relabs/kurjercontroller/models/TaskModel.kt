@@ -37,7 +37,7 @@ data class TaskModel(
     val startControlDate: DateTime,
     val endControlDate: DateTime,
     val description: String,
-    val storages: List<String>,
+    val storages: List<StorageModel>,
     val publishers: List<PublisherModel>,
     val taskItems: MutableList<TaskItemModel>,
     val taskFilters: TaskFiltersModel,
@@ -64,7 +64,6 @@ data class TaskModel(
         TaskEntity(
             id = id,
             state = state,
-            storages = storages,
             userId = userId,
             initiator = initiator,
             description = description,
@@ -83,10 +82,10 @@ data class TaskModel(
         DateTime.parse(parcel.readString()),
         DateTime.parse(parcel.readString()),
         parcel.readString().orEmpty(),
-        parcel.createStringArrayList().orEmpty(),
+        parcel.createTypedArrayList(StorageModel).orEmpty(),
         parcel.createTypedArrayList(PublisherModel).orEmpty(),
         parcel.createTypedArrayList(TaskItemModel).orEmpty().toMutableList(),
-        parcel.readParcelable(TaskFiltersModel::class.java.classLoader),
+        parcel.readParcelable(TaskFiltersModel::class.java.classLoader) ?: TaskFiltersModel.blank(),
         parcel.readInt(),
         parcel.readInt(),
         parcel.readString().orEmpty(),
@@ -102,7 +101,7 @@ data class TaskModel(
         parcel.writeString(startControlDate.toString())
         parcel.writeString(endControlDate.toString())
         parcel.writeString(description)
-        parcel.writeStringList(storages)
+        parcel.writeTypedList(storages)
         parcel.writeTypedList(publishers)
         parcel.writeTypedList(taskItems)
         parcel.writeParcelable(taskFilters, flags)

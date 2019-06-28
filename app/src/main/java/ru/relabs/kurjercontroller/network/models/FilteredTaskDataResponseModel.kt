@@ -10,7 +10,7 @@ data class FilteredTaskDataResponseModel(
 
     val items: List<TaskItemResponseModel>,
     val publishers: List<TaskPublisherResponseModel>,
-    val storages: List<String>
+    val storages: List<StorageResponseModel>
 ) {
     fun toModel(filteredTask: TaskModel): TaskModel {
         return TaskModel(
@@ -21,7 +21,7 @@ data class FilteredTaskDataResponseModel(
             description = filteredTask.description,
             initiator = filteredTask.initiator,
             userId = filteredTask.userId,
-            storages = storages,
+            storages = storages.map { it.toModel() },
             taskItems = items.map { it.copy(taskId = filteredTask.id).toModel() }.toMutableList(),
             publishers = publishers.map { it.copy(taskId = filteredTask.id).toModel() },
             taskFilters = filteredTask.taskFilters,

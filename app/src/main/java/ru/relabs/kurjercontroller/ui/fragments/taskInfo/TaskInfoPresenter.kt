@@ -35,7 +35,8 @@ class TaskInfoPresenter(val fragment: TaskInfoFragment) {
         application().router.navigateTo(
             AddressYandexMapScreen(
                 fragment.task.taskItems.map { AddressWithColor(it.address, it.placemarkColor) },
-                fragment.task.taskItems.map { it.deliverymanId }
+                fragment.task.taskItems.map { it.deliverymanId },
+                fragment.task.storages
             ) { address ->
                 fragment.targetAddress = address
             }

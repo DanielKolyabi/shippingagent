@@ -91,9 +91,8 @@ object DeliveryServerAPI {
         @POST("api/v1/controller/auth")
         @FormUrlEncoded
         fun login(
-            @Field("login") login: String, @Field("password") password: String, @Field("device_id") deviceId: String, @Field(
-                "current_time"
-            ) currentTime: String
+            @Field("login") login: String, @Field("password") password: String, @Field("device_id") deviceId: String,
+            @Field("current_time") currentTime: String
         ): Deferred<AuthResponseModel>
 
         @POST("api/v1/controller/auth/token")
@@ -141,6 +140,9 @@ object DeliveryServerAPI {
 
         @POST("api/v1/controller/tasks/filtered")
         fun getFilteredTaskItems(@Query("token") token: String, @Body req: FiltersRequest): Deferred<FilteredTaskDataResponseModel>
+
+        @GET("api/v1/controller/has_online")
+        fun hasOnlineAccess(@Query("token") token: String): Deferred<StatusResponse>
     }
 
     val api = retrofit.create(IDeliveryServerAPI::class.java)
