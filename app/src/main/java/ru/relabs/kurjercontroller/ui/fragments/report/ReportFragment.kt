@@ -32,6 +32,7 @@ import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
+import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.*
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportPhotosListModel
@@ -79,7 +80,6 @@ class ReportFragment : Fragment() {
             activity?.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
         )
         showHintText(taskItem.notes)
-        updateApartmentListBackground(0)
 
         hint_container.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
 
@@ -241,6 +241,7 @@ class ReportFragment : Fragment() {
         val isEmpty = photosAdapter.data.none { it is ReportPhotosListModel.TaskItemPhoto }
         appartaments_from?.isEnabled = !isEmpty
         appartaments_to?.isEnabled = !isEmpty
+        lock_input_overlay?.setVisible(isEmpty)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -453,6 +454,9 @@ class ReportFragment : Fragment() {
     }
 
     private fun bindControl() {
+        lock_input_overlay?.setOnClickListener {
+            presenter.onBlankPhotoClicked()
+        }
         entrance_closed?.setOnClickListener {
             presenter.onIsEntranceClosedChanged()
         }
@@ -651,6 +655,7 @@ class ReportFragment : Fragment() {
             list_type_button.text = "БезОп"
             list_type_button.setSelectButtonActive(true)
         }
+        updateApartmentListBackground(app.buttonGroup)
     }
 
     companion object {

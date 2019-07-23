@@ -60,6 +60,18 @@
             tools:text="100"/>
 
 
+    <View
+            android:id="@+id/lock_input_overlay"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toStartOf="@id/appartaments_label"
+            app:layout_constraintEnd_toEndOf="@id/appartaments_to"
+            app:layout_constraintTop_toTopOf="@id/appartaments_from"
+            app:layout_constraintBottom_toBottomOf="@id/appartaments_from"
+            android:background="@drawable/bg_photo_need_button"
+            android:focusable="true"
+            android:clickable="true"/>
+
     <TextView
             android:id="@+id/floors_label"
             android:layout_width="wrap_content"
