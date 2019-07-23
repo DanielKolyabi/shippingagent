@@ -534,6 +534,8 @@ class ReportFragment : Fragment() {
         appartaments_from?.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 appartaments_from?.setText((saved?.apartmentFrom ?: entrance.startApartments).toString())
+            }else{
+                hintHelper.setHintExpanded(false)
             }
         }
 
@@ -558,6 +560,8 @@ class ReportFragment : Fragment() {
         appartaments_to?.setOnFocusChangeListener { view, hasFocus ->
             if (!hasFocus) {
                 appartaments_to?.setText((saved?.apartmentTo ?: entrance.endApartments).toString())
+            }else{
+                hintHelper.setHintExpanded(false)
             }
         }
 
@@ -575,6 +579,30 @@ class ReportFragment : Fragment() {
         }
         lookout?.setOnClickListener {
             presenter.onLookoutChanged()
+        }
+
+        appartaments_to?.setOnClickListener {
+            hintHelper.setHintExpanded(false)
+        }
+        appartaments_from?.setOnClickListener {
+            hintHelper.setHintExpanded(false)
+        }
+        floors?.setOnClickListener {
+            hintHelper.setHintExpanded(false)
+        }
+        floors?.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                hintHelper.setHintExpanded(false)
+            }
+        }
+
+        entrance_code?.setOnClickListener {
+            hintHelper.setHintExpanded(false)
+        }
+        entrance_code?.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                hintHelper.setHintExpanded(false)
+            }
         }
     }
 

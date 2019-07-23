@@ -54,13 +54,14 @@ class HintHelper(
     }
 
     fun changeState() {
-        setHintExpanded(expanded)
-        expanded = !expanded
+        setHintExpanded(!expanded)
     }
 
 
-    private fun setHintExpanded(expanded: Boolean) {
-        val anim = if (expanded) getCollapseHintAnimation() else getExpandHintAnimation()
+    fun setHintExpanded(expanded: Boolean) {
+        if(expanded == this.expanded) return
+        this.expanded = expanded
+        val anim = if (expanded) getExpandHintAnimation() else getCollapseHintAnimation()
         hintContainer.startAnimation(anim.apply {
             duration = 250
         })

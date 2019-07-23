@@ -259,6 +259,7 @@ class MainActivity : AppCompatActivity() {
                 override fun positiveListener() {
                     try {
                         Log.d("updates", "Try install from ${updateInfo.url}")
+                        loading.setVisible(true)
                         installUpdate(URL(updateInfo.url))
                     } catch (e: Exception) {
                         e.printStackTrace()
