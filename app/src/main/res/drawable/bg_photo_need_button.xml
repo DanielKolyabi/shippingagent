@@ -13,6 +13,6 @@
     <item
             android:top="4dp"
             android:bottom="4dp">
-        <bitmap android:src="@drawable/ic_single_photo" android:gravity="center"/>
+        <bitmap android:src="@drawable/ic_single_photo_gray" android:gravity="center"/>
     </item>
 </layer-list>
