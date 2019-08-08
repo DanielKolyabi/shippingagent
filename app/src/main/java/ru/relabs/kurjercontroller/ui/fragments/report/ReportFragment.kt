@@ -37,6 +37,7 @@ import ru.relabs.kurjercontroller.ui.fragments.report.delegates.*
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportPhotosListModel
 import ru.relabs.kurjercontroller.ui.helpers.HintHelper
+import java.util.*
 
 /**
  * Created by ProOrange on 15.04.2019.
@@ -614,6 +615,9 @@ class ReportFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        savedInstanceState?.getString("photoUUID")?.let{
+            presenter.photoUUID = UUID.fromString(it)
+        }
         return inflater.inflate(R.layout.fragment_report, container, false)
     }
 
@@ -623,6 +627,14 @@ class ReportFragment : Fragment() {
             task = it.getParcelable("task")
             taskItem = it.getParcelable("task_item")
             entrance = it.getParcelable("entrance")
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        presenter.photoUUID?.let{
+            outState.putString("photoUUID", it.toString())
         }
     }
 

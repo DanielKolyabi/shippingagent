@@ -36,7 +36,7 @@ import java.util.*
 const val REQUEST_PHOTO = 1
 
 class ReportPresenter(val fragment: ReportFragment) {
-    lateinit var photoUUID: UUID
+    var photoUUID: UUID? = null
     var photoMultiMode: Boolean = false
 
     fun onBlankMultiPhotoClicked() {
@@ -48,9 +48,10 @@ class ReportPresenter(val fragment: ReportFragment) {
     }
 
     private fun requestPhoto(multiPhoto: Boolean = true) {
-        photoUUID = UUID.randomUUID()
+        val uuid = UUID.randomUUID()
+        photoUUID = uuid
         photoMultiMode = multiPhoto
-        val photoFile = PathHelper.getEntrancePhotoFile(fragment.taskItem, fragment.entrance, photoUUID)
+        val photoFile = PathHelper.getEntrancePhotoFile(fragment.taskItem, fragment.entrance, uuid)
 
         val intent: Intent? = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         intent?.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile))
@@ -72,7 +73,7 @@ class ReportPresenter(val fragment: ReportFragment) {
                 }
                 return false
             }
-            val photoFile = PathHelper.getEntrancePhotoFile(fragment.taskItem, fragment.entrance, photoUUID)
+            val photoFile = PathHelper.getEntrancePhotoFile(fragment.taskItem, fragment.entrance, photoUUID ?: UUID.randomUUID())
             if (photoFile.exists()) {
                 saveNewPhoto(photoFile.absolutePath)
                 return true
@@ -109,7 +110,7 @@ class ReportPresenter(val fragment: ReportFragment) {
     }
 
     private fun saveNewPhoto(bmp: Bitmap?): File? {
-        val photoFile = PathHelper.getEntrancePhotoFile(fragment.taskItem, fragment.entrance, photoUUID)
+        val photoFile = PathHelper.getEntrancePhotoFile(fragment.taskItem, fragment.entrance, photoUUID ?: UUID.randomUUID())
         if (bmp != null) {
             val photo: Bitmap
             try {
