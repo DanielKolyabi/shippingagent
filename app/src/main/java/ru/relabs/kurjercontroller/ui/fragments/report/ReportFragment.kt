@@ -72,6 +72,7 @@ class ReportFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        entrance_code?.transformationMethod = null
         defaultButtonBackground = mailbox_euro?.background
 
         hintHelper = HintHelper(
