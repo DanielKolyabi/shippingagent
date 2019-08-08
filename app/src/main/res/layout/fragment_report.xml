@@ -60,7 +60,7 @@
             tools:text="100"/>
 
 
-    <View
+    <ImageView
             android:id="@+id/lock_input_overlay"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -68,7 +68,7 @@
             app:layout_constraintEnd_toEndOf="@id/appartaments_to"
             app:layout_constraintTop_toTopOf="@id/appartaments_from"
             app:layout_constraintBottom_toBottomOf="@id/appartaments_from"
-            android:background="@drawable/bg_photo_need_button"
+            android:src="@drawable/ic_single_photo_gray"
             android:focusable="true"
             android:clickable="true"/>
 
@@ -113,7 +113,6 @@
             android:gravity="start"
             android:textSize="18sp"
             tools:text="к196к7112"
-            android:inputType="phone"
             android:maxLines="2"
             app:layout_constraintStart_toEndOf="@+id/entrance_code_label"
             app:layout_constraintTop_toTopOf="@id/entrance_code_label"
