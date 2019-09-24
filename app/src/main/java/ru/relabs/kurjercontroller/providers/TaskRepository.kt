@@ -736,6 +736,13 @@ class TaskRepository(val db: AppDatabase) {
                 || (task.state != savedTask.state && savedTask.state.toAndroidState() != TaskModel.STARTED)
             ) {
                 return@withContext true
+            } else {
+                task.taskItems.forEach { taskItem ->
+                    val savedItem = db.taskItemDao().getByTaskItemId(taskItem.taskId, taskItem.id)
+                    if(savedItem != null && savedItem.closeTime == null && taskItem.closeTime != null){
+                        return@withContext true
+                    }
+                }
             }
         }
         return@withContext false
