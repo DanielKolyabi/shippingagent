@@ -60,6 +60,13 @@ data class AddressModel(
             gpsLong = long
         )
 
+    override fun equals(other: Any?): Boolean {
+        if(other is AddressModel){
+            return this.id == other.id
+        }
+        return super.equals(other)
+    }
+
     companion object CREATOR : Parcelable.Creator<AddressModel> {
         override fun createFromParcel(parcel: Parcel): AddressModel {
             return AddressModel(parcel)

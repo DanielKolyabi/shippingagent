@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.joda.time.DateTime
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
@@ -33,7 +34,6 @@ import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressList
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListSortingDelegate
 import ru.relabs.kurjercontroller.ui.fragments.addressList.delegates.AddressListTaskItemDelegate
 import ru.relabs.kurjercontroller.ui.fragments.addressList.holders.AddressListAddressHolder
-import ru.relabs.kurjercontroller.ui.fragments.addressList.holders.AddressListTaskItemHolder
 import ru.relabs.kurjercontroller.ui.helpers.HintHelper
 
 /**
@@ -46,6 +46,26 @@ class AddressListFragment : Fragment(), ISearchableFragment {
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             intent ?: return
+
+            val updatedId = intent.getIntExtra("task_item_id_closed_by_deliveryman", -1)
+            val updatedDateTime = intent.getLongExtra("task_item_date_closed_by_deliveryman", -1)
+            if (updatedId > 0 && updatedDateTime > 0) {
+                tasks.forEach {
+                    it.taskItems.forEach {
+                        if (it.id == updatedId) {
+                            it.isNew = true
+                            it.closeTime = DateTime(updatedDateTime * 1000)
+                        }
+                    }
+                }
+
+                presenter.bgScope.launch {
+                    presenter.applySorting()
+                }
+
+                return
+            }
+
             val taskId = intent.getIntExtra("task_closed", 0)
             val taskItemId = intent.getIntExtra("task_item_closed", 0)
             val entranceNumber = intent.getIntExtra("entrance_number_closed", 0)
@@ -76,7 +96,10 @@ class AddressListFragment : Fragment(), ISearchableFragment {
             return adapter.data.asSequence()
                 .filter { it is AddressListModel.Address }
                 .filter {
-                    (it as AddressListModel.Address).taskItems.first().address.name.contains(filter, true)
+                    (it as AddressListModel.Address).taskItems.first().address.name.contains(
+                        filter,
+                        true
+                    )
                 }
                 .map {
                     (it as AddressListModel.Address).taskItems.first().address.name
@@ -86,7 +109,10 @@ class AddressListFragment : Fragment(), ISearchableFragment {
             return adapter.data.asSequence()
                 .filter { it is AddressListModel.Address }
                 .filter {
-                    (it as AddressListModel.Address).taskItems.first().address.street.contains(filter, true)
+                    (it as AddressListModel.Address).taskItems.first().address.street.contains(
+                        filter,
+                        true
+                    )
                 }
                 .map {
                     (it as AddressListModel.Address).taskItems.first().address.street + ","
@@ -99,7 +125,10 @@ class AddressListFragment : Fragment(), ISearchableFragment {
     override fun onItemSelected(item: String, searchView: AutoCompleteTextView) {
 
         val itemIndex = adapter.data.indexOfFirst {
-            (it as? AddressListModel.Address)?.taskItems?.first()?.address?.name?.contains(item, true)
+            (it as? AddressListModel.Address)?.taskItems?.first()?.address?.name?.contains(
+                item,
+                true
+            )
                 ?: false
         }
         if (itemIndex < 0) {
@@ -140,11 +169,17 @@ class AddressListFragment : Fragment(), ISearchableFragment {
             presenter.onMapClicked()
         }
         close_button?.setOnClickListener {
-            context?.showError("Вы действительно хотите закрыть задание?", object : ErrorButtonsListener {
-                override fun positiveListener() {
-                    presenter.onCloseTaskClicked()
-                }
-            }, "Да", "Нет", true)
+            context?.showError(
+                "Вы действительно хотите закрыть задание?",
+                object : ErrorButtonsListener {
+                    override fun positiveListener() {
+                        presenter.onCloseTaskClicked()
+                    }
+                },
+                "Да",
+                "Нет",
+                true
+            )
         }
         updateCloseTaskButtonVisibility()
 
@@ -182,7 +217,8 @@ class AddressListFragment : Fragment(), ISearchableFragment {
         address_list?.scrollToPosition(idx)
 
         address_list?.post {
-            val holder = address_list?.findViewHolderForAdapterPosition(idx) as? AddressListAddressHolder
+            val holder =
+                address_list?.findViewHolderForAdapterPosition(idx) as? AddressListAddressHolder
             holder?.flashSelectedColor()
         }
     }

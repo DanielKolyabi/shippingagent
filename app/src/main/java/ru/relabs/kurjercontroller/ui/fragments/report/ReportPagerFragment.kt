@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import android.os.Parcel
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +18,6 @@ import kotlinx.coroutines.launch
 import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.activity
-import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
@@ -30,12 +31,14 @@ import java.util.*
  */
 class ReportPagerFragment : Fragment() {
 
-    var tasks: MutableList<TaskModel> = mutableListOf()
-    var taskItems: MutableList<TaskItemModel> = mutableListOf()
-    var selectedTask: Pair<Int, Int> = Pair(0,0)
+    val tasks: MutableList<TaskModel> = mutableListOf()
+    val taskItems: MutableList<TaskItemModel> = mutableListOf()
+    var selectedTask: Pair<Int, Int> = Pair(0, 0)
     val presenter = ReportPagerPresenter(this)
     lateinit var pagerAdapter: ReportPagerAdapter
     val taskListAdapter = DelegateAdapter<ReportTasksListModel>()
+    var taskIds: IntArray? = null
+    var taskItemIds: List<TaskItemIdWithTaskId>? = null
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -59,16 +62,19 @@ class ReportPagerFragment : Fragment() {
         tasks_list.adapter = taskListAdapter
 
         activity()?.changeTitle(getTitle())
-
-        updateTasks()
-        presenter.updatePagerAdapter()
+        presenter.initTasks(taskIds, taskItemIds)
     }
 
     fun updateTasks() {
         tasks_list.setVisible(tasks.size > 1)
         taskListAdapter.data.clear()
         taskListAdapter.data.addAll(tasks.mapIndexed { i, it ->
-            ReportTasksListModel.TaskButton(it, taskItems[i], i, taskItems[i].id == selectedTask.second && taskItems[i].taskId == selectedTask.first)
+            ReportTasksListModel.TaskButton(
+                it,
+                taskItems[i],
+                i,
+                taskItems[i].id == selectedTask.second && taskItems[i].taskId == selectedTask.first
+            )
         })
         taskListAdapter.notifyDataSetChanged()
     }
@@ -83,9 +89,9 @@ class ReportPagerFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            tasks = it.getParcelableArrayList("tasks") ?: mutableListOf()
-            taskItems = it.getParcelableArrayList("task_items") ?: mutableListOf()
             selectedTask = Pair(it.getInt("selected_task_id"), it.getInt("selected_task_item_id"))
+            taskIds = it.getIntArray("task_ids")
+            taskItemIds = it.getParcelableArrayList("task_item_ids")
         }
         activity?.registerReceiver(broadcastReceiver, intentFilter)
     }
@@ -97,19 +103,56 @@ class ReportPagerFragment : Fragment() {
     }
 
     fun getTitle(): String {
-        return taskItems.first().address.name
+        return taskItems.firstOrNull()?.address?.name ?: "Загрузка"
     }
 
     companion object {
         @JvmStatic
-        fun newInstance(tasks: List<TaskModel>, taskItems: List<TaskItemModel>, selectedTaskId: Int, selectedTaskItemId: Int) =
+        fun newInstance(
+            tasks: List<TaskModel>,
+            taskItems: List<TaskItemModel>,
+            selectedTaskId: Int,
+            selectedTaskItemId: Int
+        ) =
             ReportPagerFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelableArrayList("tasks", ArrayList(tasks))
-                    putParcelableArrayList("task_items", ArrayList(taskItems))
+                    putParcelableArrayList("task_item_ids", ArrayList(taskItems.map { TaskItemIdWithTaskId(it.taskId, it.id) }))
+                    putIntArray("task_ids", tasks.map { it.id }.toIntArray())
+//                    putParcelableArrayList("tasks", ArrayList(tasks))
+//                    putParcelableArrayList("task_items", ArrayList(taskItems))
                     putInt("selected_task_id", selectedTaskId)
                     putInt("selected_task_item_id", selectedTaskItemId)
                 }
             }
+    }
+}
+
+data class TaskItemIdWithTaskId(
+    val taskId: Int,
+    val taskItemId: Int
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readInt(),
+        parcel.readInt()
+    ) {
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeInt(taskId)
+        parcel.writeInt(taskItemId)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<TaskItemIdWithTaskId> {
+        override fun createFromParcel(parcel: Parcel): TaskItemIdWithTaskId {
+            return TaskItemIdWithTaskId(parcel)
+        }
+
+        override fun newArray(size: Int): Array<TaskItemIdWithTaskId?> {
+            return arrayOfNulls(size)
+        }
     }
 }

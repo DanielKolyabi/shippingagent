@@ -1,21 +1,57 @@
 package ru.relabs.kurjercontroller.ui.fragments.yandexMap
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import com.yandex.mapkit.map.VisibleRegion
 import kotlinx.android.synthetic.main.fragment_yandex_map.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.models.AddressModel
+import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.ui.extensions.placemarkColor
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.base.BaseYandexMapFragment
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.models.YandexMapModel
 
 class TasksYandexMapFragment : BaseYandexMapFragment() {
+
+
+    private val broadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            intent ?: return
+
+            val updatedId = intent.getIntExtra("task_item_id_closed_by_deliveryman", -1)
+            val updatedDateTime = intent.getLongExtra("task_item_date_closed_by_deliveryman", -1)
+            if (updatedId > 0 && updatedDateTime > 0) {
+                tasks.forEach {
+                    it.taskItems.forEach {
+                        if (it.id == updatedId) {
+                            it.isNew = true
+                            it.closeTime = DateTime(updatedDateTime * 1000)
+                        }
+                    }
+                }
+
+                presenter.bgScope.launch(Dispatchers.Main) {
+                    presenter.updateCurrentLayer()
+                }
+
+                return
+            }
+        }
+    }
+    private val intentFilter = IntentFilter("NOW")
+
 
     override fun shouldSaveCameraPosition(): Boolean {
         return true
@@ -36,7 +72,8 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         add_button?.setOnClickListener {
-            val selectedLayer = getSelectedLayer() as? YandexMapModel.TaskLayer ?: return@setOnClickListener
+            val selectedLayer =
+                getSelectedLayer() as? YandexMapModel.TaskLayer ?: return@setOnClickListener
             val visibleRegion = mapview?.map?.visibleRegion ?: return@setOnClickListener
 
             val selectedNewTaskItems = newTaskItems.filter {
@@ -80,7 +117,10 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
 
         if (selectedNewTaskItems.isNotEmpty()) {
             add_button?.setVisible(true)
-            add_button?.text = resources.getString(R.string.yandex_map_add_button, selectedNewTaskItems.size.toString())
+            add_button?.text = resources.getString(
+                R.string.yandex_map_add_button,
+                selectedNewTaskItems.size.toString()
+            )
         } else {
             add_button?.setVisible(false)
         }
@@ -108,10 +148,16 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
         arguments?.let {
             taskIds = it.getIntegerArrayList("task_ids")?.toList() ?: listOf()
         }
+        activity?.registerReceiver(broadcastReceiver, intentFilter)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        activity?.unregisterReceiver(broadcastReceiver)
     }
 
     fun getSelectedLayer(): YandexMapModel? {
-        if(tasks.size == 1){
+        if (tasks.size == 1) {
             return YandexMapModel.TaskLayer(tasks.first())
         }
         return adapter.data.firstOrNull { it.selected }
@@ -123,8 +169,12 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
         val addresses = tasks
             .flatMap {
                 it.taskItems
-            }.map {
-                AddressWithColor(it.address, Color.CYAN)
+            }
+            .groupBy {
+                it.address
+            }
+            .map {
+                AddressWithColor(it.key, it.value.placemarkColor())
             }
 
         val newAddresses = newTaskItems.map { AddressWithColor(it.address, Color.rgb(0, 100, 0)) }
@@ -157,12 +207,14 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
         makeFocus(showedAddresses.map { it.address })
     }
 
-    suspend fun setTaskLayerLoading(task: TaskModel, loading: Boolean) = withContext(Dispatchers.Main) {
-        val layer =
-            adapter.data.firstOrNull { it is YandexMapModel.TaskLayer && it.task.id == task.id } ?: return@withContext
-        (layer as YandexMapModel.TaskLayer).loading = loading
-        adapter.notifyDataSetChanged()
-    }
+    suspend fun setTaskLayerLoading(task: TaskModel, loading: Boolean) =
+        withContext(Dispatchers.Main) {
+            val layer =
+                adapter.data.firstOrNull { it is YandexMapModel.TaskLayer && it.task.id == task.id }
+                    ?: return@withContext
+            (layer as YandexMapModel.TaskLayer).loading = loading
+            adapter.notifyDataSetChanged()
+        }
 
     fun showPredefinedAddresses() {
         clearMap()

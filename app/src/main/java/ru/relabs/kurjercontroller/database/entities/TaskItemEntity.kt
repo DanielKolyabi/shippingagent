@@ -38,7 +38,9 @@ data class TaskItemEntity(
     @ColumnInfo(name = "close_time")
     val closeTime: DateTime?,
     @ColumnInfo(name = "deliveryman_id")
-    val deliverymanId: Int
+    val deliverymanId: Int,
+    @ColumnInfo(name = "is_new")
+    val isNew: Boolean
 ) {
     suspend fun toModel(repository: TaskRepository): TaskItemModel = withContext(Dispatchers.IO) {
         return@withContext TaskItemModel(
@@ -51,7 +53,8 @@ data class TaskItemEntity(
             address = repository.db.addressDao().getById(addressId)?.toModel() ?: AddressModel.blank(),
             entrances = repository.db.entranceDao().getByTaskItemId(taskId, taskItemId).map { it.toModel() }.toMutableList(),
             closeTime = closeTime,
-            deliverymanId = deliverymanId
+            deliverymanId = deliverymanId,
+            isNew = isNew
         )
     }
 }

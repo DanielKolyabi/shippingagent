@@ -21,8 +21,9 @@ data class TaskItemModel(
     val address: AddressModel,
     val entrances: MutableList<EntranceModel>,
     val notes: List<String>,
-    val closeTime: DateTime? = null,
-    val deliverymanId: Int
+    var closeTime: DateTime? = null,
+    val deliverymanId: Int,
+    var isNew: Boolean
 ) : Parcelable {
     val isClosed: Boolean
         get() = entrances.none { it.state == EntranceModel.CREATED }
@@ -30,6 +31,8 @@ data class TaskItemModel(
     val placemarkColor: Int
         get() = if (closeTime == null) {
             Color.BLUE
+        } else if (entrances.none { it.state == EntranceModel.CREATED }) {
+            Color.GRAY
         } else {
             val diff = Seconds.secondsBetween(closeTime, DateTime()).seconds
             when {
@@ -56,7 +59,8 @@ data class TaskItemModel(
                 null
             }
         },
-        parcel.readInt()
+        parcel.readInt(),
+        parcel.readByte() != 0.toByte()
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -70,6 +74,7 @@ data class TaskItemModel(
         parcel.writeStringList(notes)
         parcel.writeLong(closeTime?.millis ?: -1)
         parcel.writeInt(deliverymanId)
+        parcel.writeByte(if (isNew) 1 else 0)
     }
 
     override fun describeContents(): Int {
@@ -87,7 +92,8 @@ data class TaskItemModel(
             publisherName = publisherName,
             addressId = address.id,
             closeTime = closeTime,
-            deliverymanId = deliverymanId
+            deliverymanId = deliverymanId,
+            isNew = isNew
         )
 
     companion object CREATOR : Parcelable.Creator<TaskItemModel> {

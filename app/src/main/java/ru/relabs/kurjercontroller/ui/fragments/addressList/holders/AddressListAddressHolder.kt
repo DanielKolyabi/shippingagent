@@ -2,12 +2,14 @@ package ru.relabs.kurjercontroller.ui.fragments.addressList.holders
 
 import android.graphics.Color
 import android.view.View
+import androidx.core.graphics.ColorUtils
 import kotlinx.android.synthetic.main.holder_addr_list_address.view.*
 import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.models.AddressModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.ui.extensions.performFlash
+import ru.relabs.kurjercontroller.ui.extensions.placemarkColor
 import ru.relabs.kurjercontroller.ui.fragments.addressList.AddressListModel
 
 
@@ -20,6 +22,7 @@ class AddressListAddressHolder(
 ) : BaseViewHolder<AddressListModel>(itemView) {
     override fun onBindViewHolder(item: AddressListModel) {
         if (item !is AddressListModel.Address) return
+
         val address = item.taskItems.first().address.name
         itemView.address_text.text = address
         val isAddressClosed = item.taskItems.find {

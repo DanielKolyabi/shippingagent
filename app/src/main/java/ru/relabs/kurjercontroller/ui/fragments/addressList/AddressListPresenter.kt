@@ -11,6 +11,7 @@ import ru.relabs.kurjercontroller.models.toAndroidState
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.activities.showErrorSuspend
+import ru.relabs.kurjercontroller.ui.extensions.placemarkColor
 import ru.relabs.kurjercontroller.ui.fragments.AddressYandexMapScreen
 import ru.relabs.kurjercontroller.ui.fragments.ReportScreen
 import ru.relabs.kurjercontroller.ui.fragments.TasksYandexMapScreen
@@ -67,14 +68,14 @@ class AddressListPresenter(val fragment: AddressListFragment) {
     }
 
     fun onAddressMapClicked(items: List<TaskItemModel>) {
-        val item = items.firstOrNull { it.closeTime != null } ?: items.first()
+        val item = items.first()
 
         application().router.navigateTo(
             AddressYandexMapScreen(
                 listOf(
                     AddressWithColor(
                         item.address,
-                        item.placemarkColor
+                        items.placemarkColor()
                     )
                 ),
                 listOf(item.deliverymanId),
@@ -121,7 +122,12 @@ class AddressListPresenter(val fragment: AddressListFragment) {
             fragment.adapter.data.clear()
 
             if (fragment.tasks.size == 1) {
-                fragment.adapter.data.add(AddressListModel.SortingItem(sortingMethod, fragment.tasks.first().filtered))
+                fragment.adapter.data.add(
+                    AddressListModel.SortingItem(
+                        sortingMethod,
+                        fragment.tasks.first().filtered
+                    )
+                )
             }
             fragment.adapter.data.addAll(prepared)
 
@@ -157,11 +163,15 @@ class AddressListPresenter(val fragment: AddressListFragment) {
             }
 
             if (fragment.adapter.data.isEmpty()) {
-                fragment.context?.showErrorSuspend("Открытых адресов не найдено", object : ErrorButtonsListener {
-                    override fun positiveListener() {
-                        application().router.exit()
-                    }
-                }, "Назад")
+                fragment.context?.showErrorSuspend(
+                    "Открытых адресов не найдено",
+                    object : ErrorButtonsListener {
+                        override fun positiveListener() {
+                            application().router.exit()
+                        }
+                    },
+                    "Назад"
+                )
             } else {
                 fragment.showLoading(false)
             }

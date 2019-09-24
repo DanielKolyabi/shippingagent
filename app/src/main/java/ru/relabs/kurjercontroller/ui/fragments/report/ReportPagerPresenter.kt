@@ -5,7 +5,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.CancelableScope
+import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.application
+import ru.relabs.kurjercontroller.application.MyApplication
 import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
@@ -119,5 +121,42 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
         fragment.selectedTask = Pair(fragment.taskItems[taskNumber].taskId, fragment.taskItems[taskNumber].id)
         fragment.updateTasks()
         updatePagerAdapter()
+    }
+
+    fun initTasks(taskIds: IntArray?, taskItemIds: List<TaskItemIdWithTaskId>?){
+        bgScope.launch {
+            loadTasks(taskIds)
+            loadTaskItems(taskItemIds)
+
+            withContext(Dispatchers.Main){
+                fragment.updateTasks()
+                updatePagerAdapter()
+                fragment.activity()?.changeTitle(fragment.getTitle())
+            }
+        }
+    }
+
+    suspend fun loadTasks(ids: IntArray?) {
+        ids ?: return
+        fragment.tasks.addAll(ids.toList().mapNotNull {
+            application().tasksRepository.getTask(it)
+        })
+    }
+
+    suspend fun loadTaskItems(ids: List<TaskItemIdWithTaskId>?) {
+        ids ?: return
+        fragment.taskItems.addAll(ids.mapNotNull {
+            application().tasksRepository.getTaskItem(it.taskId, it.taskItemId)
+        })
+
+        removeNewFromTasks()
+    }
+
+    suspend fun removeNewFromTasks(){
+        fragment.taskItems.filter { it.isNew }.forEach {
+            MyApplication.instance.database.taskItemDao().insert(
+                it.copy(isNew = false).toEntity()
+            )
+        }
     }
 }

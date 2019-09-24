@@ -12,6 +12,9 @@ interface TaskItemEntityDao {
     @get:Query("SELECT * FROM task_items")
     val all: List<TaskItemEntity>
 
+    @Query("SELECT * FROM task_items WHERE task_item_id = :taskItemId")
+    fun getAllByTaskItemId(taskItemId: Int): List<TaskItemEntity>
+
     @Query("SELECT * FROM task_items WHERE task_id = :taskId AND task_item_id = :taskItemId")
     fun getByTaskItemId(taskId: Int, taskItemId: Int): TaskItemEntity?
 

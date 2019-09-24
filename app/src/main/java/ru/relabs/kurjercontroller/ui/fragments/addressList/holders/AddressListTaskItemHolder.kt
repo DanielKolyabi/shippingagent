@@ -2,10 +2,12 @@ package ru.relabs.kurjercontroller.ui.fragments.addressList.holders
 
 import android.graphics.Color
 import android.view.View
+import androidx.core.graphics.ColorUtils
 import kotlinx.android.synthetic.main.holder_addr_list_task.view.*
 import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.ui.extensions.performFlash
+import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.addressList.AddressListModel
 
 /**
@@ -18,6 +20,10 @@ class AddressListTaskItemHolder(
 
     override fun onBindViewHolder(item: AddressListModel) {
         if (item !is AddressListModel.TaskItem) return
+
+        itemView.setBackgroundColor(ColorUtils.setAlphaComponent(item.taskItem.placemarkColor, 60))
+
+        itemView.flare_new.setVisible(item.taskItem.isNew)
         itemView.task_button.text =
             (if (item.parentTask.filtered) "По фильтрам. " else "") + item.taskItem.publisherName
 
@@ -39,7 +45,7 @@ class AddressListTaskItemHolder(
         }
     }
 
-    fun flashSelectedColor(){
+    fun flashSelectedColor() {
 
         itemView.performFlash()
     }

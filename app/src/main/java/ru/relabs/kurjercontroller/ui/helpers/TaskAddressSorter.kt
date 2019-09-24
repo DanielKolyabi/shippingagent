@@ -24,7 +24,8 @@ object TaskAddressSorter {
         return result
     }
 
-    fun sortTaskItemsCloseTime(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
+
+    private fun internalSortTaskItemsCloseTime(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem>{
         return taskItems.sortedWith(compareByDescending<AddressListModel.TaskItem> { it.taskItem.closeTime }
             .thenBy { it.taskItem.address.city }
             .thenBy { it.taskItem.address.street }
@@ -40,7 +41,14 @@ object TaskAddressSorter {
         }
     }
 
-    fun sortTaskItemsStandart(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
+    fun sortTaskItemsCloseTime(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
+        val new = taskItems.filter { it.taskItem.isNew }
+        val old = taskItems.filter { !it.taskItem.isNew }
+
+        return internalSortTaskItemsCloseTime(new) + internalSortTaskItemsCloseTime(old)
+    }
+
+    private fun internalSortTaskItemsStandart(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
         return taskItems.sortedWith(compareBy<AddressListModel.TaskItem> { it.taskItem.address.city }
             .thenBy { it.taskItem.address.street }
             .thenBy { it.taskItem.address.house }
@@ -53,6 +61,13 @@ object TaskAddressSorter {
         }.toMap().flatMap {
             it.value
         }
+    }
+
+    fun sortTaskItemsStandart(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
+        val new = taskItems.filter { it.taskItem.isNew }
+        val old = taskItems.filter { !it.taskItem.isNew }
+
+        return internalSortTaskItemsStandart(new) + internalSortTaskItemsStandart(old)
     }
 
     fun sortInfoTaskItemsAlphabetic(taskItems: List<TaskItemModel>): List<TaskItemModel> {
@@ -67,7 +82,7 @@ object TaskAddressSorter {
         }
     }
 
-    fun sortTaskItemsAlphabetic(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
+    private fun internalSortTaskItemsAlphabetic(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
         return taskItems.sortedWith(compareBy<AddressListModel.TaskItem> { it.taskItem.address.city }
             .thenBy { it.taskItem.address.street }
             .thenBy { it.taskItem.address.house }
@@ -80,6 +95,13 @@ object TaskAddressSorter {
         }.toMap().flatMap {
             it.value
         }
+    }
+
+    fun sortTaskItemsAlphabetic(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
+        val new = taskItems.filter { it.taskItem.isNew }
+        val old = taskItems.filter { !it.taskItem.isNew }
+
+        return internalSortTaskItemsAlphabetic(new) + internalSortTaskItemsAlphabetic(old)
     }
 
     const val STANDART = 1

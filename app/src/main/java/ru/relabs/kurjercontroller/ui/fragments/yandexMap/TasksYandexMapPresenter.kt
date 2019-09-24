@@ -101,4 +101,13 @@ class TasksYandexMapPresenter(override val fragment: TasksYandexMapFragment) : B
                 fragment.showTask(selectedLayer.task)
             }
         }
+
+    fun updateCurrentLayer() {
+        return when(val layer = fragment.getSelectedLayer()){
+            YandexMapModel.CommonLayer -> onCommonLayerSelected()
+            YandexMapModel.PredefinedAddressesLayer -> onPredefinedAddressesLayerSelected()
+            is YandexMapModel.TaskLayer -> onTaskLayerSelected(layer.task)
+            else -> {}
+        }
+    }
 }

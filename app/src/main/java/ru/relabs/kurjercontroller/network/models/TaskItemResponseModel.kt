@@ -37,7 +37,8 @@ data class TaskItemResponseModel(
             entrances = entrances.map { it.toModel() }.toMutableList(),
             address = address.toModel(),
             closeTime = closeTime?.let { DateTime(it) },
-            deliverymanId = deliverymanId
+            deliverymanId = deliverymanId,
+            isNew = false
         )
     }
 

@@ -6,9 +6,10 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.application.MyApplication
-import ru.relabs.kurjercontroller.application.UserModel
+import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 
 /**
@@ -35,7 +36,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
-    fun processMessageData(data: Map<String, String>) {
+    suspend fun processMessageData(data: Map<String, String>) {
         if (data.containsKey("request_gps")) {
             val user = (application as? MyApplication)?.user?.getUserCredentials() ?: return
             bgScope.launch(Dispatchers.Default) {
@@ -54,7 +55,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             }
         }
         if (data.containsKey("tasks_update")) {
-            val taskId = data.getOrElse("task_id", {null})?.toIntOrNull()
+            val taskId = data.getOrElse("task_id", { null })?.toIntOrNull()
             val int = Intent().apply {
                 putExtra("tasks_changed", true)
                 putExtra("task_id", taskId)
@@ -62,7 +63,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             }
             sendBroadcast(int)
         }
-        if (data.containsKey("closed_task_id")) {
+        //Controller entrance closed
+        if (data.containsKey("closed_entrance_number")) {
             run {
                 val taskId = data["closed_task_id"]?.toIntOrNull()
                 taskId ?: return@run
@@ -80,6 +82,34 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 sendBroadcast(int)
             }
         }
-    }
 
+        //Deliveryman address closed
+        if (data.containsKey("closed_task_id") && data.containsKey("deliveryman_task")) {
+            withContext(Dispatchers.IO) {
+                val taskItemId = data["closed_task_id"]?.toIntOrNull()
+                taskItemId ?: return@withContext
+                val closeTime = data["close_time"]?.toDoubleOrNull()?.toLong()
+                closeTime ?: return@withContext
+                val closeDate = DateTime(closeTime * 1000)
+                val items = MyApplication.instance.tasksRepository.getTaskItems(taskItemId)
+                if (items.isNotEmpty()) {
+                    items.forEach {
+                        if (MyApplication.instance.database.taskDao().getById(it.taskId)?.state != TaskModel.CREATED) {
+                            MyApplication.instance.database.taskItemDao().insert(
+                                it.copy(isNew = true, closeTime = closeDate).toEntity()
+                            )
+                        }
+                    }
+                    withContext(Dispatchers.Main) {
+                        val int = Intent().apply {
+                            putExtra("task_item_id_closed_by_deliveryman", taskItemId)
+                            putExtra("task_item_date_closed_by_deliveryman", closeTime)
+                            action = "NOW"
+                        }
+                        sendBroadcast(int)
+                    }
+                }
+            }
+        }
+    }
 }
