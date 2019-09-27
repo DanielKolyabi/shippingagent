@@ -289,6 +289,8 @@ class ReportFragment : Fragment() {
             loadKeys(saved)
         }
 
+        lookout?.setSelectButtonActive(hasLookout)
+
         saved?.let { saved ->
             if (saved.apartmentFrom != null) appartaments_from?.setText(saved.apartmentFrom.toString())
             if (saved.apartmentTo != null) appartaments_to?.setText(saved.apartmentTo.toString())
@@ -440,11 +442,7 @@ class ReportFragment : Fragment() {
                 }
             } else {
                 apartmentListAddEntrance()
-                if (hasLookout) {
-                    apartmentListAddLookout()
-                } else {
-                    apartmentListRemoveLookout()
-                }
+                apartmentListRemoveLookout()
             }
 
             appartaments_list?.post {

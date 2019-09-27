@@ -42,6 +42,8 @@ class AddressListPresenter(val fragment: AddressListFragment) {
 
     fun onTaskItemClicked(clickedTask: AddressListModel.TaskItem) {
 
+        clickedTask.taskItem.isNew = false
+
         val taskItemsOnAddress = fragment.adapter.data
             .filter {
                 (it as? AddressListModel.TaskItem)?.taskItem?.address?.idnd == clickedTask.taskItem.address.idnd
