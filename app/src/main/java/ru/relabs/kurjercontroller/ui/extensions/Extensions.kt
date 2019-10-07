@@ -73,12 +73,12 @@ fun View.performFlash() {
 }
 
 fun Iterable<TaskItemModel>.placemarkColor(): Int {
-    val minCloseTime = filter { it.closeTime != null }.minBy {
+    val minCloseTime = filter { it.closeTime != null && !it.isClosed }.minBy {
         it.closeTime!!
     }
     //If nothing closed in set
     return if (minCloseTime == null) {
-        if (none { it.isClosed }) {
+        if (any { !it.isClosed }) {
             Color.BLUE
         } else {
             Color.GRAY

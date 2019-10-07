@@ -29,10 +29,10 @@ data class TaskItemModel(
         get() = entrances.none { it.state == EntranceModel.CREATED }
 
     val placemarkColor: Int
-        get() = if (closeTime == null) {
-            Color.BLUE
-        } else if (entrances.none { it.state == EntranceModel.CREATED }) {
+        get() = if (isClosed) {
             Color.GRAY
+        } else if (closeTime == null) {
+            Color.BLUE
         } else {
             val diff = Seconds.secondsBetween(closeTime, DateTime()).seconds
             when {

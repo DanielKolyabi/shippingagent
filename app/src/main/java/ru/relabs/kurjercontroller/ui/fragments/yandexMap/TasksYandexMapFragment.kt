@@ -15,7 +15,6 @@ import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.models.AddressModel
-import ru.relabs.kurjercontroller.models.EntranceModel
 import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.extensions.placemarkColor
@@ -166,20 +165,22 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
     fun showAllTasks() {
         clearMap()
 
-        val addresses = tasks
+        val items = tasks
             .flatMap {
                 it.taskItems
             }
+        val addresses = items.map { it.address }.distinctBy { it.idnd }
+        val coloredAddresses = items
             .groupBy {
-                it.address
+                it.address.idnd
             }
             .map {
-                AddressWithColor(it.key, it.value.placemarkColor())
+                AddressWithColor(addresses.first { addr -> addr.idnd == it.key }, Color.CYAN)
             }
 
         val newAddresses = newTaskItems.map { AddressWithColor(it.address, Color.rgb(0, 100, 0)) }
 
-        showedAddresses = addresses + newAddresses
+        showedAddresses = coloredAddresses + newAddresses
         showedAddresses.forEach(::showAddress)
     }
 
@@ -219,16 +220,23 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
     fun showPredefinedAddresses() {
         clearMap()
 
-        tasks
+        val items = tasks
             .filter {
                 !it.filtered
             }
             .flatMap {
                 it.taskItems
-            }.map {
-                AddressWithColor(it.address, it.placemarkColor)
-            }.forEach(::showAddress)
+            }
+        val addresses = items.map { it.address }.distinctBy { it.idnd }
 
+        items.groupBy {
+            it.address.idnd
+        }.map {
+            AddressWithColor(
+                addresses.first { addr -> addr.idnd == it.key },
+                it.value.placemarkColor()
+            )
+        }.forEach(::showAddress)
     }
 
     companion object {

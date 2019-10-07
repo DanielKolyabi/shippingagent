@@ -36,4 +36,7 @@ interface TaskItemEntityDao {
     @Delete
     fun delete(item: TaskItemEntity)
 
+    @Query("SELECT * FROM task_items WHERE address_id = :addressId")
+    fun getByAddressId(addressId: Int): List<TaskItemEntity>
+
 }

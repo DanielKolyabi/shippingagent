@@ -188,9 +188,13 @@ class AddressListFragment : Fragment(), ISearchableFragment {
             presenter.preloadTasks()
         } else {
             presenter.bgScope.launch {
-                presenter.applySorting()
+                presenter.preloadTasks(silent = true)
                 presenter.checkTasks()
             }
+//            presenter.bgScope.launch {
+//                presenter.applySorting()
+//                presenter.checkTasks()
+//            }
         }
 
         targetAddress?.let {

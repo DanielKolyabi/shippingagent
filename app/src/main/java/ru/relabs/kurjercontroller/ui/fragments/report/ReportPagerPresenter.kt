@@ -146,7 +146,8 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
     suspend fun loadTaskItems(ids: List<TaskItemIdWithTaskId>?) {
         ids ?: return
         fragment.taskItems.addAll(ids.mapNotNull {
-            application().tasksRepository.getTaskItem(it.taskId, it.taskItemId)
+            val item = application().tasksRepository.getTaskItem(it.taskId, it.taskItemId)
+            item
         })
 
         removeNewFromTasks()

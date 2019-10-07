@@ -20,7 +20,6 @@ import ru.relabs.kurjercontroller.database.entities.*
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun addressDao(): AddressEntityDao
-    abstract fun entranceAppartamentReportDao(): EntranceAppartamentReportEntityDao
     abstract fun entranceDao(): EntranceEntityDao
     abstract fun entrancePhotoDao(): EntrancePhotoEntityDao
     abstract fun entranceReportDao(): EntranceReportEntityDao

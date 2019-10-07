@@ -141,7 +141,7 @@ class ReportService : Service() {
     private suspend fun sendReportQuery(db: AppDatabase, item: EntranceReportEntity) {
          NetworkHelper.sendReport(
              item,
-             db.entrancePhotoDao().getEntrancePhoto(item.taskItemId, item.entranceNumber)
+             db.entrancePhotoDao().getEntrancePhoto(item.taskId, item.taskItemId, item.entranceNumber)
          )
     }
 

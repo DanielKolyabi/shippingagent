@@ -150,13 +150,15 @@ class AddressListPresenter(val fragment: AddressListFragment) {
         return TaskAddressSorter.getAddressesWithTasksList(sorted)
     }
 
-    fun preloadTasks() {
+    fun preloadTasks(silent: Boolean = false) {
         bgScope.launch {
-            fragment.showLoading(true)
-            fragment.tasks.clear()
+            if (!silent) {
+                fragment.showLoading(true)
+            }
             val tasks = fragment.taskIds.mapNotNull {
                 application().tasksRepository.getTask(it)
             }
+            fragment.tasks.clear()
             fragment.tasks.addAll(tasks)
             applySorting()
 
@@ -186,7 +188,7 @@ class AddressListPresenter(val fragment: AddressListFragment) {
                 !it.isClosed
             }
         }
-        closedTasks.forEach {
+        closedTasks.filter { !it.filtered }.forEach {
             if (it.state.toAndroidState() != TaskModel.COMPLETED) {
                 application().tasksRepository.closeTaskStatus(it)
                 application().tasksRepository.closeTaskById(it.id)

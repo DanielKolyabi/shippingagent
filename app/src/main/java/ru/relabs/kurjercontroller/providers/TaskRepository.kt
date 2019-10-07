@@ -173,11 +173,15 @@ class TaskRepository(val db: AppDatabase) {
                 (savedTask.iteration < task.iteration)
                 || (task.state != savedTask.state && savedTask.state.toAndroidState() != TaskModel.STARTED)
             ) {
-
                 db.taskDao().update(task.toEntity())
                 db.taskStorageDao().insertAll(task.storages.map { it.toEntity(task.id) })
                 db.taskPublisherDao().insertAll(task.publishers.map { it.toEntity() })
+
+                val currentTaskItems = db.taskItemDao().getByTaskId(task.id).toMutableList()
+
                 task.taskItems.forEach { taskItem ->
+                    currentTaskItems.removeAll { oldTaskItem -> oldTaskItem.taskItemId == taskItem.id && oldTaskItem.taskId == taskItem.taskId }
+
                     db.addressDao().insert(taskItem.address.toEntity())
                     db.taskItemDao().insert(taskItem.toEntity())
                     taskItem.entrances.forEach { entrance ->
@@ -192,13 +196,18 @@ class TaskRepository(val db: AppDatabase) {
                         db.entranceDao().insert(entity)
                     }
                 }
+
+                currentTaskItems.forEach {
+                    removeTaskItem(it)
+                }
                 result.isTasksChanged = true
             } else {
                 //MERGE CLOSE TIMINGS
                 task.taskItems.forEach { taskItem ->
                     val savedItem = db.taskItemDao().getByTaskItemId(taskItem.taskId, taskItem.id)
-                    if(savedItem != null && savedItem.closeTime == null && taskItem.closeTime != null){
-                        db.taskItemDao().insert(savedItem.copy(closeTime = taskItem.closeTime, isNew = true))
+                    if (savedItem != null && savedItem.closeTime == null && taskItem.closeTime != null) {
+                        db.taskItemDao()
+                            .insert(savedItem.copy(closeTime = taskItem.closeTime, isNew = true))
                     }
                 }
             }
@@ -206,6 +215,19 @@ class TaskRepository(val db: AppDatabase) {
 
         appearedTasks.forEach { onNewTaskAppear(it) }
         return result
+    }
+
+    private suspend fun removeTaskItem(taskItem: TaskItemEntity) {
+        db.entranceDao().getByTaskItemId(taskItem.taskId, taskItem.taskItemId).forEach { entrance ->
+            db.entranceResultDao().deleteByEntrance(taskItem.taskId, taskItem.taskItemId, entrance.number)
+            db.entrancePhotoDao().getEntrancePhoto(taskItem.taskId, taskItem.taskItemId, entrance.number).forEach { photo ->
+                removePhoto(photo.toModel(this))
+            }
+            db.apartmentResultDao().deleteByEntrance(taskItem.taskId, taskItem.taskItemId, entrance.number)
+            db.entranceReportDao().deleteByEntrance(taskItem.taskId, taskItem.taskItemId, entrance.number)
+            db.entranceDao().delete(entrance)
+        }
+        db.taskItemDao().delete(taskItem)
     }
 
     suspend fun saveFilters(task: TaskModel, filters: TaskFiltersModel = task.taskFilters) =
@@ -272,7 +294,7 @@ class TaskRepository(val db: AppDatabase) {
     suspend fun removeReport(db: AppDatabase, report: EntranceReportEntity) =
         withContext(Dispatchers.IO) {
             db.entranceReportDao().delete(report)
-            db.entrancePhotoDao().getEntrancePhoto(report.taskItemId, report.entranceNumber)
+            db.entrancePhotoDao().getEntrancePhoto(report.taskId, report.taskItemId, report.entranceNumber)
                 .forEach {
                     //Delete photo
                     removePhoto(it.toModel(this@TaskRepository))
@@ -318,12 +340,18 @@ class TaskRepository(val db: AppDatabase) {
                         deleteEntrance(taskItem.taskId, taskItem.taskItemId, it.number)
                     }
 
-                db.addressDao().deleteById(taskItem.addressId)
+                safeDeleteAddress(taskItem.addressId)
 
                 db.taskItemDao().delete(taskItem)
             }
 
         db.taskDao().deleteById(taskId)
+    }
+
+    suspend fun safeDeleteAddress(addressId: Int){
+        if(db.taskItemDao().getByAddressId(addressId).isEmpty()){
+            db.addressDao().deleteById(addressId)
+        }
     }
 
     suspend fun deleteEntrance(taskId: Int, taskItemId: Int, entranceNumber: Int) =
@@ -387,7 +415,7 @@ class TaskRepository(val db: AppDatabase) {
         entrance: EntranceModel
     ): List<EntrancePhotoModel> =
         withContext(Dispatchers.IO) {
-            return@withContext db.entrancePhotoDao().getEntrancePhoto(taskItem.id, entrance.number)
+            return@withContext db.entrancePhotoDao().getEntrancePhoto(taskItem.taskId, taskItem.id, entrance.number)
                 .map {
                     it.toModel(this@TaskRepository)
                 }
@@ -649,7 +677,7 @@ class TaskRepository(val db: AppDatabase) {
                             deleteEntrance(taskItem.taskId, taskItem.taskItemId, it.number)
                         }
 
-                    db.addressDao().deleteById(taskItem.addressId)
+                    safeDeleteAddress(taskItem.addressId)
 
                     db.taskItemDao().delete(taskItem)
                 }
@@ -739,7 +767,7 @@ class TaskRepository(val db: AppDatabase) {
             } else {
                 task.taskItems.forEach { taskItem ->
                     val savedItem = db.taskItemDao().getByTaskItemId(taskItem.taskId, taskItem.id)
-                    if(savedItem != null && savedItem.closeTime == null && taskItem.closeTime != null){
+                    if (savedItem != null && savedItem.closeTime == null && taskItem.closeTime != null) {
                         return@withContext true
                     }
                 }

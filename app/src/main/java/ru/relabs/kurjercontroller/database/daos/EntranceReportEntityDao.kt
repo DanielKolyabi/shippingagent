@@ -29,4 +29,7 @@ interface EntranceReportEntityDao {
 
     @Delete
     fun delete(address: EntranceReportEntity)
+
+    @Query("DELETE FROM entrance_reports WHERE task_id = :taskId AND task_item_id = :taskItemId AND entrance_number = :number")
+    fun deleteByEntrance(taskId: Int, taskItemId: Int, number: Int)
 }
