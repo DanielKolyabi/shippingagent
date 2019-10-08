@@ -674,7 +674,7 @@ class ReportFragment : Fragment() {
         fun newInstance(task: TaskModel, taskItem: TaskItemModel, entrance: EntranceModel) =
             ReportFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelable("task", task)
+                    putParcelable("task", task.copy(taskItems = mutableListOf()))
                     putParcelable("task_item", taskItem)
                     putParcelable("entrance", entrance)
                 }

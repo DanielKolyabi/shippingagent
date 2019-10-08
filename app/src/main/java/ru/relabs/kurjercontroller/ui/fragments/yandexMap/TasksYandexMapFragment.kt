@@ -186,16 +186,23 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
 
     fun showTask(task: TaskModel) {
         clearMap()
-        val addresses = task.taskItems.map {
-            AddressWithColor(it.address, it.placemarkColor)
-        }
+        val addresses = task.taskItems.map { it.address }.distinctBy { it.idnd }
+        val coloredAddresses = task.taskItems
+            .groupBy { it.address.idnd }
+            .map {
+                AddressWithColor(
+                    addresses.first { addr -> addr.idnd == it.key },
+                    it.value.placemarkColor()
+                )
+            }
+
         val newAddresses = newTaskItems
             .filter { it.taskId == task.id }
             .map {
                 AddressWithColor(it.address, Color.rgb(0, 100, 0))
             }
 
-        showedAddresses = addresses + newAddresses
+        showedAddresses = coloredAddresses + newAddresses
         showedAddresses.forEach(::showAddress)
 
         task.storages.forEach {
