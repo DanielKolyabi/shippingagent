@@ -31,6 +31,13 @@ fun Button.setSelectButtonActive(active: Boolean) {
     }
 }
 
+fun Context.showKeyboard(view: View?) {
+    (this.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)?.showSoftInput(
+        view,
+        0
+    )
+}
+
 fun Context.hideKeyboard(view: View?) {
     (this.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)?.hideSoftInputFromWindow(
         view?.windowToken,

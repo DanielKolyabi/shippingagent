@@ -1,18 +1,20 @@
 package ru.relabs.kurjercontroller.ui.fragments.report
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.Html
+import android.text.InputType
 import android.text.TextWatcher
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Button
+import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,8 +33,10 @@ import ru.relabs.kurjercontroller.models.TaskItemModel
 import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
+import ru.relabs.kurjercontroller.ui.extensions.hideKeyboard
 import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
+import ru.relabs.kurjercontroller.ui.extensions.showKeyboard
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.*
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportPhotosListModel
@@ -83,7 +87,8 @@ class ReportFragment : Fragment() {
         )
         showHintText(taskItem.notes)
 
-        hint_container.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+        hint_container.viewTreeObserver.addOnGlobalLayoutListener(object :
+            ViewTreeObserver.OnGlobalLayoutListener {
 
             override fun onGlobalLayout() {
                 hint_container?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
@@ -200,7 +205,7 @@ class ReportFragment : Fragment() {
         refreshData()
     }
 
-    fun setControlsLockedDueEntranceClosed(locked: Boolean){
+    fun setControlsLockedDueEntranceClosed(locked: Boolean) {
         entrance_euro_key?.isEnabled = !locked
         entrance_key?.isEnabled = !locked
         layout_error_button?.isEnabled = !locked
@@ -415,8 +420,13 @@ class ReportFragment : Fragment() {
     fun fillApartmentList() {
         apartmentAdapter.data.clear()
         apartmentAdapter.data.addAll(
-            ((saved?.apartmentFrom ?: entrance.startApartments)..(saved?.apartmentTo ?: entrance.endApartments)).map {
-                ApartmentListModel.Apartment(it, buttonGroup = taskItem.defaultReportType, state = 0)
+            ((saved?.apartmentFrom ?: entrance.startApartments)..(saved?.apartmentTo
+                ?: entrance.endApartments)).map {
+                ApartmentListModel.Apartment(
+                    it,
+                    buttonGroup = taskItem.defaultReportType,
+                    state = 0
+                )
             }
         )
         apartmentAdapter.notifyDataSetChanged()
@@ -453,7 +463,33 @@ class ReportFragment : Fragment() {
         }
     }
 
+    private fun showDescriptionInputDialog(){
+        val input = EditText(context).apply {
+            inputType = InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            setText(user_explanation_input?.text ?: "")
+        }
+
+        AlertDialog.Builder(context)
+            .setTitle("Описание")
+            .setView(input)
+            .setPositiveButton("Ок") { _, _ ->
+                user_explanation_input?.setText(input.text ?: "")
+                context?.hideKeyboard(user_explanation_input)
+            }
+            .setNegativeButton("Отмена") { _, _ ->
+                context?.hideKeyboard(user_explanation_input)
+            }
+            .show()
+            .setOnShowListener {
+                //context?.showKeyboard(input)
+                input.requestFocus()
+            }
+    }
+
     private fun bindControl() {
+        user_explanation_input?.setOnClickListener {
+            showDescriptionInputDialog()
+        }
         lock_input_overlay?.setOnClickListener {
             presenter.onBlankPhotoClicked()
         }
@@ -471,11 +507,17 @@ class ReportFragment : Fragment() {
             presenter.onApartmentButtonGroupChanged()
         }
         close_button?.setOnClickListener {
-            context?.showError("Вы действительно хотите закрыть подъезд?", object : ErrorButtonsListener {
-                override fun positiveListener() {
-                    callback?.onEntranceClosed(task, taskItem, entrance)
-                }
-            }, "Да", "Нет", true)
+            context?.showError(
+                "Вы действительно хотите закрыть подъезд?",
+                object : ErrorButtonsListener {
+                    override fun positiveListener() {
+                        callback?.onEntranceClosed(task, taskItem, entrance)
+                    }
+                },
+                "Да",
+                "Нет",
+                true
+            )
         }
 
         entrance_key?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -537,8 +579,10 @@ class ReportFragment : Fragment() {
         }
         appartaments_from?.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                appartaments_from?.setText((saved?.apartmentFrom ?: entrance.startApartments).toString())
-            }else{
+                appartaments_from?.setText(
+                    (saved?.apartmentFrom ?: entrance.startApartments).toString()
+                )
+            } else {
                 hintHelper.setHintExpanded(false)
             }
         }
@@ -564,7 +608,7 @@ class ReportFragment : Fragment() {
         appartaments_to?.setOnFocusChangeListener { view, hasFocus ->
             if (!hasFocus) {
                 appartaments_to?.setText((saved?.apartmentTo ?: entrance.endApartments).toString())
-            }else{
+            } else {
                 hintHelper.setHintExpanded(false)
             }
         }
@@ -614,7 +658,7 @@ class ReportFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        savedInstanceState?.getString("photoUUID")?.let{
+        savedInstanceState?.getString("photoUUID")?.let {
             presenter.photoUUID = UUID.fromString(it)
         }
         return inflater.inflate(R.layout.fragment_report, container, false)
@@ -632,7 +676,7 @@ class ReportFragment : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        presenter.photoUUID?.let{
+        presenter.photoUUID?.let {
             outState.putString("photoUUID", it.toString())
         }
     }
@@ -657,12 +701,13 @@ class ReportFragment : Fragment() {
     }
 
     fun updateApartmentListTypeButton() {
-        val app = apartmentAdapter.data.firstOrNull{ it is ApartmentListModel.Apartment } as? ApartmentListModel.Apartment
+        val app =
+            apartmentAdapter.data.firstOrNull { it is ApartmentListModel.Apartment } as? ApartmentListModel.Apartment
         app ?: return
-        if(app.buttonGroup == 0){
+        if (app.buttonGroup == 0) {
             list_type_button.text = "Опрос"
             list_type_button.setSelectButtonActive(false)
-        }else{
+        } else {
             list_type_button.text = "БезОп"
             list_type_button.setSelectButtonActive(true)
         }

@@ -285,7 +285,7 @@
                 android:layout_marginBottom="8dp"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <EditText
+    <TextView
 
             android:id="@+id/user_explanation_input"
             android:layout_width="0dp"
