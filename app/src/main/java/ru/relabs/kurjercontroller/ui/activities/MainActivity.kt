@@ -1,7 +1,9 @@
 package ru.relabs.kurjercontroller.ui.activities
 
+import android.app.Activity
 import android.content.*
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -46,6 +48,7 @@ import java.io.File
 import java.net.URL
 import kotlin.math.roundToInt
 
+const val REQUEST_LOCATION = 999
 
 class MainActivity : AppCompatActivity() {
     val bgScope = CancelableScope(Dispatchers.Main)
@@ -77,6 +80,25 @@ class MainActivity : AppCompatActivity() {
                     }
                     repository.closeEntrance(taskId, taskItemId, entranceNumber)
                 }
+            }
+        }
+    }
+
+    val gpsSwitchStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == LocationManager.PROVIDERS_CHANGED_ACTION) {
+                if (!NetworkHelper.isGPSEnabled(applicationContext)) {
+                    NetworkHelper.displayLocationSettingsRequest(applicationContext, this@MainActivity)
+                }
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == REQUEST_LOCATION){
+            if(resultCode == Activity.RESULT_OK){
+                application().enableLocationListening()
             }
         }
     }
@@ -393,6 +415,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (!NetworkHelper.isGPSEnabled(applicationContext)) {
+            NetworkHelper.displayLocationSettingsRequest(applicationContext, this)
+        }
         serviceCheckingScope.launch {
             while(true){
                 if(!ReportService.isRunning){
@@ -402,6 +427,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
         isRunning = true
+
+        registerReceiver(gpsSwitchStateReceiver, IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION))
         application().enableLocationListening()
         application().navigatorHolder.setNavigator(navigator)
     }
@@ -410,6 +437,8 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         serviceCheckingScope.cancel()
         isRunning = false
+
+        unregisterReceiver(gpsSwitchStateReceiver)
         application().disableLocationListening()
         application().navigatorHolder.removeNavigator()
     }

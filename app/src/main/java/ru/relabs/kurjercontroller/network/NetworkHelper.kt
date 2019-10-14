@@ -1,15 +1,22 @@
 package ru.relabs.kurjercontroller.network
 
 import android.content.Context
+import android.location.LocationManager.GPS_PROVIDER
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.net.wifi.WifiManager
 import android.provider.Settings
 import android.util.Log
 import android.webkit.MimeTypeMap
+import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.LocationSettingsStatusCodes
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.database.entities.EntrancePhotoEntity
 import ru.relabs.kurjercontroller.database.entities.EntranceReportEntity
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
@@ -17,6 +24,8 @@ import ru.relabs.kurjercontroller.logError
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI.api
 import ru.relabs.kurjercontroller.network.models.PhotoReportModel
 import ru.relabs.kurjercontroller.network.models.TaskItemReportModel
+import ru.relabs.kurjercontroller.ui.activities.MainActivity
+import ru.relabs.kurjercontroller.ui.activities.REQUEST_LOCATION
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -150,4 +159,37 @@ object NetworkHelper {
         )
         return MultipartBody.Part.createFormData(partName, photoFile.name, requestFile)
     }
+
+    fun isGPSEnabled(context: Context?): Boolean{
+        return application().locationManager?.isProviderEnabled(GPS_PROVIDER) ?: false
+    }
+
+    fun displayLocationSettingsRequest(context: Context, activity: MainActivity) {
+        val googleApiClient = GoogleApiClient.Builder(context)
+            .addApi(LocationServices.API).build()
+        googleApiClient.connect()
+
+        val locationRequest = LocationRequest.create()
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        locationRequest.interval = 30000
+        locationRequest.fastestInterval = 15000
+        locationRequest.smallestDisplacement = 10f
+
+        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
+        builder.setAlwaysShow(true)
+
+        val result = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build())
+        result.setResultCallback { result ->
+            val status = result.status
+            when (status.statusCode) {
+                LocationSettingsStatusCodes.SUCCESS -> Log.i("NetworkHelper", "All location settings are satisfied.")
+                LocationSettingsStatusCodes.RESOLUTION_REQUIRED -> {
+                    Log.i("NetworkHelper", "Location settings are not satisfied. Show the user a dialog to upgrade location settings ")
+                    status.startResolutionForResult(activity, REQUEST_LOCATION)
+                }
+                LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> Log.i("NetworkHelper", "Location settings are inadequate, and cannot be fixed here. Dialog not created.")
+            }
+        }
+    }
+
 }

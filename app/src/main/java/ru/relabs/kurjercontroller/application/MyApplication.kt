@@ -39,7 +39,7 @@ class MyApplication : Application() {
 
     var lastRequiredAppVersion = 0
 
-    private var locationManager: LocationManager? = null
+    var locationManager: LocationManager? = null
     var currentLocation = GPSCoordinatesModel(0.0, 0.0, DateTime(0))
     lateinit var deviceUUID: String
     private val listener = object : LocationListener {
