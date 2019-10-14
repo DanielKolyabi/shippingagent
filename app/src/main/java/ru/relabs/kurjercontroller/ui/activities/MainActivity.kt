@@ -64,6 +64,9 @@ class MainActivity : AppCompatActivity() {
 //            if (intent.getBooleanExtra("network_disabled", false)) {
 //                showNetworkDisabledError(!blockingNetworkDisabled)
 //            }
+            if(intent.getBooleanExtra("force_finish", false)){
+                finish()
+            }
             if (intent.getBooleanExtra("tasks_changed", false)) {
                 if (needRefreshShowed) return
                 needRefreshShowed = true

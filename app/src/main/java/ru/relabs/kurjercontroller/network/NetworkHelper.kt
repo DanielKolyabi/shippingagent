@@ -1,6 +1,7 @@
 package ru.relabs.kurjercontroller.network
 
 import android.content.Context
+import android.location.LocationManager
 import android.location.LocationManager.GPS_PROVIDER
 import android.net.ConnectivityManager
 import android.net.Uri
@@ -161,7 +162,7 @@ object NetworkHelper {
     }
 
     fun isGPSEnabled(context: Context?): Boolean{
-        return application().locationManager?.isProviderEnabled(GPS_PROVIDER) ?: false
+        return (context?.getSystemService(Context.LOCATION_SERVICE) as? LocationManager)?.isProviderEnabled(GPS_PROVIDER) ?: false
     }
 
     fun displayLocationSettingsRequest(context: Context, activity: MainActivity) {

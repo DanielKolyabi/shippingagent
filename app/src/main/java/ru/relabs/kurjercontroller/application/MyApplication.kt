@@ -12,6 +12,10 @@ import androidx.core.content.ContextCompat
 import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.firebase.iid.FirebaseInstanceId
 import com.yandex.mapkit.MapKitFactory
 import org.joda.time.DateTime
@@ -39,19 +43,16 @@ class MyApplication : Application() {
 
     var lastRequiredAppVersion = 0
 
-    var locationManager: LocationManager? = null
+    var locationManager: FusedLocationProviderClient? = null
     var currentLocation = GPSCoordinatesModel(0.0, 0.0, DateTime(0))
     lateinit var deviceUUID: String
-    private val listener = object : LocationListener {
-        override fun onLocationChanged(location: Location?) {
+
+    val listener = object : LocationCallback() {
+        override fun onLocationResult(location: LocationResult?) {
             location?.let {
-                currentLocation = GPSCoordinatesModel(it.latitude, it.longitude, DateTime(it.time))
+                currentLocation = GPSCoordinatesModel(it.lastLocation.latitude, it.lastLocation.longitude, DateTime(it.lastLocation.time))
             }
         }
-
-        override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
-        override fun onProviderEnabled(provider: String?) {}
-        override fun onProviderDisabled(provider: String?) {}
     }
 
     val user = UserCredentials(this)
@@ -85,7 +86,7 @@ class MyApplication : Application() {
         MapKitFactory.setApiKey(BuildConfig.YA_KEY)
     }
 
-    fun enableLocationListening(): Boolean {
+    fun enableLocationListening(time: Long = 30 * 1000, distance: Float = 10f): Boolean {
         if (ContextCompat.checkSelfPermission(
                 this,
                 android.Manifest.permission.ACCESS_FINE_LOCATION
@@ -94,10 +95,15 @@ class MyApplication : Application() {
             return false
         }
 
-        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        locationManager = FusedLocationProviderClient(applicationContext)
 
-        locationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30 * 1000, 10f, listener)
-        locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30 * 1000, 10f, listener)
+        val req = LocationRequest().apply {
+            fastestInterval = time
+            smallestDisplacement = distance
+            priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
+        }
+
+        locationManager?.requestLocationUpdates(req, listener, mainLooper)
 
         return true
     }
@@ -117,7 +123,7 @@ class MyApplication : Application() {
     }
 
     fun disableLocationListening() {
-        locationManager?.removeUpdates(listener)
+        //locationManager?.removeUpdates(listener)
     }
 
     fun savePushToken(pushToken: String) {
@@ -153,6 +159,18 @@ class MyApplication : Application() {
             FirebaseInstanceId.getInstance().instanceId.addOnSuccessListener {
                 savePushToken(it.token)
                 sendPushToken(it.token)
+            }
+        }
+    }
+
+    fun requestLocation() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return
+        }
+
+        locationManager?.lastLocation?.addOnSuccessListener { location ->
+            location?.let {
+                currentLocation = GPSCoordinatesModel(it.latitude, it.longitude, DateTime(it.time))
             }
         }
     }

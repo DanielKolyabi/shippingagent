@@ -3,9 +3,14 @@ package ru.relabs.kurjercontroller
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.graphics.ColorUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -22,34 +27,77 @@ import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 
+const val CHANNEL_ID = "controller_notification_channel"
+const val CLOSE_SERVICE_TIMEOUT = 80 * 60 * 1000
+
+enum class ServiceState {
+    TRANSFER, IDLE, UNAVAILABLE
+}
 
 class ReportService : Service() {
     private var thread: Job? = null
     private val bgScope = CancelableScope(Dispatchers.Default)
 
+    private var currentIconBitmap: Bitmap? = null
+    private var lastState: ServiceState = ServiceState.IDLE
+    private var lastActivityResumeTime = 0L
+    private var lastActivityRunningState = false
+    private var lastGPSPending = System.currentTimeMillis()
+
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 
-    private fun notification(body: String): Notification {
-        val channelId = "controller_notification_channel"
-
+    private fun notification(body: String, status: ServiceState, update: Boolean = false): Notification {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel =
-                NotificationChannel(channelId, getString(R.string.app_name), NotificationManager.IMPORTANCE_DEFAULT)
+                NotificationChannel(CHANNEL_ID, getString(R.string.app_name), NotificationManager.IMPORTANCE_DEFAULT)
             (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(
                 notificationChannel
             )
         }
 
-        return NotificationCompat.Builder(applicationContext)
+        val ic = when (status) {
+            ServiceState.TRANSFER -> R.drawable.ic_service_ok
+            ServiceState.IDLE -> R.drawable.ic_service_idle
+            ServiceState.UNAVAILABLE -> R.drawable.ic_service_error
+        }
+
+        val color = when (status) {
+            ServiceState.TRANSFER -> Color.parseColor("#00aa33")
+            ServiceState.IDLE -> Color.parseColor("#555555")
+            ServiceState.UNAVAILABLE -> Color.parseColor("#bb0011")
+        }
+
+        if (lastState != status) {
+            currentIconBitmap?.recycle()
+            currentIconBitmap = BitmapFactory.decodeResource(application.resources, ic)
+            lastState = status
+        }
+
+        val millisToClose = CLOSE_SERVICE_TIMEOUT - (System.currentTimeMillis() - lastActivityResumeTime)
+        val closeNotifyText = if (status == ServiceState.IDLE && !lastActivityRunningState && millisToClose > 0) {
+            val secondsToClose = millisToClose / 1000
+            val timeWithUnit = if (secondsToClose < 60) {
+                secondsToClose to "сек"
+            } else {
+                (secondsToClose / 60).toInt() to "мин"
+            }
+            " Закрытие через ${timeWithUnit.first} ${timeWithUnit.second}."
+        } else {
+            ""
+        }
+
+        val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
-            .setContentText(body)
-            .setSmallIcon(R.drawable.ic_arrow)
+            .setContentText(body + closeNotifyText)
+            .setSmallIcon(ic)
+            .setColor(color)
             .setWhen(System.currentTimeMillis())
-            .setChannelId(channelId)
+            .setChannelId(CHANNEL_ID)
             .setOnlyAlertOnce(true)
-            .build()
+
+        return notification.build()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -58,25 +106,20 @@ class ReportService : Service() {
             return Service.START_STICKY
         }
 
-        startForeground(1, notification("Сервис отправки данных."))
+        startForeground(1, notification("Сервис отправки данных.", ServiceState.IDLE))
         isRunning = true
 
         val db = MyApplication.instance.database
         var lastTasksChecking = System.currentTimeMillis()
         var lastNetworkEnabledChecking = System.currentTimeMillis()
 
+        thread?.cancel()
         thread = bgScope.launch(Dispatchers.Default) {
             while (true) {
                 var isTaskSended = false
                 if (NetworkHelper.isNetworkAvailable(applicationContext)) {
                     val sendQuery = getSendQuery(db)
                     val reportQuery = getReportQuery(db)
-
-                    if(sendQuery == null && reportQuery == null && !MainActivity.isRunning) {
-                        stopForeground(true)
-                        stopSelf()
-                        break
-                    }
 
                     if (reportQuery != null) {
                         try {
@@ -113,7 +156,6 @@ class ReportService : Service() {
                         lastTasksChecking = System.currentTimeMillis()
                     }
                 }
-                updateNotificationText(db)
 
                 if (System.currentTimeMillis() - lastNetworkEnabledChecking > 10 * 60 * 1000) {
                     lastNetworkEnabledChecking = System.currentTimeMillis()
@@ -126,16 +168,58 @@ class ReportService : Service() {
                     }
                 }
 
-                delay(if (!isTaskSended) 10000 else 1000)
+                updateNotificationText(db)
+
+                pendingGPS()
+                updateActivityState()
+
+                delay(if (!isTaskSended) 5000 else 1000)
             }
         }
 
         return START_STICKY
     }
 
+    private fun pendingGPS() {
+        if (System.currentTimeMillis() - lastGPSPending > 1 * 60 * 1000) {
+            MyApplication.instance.requestLocation()
+            lastGPSPending = System.currentTimeMillis()
+        }
+    }
+
+    private fun updateActivityState() {
+        if (!lastActivityRunningState && MainActivity.isRunning) {
+            lastActivityResumeTime = System.currentTimeMillis()
+        }
+
+        if (!MainActivity.isRunning && (System.currentTimeMillis() - lastActivityResumeTime) > CLOSE_SERVICE_TIMEOUT) {
+            val int = Intent().apply {
+                putExtra("force_finish", true)
+                action = "NOW"
+            }
+            sendBroadcast(int)
+
+            stopSelf()
+            stopForeground(true)
+        }
+        lastActivityRunningState = MainActivity.isRunning
+    }
+
     private fun updateNotificationText(db: AppDatabase) {
+        val isNetworkAvailable = NetworkHelper.isNetworkAvailable(applicationContext)
         val count = db.sendQueryDao().all.size + db.entranceReportDao().all.size
-        startForeground(1, notification("Сервис отправки данных. В очереди $count"))
+
+        val state = if (!isNetworkAvailable) {
+            ServiceState.UNAVAILABLE
+        } else if (count > 0) {
+            ServiceState.TRANSFER
+        } else {
+            ServiceState.IDLE
+        }
+
+        val text = "Сервис. В очереди: $count." + if (!isNetworkAvailable) " Сеть недоступна." else ""
+
+        NotificationManagerCompat.from(this).notify(1, notification(text, state))
     }
 
     private suspend fun sendReportQuery(db: AppDatabase, item: EntranceReportEntity) {
