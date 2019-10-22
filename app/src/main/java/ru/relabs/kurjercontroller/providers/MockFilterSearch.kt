@@ -25,7 +25,8 @@ object MockFilterSearch : IFilterSearch {
     override fun searchFilters(
         filterType: Int,
         filterValue: String,
-        selectedFilters: List<FilterModel>
+        selectedFilters: List<FilterModel>,
+        withPlanned: Boolean
     ): Deferred<FiltersResultOrError> {
         val deferred = CompletableDeferred<FiltersResultOrError>()
         GlobalScope.launch(Dispatchers.IO) {

@@ -10,9 +10,11 @@ import android.os.Parcelable
 
 data class AddressIdWithColor(
     val id: Int,
-    val color: Int = Color.BLUE
+    val color: Int = Color.BLUE,
+    val outlineColor: Int = color
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
+        parcel.readInt(),
         parcel.readInt(),
         parcel.readInt()
     ) {
@@ -20,6 +22,7 @@ data class AddressIdWithColor(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(id)
+        parcel.writeInt(color)
         parcel.writeInt(color)
     }
 

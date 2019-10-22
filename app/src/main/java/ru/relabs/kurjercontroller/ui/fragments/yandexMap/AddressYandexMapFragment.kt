@@ -52,7 +52,7 @@ class AddressYandexMapFragment : BaseYandexMapFragment() {
                 arguments = Bundle().apply {
                     putParcelableArrayList(
                         "address_ids",
-                        ArrayList(addresses.map { AddressIdWithColor(it.address.id, it.color) })
+                        ArrayList(addresses.map { AddressIdWithColor(it.address.id, it.color, it.outlineColor) })
                     )
                     putParcelableArrayList(
                         "storages",

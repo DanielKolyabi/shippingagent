@@ -219,19 +219,32 @@ class TaskRepository(val db: AppDatabase) {
 
     private suspend fun removeTaskItem(taskItem: TaskItemEntity) {
         db.entranceDao().getByTaskItemId(taskItem.taskId, taskItem.taskItemId).forEach { entrance ->
-            db.entranceResultDao().deleteByEntrance(taskItem.taskId, taskItem.taskItemId, entrance.number)
-            db.entrancePhotoDao().getEntrancePhoto(taskItem.taskId, taskItem.taskItemId, entrance.number).forEach { photo ->
-                removePhoto(photo.toModel(this))
-            }
-            db.apartmentResultDao().deleteByEntrance(taskItem.taskId, taskItem.taskItemId, entrance.number)
-            db.entranceReportDao().deleteByEntrance(taskItem.taskId, taskItem.taskItemId, entrance.number)
+            db.entranceResultDao()
+                .deleteByEntrance(taskItem.taskId, taskItem.taskItemId, entrance.number)
+            db.entrancePhotoDao()
+                .getEntrancePhoto(taskItem.taskId, taskItem.taskItemId, entrance.number)
+                .forEach { photo ->
+                    removePhoto(photo.toModel(this))
+                }
+            db.apartmentResultDao()
+                .deleteByEntrance(taskItem.taskId, taskItem.taskItemId, entrance.number)
+            db.entranceReportDao()
+                .deleteByEntrance(taskItem.taskId, taskItem.taskItemId, entrance.number)
             db.entranceDao().delete(entrance)
         }
         db.taskItemDao().delete(taskItem)
     }
 
-    suspend fun saveFilters(task: TaskModel, filters: TaskFiltersModel = task.taskFilters) =
+    suspend fun saveFilters(
+        task: TaskModel,
+        filters: TaskFiltersModel = task.taskFilters,
+        withPlanned: Boolean = task.withPlanned
+    ) =
         withContext(Dispatchers.IO) {
+            db.taskDao().getById(task.id)?.let{
+                db.taskDao().update(it.copy(withPlanned = withPlanned))
+            }
+
             db.filtersDao().deleteByTaskId(task.id)
 
             db.filtersDao().insertAll(filters.brigades.map {
@@ -294,7 +307,8 @@ class TaskRepository(val db: AppDatabase) {
     suspend fun removeReport(db: AppDatabase, report: EntranceReportEntity) =
         withContext(Dispatchers.IO) {
             db.entranceReportDao().delete(report)
-            db.entrancePhotoDao().getEntrancePhoto(report.taskId, report.taskItemId, report.entranceNumber)
+            db.entrancePhotoDao()
+                .getEntrancePhoto(report.taskId, report.taskItemId, report.entranceNumber)
                 .forEach {
                     //Delete photo
                     removePhoto(it.toModel(this@TaskRepository))
@@ -348,8 +362,8 @@ class TaskRepository(val db: AppDatabase) {
         db.taskDao().deleteById(taskId)
     }
 
-    suspend fun safeDeleteAddress(addressId: Int){
-        if(db.taskItemDao().getByAddressId(addressId).isEmpty()){
+    suspend fun safeDeleteAddress(addressId: Int) {
+        if (db.taskItemDao().getByAddressId(addressId).isEmpty()) {
             db.addressDao().deleteById(addressId)
         }
     }
@@ -415,7 +429,8 @@ class TaskRepository(val db: AppDatabase) {
         entrance: EntranceModel
     ): List<EntrancePhotoModel> =
         withContext(Dispatchers.IO) {
-            return@withContext db.entrancePhotoDao().getEntrancePhoto(taskItem.taskId, taskItem.id, entrance.number)
+            return@withContext db.entrancePhotoDao()
+                .getEntrancePhoto(taskItem.taskId, taskItem.id, entrance.number)
                 .map {
                     it.toModel(this@TaskRepository)
                 }
@@ -658,7 +673,7 @@ class TaskRepository(val db: AppDatabase) {
             val data = try {
                 api.getFilteredTaskItems(
                     token,
-                    FiltersRequest.fromFiltersList(task.taskFilters.all)
+                    FiltersRequest.fromFiltersList(task.taskFilters.all, task.withPlanned)
                 ).await()
             } catch (e: java.lang.Exception) {
                 e.logError()
@@ -707,7 +722,7 @@ class TaskRepository(val db: AppDatabase) {
         db.taskDao().getOnlineTask() != null
     }
 
-    suspend fun createOnlineTask(filters: TaskFiltersModel): TaskModel =
+    suspend fun createOnlineTask(filters: TaskFiltersModel, withPlanned: Boolean): TaskModel =
         withContext(Dispatchers.IO) {
             db.taskDao().deleteOnlineTask()
             val currentDate = DateTime()
@@ -723,7 +738,8 @@ class TaskRepository(val db: AppDatabase) {
                 firstExaminedDeviceId = null,
                 iteration = 0,
                 state = TaskModel.STARTED.toSiriusState(),
-                isOnline = true
+                isOnline = true,
+                withPlanned = withPlanned
             )
             val taskId = db.taskDao().insert(entity)
             db.filtersDao().insertAll(filters.all.map {

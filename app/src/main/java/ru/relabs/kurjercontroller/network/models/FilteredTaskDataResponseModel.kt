@@ -28,7 +28,8 @@ data class FilteredTaskDataResponseModel(
             iteration = filteredTask.iteration,
             firstExaminedDeviceId = filteredTask.firstExaminedDeviceId,
             filtered = filteredTask.filtered,
-            isOnline = false
+            isOnline = false,
+            withPlanned = false
         )
     }
 }

@@ -3,10 +3,6 @@ package ru.relabs.kurjercontroller.application
 import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
-import android.os.Bundle
 import android.os.StrictMode
 import androidx.core.content.ContextCompat
 import androidx.room.Room
@@ -50,7 +46,11 @@ class MyApplication : Application() {
     val listener = object : LocationCallback() {
         override fun onLocationResult(location: LocationResult?) {
             location?.let {
-                currentLocation = GPSCoordinatesModel(it.lastLocation.latitude, it.lastLocation.longitude, DateTime(it.lastLocation.time))
+                currentLocation = GPSCoordinatesModel(
+                    it.lastLocation.latitude,
+                    it.lastLocation.longitude,
+                    DateTime(it.lastLocation.time)
+                )
             }
         }
     }
@@ -73,10 +73,20 @@ class MyApplication : Application() {
                 database.execSQL("ALTER TABLE task_items ADD COLUMN is_new INTEGER NOT NULL DEFAULT 0")
             }
         }
+        val migration_37_38 = object : Migration(37, 38) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE task_items ADD COLUMN wrong_method INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+        val migration_38_39 = object : Migration(38, 39) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE tasks ADD COLUMN with_planned INTEGER NOT NULL DEFAULT 0")
+            }
+        }
 
         database = Room
             .databaseBuilder(applicationContext, AppDatabase::class.java, "deliverycontroller")
-            .addMigrations(migration_36_37)
+            .addMigrations(migration_36_37, migration_37_38, migration_38_39)
             .build()
         tasksRepository = TaskRepository(database)
 //        GlobalScope.launch(Dispatchers.IO) {
@@ -109,7 +119,8 @@ class MyApplication : Application() {
     }
 
     fun getOrGenerateDeviceUUID(): String {
-        val sharedPreferences = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
+        val sharedPreferences =
+            getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
 
         return sharedPreferences.getString(
             "device_uuid", "unknown"
@@ -147,10 +158,11 @@ class MyApplication : Application() {
                 e.printStackTrace()
             }
         } else {
-            val token = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE).getString(
-                "firebase_token",
-                "notoken"
-            )
+            val token =
+                getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE).getString(
+                    "firebase_token",
+                    "notoken"
+                )
             if (token != "notoken") {
                 sendPushToken(token)
                 return
@@ -164,7 +176,11 @@ class MyApplication : Application() {
     }
 
     fun requestLocation() {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             return
         }
 

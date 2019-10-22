@@ -1,15 +1,12 @@
 package ru.relabs.kurjercontroller.ui.fragments.filters
 
-import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import android.widget.AutoCompleteTextView
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_filters.*
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
@@ -18,8 +15,8 @@ import ru.relabs.kurjercontroller.database.entities.FilterEntity
 import ru.relabs.kurjercontroller.models.FilterModel
 import ru.relabs.kurjercontroller.models.TaskFiltersModel
 import ru.relabs.kurjercontroller.providers.RemoteFilterSearch
-import ru.relabs.kurjercontroller.ui.сustomView.FilterTagLayout
 import ru.relabs.kurjercontroller.ui.fragments.filters.adapters.FilterSearchAdapter
+import ru.relabs.kurjercontroller.ui.сustomView.FilterTagLayout
 import ru.relabs.kurjercontroller.ui.сustomView.InstantAutocompleteTextView
 import java.lang.ref.WeakReference
 
@@ -30,9 +27,11 @@ import java.lang.ref.WeakReference
 
 class FiltersFragment : Fragment() {
 
-    var onStartClicked: ((filters: TaskFiltersModel) -> Unit)? = null
-
+    var onStartClicked: ((filters: TaskFiltersModel, withPlanned: Boolean) -> Unit)? = null
+    lateinit var adapter: FilterSearchAdapter
     lateinit var filters: TaskFiltersModel
+    var withPlanned: Boolean = false
+
     val presenter = FiltersPresenter(this)
     val filterSearch = RemoteFilterSearch(
         presenter.bgScope,
@@ -42,50 +41,63 @@ class FiltersFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setStartButtonCount("0")
+        setStartButtonCount(0, 0, false)
 
         bindControl()
         fillAllFilters()
         bindAllFilterControls()
-
+        planned_tasks?.isChecked = withPlanned
 
         if (allFilters.any { it.isActive() }) {
-            presenter.loadFilteredTasksCount(allFilters)
+            presenter.loadFilteredTasksCount(allFilters, withPlanned)
         }
-
     }
 
     private fun bindControl() {
         start_button.setOnClickListener {
-            onStartClicked?.invoke(presenter.toTaskFiltersModel(allFilters))
+            onStartClicked?.invoke(presenter.toTaskFiltersModel(allFilters), planned_tasks?.isChecked ?: false)
         }
         reload_button?.setOnClickListener {
-            presenter.loadFilteredTasksCount(allFilters)
+            presenter.loadFilteredTasksCount(allFilters, planned_tasks?.isChecked ?: false)
+        }
+        planned_tasks?.setOnCheckedChangeListener { _, checked ->
+            presenter.loadFilteredTasksCount(allFilters, checked)
         }
     }
 
-    fun setStartButtonCount(count: String) {
-        val intCount = count.toIntOrNull()
-        if(intCount == null || intCount > BuildConfig.MAX_ADDRESSES_IN_FILTERS || intCount < 0){
+    fun setStartButtonCount(closedCount: Int, plannedCount: Int, plannedEnabled: Boolean) {
+        if ((closedCount + plannedCount) > BuildConfig.MAX_ADDRESSES_IN_FILTERS || closedCount < 0) {
             start_button?.setTextColor(Color.RED)
             start_button?.isEnabled = false
-        }else{
+        } else {
             start_button?.setTextColor(Color.BLACK)
             start_button?.isEnabled = true
         }
-        start_button?.text = resources.getString(R.string.filter_apply_button, count)
+        if (closedCount < 0) {
+            start_button?.text = "Ошибка"
+        } else if (!plannedEnabled) {
+            start_button?.text =
+                resources.getString(R.string.filter_apply_button, closedCount.toString())
+        } else {
+            start_button?.text =
+                resources.getString(R.string.filter_apply_button, "$closedCount - $plannedCount")
+        }
     }
 
-    private fun bindFilterControl(textView: InstantAutocompleteTextView, container: FilterTagLayout, filterType: Int) {
+    private fun bindFilterControl(
+        textView: InstantAutocompleteTextView,
+        container: FilterTagLayout,
+        filterType: Int
+    ) {
         context?.let {
             container.onFilterAppear = { filter ->
                 allFilters.add(filter)
-                presenter.loadFilteredTasksCount(allFilters)
+                presenter.loadFilteredTasksCount(allFilters, planned_tasks?.isChecked ?: false)
                 textView?.performFiltering()
             }
             container.onFilterDisappear = { filter ->
                 allFilters.remove(filter)
-                presenter.loadFilteredTasksCount(allFilters)
+                presenter.loadFilteredTasksCount(allFilters, planned_tasks?.isChecked ?: false)
                 textView?.performFiltering()
             }
             container.onFilterActiveChangedPredicate = { filter, newActive ->
@@ -96,15 +108,15 @@ class FiltersFragment : Fragment() {
                 }
             }
             container.onFilterActiveChanged = {
-                presenter.loadFilteredTasksCount(allFilters)
+                presenter.loadFilteredTasksCount(allFilters, planned_tasks?.isChecked ?: false)
             }
 
-            val adapter = FilterSearchAdapter(
-                    it,
-                    filterSearch,
-                    filterType,
-                    WeakReference(allFilters)
-                )
+            adapter = FilterSearchAdapter(
+                it,
+                filterSearch,
+                filterType,
+                WeakReference(allFilters)
+            ) {planned_tasks?.isChecked ?: false}
 
             textView.setAdapter(adapter)
             textView.threshold = 0
@@ -113,7 +125,12 @@ class FiltersFragment : Fragment() {
                 textView?.performFiltering()
             }
             textView.onItemClickListener = object : AdapterView.OnItemClickListener {
-                override fun onItemClick(adapter: AdapterView<*>?, view: View?, pos: Int, p3: Long) {
+                override fun onItemClick(
+                    adapter: AdapterView<*>?,
+                    view: View?,
+                    pos: Int,
+                    p3: Long
+                ) {
                     val item = adapter?.getItemAtPosition(pos) as? FilterModel
                     item ?: return
                     if (allFilters.contains(item)) {
@@ -170,15 +187,17 @@ class FiltersFragment : Fragment() {
         super.onCreate(savedInstanceState)
         arguments?.let {
             filters = it.getParcelable("filters") ?: TaskFiltersModel.blank()
+            withPlanned = it.getBoolean("with_planned") ?: false
         }
     }
 
     companion object {
         @JvmStatic
-        fun newInstance(filters: TaskFiltersModel?) =
+        fun newInstance(filters: TaskFiltersModel?, withPlanned: Boolean?) =
             FiltersFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable("filters", filters)
+                    putBoolean("with_planned", withPlanned ?: false)
                 }
             }
     }

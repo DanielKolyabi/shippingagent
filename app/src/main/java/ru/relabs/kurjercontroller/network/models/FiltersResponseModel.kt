@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.network.models
 
+import com.google.gson.annotations.SerializedName
 import ru.relabs.kurjercontroller.database.entities.FilterEntity
 import ru.relabs.kurjercontroller.models.FilterModel
 import ru.relabs.kurjercontroller.models.TaskFiltersModel
@@ -24,7 +25,10 @@ data class FiltersResponseModel(
 }
 
 data class FilteredTasksCountResponse(
-    val count: Int
+    @SerializedName("closed")
+    val closedCount: Int,
+    @SerializedName("planned")
+    val plannedCount: Int
 )
 
 

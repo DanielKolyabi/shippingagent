@@ -33,7 +33,9 @@ data class TaskEntity(
     val firstExaminedDeviceId: String?,
     val filtered: Boolean,
     @ColumnInfo(name = "is_online")
-    val isOnline: Boolean = false
+    val isOnline: Boolean = false,
+    @ColumnInfo(name = "with_planned")
+    val withPlanned: Boolean = false
 ) {
     suspend fun toModel(repository: TaskRepository): TaskModel = withContext(Dispatchers.IO) {
         return@withContext TaskModel(
@@ -51,7 +53,8 @@ data class TaskEntity(
             iteration = iteration,
             firstExaminedDeviceId = firstExaminedDeviceId,
             filtered = filtered,
-            isOnline = isOnline
+            isOnline = isOnline,
+            withPlanned = withPlanned
         )
     }
 }

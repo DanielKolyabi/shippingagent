@@ -113,10 +113,10 @@ class FiltersScreen(
 }
 
 class OnlineFiltersScreen(
-    private val onStartClicked: (filtersModel: TaskFiltersModel) -> Unit
+    private val onStartClicked: (filtersModel: TaskFiltersModel, withPlanned: Boolean) -> Unit
 ) : SupportAppScreen() {
     override fun getFragment(): Fragment {
-        return FiltersFragment.newInstance(null).apply {
+        return FiltersFragment.newInstance(null, false).apply {
             onStartClicked = this@OnlineFiltersScreen.onStartClicked
         }
     }

@@ -21,10 +21,10 @@ class FiltersPresenter(val fragment: FiltersFragment) {
     val bgScope = CancelableScope(Dispatchers.Default)
     var loadFilterCountJob: Job? = null
 
-    fun loadFilteredTasksCount(filters: List<FilterModel>) {
+    fun loadFilteredTasksCount(filters: List<FilterModel>, withPlanned: Boolean) {
         val token = application().user.getUserCredentials()?.token
         if (token == null) {
-            fragment.setStartButtonCount("Ошибка")
+            fragment.setStartButtonCount(-1, 0, false)
             return
         }
         loadFilterCountJob?.cancel()
@@ -32,15 +32,15 @@ class FiltersPresenter(val fragment: FiltersFragment) {
             val count = try {
                 DeliveryServerAPI.api.countFilteredTasks(
                     token,
-                    FiltersRequest.fromFiltersList(filters)
-                ).await().count.toString()
+                    FiltersRequest.fromFiltersList(filters, withPlanned)
+                ).await()
 
             } catch (e: Exception) {
                 e.logError()
-                "Ошибка"
+                null
             }
             withContext(Dispatchers.Main) {
-                fragment?.setStartButtonCount(count)
+                fragment?.setStartButtonCount(count?.closedCount ?: -1, count?.plannedCount ?: 0, withPlanned)
             }
         }
     }

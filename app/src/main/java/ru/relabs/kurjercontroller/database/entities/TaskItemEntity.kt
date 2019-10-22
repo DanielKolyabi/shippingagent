@@ -40,7 +40,9 @@ data class TaskItemEntity(
     @ColumnInfo(name = "deliveryman_id")
     val deliverymanId: Int,
     @ColumnInfo(name = "is_new")
-    val isNew: Boolean
+    val isNew: Boolean,
+    @ColumnInfo(name = "wrong_method")
+    val wrongMethod: Boolean
 ) {
     suspend fun toModel(repository: TaskRepository): TaskItemModel = withContext(Dispatchers.IO) {
         return@withContext TaskItemModel(
@@ -54,7 +56,8 @@ data class TaskItemEntity(
             entrances = repository.db.entranceDao().getByTaskItemId(taskId, taskItemId).map { it.toModel() }.toMutableList(),
             closeTime = closeTime,
             deliverymanId = deliverymanId,
-            isNew = isNew
+            isNew = isNew,
+            wrongMethod = wrongMethod
         )
     }
 }

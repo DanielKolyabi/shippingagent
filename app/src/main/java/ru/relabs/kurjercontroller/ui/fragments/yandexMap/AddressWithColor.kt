@@ -10,10 +10,12 @@ import ru.relabs.kurjercontroller.models.AddressModel
  */
 data class AddressWithColor(
     val address: AddressModel,
-    val color: Int = Color.BLUE
+    val color: Int = Color.BLUE,
+    val outlineColor: Int = color
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readParcelable(AddressModel::class.java.classLoader),
+        parcel.readInt(),
         parcel.readInt()
     ) {
     }
@@ -21,6 +23,7 @@ data class AddressWithColor(
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeParcelable(address, flags)
         parcel.writeInt(color)
+        parcel.writeInt(outlineColor)
     }
 
     override fun describeContents(): Int {

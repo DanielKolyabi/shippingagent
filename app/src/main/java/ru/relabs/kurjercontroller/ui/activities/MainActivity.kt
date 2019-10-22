@@ -455,9 +455,13 @@ class MainActivity : AppCompatActivity() {
                 setDeviceIdButtonVisible(true)
             }
             hideKeyboard(search_input)
-
         } else {
-            application().router.exit()
+            val current = supportFragmentManager.findFragmentById(R.id.fragment_container)
+            if(current is TaskListFragment){
+                moveTaskToBack(true)
+            }else{
+                application().router.exit()
+            }
         }
     }
 

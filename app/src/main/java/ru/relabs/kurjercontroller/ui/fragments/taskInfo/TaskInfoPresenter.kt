@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.ui.fragments.taskInfo
 
+import android.graphics.Color
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -10,6 +11,7 @@ import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.fragments.AddressYandexMapScreen
 import ru.relabs.kurjercontroller.ui.fragments.TaskItemExplanationScreen
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.AddressWithColor
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.base.WRONG_METHOD_OUTLINE_COLOR
 
 class TaskInfoPresenter(val fragment: TaskInfoFragment) {
     val bgScope = CancelableScope(Dispatchers.Default)
@@ -34,7 +36,7 @@ class TaskInfoPresenter(val fragment: TaskInfoFragment) {
         }
         application().router.navigateTo(
             AddressYandexMapScreen(
-                fragment.task.taskItems.map { AddressWithColor(it.address, it.placemarkColor) },
+                fragment.task.taskItems.map { AddressWithColor(it.address, it.placemarkColor, if(it.wrongMethod) WRONG_METHOD_OUTLINE_COLOR else it.placemarkColor) },
                 fragment.task.taskItems.map { it.deliverymanId },
                 fragment.task.storages
             ) { address ->

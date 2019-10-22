@@ -23,7 +23,8 @@ class RemoteFilterSearch(val scope: CancelableScope, val token: String) :
     override fun searchFilters(
         filterType: Int,
         filterValue: String,
-        selectedFilters: List<FilterModel>
+        selectedFilters: List<FilterModel>,
+        withPlanned: Boolean
     ): Deferred<FiltersResultOrError> {
         val deferred = CompletableDeferred<FiltersResultOrError>()
         searchJob?.cancel()
@@ -35,7 +36,8 @@ class RemoteFilterSearch(val scope: CancelableScope, val token: String) :
                         filterValue,
                         selectedFilters
                             .filter { it.isActive() }
-                            .map { it.toFilterResponseModel() }
+                            .map { it.toFilterResponseModel() },
+                        withPlanned
                     )
                 ).await()
             } catch (e: Exception) {

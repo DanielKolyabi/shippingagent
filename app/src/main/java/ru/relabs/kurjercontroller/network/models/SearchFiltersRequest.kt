@@ -12,16 +12,20 @@ data class SearchFiltersRequest(
     @SerializedName("filter_value")
     val filterValue: String,
     @SerializedName("selected_filters")
-    val filters: List<FilterResponseModel>
+    val filters: List<FilterResponseModel>,
+    @SerializedName("with_planned")
+    val withPlanned: Boolean
 ) {
 }
 
 data class FiltersRequest(
     @SerializedName("selected_filters")
-    val filters: List<FilterResponseModel>
+    val filters: List<FilterResponseModel>,
+    @SerializedName("with_planned")
+    val withPlanned: Boolean
 ) {
     companion object {
-        fun fromFiltersList(filters: List<FilterModel>): FiltersRequest =
+        fun fromFiltersList(filters: List<FilterModel>, withPlanned: Boolean): FiltersRequest =
             FiltersRequest(filters.filter { it.isActive() }.map {
                 FilterResponseModel(
                     it.id,
@@ -29,6 +33,6 @@ data class FiltersRequest(
                     it.fixed,
                     it.type
                 )
-            })
+            }, withPlanned)
     }
 }

@@ -1,6 +1,7 @@
 package ru.relabs.kurjercontroller.ui.fragments.taskItemExplanation
 
 import android.os.Bundle
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,7 +36,7 @@ class TaskItemExplanationFragment : Fragment() {
             return
         }
 
-        views[fieldNum].text = text
+        views[fieldNum].text = Html.fromHtml(text)
     }
 
     override fun onCreateView(

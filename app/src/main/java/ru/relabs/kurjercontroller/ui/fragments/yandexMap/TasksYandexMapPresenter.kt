@@ -63,7 +63,7 @@ class TasksYandexMapPresenter(override val fragment: TasksYandexMapFragment) : B
             val response = try {
                 DeliveryServerAPI.api.getFilteredTaskItems(
                     token,
-                    FiltersRequest.fromFiltersList(task.taskFilters.all)
+                    FiltersRequest.fromFiltersList(task.taskFilters.all, task.withPlanned)
                 ).await()
             } catch (e: Exception) {
                 e.logError()

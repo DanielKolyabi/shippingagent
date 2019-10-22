@@ -15,7 +15,7 @@ import ru.relabs.kurjercontroller.ui.fragments.filters.FiltersFragment
 class FiltersPagerAdapter(
     var tasks: List<TaskModel>,
     fm: FragmentManager,
-    val onStartClicked: (task: TaskModel, newFilters: TaskFiltersModel) -> Unit
+    val onStartClicked: (task: TaskModel, newFilters: TaskFiltersModel, withPlanned: Boolean) -> Unit
 ) : FragmentStatePagerAdapter(fm) {
     override fun getCount(): Int = tasks.size
 
@@ -26,11 +26,12 @@ class FiltersPagerAdapter(
     override fun getItem(position: Int): Fragment {
 
         val fragment = FiltersFragment.newInstance(
-            tasks[position].taskFilters
+            tasks[position].taskFilters,
+            tasks[position].withPlanned
         )
 
-        fragment.onStartClicked = {
-            onStartClicked(tasks[position], it)
+        fragment.onStartClicked = { filters, withPlanned ->
+            onStartClicked(tasks[position], filters, withPlanned)
         }
 
         return fragment

@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.ui.fragments.addressList
 
+import android.graphics.Color
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -16,6 +17,7 @@ import ru.relabs.kurjercontroller.ui.fragments.AddressYandexMapScreen
 import ru.relabs.kurjercontroller.ui.fragments.ReportScreen
 import ru.relabs.kurjercontroller.ui.fragments.TasksYandexMapScreen
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.AddressWithColor
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.base.WRONG_METHOD_OUTLINE_COLOR
 import ru.relabs.kurjercontroller.ui.helpers.TaskAddressSorter
 
 /**
@@ -72,12 +74,15 @@ class AddressListPresenter(val fragment: AddressListFragment) {
     fun onAddressMapClicked(items: List<TaskItemModel>) {
         val item = items.first()
 
+        val placemarkColor = items.placemarkColor()
+
         application().router.navigateTo(
             AddressYandexMapScreen(
                 listOf(
                     AddressWithColor(
                         item.address,
-                        items.placemarkColor()
+                        placemarkColor,
+                        if (items.any { it.wrongMethod }) WRONG_METHOD_OUTLINE_COLOR else placemarkColor
                     )
                 ),
                 listOf(item.deliverymanId),

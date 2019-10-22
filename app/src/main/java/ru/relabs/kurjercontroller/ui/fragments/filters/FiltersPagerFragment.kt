@@ -32,8 +32,8 @@ class FiltersPagerFragment : Fragment() {
 
     private fun updatePagerAdapter() {
         val manager = fragmentManager ?: return
-        pagerAdapter = FiltersPagerAdapter(tasks, manager) { task, newFilters ->
-            presenter.onStartClicked(task, newFilters)
+        pagerAdapter = FiltersPagerAdapter(tasks, manager) { task, newFilters, withPlanned ->
+            presenter.onStartClicked(task, newFilters, withPlanned)
         }
         view_pager?.adapter = pagerAdapter
         view_pager?.currentItem = 0

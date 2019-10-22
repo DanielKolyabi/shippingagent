@@ -24,7 +24,7 @@ class AddressYandexMapPresenter(override val fragment: AddressYandexMapFragment)
 
             fragment.addresses = fragment.addressIds.mapNotNull {
                 val address = application().tasksRepository.getAddress(it.id) ?: return@mapNotNull null
-                return@mapNotNull AddressWithColor(address, it.color)
+                return@mapNotNull AddressWithColor(address, it.color, it.outlineColor)
             }.distinctBy {
                 it.address.idnd
             }

@@ -45,7 +45,8 @@ data class TaskResponseModel(
             iteration = iteration,
             firstExaminedDeviceId = firstExaminedDeviceId,
             filtered = filtered,
-            isOnline = false
+            isOnline = false,
+            withPlanned = false
         )
     }
 }

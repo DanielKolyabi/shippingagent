@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.ui.fragments.yandexMap.base
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -25,6 +26,8 @@ import ru.relabs.kurjercontroller.ui.fragments.yandexMap.ColoredIconProvider
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.DeliverymanIconProvider
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.delegates.*
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.models.YandexMapModel
+
+val WRONG_METHOD_OUTLINE_COLOR = Color.BLACK//Color.parseColor("#8B4513")
 
 abstract class BaseYandexMapFragment : Fragment() {
     private lateinit var userLocationLayer: UserLocationLayer
@@ -83,6 +86,7 @@ abstract class BaseYandexMapFragment : Fragment() {
             val point = Point(address.lat, address.long)
 
             val color = addressWithColor.color
+            val outlineColor = addressWithColor.outlineColor
 
             mapview.map.mapObjects
                 .addPlacemark(
@@ -99,7 +103,7 @@ abstract class BaseYandexMapFragment : Fragment() {
 
             mapview.map.mapObjects.addCircle(
                 Circle(point, 50f),
-                color,
+                outlineColor,
                 2f,
                 ColorUtils.setAlphaComponent(color, 80)
             )

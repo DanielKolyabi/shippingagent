@@ -20,6 +20,7 @@ import ru.relabs.kurjercontroller.models.TaskModel
 import ru.relabs.kurjercontroller.ui.extensions.placemarkColor
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.base.BaseYandexMapFragment
+import ru.relabs.kurjercontroller.ui.fragments.yandexMap.base.WRONG_METHOD_OUTLINE_COLOR
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.models.YandexMapModel
 
 class TasksYandexMapFragment : BaseYandexMapFragment() {
@@ -190,9 +191,11 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
         val coloredAddresses = task.taskItems
             .groupBy { it.address.idnd }
             .map {
+                val placemarkColor = it.value.placemarkColor()
                 AddressWithColor(
                     addresses.first { addr -> addr.idnd == it.key },
-                    it.value.placemarkColor()
+                    placemarkColor,
+                    if (it.value.any {  it.wrongMethod && !it.isClosed  }) WRONG_METHOD_OUTLINE_COLOR else placemarkColor
                 )
             }
 
@@ -239,9 +242,11 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
         items.groupBy {
             it.address.idnd
         }.map {
+            val placemarkColor = it.value.placemarkColor()
             AddressWithColor(
                 addresses.first { addr -> addr.idnd == it.key },
-                it.value.placemarkColor()
+                placemarkColor,
+                if (it.value.any { it.wrongMethod && !it.isClosed }) WRONG_METHOD_OUTLINE_COLOR else placemarkColor
             )
         }.forEach(::showAddress)
     }

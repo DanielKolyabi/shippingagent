@@ -190,9 +190,9 @@ class TaskListPresenter(val fragment: TaskListFragment) {
             }
 
             application().router.navigateTo(
-                OnlineFiltersScreen {
+                OnlineFiltersScreen { filters, withPlanned ->
                     application().router.exit()
-                    onOnlineFiltersReceived(it, token)
+                    onOnlineFiltersReceived(filters, withPlanned, token)
                 }
             )
     }
@@ -220,10 +220,10 @@ class TaskListPresenter(val fragment: TaskListFragment) {
         }
     }
 
-    fun onOnlineFiltersReceived(filters: TaskFiltersModel, token: String) {
+    fun onOnlineFiltersReceived(filters: TaskFiltersModel, withPlanned: Boolean, token: String) {
         fragment.showLoading(true, text = "Загрузка адресов")
         bgScope.launch {
-            val task = application().tasksRepository.createOnlineTask(filters)
+            val task = application().tasksRepository.createOnlineTask(filters, withPlanned)
             val newTask = try {
                 application().tasksRepository.reloadFilteredTaskItems(token, task)
             } catch (e: java.lang.Exception) {

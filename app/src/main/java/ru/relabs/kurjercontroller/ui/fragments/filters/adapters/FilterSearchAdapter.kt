@@ -22,7 +22,8 @@ class FilterSearchAdapter(
     context: Context,
     val filterSearch: IFilterSearch,
     val filterType: Int,
-    val selectedFiltersReference: WeakReference<MutableList<FilterModel>>
+    val selectedFiltersReference: WeakReference<MutableList<FilterModel>>,
+    val withPlannedProvider: () -> Boolean
 ) : ArrayAdapter<FilterModel>(context, 0), Filterable {
     private val results: MutableList<FilterModel> = mutableListOf()
 
@@ -40,13 +41,14 @@ class FilterSearchAdapter(
 
     override fun getCount(): Int = results.size
 
-    val filterObj = object : Filter() {
+    override fun getFilter(): Filter = object : Filter() {
         override fun performFiltering(constraint: CharSequence?): FilterResults {
             val filters = runBlocking {
                 filterSearch.searchFilters(
                     filterType,
                     constraint.toString(),
-                    selectedFiltersReference.get().orEmpty()
+                    selectedFiltersReference.get().orEmpty(),
+                    withPlannedProvider()
                 ).await()
             }
             if(filters.error != null){
@@ -75,6 +77,4 @@ class FilterSearchAdapter(
             }
         }
     }
-
-    override fun getFilter(): Filter = filterObj
 }

@@ -23,7 +23,8 @@ data class TaskItemModel(
     val notes: List<String>,
     var closeTime: DateTime? = null,
     val deliverymanId: Int,
-    var isNew: Boolean
+    var isNew: Boolean,
+    val wrongMethod: Boolean
 ) : Parcelable {
     val isClosed: Boolean
         get() = entrances.none { it.state == EntranceModel.CREATED }
@@ -60,6 +61,7 @@ data class TaskItemModel(
             }
         },
         parcel.readInt(),
+        parcel.readByte() != 0.toByte(),
         parcel.readByte() != 0.toByte()
     )
 
@@ -75,6 +77,7 @@ data class TaskItemModel(
         parcel.writeLong(closeTime?.millis ?: -1)
         parcel.writeInt(deliverymanId)
         parcel.writeByte(if (isNew) 1 else 0)
+        parcel.writeByte(if (wrongMethod) 1 else 0)
     }
 
     override fun describeContents(): Int {
@@ -93,7 +96,8 @@ data class TaskItemModel(
             addressId = address.id,
             closeTime = closeTime,
             deliverymanId = deliverymanId,
-            isNew = isNew
+            isNew = isNew,
+            wrongMethod = wrongMethod
         )
 
     companion object CREATOR : Parcelable.Creator<TaskItemModel> {
