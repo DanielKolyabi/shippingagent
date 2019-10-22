@@ -66,7 +66,7 @@ class ReportPagerFragment : Fragment() {
     }
 
     fun updateTasks() {
-        tasks_list.setVisible(tasks.size > 1)
+        tasks_list?.setVisible(tasks.size > 1)
         taskListAdapter.data.clear()
         taskListAdapter.data.addAll(tasks.mapIndexed { i, it ->
             ReportTasksListModel.TaskButton(
