@@ -33,6 +33,9 @@ class TaskListPresenter(val fragment: TaskListFragment) {
     }
 
     fun onTaskSelected(pos: Int) {
+        if (pos < 0) {
+            return
+        }
         if (fragment.adapter.data[pos] !is TaskListModel.TaskItem) {
             return
         }
@@ -85,7 +88,8 @@ class TaskListPresenter(val fragment: TaskListFragment) {
 
         oldStates.forEachIndexed { i, state ->
             if (state != newStates[i]) {
-                (fragment.adapter.data[i] as TaskListModel.TaskItem).hasAddressIntersection = newStates[i]
+                (fragment.adapter.data[i] as TaskListModel.TaskItem).hasAddressIntersection =
+                    newStates[i]
                 fragment.adapter.notifyItemChanged(i)
             }
         }
@@ -123,7 +127,8 @@ class TaskListPresenter(val fragment: TaskListFragment) {
                 bgScope.launch {
                     val notLoadedTasks = mutableListOf<TaskModel>()
                     selectedFilteredTasks.forEach {
-                        val reloadedDbTask = application().tasksRepository.getTask(it.id) ?: return@forEach
+                        val reloadedDbTask =
+                            application().tasksRepository.getTask(it.id) ?: return@forEach
                         try {
                             application().tasksRepository.reloadFilteredTaskItems(
                                 token,
@@ -172,29 +177,30 @@ class TaskListPresenter(val fragment: TaskListFragment) {
 
     }
 
-    suspend fun startOnline() = withContext(Dispatchers.Main){
-            val exists = application().tasksRepository.isOnlineTaskExists()
-            if (exists) {
-                val idx = fragment.adapter.data.indexOfFirst {
-                    (it is TaskListModel.TaskItem) && it.task.isOnline
-                }
-                val holderView = fragment.tasks_list?.findViewHolderForAdapterPosition(idx) as? TaskHolder
-                holderView?.setSelected()
-                updateStartButton()
-                return@withContext
+    suspend fun startOnline() = withContext(Dispatchers.Main) {
+        val exists = application().tasksRepository.isOnlineTaskExists()
+        if (exists) {
+            val idx = fragment.adapter.data.indexOfFirst {
+                (it is TaskListModel.TaskItem) && it.task.isOnline
             }
-            val token = application().user.getUserCredentials()?.token
-            if (token == null) {
-                fragment.context?.showError("Произошла ошибка")
-                return@withContext
-            }
+            val holderView =
+                fragment.tasks_list?.findViewHolderForAdapterPosition(idx) as? TaskHolder
+            holderView?.setSelected()
+            updateStartButton()
+            return@withContext
+        }
+        val token = application().user.getUserCredentials()?.token
+        if (token == null) {
+            fragment.context?.showError("Произошла ошибка")
+            return@withContext
+        }
 
-            application().router.navigateTo(
-                OnlineFiltersScreen { filters, withPlanned ->
-                    application().router.exit()
-                    onOnlineFiltersReceived(filters, withPlanned, token)
-                }
-            )
+        application().router.navigateTo(
+            OnlineFiltersScreen { filters, withPlanned ->
+                application().router.exit()
+                onOnlineFiltersReceived(filters, withPlanned, token)
+            }
+        )
     }
 
     fun onOnlineClicked() {
@@ -203,18 +209,18 @@ class TaskListPresenter(val fragment: TaskListFragment) {
         bgScope.launch(Dispatchers.IO) {
             val hasAccess = try {
                 DeliveryServerAPI.api.hasOnlineAccess(token).await().status
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 fragment.activity()?.showErrorAsync("Не удалось проверить права.")
                 return@launch
-            }finally {
-                withContext(Dispatchers.Main){
+            } finally {
+                withContext(Dispatchers.Main) {
                     fragment.online_button?.isEnabled = true
                 }
             }
 
-            if(!hasAccess){
+            if (!hasAccess) {
                 fragment.activity()?.showErrorAsync("У вас нет прав на составление заданий.")
-            }else{
+            } else {
                 startOnline()
             }
         }
