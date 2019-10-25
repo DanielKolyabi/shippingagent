@@ -220,10 +220,13 @@ class AddressListFragment : Fragment(), ISearchableFragment {
 
         address_list?.scrollToPosition(idx)
 
-        address_list?.post {
-            val holder =
-                address_list?.findViewHolderForAdapterPosition(idx) as? AddressListAddressHolder
-            holder?.flashSelectedColor()
+        presenter.bgScope.launch {
+            delay(500)
+            address_list?.post {
+                val holder =
+                    address_list?.findViewHolderForAdapterPosition(idx) as? AddressListAddressHolder
+                holder?.flashSelectedColor()
+            }
         }
     }
 
