@@ -25,7 +25,8 @@ class AddressListTaskItemHolder(
 
         itemView.flare_new.setVisible(item.taskItem.isNew)
         itemView.task_button.text =
-            (if (item.parentTask.filtered) "По фильтрам. " else "") + item.taskItem.publisherName
+            (if (item.parentTask.filtered) "По фильтрам. " else "") +
+                    (if (item.taskItem.buttonName.isNotEmpty()) item.taskItem.buttonName else item.taskItem.publisherName)
 
         if (item.taskItem.isClosed) {
             itemView.task_button.setTextColor(Color.parseColor("#66000000"))

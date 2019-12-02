@@ -42,7 +42,11 @@ data class TaskItemEntity(
     @ColumnInfo(name = "is_new")
     val isNew: Boolean,
     @ColumnInfo(name = "wrong_method")
-    val wrongMethod: Boolean
+    val wrongMethod: Boolean,
+    @ColumnInfo(name = "button_name")
+    val buttonName: String,
+    @ColumnInfo(name = "required_apartments")
+    val requiredApartments: String
 ) {
     suspend fun toModel(repository: TaskRepository): TaskItemModel = withContext(Dispatchers.IO) {
         return@withContext TaskItemModel(
@@ -57,7 +61,9 @@ data class TaskItemEntity(
             closeTime = closeTime,
             deliverymanId = deliverymanId,
             isNew = isNew,
-            wrongMethod = wrongMethod
+            wrongMethod = wrongMethod,
+            buttonName = buttonName,
+            requiredApartments = requiredApartments
         )
     }
 }

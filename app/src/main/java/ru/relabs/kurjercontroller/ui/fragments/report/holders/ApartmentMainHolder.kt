@@ -1,6 +1,8 @@
 package ru.relabs.kurjercontroller.ui.fragments.report.holders
 
+import android.graphics.Color
 import android.view.View
+import androidx.core.graphics.ColorUtils
 import kotlinx.android.synthetic.main.holder_report_appartament.view.*
 import kotlinx.android.synthetic.main.holder_report_appartament_button_group_addition.view.*
 import kotlinx.android.synthetic.main.holder_report_appartament_button_group_main.view.*
@@ -25,6 +27,11 @@ class ApartmentMainHolder(
         if (item !is ApartmentListModel.Apartment) return
 
         with(itemView) {
+            if(item.colored){
+                setBackgroundColor(Color.parseColor("#77ff0000"))
+            }else{
+                background = null
+            }
             description_button?.setOnClickListener {
                 onDescriptionClicked(item.number)
             }

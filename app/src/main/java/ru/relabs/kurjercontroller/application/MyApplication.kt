@@ -83,10 +83,21 @@ class MyApplication : Application() {
                 database.execSQL("ALTER TABLE tasks ADD COLUMN with_planned INTEGER NOT NULL DEFAULT 0")
             }
         }
+        val migration_39_40 = object : Migration(39, 40) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE task_items ADD COLUMN button_name TEXT NOT NULL DEFAULT ''")
+            }
+        }
+        val migration_40_41 = object : Migration(40, 41) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE task_items ADD COLUMN required_apartments TEXT NOT NULL DEFAULT ''")
+            }
+        }
+
 
         database = Room
             .databaseBuilder(applicationContext, AppDatabase::class.java, "deliverycontroller")
-            .addMigrations(migration_36_37, migration_37_38, migration_38_39)
+            .addMigrations(migration_36_37, migration_37_38, migration_38_39, migration_39_40, migration_40_41)
             .build()
         tasksRepository = TaskRepository(database)
 //        GlobalScope.launch(Dispatchers.IO) {

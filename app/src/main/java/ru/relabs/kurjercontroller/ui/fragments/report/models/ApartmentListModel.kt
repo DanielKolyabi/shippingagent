@@ -9,7 +9,8 @@ sealed class ApartmentListModel {
         val number: Int,
         var buttonGroup: Int = 0,
         var state: Int = 0,
-        var description: String = ""
+        var description: String = "",
+        val colored: Boolean = false
     ): ApartmentListModel()
 
     data class Lookout(

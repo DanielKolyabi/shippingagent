@@ -36,7 +36,6 @@ import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.extensions.hideKeyboard
 import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
 import ru.relabs.kurjercontroller.ui.extensions.setVisible
-import ru.relabs.kurjercontroller.ui.extensions.showKeyboard
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.*
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportPhotosListModel
@@ -429,6 +428,19 @@ class ReportFragment : Fragment() {
                 )
             }
         )
+        val reqApps = taskItem.getRequiredApartments()
+        apartmentAdapter.data.addAll(0, reqApps.mapNotNull { required ->
+            ApartmentListModel.Apartment(
+                required.number,
+                buttonGroup = taskItem.defaultReportType,
+                state = 0,
+                colored = required.colored
+            )
+                .takeIf { apartmentAdapter.data.any { (it is ApartmentListModel.Apartment) && it.number == required.number } }
+                .also {
+                    apartmentAdapter.data.removeAll { (it is ApartmentListModel.Apartment) && it.number == required.number }
+                }
+        })
         apartmentAdapter.notifyDataSetChanged()
         presenter.bgScope.launch {
             val saves = application().tasksRepository.loadEntranceApartments(taskItem, entrance)
@@ -463,7 +475,7 @@ class ReportFragment : Fragment() {
         }
     }
 
-    private fun showDescriptionInputDialog(){
+    private fun showDescriptionInputDialog() {
         val input = EditText(context).apply {
             inputType = InputType.TYPE_TEXT_FLAG_MULTI_LINE
             setText(user_explanation_input?.text ?: "")
@@ -692,7 +704,7 @@ class ReportFragment : Fragment() {
     }
 
     fun updateApartmentListBackground(buttonGroup: Int) {
-        list_background.setImageDrawable(
+        list_background?.setImageDrawable(
             if (buttonGroup == 0) resources.getDrawable(
                 R.drawable.apartment_list_main_bg,
                 null
@@ -705,11 +717,11 @@ class ReportFragment : Fragment() {
             apartmentAdapter.data.firstOrNull { it is ApartmentListModel.Apartment } as? ApartmentListModel.Apartment
         app ?: return
         if (app.buttonGroup == 0) {
-            list_type_button.text = "Опрос"
-            list_type_button.setSelectButtonActive(false)
+            list_type_button?.text = "Опрос"
+            list_type_button?.setSelectButtonActive(false)
         } else {
-            list_type_button.text = "БезОп"
-            list_type_button.setSelectButtonActive(true)
+            list_type_button?.text = "БезОп"
+            list_type_button?.setSelectButtonActive(true)
         }
         updateApartmentListBackground(app.buttonGroup)
     }

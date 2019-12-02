@@ -27,7 +27,12 @@ data class TaskItemResponseModel(
     val deliverymanId: Int,
 
     @SerializedName("wrong_method")
-    val wrongMethod: Boolean
+    val wrongMethod: Boolean,
+
+    @SerializedName("button_name")
+    val buttonName: String,
+    @SerializedName("required_apartaments")
+    val requiredApartments: String
 ) {
     fun toModel(): TaskItemModel {
         return TaskItemModel(
@@ -42,7 +47,9 @@ data class TaskItemResponseModel(
             closeTime = closeTime?.let { DateTime(it) },
             deliverymanId = deliverymanId,
             isNew = false,
-            wrongMethod = wrongMethod
+            wrongMethod = wrongMethod,
+            buttonName = buttonName,
+            requiredApartments = requiredApartments
         )
     }
 

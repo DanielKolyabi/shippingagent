@@ -24,8 +24,22 @@ data class TaskItemModel(
     var closeTime: DateTime? = null,
     val deliverymanId: Int,
     var isNew: Boolean,
-    val wrongMethod: Boolean
+    val wrongMethod: Boolean,
+    val buttonName: String,
+    val requiredApartments: String
 ) : Parcelable {
+    fun getRequiredApartments(): List<RequiredApartment> {
+        return requiredApartments.split(",").mapNotNull {
+            if (it.contains("*")) {
+                it.replace("*", "").toIntOrNull()?.let { RequiredApartment(it, true) }
+            } else {
+                it.toIntOrNull()?.let { RequiredApartment(it, false) }
+            }
+        }.sortedBy {
+            it.number
+        }
+    }
+
     val isClosed: Boolean
         get() = entrances.none { it.state == EntranceModel.CREATED }
 
@@ -62,7 +76,9 @@ data class TaskItemModel(
         },
         parcel.readInt(),
         parcel.readByte() != 0.toByte(),
-        parcel.readByte() != 0.toByte()
+        parcel.readByte() != 0.toByte(),
+        parcel.readString().orEmpty(),
+        parcel.readString().orEmpty()
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -78,6 +94,8 @@ data class TaskItemModel(
         parcel.writeInt(deliverymanId)
         parcel.writeByte(if (isNew) 1 else 0)
         parcel.writeByte(if (wrongMethod) 1 else 0)
+        parcel.writeString(buttonName)
+        parcel.writeString(buttonName)
     }
 
     override fun describeContents(): Int {
@@ -97,7 +115,9 @@ data class TaskItemModel(
             closeTime = closeTime,
             deliverymanId = deliverymanId,
             isNew = isNew,
-            wrongMethod = wrongMethod
+            wrongMethod = wrongMethod,
+            buttonName = buttonName,
+            requiredApartments = requiredApartments
         )
 
     companion object CREATOR : Parcelable.Creator<TaskItemModel> {
@@ -110,3 +130,8 @@ data class TaskItemModel(
         }
     }
 }
+
+data class RequiredApartment(
+    val number: Int,
+    val colored: Boolean
+)
