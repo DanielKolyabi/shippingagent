@@ -3,6 +3,7 @@ package ru.relabs.kurjercontroller.ui.fragments.report
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.Editable
@@ -125,6 +126,9 @@ class ReportFragment : Fragment() {
 
     private fun bindDelegates() {
 
+        apartmentAdapter.addDelegate(
+            ApartmentDividerDelegate()
+        )
         apartmentAdapter.addDelegate(
             ApartmentMainDelegate(
                 { apartment, newState ->
@@ -417,6 +421,23 @@ class ReportFragment : Fragment() {
     }
 
     fun fillApartmentList() {
+        val reqApps = taskItem.getRequiredApartments()
+        appartaments_from?.setTextColor(Color.parseColor("#000000"))
+        appartaments_to?.setTextColor(Color.parseColor("#000000"))
+        if (taskItem.entrances.minBy { it.number }?.number == entrance.number) {
+            if ((reqApps.minBy { it.number }?.number ?: Int.MAX_VALUE) < (saved?.apartmentFrom
+                    ?: entrance.startApartments)
+            ) {
+                appartaments_from?.setTextColor(Color.parseColor("#ff0000"))
+            }
+        }
+        if (taskItem.entrances.maxBy { it.number }?.number == entrance.number) {
+            if ((reqApps.maxBy { it.number }?.number ?: Int.MIN_VALUE) > (saved?.apartmentTo
+                    ?: entrance.endApartments)
+            ) {
+                appartaments_to?.setTextColor(Color.parseColor("#ff0000"))
+            }
+        }
         apartmentAdapter.data.clear()
         apartmentAdapter.data.addAll(
             ((saved?.apartmentFrom ?: entrance.startApartments)..(saved?.apartmentTo
@@ -428,8 +449,7 @@ class ReportFragment : Fragment() {
                 )
             }
         )
-        val reqApps = taskItem.getRequiredApartments()
-        apartmentAdapter.data.addAll(0, reqApps.mapNotNull { required ->
+        val topElements = reqApps.mapNotNull { required ->
             ApartmentListModel.Apartment(
                 required.number,
                 buttonGroup = taskItem.defaultReportType,
@@ -437,10 +457,17 @@ class ReportFragment : Fragment() {
                 colored = required.colored
             )
                 .takeIf { apartmentAdapter.data.any { (it is ApartmentListModel.Apartment) && it.number == required.number } }
-                .also {
+                .apply {
                     apartmentAdapter.data.removeAll { (it is ApartmentListModel.Apartment) && it.number == required.number }
                 }
-        })
+        }
+
+
+        apartmentAdapter.data.addAll(0, topElements)
+        if (topElements.isNotEmpty()) {
+            apartmentAdapter.data.add(topElements.size, ApartmentListModel.Divider)
+        }
+
         apartmentAdapter.notifyDataSetChanged()
         presenter.bgScope.launch {
             val saves = application().tasksRepository.loadEntranceApartments(taskItem, entrance)
@@ -542,20 +569,32 @@ class ReportFragment : Fragment() {
             }
         }
 
-        entrance_euro_key?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        entrance_euro_key?.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(p0: AdapterView<*>?) {}
 
-            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, pos: Int, p3: Long) {
-                euroKeyAdapter?.getItem(pos)?.let {
-                    presenter.onEntranceEuroKeyChanged(it)
+                override fun onItemSelected(
+                    p0: AdapterView<*>?,
+                    p1: View?,
+                    pos: Int,
+                    p3: Long
+                ) {
+                    euroKeyAdapter?.getItem(pos)?.let {
+                        presenter.onEntranceEuroKeyChanged(it)
+                    }
                 }
             }
-        }
 
         user_explanation_input?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {
+            }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 presenter.onDescriptionChanged()
@@ -564,7 +603,13 @@ class ReportFragment : Fragment() {
         entrance_code?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {
+            }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 presenter.onCodeChanged()
@@ -619,7 +664,9 @@ class ReportFragment : Fragment() {
         }
         appartaments_to?.setOnFocusChangeListener { view, hasFocus ->
             if (!hasFocus) {
-                appartaments_to?.setText((saved?.apartmentTo ?: entrance.endApartments).toString())
+                appartaments_to?.setText(
+                    (saved?.apartmentTo ?: entrance.endApartments).toString()
+                )
             } else {
                 hintHelper.setHintExpanded(false)
             }
@@ -628,7 +675,13 @@ class ReportFragment : Fragment() {
         floors?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {
+            }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 presenter.onFloorsChanged()

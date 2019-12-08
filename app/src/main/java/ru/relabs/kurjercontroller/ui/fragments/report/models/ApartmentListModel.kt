@@ -20,4 +20,6 @@ sealed class ApartmentListModel {
     data class Entrance(
         var state: Int = 0
     ): ApartmentListModel()
+
+    object Divider: ApartmentListModel()
 }
