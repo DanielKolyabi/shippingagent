@@ -1,5 +1,7 @@
 package ru.relabs.kurjercontroller.ui.fragments.report.holders
 
+import android.graphics.Color
+import android.graphics.Typeface
 import android.view.View
 import kotlinx.android.synthetic.main.holder_report_appartament.view.*
 import kotlinx.android.synthetic.main.holder_report_appartament_button_group_addition.view.*
@@ -25,6 +27,19 @@ class ApartmentAdditionHolder(
         if (item !is ApartmentListModel.Apartment) return
 
         with(itemView) {
+            if(item.colored){
+                setBackgroundColor(Color.parseColor("#77ff0000"))
+            }else{
+                background = null
+            }
+            if(item.required){
+                appartament_number?.setTextColor(Color.parseColor("#0000ff"))
+                appartament_number?.setTypeface(null, Typeface.BOLD)
+            }else{
+                appartament_number?.setTextColor(Color.parseColor("#000000"))
+                appartament_number?.setTypeface(null, Typeface.NORMAL)
+            }
+
             description_button?.setOnClickListener {
                 onDescriptionClicked(item.number)
             }

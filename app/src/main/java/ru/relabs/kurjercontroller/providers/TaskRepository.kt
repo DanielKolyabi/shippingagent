@@ -241,7 +241,7 @@ class TaskRepository(val db: AppDatabase) {
         withPlanned: Boolean = task.withPlanned
     ) =
         withContext(Dispatchers.IO) {
-            db.taskDao().getById(task.id)?.let{
+            db.taskDao().getById(task.id)?.let {
                 db.taskDao().update(it.copy(withPlanned = withPlanned))
             }
 
@@ -517,6 +517,21 @@ class TaskRepository(val db: AppDatabase) {
         )
     }
 
+    suspend fun updateTaskItemButtonGroup(
+        taskItem: TaskItemModel,
+        buttonGroup: Int
+    ) = withContext(Dispatchers.IO) {
+        db.taskItemDao().getByTaskItemId(taskItem.taskId, taskItem.id)?.let {
+            db.taskItemDao().update(it.copy(defaultReportType = buttonGroup))
+        }
+
+        taskItem.entrances.map { it.number }.forEach { ent ->
+            db.apartmentResultDao().getByEntrance(taskItem.taskId, taskItem.id, ent)
+                .forEach { app ->
+                    db.apartmentResultDao().update(app.copy(buttonGroup = buttonGroup))
+                }
+        }
+    }
 
     suspend fun saveApartmentResults(
         taskItem: TaskItemModel,

@@ -73,7 +73,11 @@ class ReportPresenter(val fragment: ReportFragment) {
                 }
                 return false
             }
-            val photoFile = PathHelper.getEntrancePhotoFile(fragment.taskItem, fragment.entrance, photoUUID ?: UUID.randomUUID())
+            val photoFile = PathHelper.getEntrancePhotoFile(
+                fragment.taskItem,
+                fragment.entrance,
+                photoUUID ?: UUID.randomUUID()
+            )
             if (photoFile.exists()) {
                 saveNewPhoto(photoFile.absolutePath)
                 return true
@@ -110,7 +114,11 @@ class ReportPresenter(val fragment: ReportFragment) {
     }
 
     private fun saveNewPhoto(bmp: Bitmap?): File? {
-        val photoFile = PathHelper.getEntrancePhotoFile(fragment.taskItem, fragment.entrance, photoUUID ?: UUID.randomUUID())
+        val photoFile = PathHelper.getEntrancePhotoFile(
+            fragment.taskItem,
+            fragment.entrance,
+            photoUUID ?: UUID.randomUUID()
+        )
         if (bmp != null) {
             val photo: Bitmap
             try {
@@ -135,11 +143,23 @@ class ReportPresenter(val fragment: ReportFragment) {
         bgScope.launch(Dispatchers.Main) {
             val currentGPS = application().currentLocation
             val photoModel =
-                EntrancePhotoModel(0, photoUUID.toString(), fragment.taskItem, fragment.entrance, currentGPS)
+                EntrancePhotoModel(
+                    0,
+                    photoUUID.toString(),
+                    fragment.taskItem,
+                    fragment.entrance,
+                    currentGPS
+                )
 
             val id = application().tasksRepository.savePhoto(photoModel)
             val savedPhoto =
-                EntrancePhotoModel(id.toInt(), photoUUID.toString(), fragment.taskItem, fragment.entrance, currentGPS)
+                EntrancePhotoModel(
+                    id.toInt(),
+                    photoUUID.toString(),
+                    fragment.taskItem,
+                    fragment.entrance,
+                    currentGPS
+                )
 
 
             fragment.photosAdapter.data.add(
@@ -177,7 +197,11 @@ class ReportPresenter(val fragment: ReportFragment) {
         val code = fragment.entrance_code?.text.toString()
         bgScope.launch {
             fragment.allTaskItems.forEach {
-                application().tasksRepository.insertEntranceResult(it, fragment.entrance, code = code)
+                application().tasksRepository.insertEntranceResult(
+                    it,
+                    fragment.entrance,
+                    code = code
+                )
             }
         }
     }
@@ -270,7 +294,11 @@ class ReportPresenter(val fragment: ReportFragment) {
             it.number == entrance.number - 1
         }?.let { prevEntrance ->
             if (prevEntrance.endApartments >= fromApartment) {
-                changeApartmentInterval(prevEntrance, prevEntrance.startApartments, fromApartment - 1)
+                changeApartmentInterval(
+                    prevEntrance,
+                    prevEntrance.startApartments,
+                    fromApartment - 1
+                )
             }
         }
         fragment.taskItem.entrances.firstOrNull {
@@ -316,7 +344,11 @@ class ReportPresenter(val fragment: ReportFragment) {
 
         bgScope.launch {
             fragment.allTaskItems.forEach {
-                application().tasksRepository.insertEntranceResult(it, fragment.entrance, floors = floors)
+                application().tasksRepository.insertEntranceResult(
+                    it,
+                    fragment.entrance,
+                    floors = floors
+                )
             }
         }
     }
@@ -360,6 +392,16 @@ class ReportPresenter(val fragment: ReportFragment) {
                 fragment.taskItem,
                 fragment.entrance,
                 data.mapNotNull { it as? ApartmentListModel.Apartment })
+
+            application().tasksRepository.updateTaskItemButtonGroup(
+                fragment.taskItem,
+                buttonGroup
+            )
+
+            fragment.taskItem.entrances.forEach {
+                if (it != fragment.entrance)
+                    fragment.callback?.onEntranceChanged(it)
+            }
         }
 
         fragment.updateApartmentListTypeButton()
@@ -375,7 +417,11 @@ class ReportPresenter(val fragment: ReportFragment) {
         fragment.apartmentAdapter.notifyItemChanged(index)
 
         bgScope.launch {
-            application().tasksRepository.saveApartmentResult(fragment.taskItem, fragment.entrance, newItem)
+            application().tasksRepository.saveApartmentResult(
+                fragment.taskItem,
+                fragment.entrance,
+                newItem
+            )
         }
     }
 
@@ -465,7 +511,11 @@ class ReportPresenter(val fragment: ReportFragment) {
     fun onEntranceEuroKeyChanged(key: String) {
         bgScope.launch {
             fragment.allTaskItems.forEach {
-                application().tasksRepository.insertEntranceResult(it, fragment.entrance, euroKey = key)
+                application().tasksRepository.insertEntranceResult(
+                    it,
+                    fragment.entrance,
+                    euroKey = key
+                )
             }
         }
     }
@@ -498,8 +548,10 @@ class ReportPresenter(val fragment: ReportFragment) {
                     when (change) {
                         1 -> if (apartment.state and 4 > 0) apartment.state = apartment.state xor 4
                         4 -> if (apartment.state and 1 > 0) apartment.state = apartment.state xor 1
-                        16 -> if (apartment.state and 32 > 0) apartment.state = apartment.state xor 32
-                        32 -> if (apartment.state and 16 > 0) apartment.state = apartment.state xor 16
+                        16 -> if (apartment.state and 32 > 0) apartment.state =
+                            apartment.state xor 32
+                        32 -> if (apartment.state and 16 > 0) apartment.state =
+                            apartment.state xor 16
                     }
                 }
             }
@@ -552,7 +604,11 @@ class ReportPresenter(val fragment: ReportFragment) {
                     withContext(Dispatchers.Main) {
                         fragment.apartmentAdapter.notifyItemChanged(index)
                     }
-                    application().tasksRepository.saveApartmentResult(fragment.taskItem, fragment.entrance, item)
+                    application().tasksRepository.saveApartmentResult(
+                        fragment.taskItem,
+                        fragment.entrance,
+                        item
+                    )
                 }
             }
             .setNegativeButton("Отмена") { _, _ -> }

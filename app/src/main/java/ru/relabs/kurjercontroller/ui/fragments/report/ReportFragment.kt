@@ -196,6 +196,9 @@ class ReportFragment : Fragment() {
 
     private fun refreshData() {
         presenter.bgScope.launch {
+            application().tasksRepository.getTaskItem(taskItem.taskId, taskItem.id)?.let{
+                taskItem = it
+            }
             saved = application().tasksRepository.loadEntranceResult(taskItem, entrance)
             fillData()
         }
@@ -454,7 +457,8 @@ class ReportFragment : Fragment() {
                 required.number,
                 buttonGroup = taskItem.defaultReportType,
                 state = 0,
-                colored = required.colored
+                colored = required.colored,
+                required = true
             )
                 .takeIf { apartmentAdapter.data.any { (it is ApartmentListModel.Apartment) && it.number == required.number } }
                 .apply {
