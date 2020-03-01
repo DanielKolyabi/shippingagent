@@ -275,6 +275,13 @@ class ReportPresenter(val fragment: ReportFragment) {
             fromApartment = toApartment - 1
         }
 
+        fragment.taskItem.entrances.indexOf(entrance).takeIf { it > 0 }?.let{ entranceIdx ->
+            fragment.taskItem.entrances[entranceIdx] = fragment.taskItem.entrances[entranceIdx].copy(
+                startApartments = fromApartment,
+                endApartments = toApartment
+            )
+        }
+
         bgScope.launch {
             fragment.allTaskItems.forEach {
                 application().tasksRepository.insertEntranceResult(

@@ -26,7 +26,7 @@ abstract class BaseYandexMapPresenter(open val fragment: BaseYandexMapFragment) 
         val deliverymanIDs = getDeliverymanIDs().distinct()
         bgScope.launch(Dispatchers.IO) {
             deliverymanPositions = deliverymanIDs.map {
-                async {
+                async(Dispatchers.IO) {
                     try {
                         Pair(it, DeliveryServerAPI.api.requestUserPosition(it).await())
                     } catch (e: Exception) {
