@@ -98,6 +98,7 @@ class MyApplication : Application() {
         database = Room
             .databaseBuilder(applicationContext, AppDatabase::class.java, "deliverycontroller")
             .addMigrations(migration_36_37, migration_37_38, migration_38_39, migration_39_40, migration_40_41)
+            .fallbackToDestructiveMigration()
             .build()
         tasksRepository = TaskRepository(database)
 //        GlobalScope.launch(Dispatchers.IO) {
