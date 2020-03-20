@@ -46,6 +46,11 @@ object NetworkHelper {
         return wifiManager.isWifiEnabled
     }
 
+    fun isAirplaneModeEnabled(context: Context?): Boolean {
+        context ?: return false
+        return Settings.Global.getInt(context.contentResolver, Settings.Global.AIRPLANE_MODE_ON, 0) != 0
+    }
+
     private fun isWifiConnected(context: Context?): Boolean {
         context ?: return false
         val wifiManager =
@@ -64,7 +69,7 @@ object NetworkHelper {
     }
 
     fun isNetworkEnabled(context: Context?): Boolean {
-        return (isWifiEnabled(context) && isWifiConnected(context)) || isMobileDataEnabled(context)
+        return ((isWifiEnabled(context) && isWifiConnected(context)) || isMobileDataEnabled(context)) && !isAirplaneModeEnabled(context)
     }
 
 
@@ -72,7 +77,7 @@ object NetworkHelper {
         context ?: return false
         val status =
             (context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager)?.activeNetworkInfo?.isConnectedOrConnecting
-        return status ?: false
+        return (status ?: false) && !isAirplaneModeEnabled(context)
     }
 
     fun loadUpdateFile(url: URL, onDownloadUpdate: (current: Int, total: Int) -> Unit): File {

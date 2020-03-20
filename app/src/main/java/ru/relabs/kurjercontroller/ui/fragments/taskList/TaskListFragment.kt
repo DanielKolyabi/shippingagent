@@ -21,6 +21,8 @@ import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.ui.activities.showError
+import ru.relabs.kurjercontroller.ui.activities.showErrorSuspend
 import ru.relabs.kurjercontroller.ui.fragments.ISearchableFragment
 import ru.relabs.kurjercontroller.ui.fragments.taskList.delegates.HeaderDelegate
 import ru.relabs.kurjercontroller.ui.fragments.taskList.delegates.LoaderDelegate
@@ -115,7 +117,12 @@ class TaskListFragment : Fragment(), ISearchableFragment {
         }
         activity()?.findViewById<View>(R.id.refresh_button)?.setOnClickListener {
             presenter.bgScope.launch {
-                presenter.performNetworkUpdate()
+                try{
+                    presenter.performNetworkUpdate()
+                }catch(e: Exception){
+                    context?.showErrorSuspend("Ошибка сети")
+                    showLoadingAsync(false)
+                }
             }
         }
 

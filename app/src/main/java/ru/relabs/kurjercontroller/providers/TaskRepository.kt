@@ -615,7 +615,7 @@ class TaskRepository(val db: AppDatabase) {
                 entranceResult?.key ?: entrance.key,
                 entranceResult?.euroKey ?: entrance.euroKey,
                 entranceResult?.isDeliveryWrong ?: false,
-                entranceResult?.hasLookupPost ?: false,
+                entranceResult?.hasLookupPost ?: entrance.hasLookout ?: false,
                 application().user.getUserCredentials()?.token ?: "",
                 apartmentResults.map {
                     ApartmentResult(
