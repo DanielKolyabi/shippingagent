@@ -6,6 +6,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.CancelableScope
+import ru.relabs.kurjercontroller.CustomLog
 import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.models.TaskFiltersModel
@@ -278,8 +279,12 @@ class TaskListPresenter(val fragment: TaskListFragment) {
 
         fragment.showLoadingAsync(true, true, "Загрузка заданий")
 
-        application().tasksRepository.getAvailableEntranceKeys(user.token, true)
-        application().tasksRepository.getAvailableEntranceEuroKeys(user.token, true)
+        try {
+            application().tasksRepository.getAvailableEntranceKeys(user.token, true)
+            application().tasksRepository.getAvailableEntranceEuroKeys(user.token, true)
+        }catch (e: java.lang.Exception){
+            CustomLog.writeToFile(CustomLog.getStacktraceAsString(e))
+        }
 
         networkUpdateStarted = true
         val tasks = try {
