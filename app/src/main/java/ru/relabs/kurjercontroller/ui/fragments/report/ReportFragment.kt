@@ -550,17 +550,25 @@ class ReportFragment : Fragment() {
             presenter.onApartmentButtonGroupChanged()
         }
         close_button?.setOnClickListener {
-            context?.showError(
-                "Вы действительно хотите закрыть подъезд?",
-                object : ErrorButtonsListener {
-                    override fun positiveListener() {
-                        callback?.onEntranceClosed(task, taskItem, entrance)
-                    }
-                },
-                "Да",
-                "Нет",
-                true
-            )
+            val isEmpty = photosAdapter.data.none { it is ReportPhotosListModel.TaskItemPhoto }
+            val isAppsIntervalChanged = (saved?.apartmentFrom != entrance.startApartments && saved?.apartmentFrom != null) ||
+                    (saved?.apartmentTo != entrance.endApartments && saved?.apartmentTo != null)
+
+            if(isEmpty && isAppsIntervalChanged){
+                context?.showError("Необходимо фото-подтверждение измененённого диапазона квартир")
+            }else{
+                context?.showError(
+                    "Вы действительно хотите закрыть подъезд?",
+                    object : ErrorButtonsListener {
+                        override fun positiveListener() {
+                            callback?.onEntranceClosed(task, taskItem, entrance)
+                        }
+                    },
+                    "Да",
+                    "Нет",
+                    true
+                )
+            }
         }
 
         entrance_key?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
