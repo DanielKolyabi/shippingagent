@@ -555,7 +555,7 @@ class ReportFragment : Fragment() {
                     (saved?.apartmentTo != entrance.endApartments && saved?.apartmentTo != null)
 
             if(isEmpty && isAppsIntervalChanged){
-                context?.showError("Необходимо фото-подтверждение измененённого диапазона квартир")
+                context?.showError("Необходимо фото-подтверждение изменённого диапазона квартир")
             }else{
                 context?.showError(
                     "Вы действительно хотите закрыть подъезд?",
