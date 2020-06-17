@@ -73,7 +73,7 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
                 application().tasksRepository.saveTaskReport(
                     taskItem,
                     entrance,
-                    task.publishers.first { it.name == taskItem.publisherName },
+                    task.publishers.firstOrNull { it.name == taskItem.publisherName } ?: task.publishers.first(),
                     location
                 )
 
@@ -98,13 +98,14 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
                 fragment.taskItems.removeAt(idx)
                 fragment.tasks.removeAt(idx)
 
-                if (fragment.taskItems.isEmpty()) {
+                val taskItem = fragment.taskItems.firstOrNull()
+                if (taskItem == null) {
                     shouldRefreshUI = false
                     withContext(Dispatchers.Main) {
                         application().router.exit()
                     }
                 } else {
-                    fragment.selectedTask = Pair(fragment.taskItems.first().taskId, fragment.taskItems.first().id)
+                    fragment.selectedTask = Pair(taskItem.taskId, taskItem.id)
                 }
             }
 
