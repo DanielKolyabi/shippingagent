@@ -319,10 +319,7 @@ class ReportPresenter(val fragment: ReportFragment) {
 
     fun onRemovePhotoClicked(holder: RecyclerView.ViewHolder) {
         val position = holder.adapterPosition
-        if (position >= fragment.photosAdapter.data.size ||
-            position < 0
-        ) {
-
+        if (position >= fragment.photosAdapter.data.size || position < 0) {
             fragment.context?.showError("Невозможно удалить фото.")
             return
         }

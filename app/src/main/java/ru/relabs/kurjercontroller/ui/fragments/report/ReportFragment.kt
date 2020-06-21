@@ -255,6 +255,11 @@ class ReportFragment : Fragment() {
         appartaments_from?.isEnabled = !isEmpty
         appartaments_to?.isEnabled = !isEmpty
         lock_input_overlay?.setVisible(isEmpty)
+        if(isEmpty){
+            appartaments_from?.setText(entrance.startApartments.toString())
+            appartaments_to?.setText(entrance.endApartments.toString())
+            presenter.onApartmentIntervalChanged()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
