@@ -32,7 +32,9 @@ data class TaskItemResponseModel(
     @SerializedName("button_name")
     val buttonName: String,
     @SerializedName("required_apartaments")
-    val requiredApartments: String
+    val requiredApartments: String,
+    @SerializedName("order_id")
+    val orderId: Int
 ) {
     fun toModel(): TaskItemModel {
         return TaskItemModel(
@@ -49,7 +51,8 @@ data class TaskItemResponseModel(
             isNew = false,
             wrongMethod = wrongMethod,
             buttonName = buttonName,
-            requiredApartments = requiredApartments
+            requiredApartments = requiredApartments,
+            publisherId = orderId
         )
     }
 

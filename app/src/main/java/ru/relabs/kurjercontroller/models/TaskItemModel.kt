@@ -26,7 +26,8 @@ data class TaskItemModel(
     var isNew: Boolean,
     val wrongMethod: Boolean,
     val buttonName: String,
-    val requiredApartments: String
+    val requiredApartments: String,
+    val publisherId: Int
 ) : Parcelable {
     fun getRequiredApartments(): List<RequiredApartment> {
         return requiredApartments.split(",").mapNotNull {
@@ -78,7 +79,8 @@ data class TaskItemModel(
         parcel.readByte() != 0.toByte(),
         parcel.readByte() != 0.toByte(),
         parcel.readString().orEmpty(),
-        parcel.readString().orEmpty()
+        parcel.readString().orEmpty(),
+        parcel.readInt()
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -96,6 +98,7 @@ data class TaskItemModel(
         parcel.writeByte(if (wrongMethod) 1 else 0)
         parcel.writeString(buttonName)
         parcel.writeString(buttonName)
+        parcel.writeInt(publisherId)
     }
 
     override fun describeContents(): Int {
@@ -117,7 +120,8 @@ data class TaskItemModel(
             isNew = isNew,
             wrongMethod = wrongMethod,
             buttonName = buttonName,
-            requiredApartments = requiredApartments
+            requiredApartments = requiredApartments,
+            orderId = publisherId
         )
 
     companion object CREATOR : Parcelable.Creator<TaskItemModel> {

@@ -4,7 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
@@ -46,7 +45,9 @@ data class TaskItemEntity(
     @ColumnInfo(name = "button_name")
     val buttonName: String,
     @ColumnInfo(name = "required_apartments")
-    val requiredApartments: String
+    val requiredApartments: String,
+    @ColumnInfo(name = "order_id")
+    val orderId: Int
 ) {
     suspend fun toModel(repository: TaskRepository): TaskItemModel = withContext(Dispatchers.IO) {
         return@withContext TaskItemModel(
@@ -63,7 +64,8 @@ data class TaskItemEntity(
             isNew = isNew,
             wrongMethod = wrongMethod,
             buttonName = buttonName,
-            requiredApartments = requiredApartments
+            requiredApartments = requiredApartments,
+            publisherId = orderId
         )
     }
 }

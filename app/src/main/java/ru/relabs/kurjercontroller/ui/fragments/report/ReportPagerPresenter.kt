@@ -73,7 +73,7 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
                 application().tasksRepository.saveTaskReport(
                     taskItem,
                     entrance,
-                    task.publishers.firstOrNull { it.name == taskItem.publisherName } ?: task.publishers.first(),
+                    task.publishers.firstOrNull { it.id == taskItem.publisherId } ?: task.publishers.first(),
                     location
                 )
 
