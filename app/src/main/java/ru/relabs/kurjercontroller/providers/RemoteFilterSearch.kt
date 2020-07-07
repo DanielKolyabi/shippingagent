@@ -7,7 +7,6 @@ import kotlinx.coroutines.launch
 import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.models.FilterModel
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
-import ru.relabs.kurjercontroller.network.models.FilterResponseModel
 import ru.relabs.kurjercontroller.network.models.SearchFiltersRequest
 import ru.relabs.kurjercontroller.providers.interfaces.FiltersResultOrError
 import ru.relabs.kurjercontroller.providers.interfaces.IFilterSearch
@@ -39,7 +38,7 @@ class RemoteFilterSearch(val scope: CancelableScope, val token: String) :
                             .map { it.toFilterResponseModel() },
                         withPlanned
                     )
-                ).await()
+                ).await().distinctBy { it.id to it.type }
             } catch (e: Exception) {
                 deferred.complete(FiltersResultOrError(error = e))
                 return@launch

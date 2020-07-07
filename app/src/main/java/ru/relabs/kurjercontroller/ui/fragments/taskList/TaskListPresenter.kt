@@ -234,7 +234,7 @@ class TaskListPresenter(val fragment: TaskListFragment) {
             val newTask = try {
                 application().tasksRepository.reloadFilteredTaskItems(token, task)
             } catch (e: java.lang.Exception) {
-                fragment.context?.showError("Не удалось загрузить список адресов.")
+                fragment.context?.showErrorSuspend("Не удалось загрузить список адресов.")
                 return@launch
             }
 
@@ -282,7 +282,7 @@ class TaskListPresenter(val fragment: TaskListFragment) {
         try {
             application().tasksRepository.getAvailableEntranceKeys(user.token, true)
             application().tasksRepository.getAvailableEntranceEuroKeys(user.token, true)
-        }catch (e: java.lang.Exception){
+        } catch (e: java.lang.Exception) {
             CustomLog.writeToFile(CustomLog.getStacktraceAsString(e))
         }
 
