@@ -196,7 +196,7 @@ class ReportFragment : Fragment() {
 
     private fun refreshData() {
         presenter.bgScope.launch {
-            application().tasksRepository.getTaskItem(taskItem.taskId, taskItem.id)?.let{
+            application().tasksRepository.getTaskItem(taskItem.taskId, taskItem.id)?.let {
                 taskItem = it
             }
             saved = application().tasksRepository.loadEntranceResult(taskItem, entrance)
@@ -251,14 +251,22 @@ class ReportFragment : Fragment() {
     }
 
     fun updateEditable() {
-        val isEmpty = photosAdapter.data.none { it is ReportPhotosListModel.TaskItemPhoto }
-        appartaments_from?.isEnabled = !isEmpty
-        appartaments_to?.isEnabled = !isEmpty
-        lock_input_overlay?.setVisible(isEmpty)
-        if(isEmpty){
-            appartaments_from?.setText(entrance.startApartments.toString())
-            appartaments_to?.setText(entrance.endApartments.toString())
-            presenter.onApartmentIntervalChanged()
+        presenter.bgScope.launch {
+            val isNotEmpty =
+                    application().database.entrancePhotoDao().getEntrancesPhoto(taskItem.address.idnd, entrance.number).isNotEmpty() ||
+                        application().database.entrancePhotoDao().getEntrancesPhoto(taskItem.address.idnd, entrance.number-1).isNotEmpty() ||
+                        application().database.entrancePhotoDao().getEntrancesPhoto(taskItem.address.idnd, entrance.number + 1).isNotEmpty()
+
+            withContext(Dispatchers.Main) {
+                appartaments_from?.isEnabled = isNotEmpty
+                appartaments_to?.isEnabled = isNotEmpty
+                lock_input_overlay?.setVisible(!isNotEmpty)
+                if (!isNotEmpty) {
+                    appartaments_from?.setText(entrance.startApartments.toString())
+                    appartaments_to?.setText(entrance.endApartments.toString())
+                    presenter.onApartmentIntervalChanged()
+                }
+            }
         }
     }
 
@@ -371,8 +379,8 @@ class ReportFragment : Fragment() {
             }
         }
 
-        presenter.onEntranceKeyChanged(entrance_key.selectedItem?.toString() ?: "ошибка")
-        presenter.onEntranceEuroKeyChanged(entrance_euro_key.selectedItem?.toString() ?: "ошибка")
+        presenter.onEntranceKeyChanged(entrance_key?.selectedItem?.toString() ?: "ошибка")
+        presenter.onEntranceEuroKeyChanged(entrance_euro_key?.selectedItem?.toString() ?: "ошибка")
 
         withContext(Dispatchers.Main) {
             keyAdapter?.notifyDataSetChanged()
@@ -555,24 +563,33 @@ class ReportFragment : Fragment() {
             presenter.onApartmentButtonGroupChanged()
         }
         close_button?.setOnClickListener {
-            val isEmpty = photosAdapter.data.none { it is ReportPhotosListModel.TaskItemPhoto }
-            val isAppsIntervalChanged = (saved?.apartmentFrom != entrance.startApartments && saved?.apartmentFrom != null) ||
-                    (saved?.apartmentTo != entrance.endApartments && saved?.apartmentTo != null)
+            presenter.bgScope.launch {
+                val isNotEmpty =
+                    application().database.entrancePhotoDao().getEntrancesPhoto(taskItem.address.idnd, entrance.number).isNotEmpty() ||
+                            application().database.entrancePhotoDao().getEntrancesPhoto(taskItem.address.idnd, entrance.number-1).isNotEmpty() ||
+                            application().database.entrancePhotoDao().getEntrancesPhoto(taskItem.address.idnd, entrance.number + 1).isNotEmpty()
 
-            if(isEmpty && isAppsIntervalChanged){
-                context?.showError("Необходимо фото-подтверждение изменённого диапазона квартир")
-            }else{
-                context?.showError(
-                    "Вы действительно хотите закрыть подъезд?",
-                    object : ErrorButtonsListener {
-                        override fun positiveListener() {
-                            callback?.onEntranceClosed(task, taskItem, entrance)
-                        }
-                    },
-                    "Да",
-                    "Нет",
-                    true
-                )
+                withContext(Dispatchers.Main) {
+                    val isAppsIntervalChanged =
+                        (saved?.apartmentFrom != entrance.startApartments && saved?.apartmentFrom != null) ||
+                                (saved?.apartmentTo != entrance.endApartments && saved?.apartmentTo != null)
+
+                    if (!isNotEmpty && isAppsIntervalChanged) {
+                        context?.showError("Необходимо фото-подтверждение изменённого диапазона квартир")
+                    } else {
+                        context?.showError(
+                            "Вы действительно хотите закрыть подъезд?",
+                            object : ErrorButtonsListener {
+                                override fun positiveListener() {
+                                    callback?.onEntranceClosed(task, taskItem, entrance)
+                                }
+                            },
+                            "Да",
+                            "Нет",
+                            true
+                        )
+                    }
+                }
             }
         }
 

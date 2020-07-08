@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.MediaStore
 import android.text.InputType
+import android.util.Log
 import android.widget.EditText
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_report.*
@@ -266,6 +267,7 @@ class ReportPresenter(val fragment: ReportFragment) {
     }
 
     private fun changeApartmentInterval(entrance: EntranceModel, from: Int, to: Int) {
+        Log.d("Test Apps", "$entrance changed")
         var toApartment = to
         var fromApartment = from
         if (fromApartment > toApartment) {
@@ -337,6 +339,12 @@ class ReportPresenter(val fragment: ReportFragment) {
         fragment.photosAdapter.data.removeAt(holder.adapterPosition)
         fragment.photosAdapter.notifyItemRemoved(holder.adapterPosition)
         fragment.updateEditable()
+
+        fragment.taskItem.entrances.forEach {
+            if(it != fragment.entrance){
+                fragment.callback?.onEntranceChanged(it)
+            }
+        }
     }
 
     fun onFloorsChanged() {
