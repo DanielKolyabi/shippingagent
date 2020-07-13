@@ -98,11 +98,16 @@ class MyApplication : Application() {
                 database.execSQL("ALTER TABLE entrance_photos ADD COLUMN real_path TEXT")
             }
         }
+        val migration_43_44 = object : Migration(43, 44) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE entrance_photos ADD COLUMN is_entrance_photo INTEGER NOT NULL DEFAULT 0")
+            }
+        }
 
 
         database = Room
             .databaseBuilder(applicationContext, AppDatabase::class.java, "deliverycontroller")
-            .addMigrations(migration_36_37, migration_37_38, migration_38_39, migration_39_40, migration_40_41, migration_42_43)
+            .addMigrations(migration_36_37, migration_37_38, migration_38_39, migration_39_40, migration_40_41, migration_42_43, migration_43_44)
             .fallbackToDestructiveMigration()
             .build()
         tasksRepository = TaskRepository(database)

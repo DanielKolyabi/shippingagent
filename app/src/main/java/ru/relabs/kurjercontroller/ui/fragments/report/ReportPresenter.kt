@@ -39,19 +39,21 @@ const val REQUEST_PHOTO = 1
 class ReportPresenter(val fragment: ReportFragment) {
     var photoUUID: UUID? = null
     var photoMultiMode: Boolean = false
+    var photoEntrance: Boolean = false
 
     fun onBlankMultiPhotoClicked() {
         requestPhoto()
     }
 
-    fun onBlankPhotoClicked() {
-        requestPhoto(false)
+    fun onBlankPhotoClicked(isEntrancePhoto: Boolean) {
+        requestPhoto(false, isEntrancePhoto)
     }
 
-    private fun requestPhoto(multiPhoto: Boolean = true) {
+    private fun requestPhoto(multiPhoto: Boolean = true, entrancePhoto: Boolean = false) {
         val uuid = UUID.randomUUID()
         photoUUID = uuid
         photoMultiMode = multiPhoto
+        photoEntrance = entrancePhoto
         val photoFile = PathHelper.getEntrancePhotoFile(fragment.taskItem, fragment.entrance, uuid)
 
         val intent: Intent? = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
@@ -149,27 +151,30 @@ class ReportPresenter(val fragment: ReportFragment) {
                 fragment.taskItem,
                 fragment.entrance,
                 currentGPS,
-                null
+                null,
+                photoEntrance
             )
 
             val id = application().tasksRepository.savePhoto(photoModel)
-            fragment.allTaskItems.forEach { taskItem ->
-                taskItem.entrances.firstOrNull {
-                    it.number == fragment.entrance.number
-                            && taskItem != fragment.taskItem
-                            && it.state != EntranceModel.CLOSED
-                }?.let {
-                    application().tasksRepository.savePhoto(
-                        photoModel.copy(
-                            taskItem = taskItem,
-                            entranceModel = it,
-                            realPath = photoModel.URI.path
+
+            if (photoEntrance) {
+                fragment.allTaskItems.forEach { taskItem ->
+                    taskItem.entrances.firstOrNull {
+                        it.number == fragment.entrance.number
+                                && taskItem != fragment.taskItem
+                                && it.state != EntranceModel.CLOSED
+                    }?.let {
+                        application().tasksRepository.savePhoto(
+                            photoModel.copy(
+                                taskItem = taskItem,
+                                entranceModel = it,
+                                realPath = photoModel.URI.path
+                            )
                         )
-                    )
+                    }
                 }
             }
             val savedPhoto = photoModel.copy(id = id.toInt())
-
 
             fragment.photosAdapter.data.add(ReportPhotosListModel.TaskItemPhoto(savedPhoto))
             fragment.photosAdapter.notifyItemRangeChanged(fragment.photosAdapter.data.size - 1, 2)

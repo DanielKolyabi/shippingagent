@@ -179,7 +179,7 @@ class ReportFragment : Fragment() {
         })
         photosAdapter.addDelegate(ReportBlankPhotoDelegate {
             if (!isPhotoAvailable()) return@ReportBlankPhotoDelegate
-            presenter.onBlankPhotoClicked()
+            presenter.onBlankPhotoClicked(false)
         })
         photosAdapter.addDelegate(ReportBlankMultiPhotoDelegate {
             if (!isPhotoAvailable()) return@ReportBlankMultiPhotoDelegate
@@ -253,7 +253,9 @@ class ReportFragment : Fragment() {
     fun updateEditable() {
         presenter.bgScope.launch {
             val isNotEmpty =
-                    application().database.entrancePhotoDao().getEntrancesPhoto(taskItem.address.idnd, entrance.number).isNotEmpty()
+                application().database.entrancePhotoDao()
+                    .getEntrancesPhoto(taskItem.address.idnd, entrance.number)
+                    .any { it.isEntrancePhoto }
 
             withContext(Dispatchers.Main) {
                 appartaments_from?.isEnabled = isNotEmpty
@@ -262,7 +264,9 @@ class ReportFragment : Fragment() {
                 if (!isNotEmpty) {
                     appartaments_from?.setText(entrance.startApartments.toString())
                     appartaments_to?.setText(entrance.endApartments.toString())
-                    presenter.onApartmentIntervalChanged()
+                    withContext(Dispatchers.Main) {
+                        presenter.onApartmentIntervalChanged()
+                    }
                 }
             }
         }
@@ -545,7 +549,7 @@ class ReportFragment : Fragment() {
             showDescriptionInputDialog()
         }
         lock_input_overlay?.setOnClickListener {
-            presenter.onBlankPhotoClicked()
+            presenter.onBlankPhotoClicked(true)
         }
         entrance_closed?.setOnClickListener {
             presenter.onIsEntranceClosedChanged()
@@ -562,10 +566,13 @@ class ReportFragment : Fragment() {
         }
         close_button?.setOnClickListener {
             presenter.bgScope.launch {
-                presenter.onApartmentIntervalChanged()
+                withContext(Dispatchers.Main) {
+                    presenter.onApartmentIntervalChanged()
+                }
 
-                val isNotEmpty =
-                    application().database.entrancePhotoDao().getEntrancesPhoto(taskItem.address.idnd, entrance.number).isNotEmpty()
+                val isNotEmpty = application().database.entrancePhotoDao()
+                    .getEntrancesPhoto(taskItem.address.idnd, entrance.number)
+                    .any { it.isEntrancePhoto }
 
                 withContext(Dispatchers.Main) {
                     val isAppsIntervalChanged =

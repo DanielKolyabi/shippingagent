@@ -28,7 +28,9 @@ data class EntrancePhotoEntity(
     @ColumnInfo(name = "entrance_number")
     var entranceNumber: Int,
     @ColumnInfo(name = "real_path")
-    var realPath: String?
+    var realPath: String?,
+    @ColumnInfo(name = "is_entrance_photo")
+    var isEntrancePhoto: Boolean
 ) {
     suspend fun toModel(repository: TaskRepository): EntrancePhotoModel = withContext(Dispatchers.IO) {
         val taskItem = repository.db.taskItemDao().getByTaskItemId(taskId, taskItemId)?.toModel(repository)
@@ -42,7 +44,8 @@ data class EntrancePhotoEntity(
             gps = gps,
             uuid = UUID,
             taskItem = taskItem,
-            realPath = realPath
+            realPath = realPath,
+            isEntrancePhoto = isEntrancePhoto
         )
     }
 }
