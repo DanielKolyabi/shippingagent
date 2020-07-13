@@ -258,10 +258,10 @@ class ReportFragment : Fragment() {
                     .any { it.isEntrancePhoto }
 
             withContext(Dispatchers.Main) {
-                appartaments_from?.isEnabled = isNotEmpty
-                appartaments_to?.isEnabled = isNotEmpty
+                appartaments_from?.isEnabled = isNotEmpty && !isClosed()
+                appartaments_to?.isEnabled = isNotEmpty && !isClosed()
                 lock_input_overlay?.setVisible(!isNotEmpty)
-                if (!isNotEmpty) {
+                if (!isNotEmpty && !isClosed()) {
                     appartaments_from?.setText(entrance.startApartments.toString())
                     appartaments_to?.setText(entrance.endApartments.toString())
                     withContext(Dispatchers.Main) {
@@ -549,7 +549,9 @@ class ReportFragment : Fragment() {
             showDescriptionInputDialog()
         }
         lock_input_overlay?.setOnClickListener {
-            presenter.onBlankPhotoClicked(true)
+            if(!isClosed()){
+                presenter.onBlankPhotoClicked(true)
+            }
         }
         entrance_closed?.setOnClickListener {
             presenter.onIsEntranceClosedChanged()

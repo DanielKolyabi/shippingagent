@@ -297,12 +297,14 @@ class ReportPresenter(val fragment: ReportFragment) {
 
         bgScope.launch {
             fragment.allTaskItems.forEach {
-                application().tasksRepository.insertEntranceResult(
-                    it,
-                    entrance,
-                    apartmentFrom = fromApartment,
-                    apartmentTo = toApartment
-                )
+                if(it.entrances.firstOrNull { it.number == entrance.number }?.state != EntranceModel.CLOSED){
+                    application().tasksRepository.insertEntranceResult(
+                        it,
+                        entrance,
+                        apartmentFrom = fromApartment,
+                        apartmentTo = toApartment
+                    )
+                }
             }
 
             if (entrance.number != fragment.entrance.number) {
