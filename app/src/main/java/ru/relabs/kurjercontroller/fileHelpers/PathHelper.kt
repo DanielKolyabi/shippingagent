@@ -40,7 +40,7 @@ object PathHelper {
     }
 
     fun deletePhoto(entrancePhoto: EntrancePhotoModel) {
-        val file = File(entrancePhoto.URI.path)
+        val file = File(entrancePhoto.realPath ?: entrancePhoto.URI.path)
         val entranceFolder = file.parentFile
         val taskItemFolder = entranceFolder.parentFile
         file.delete()

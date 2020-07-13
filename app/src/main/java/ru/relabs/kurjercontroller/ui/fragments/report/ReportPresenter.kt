@@ -143,29 +143,35 @@ class ReportPresenter(val fragment: ReportFragment) {
         }
         bgScope.launch(Dispatchers.Main) {
             val currentGPS = application().currentLocation
-            val photoModel =
-                EntrancePhotoModel(
-                    0,
-                    photoUUID.toString(),
-                    fragment.taskItem,
-                    fragment.entrance,
-                    currentGPS
-                )
+            val photoModel = EntrancePhotoModel(
+                0,
+                photoUUID.toString(),
+                fragment.taskItem,
+                fragment.entrance,
+                currentGPS,
+                null
+            )
 
             val id = application().tasksRepository.savePhoto(photoModel)
-            val savedPhoto =
-                EntrancePhotoModel(
-                    id.toInt(),
-                    photoUUID.toString(),
-                    fragment.taskItem,
-                    fragment.entrance,
-                    currentGPS
-                )
+            fragment.allTaskItems.forEach { taskItem ->
+                taskItem.entrances.firstOrNull {
+                    it.number == fragment.entrance.number
+                            && taskItem != fragment.taskItem
+                            && it.state != EntranceModel.CLOSED
+                }?.let {
+                    application().tasksRepository.savePhoto(
+                        photoModel.copy(
+                            taskItem = taskItem,
+                            entranceModel = it,
+                            realPath = photoModel.URI.path
+                        )
+                    )
+                }
+            }
+            val savedPhoto = photoModel.copy(id = id.toInt())
 
 
-            fragment.photosAdapter.data.add(
-                ReportPhotosListModel.TaskItemPhoto(savedPhoto)
-            )
+            fragment.photosAdapter.data.add(ReportPhotosListModel.TaskItemPhoto(savedPhoto))
             fragment.photosAdapter.notifyItemRangeChanged(fragment.photosAdapter.data.size - 1, 2)
 
             if (photoMultiMode) {
@@ -277,7 +283,7 @@ class ReportPresenter(val fragment: ReportFragment) {
             fromApartment = toApartment - 1
         }
 
-        fragment.taskItem.entrances.indexOf(entrance).takeIf { it > 0 }?.let{ entranceIdx ->
+        fragment.taskItem.entrances.indexOf(entrance).takeIf { it > 0 }?.let { entranceIdx ->
             fragment.taskItem.entrances[entranceIdx] = fragment.taskItem.entrances[entranceIdx].copy(
                 startApartments = fromApartment,
                 endApartments = toApartment
@@ -298,25 +304,6 @@ class ReportPresenter(val fragment: ReportFragment) {
                 fragment.callback?.onEntranceChanged(entrance)
             }
         }
-
-        fragment.taskItem.entrances.firstOrNull {
-            it.number == entrance.number - 1
-        }?.let { prevEntrance ->
-            if (prevEntrance.endApartments >= fromApartment) {
-                changeApartmentInterval(
-                    prevEntrance,
-                    prevEntrance.startApartments,
-                    fromApartment - 1
-                )
-            }
-        }
-        fragment.taskItem.entrances.firstOrNull {
-            it.number == entrance.number + 1
-        }?.let { nextEntrance ->
-            if (nextEntrance.startApartments <= toApartment) {
-                changeApartmentInterval(nextEntrance, toApartment + 1, nextEntrance.endApartments)
-            }
-        }
     }
 
     fun onRemovePhotoClicked(holder: RecyclerView.ViewHolder) {
@@ -325,13 +312,9 @@ class ReportPresenter(val fragment: ReportFragment) {
             fragment.context?.showError("Невозможно удалить фото.")
             return
         }
-        val status =
-            File((fragment.photosAdapter.data[holder.adapterPosition] as ReportPhotosListModel.TaskItemPhoto).photo.URI.path).delete()
-        if (!status) {
-            fragment.context?.showError("Невозможно удалить фото из памяти.")
-        }
         val entrancePhotoModel =
             (fragment.photosAdapter.data[holder.adapterPosition] as ReportPhotosListModel.TaskItemPhoto).photo
+
         bgScope.launch {
             application().tasksRepository.removePhoto(entrancePhotoModel)
         }
@@ -339,12 +322,6 @@ class ReportPresenter(val fragment: ReportFragment) {
         fragment.photosAdapter.data.removeAt(holder.adapterPosition)
         fragment.photosAdapter.notifyItemRemoved(holder.adapterPosition)
         fragment.updateEditable()
-
-        fragment.taskItem.entrances.forEach {
-            if(it != fragment.entrance){
-                fragment.callback?.onEntranceChanged(it)
-            }
-        }
     }
 
     fun onFloorsChanged() {

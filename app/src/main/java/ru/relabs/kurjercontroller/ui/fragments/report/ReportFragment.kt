@@ -253,9 +253,7 @@ class ReportFragment : Fragment() {
     fun updateEditable() {
         presenter.bgScope.launch {
             val isNotEmpty =
-                    application().database.entrancePhotoDao().getEntrancesPhoto(taskItem.address.idnd, entrance.number).isNotEmpty() ||
-                        application().database.entrancePhotoDao().getEntrancesPhoto(taskItem.address.idnd, entrance.number-1).isNotEmpty() ||
-                        application().database.entrancePhotoDao().getEntrancesPhoto(taskItem.address.idnd, entrance.number + 1).isNotEmpty()
+                    application().database.entrancePhotoDao().getEntrancesPhoto(taskItem.address.idnd, entrance.number).isNotEmpty()
 
             withContext(Dispatchers.Main) {
                 appartaments_from?.isEnabled = isNotEmpty
@@ -564,10 +562,10 @@ class ReportFragment : Fragment() {
         }
         close_button?.setOnClickListener {
             presenter.bgScope.launch {
+                presenter.onApartmentIntervalChanged()
+
                 val isNotEmpty =
-                    application().database.entrancePhotoDao().getEntrancesPhoto(taskItem.address.idnd, entrance.number).isNotEmpty() ||
-                            application().database.entrancePhotoDao().getEntrancesPhoto(taskItem.address.idnd, entrance.number-1).isNotEmpty() ||
-                            application().database.entrancePhotoDao().getEntrancesPhoto(taskItem.address.idnd, entrance.number + 1).isNotEmpty()
+                    application().database.entrancePhotoDao().getEntrancesPhoto(taskItem.address.idnd, entrance.number).isNotEmpty()
 
                 withContext(Dispatchers.Main) {
                     val isAppsIntervalChanged =

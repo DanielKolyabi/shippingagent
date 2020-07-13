@@ -16,7 +16,7 @@ class ReportPhotoHolder(itemView: View, private val onRemoveClicked: (holder: Re
     override fun onBindViewHolder(item: ReportPhotosListModel) {
         if (item !is ReportPhotosListModel.TaskItemPhoto) return
         Glide.with(itemView)
-            .load(item.photo.URI)
+            .load(item.photo.realPath ?: item.photo.URI)
             .into(itemView.photo)
         itemView.remove.setOnClickListener {
             onRemoveClicked(this)

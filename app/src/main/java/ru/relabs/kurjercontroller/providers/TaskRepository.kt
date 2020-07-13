@@ -417,7 +417,9 @@ class TaskRepository(val db: AppDatabase) {
 
     suspend fun removePhoto(entrancePhoto: EntrancePhotoModel) = withContext(Dispatchers.IO) {
         db.entrancePhotoDao().deleteById(entrancePhoto.id)
-        PathHelper.deletePhoto(entrancePhoto)
+        if (db.entrancePhotoDao().getByUUID(entrancePhoto.uuid).isEmpty()) {
+            PathHelper.deletePhoto(entrancePhoto)
+        }
     }
 
     suspend fun savePhoto(entrancePhoto: EntrancePhotoModel): Long = withContext(Dispatchers.IO) {
@@ -427,14 +429,11 @@ class TaskRepository(val db: AppDatabase) {
     suspend fun loadEntrancePhotos(
         taskItem: TaskItemModel,
         entrance: EntranceModel
-    ): List<EntrancePhotoModel> =
-        withContext(Dispatchers.IO) {
-            return@withContext db.entrancePhotoDao()
-                .getEntrancePhoto(taskItem.taskId, taskItem.id, entrance.number)
-                .map {
-                    it.toModel(this@TaskRepository)
-                }
-        }
+    ): List<EntrancePhotoModel> = withContext(Dispatchers.IO) {
+        return@withContext db.entrancePhotoDao()
+            .getEntrancePhoto(taskItem.taskId, taskItem.id, entrance.number)
+            .map { it.toModel(this@TaskRepository) }
+    }
 
     suspend fun insertEntranceResult(
         taskItem: TaskItemModel, entrance: EntranceModel,

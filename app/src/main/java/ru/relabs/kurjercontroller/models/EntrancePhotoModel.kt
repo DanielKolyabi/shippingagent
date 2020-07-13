@@ -13,7 +13,8 @@ data class EntrancePhotoModel(
     val uuid: String,
     val taskItem: TaskItemModel,
     val entranceModel: EntranceModel,
-    val gps: GPSCoordinatesModel
+    val gps: GPSCoordinatesModel,
+    val realPath: String?
 ) {
     fun toEntity(): EntrancePhotoEntity =
         EntrancePhotoEntity(
@@ -23,7 +24,8 @@ data class EntrancePhotoModel(
             taskItem.taskId,
             taskItem.id,
             taskItem.address.idnd,
-            entranceModel.number
+            entranceModel.number,
+            realPath
         )
 
     val URI: Uri
