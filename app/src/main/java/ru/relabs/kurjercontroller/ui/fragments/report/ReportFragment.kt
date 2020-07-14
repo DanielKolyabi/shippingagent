@@ -254,7 +254,7 @@ class ReportFragment : Fragment() {
         presenter.bgScope.launch {
             val isNotEmpty =
                 application().database.entrancePhotoDao()
-                    .getEntrancesPhoto(taskItem.address.idnd, entrance.number)
+                    .getEntrancePhoto(taskItem.taskId, taskItem.id, entrance.number)
                     .any { it.isEntrancePhoto }
 
             withContext(Dispatchers.Main) {
@@ -573,7 +573,7 @@ class ReportFragment : Fragment() {
                 }
 
                 val isNotEmpty = application().database.entrancePhotoDao()
-                    .getEntrancesPhoto(taskItem.address.idnd, entrance.number)
+                    .getEntrancePhoto(taskItem.taskId, taskItem.id, entrance.number)
                     .any { it.isEntrancePhoto }
 
                 withContext(Dispatchers.Main) {
