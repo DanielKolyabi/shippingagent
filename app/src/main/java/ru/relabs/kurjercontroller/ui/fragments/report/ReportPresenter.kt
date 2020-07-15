@@ -322,13 +322,15 @@ class ReportPresenter(val fragment: ReportFragment) {
         val entrancePhotoModel =
             (fragment.photosAdapter.data[holder.adapterPosition] as ReportPhotosListModel.TaskItemPhoto).photo
 
-        bgScope.launch {
-            application().tasksRepository.removePhoto(entrancePhotoModel)
-        }
-
         fragment.photosAdapter.data.removeAt(holder.adapterPosition)
         fragment.photosAdapter.notifyItemRemoved(holder.adapterPosition)
-        fragment.updateEditable()
+
+        bgScope.launch {
+            application().tasksRepository.removePhoto(entrancePhotoModel)
+            withContext(Dispatchers.Main){
+                fragment.updateEditable()
+            }
+        }
     }
 
     fun onFloorsChanged() {
