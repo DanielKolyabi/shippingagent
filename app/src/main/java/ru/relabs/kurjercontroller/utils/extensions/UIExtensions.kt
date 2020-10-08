@@ -4,16 +4,14 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
-import android.content.Context
 import android.graphics.Color
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import androidx.core.graphics.ColorUtils
 import org.joda.time.DateTime
 import org.joda.time.Seconds
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 
 /**
  * Created by ProOrange on 29.08.2018.
@@ -67,7 +65,7 @@ fun View.performFlash() {
     startFlashValueAnimator(this)
 }
 
-fun Iterable<TaskItemModel>.placemarkColor(): Int {
+fun Iterable<TaskItem>.placemarkColor(): Int {
     val minCloseTime = filter { it.closeTime != null && !it.isClosed }.minBy {
         it.closeTime!!
     }

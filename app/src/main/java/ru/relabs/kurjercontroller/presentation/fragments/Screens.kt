@@ -39,7 +39,7 @@ class AddressListScreen(private val taskIds: List<Int>) : SupportAppScreen() {
 }
 
 class ReportScreen(
-    private val taskItems: List<Pair<TaskModel, TaskItemModel>>,
+    private val taskItems: List<Pair<TaskModel, TaskItem>>,
     private val selectedTaskId: Int,
     private val selectedTaskItemId: Int
 ) :
@@ -56,13 +56,13 @@ class ReportScreen(
 
 class TasksYandexMapScreen(
     private val tasks: List<TaskModel>,
-    private val onAddressClicked: suspend (address: AddressModel) -> Unit,
+    private val onAddressClicked: suspend (address: Address) -> Unit,
     private val onNewAddressesAdded: () -> Unit
 ) : SupportAppScreen() {
     override fun getFragment(): Fragment {
         return TasksYandexMapFragment.newInstance(tasks).apply {
             setOnClickCallback(object : BaseYandexMapFragment.Callback {
-                override suspend fun onAddressClicked(address: AddressModel) {
+                override suspend fun onAddressClicked(address: Address) {
                     this@TasksYandexMapScreen.onAddressClicked(address)
                 }
             })
@@ -74,14 +74,14 @@ class TasksYandexMapScreen(
 class AddressYandexMapScreen(
     private val addresses: List<AddressWithColor>,
     private val deliverymanIds: List<Int>,
-    private val storages: List<StorageModel>,
-    private val onAddressClicked: suspend (address: AddressModel) -> Unit
+    private val storages: List<TaskStorage>,
+    private val onAddressClicked: suspend (address: Address) -> Unit
 ) :
     SupportAppScreen() {
     override fun getFragment(): Fragment {
         return AddressYandexMapFragment.newInstance(addresses, deliverymanIds, storages).apply {
             setOnClickCallback(object : BaseYandexMapFragment.Callback {
-                override suspend fun onAddressClicked(address: AddressModel) {
+                override suspend fun onAddressClicked(address: Address) {
                     this@AddressYandexMapScreen.onAddressClicked(address)
                 }
             })
@@ -95,7 +95,7 @@ class TaskInfoScreen(private val task: TaskModel) : SupportAppScreen() {
     }
 }
 
-class TaskItemExplanationScreen(private val taskItem: TaskItemModel) : SupportAppScreen() {
+class TaskItemExplanationScreen(private val taskItem: TaskItem) : SupportAppScreen() {
     override fun getFragment(): Fragment {
         return TaskItemExplanationFragment.newInstance(taskItem)
     }
@@ -113,7 +113,7 @@ class FiltersScreen(
 }
 
 class OnlineFiltersScreen(
-    private val onStartClicked: (filtersModel: TaskFiltersModel, withPlanned: Boolean) -> Unit
+    private val onStartClicked: (filters: TaskFilters, withPlanned: Boolean) -> Unit
 ) : SupportAppScreen() {
     override fun getFragment(): Fragment {
         return FiltersFragment.newInstance(null, false).apply {

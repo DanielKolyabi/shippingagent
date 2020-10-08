@@ -1,6 +1,6 @@
 package ru.relabs.kurjercontroller.presentation.fragments.report.models
 
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.domain.models.TaskModel
 
 /**
@@ -8,6 +8,6 @@ import ru.relabs.kurjercontroller.domain.models.TaskModel
  */
 
 sealed class ReportTasksListModel {
-    data class TaskButton(val task: TaskModel, val taskItem: TaskItemModel, val pos: Int, var active: Boolean) :
+    data class TaskButton(val task: TaskModel, val taskItem: TaskItem, val pos: Int, var active: Boolean) :
         ReportTasksListModel()
 }

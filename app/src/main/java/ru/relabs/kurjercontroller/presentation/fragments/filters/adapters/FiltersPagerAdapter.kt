@@ -4,7 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.PagerAdapter
-import ru.relabs.kurjercontroller.domain.models.TaskFiltersModel
+import ru.relabs.kurjercontroller.domain.models.TaskFilters
 import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.presentation.fragments.filters.FiltersFragment
 
@@ -15,7 +15,7 @@ import ru.relabs.kurjercontroller.presentation.fragments.filters.FiltersFragment
 class FiltersPagerAdapter(
     var tasks: List<TaskModel>,
     fm: FragmentManager,
-    val onStartClicked: (task: TaskModel, newFilters: TaskFiltersModel, withPlanned: Boolean) -> Unit
+    val onStartClicked: (task: TaskModel, newFilters: TaskFilters, withPlanned: Boolean) -> Unit
 ) : FragmentStatePagerAdapter(fm) {
     override fun getCount(): Int = tasks.size
 

@@ -9,10 +9,12 @@ import android.widget.Filter
 import android.widget.Filterable
 import android.widget.TextView
 import kotlinx.coroutines.runBlocking
-import ru.relabs.kurjercontroller.logError
-import ru.relabs.kurjercontroller.domain.models.FilterModel
+import ru.relabs.kurjercontroller.domain.models.TaskFilter
 import ru.relabs.kurjercontroller.providers.interfaces.IFilterSearch
 import ru.relabs.kurjercontroller.orEmpty
+import ru.relabs.kurjercontroller.utils.Left
+import ru.relabs.kurjercontroller.utils.Right
+import ru.relabs.kurjercontroller.utils.log
 import java.lang.ref.WeakReference
 
 /**
@@ -22,10 +24,10 @@ class FilterSearchAdapter(
     context: Context,
     val filterSearch: IFilterSearch,
     val filterType: Int,
-    val selectedFiltersReference: WeakReference<MutableList<FilterModel>>,
+    val selectedFiltersReference: WeakReference<MutableList<TaskFilter>>,
     val withPlannedProvider: () -> Boolean
-) : ArrayAdapter<FilterModel>(context, 0), Filterable {
-    private val results: MutableList<FilterModel> = mutableListOf()
+) : ArrayAdapter<TaskFilter>(context, 0), Filterable {
+    private val results: MutableList<TaskFilter> = mutableListOf()
 
     override fun getView(pos: Int, convertView: View?, parent: ViewGroup?): View {
         val view = LayoutInflater.from(context).inflate(android.R.layout.simple_dropdown_item_1line, parent, false)
@@ -35,7 +37,7 @@ class FilterSearchAdapter(
     }
 
 
-    override fun getItem(index: Int): FilterModel = results[index]
+    override fun getItem(index: Int): TaskFilter = results[index]
 
     override fun getItemId(pos: Int): Long = pos.toLong()
 
@@ -51,23 +53,25 @@ class FilterSearchAdapter(
                     withPlannedProvider()
                 ).await()
             }
-            if(filters.error != null){
-                filters.error.logError()
-                return FilterResults().apply{
-                    values = null
-                    count = 0
+            return when(filters){
+                is Right -> FilterResults().apply {
+                    values = filters.value
+                    count = filters.value.size
                 }
-            }
-            return FilterResults().apply {
-                values = filters.result
-                count = filters.result.size
+                is Left -> {
+                    filters.value.log()
+                    FilterResults().apply {
+                        values = emptyList<Filter>()
+                        count = 0
+                    }
+                }
             }
         }
 
         override fun publishResults(constraint: CharSequence?, searchResults: FilterResults?) {
             if (searchResults != null && searchResults.count > 0) {
                 results.clear()
-                (searchResults.values as? List<FilterModel>)?.forEach {
+                (searchResults.values as? List<TaskFilter>)?.forEach {
                     results.add(it)
                 }
                 notifyDataSetChanged()

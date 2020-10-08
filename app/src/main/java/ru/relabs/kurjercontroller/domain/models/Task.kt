@@ -2,9 +2,7 @@ package ru.relabs.kurjercontroller.domain.models
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
-import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.domain.mappers.MappingException
-import java.lang.RuntimeException
 import java.util.*
 
 @Parcelize
@@ -18,10 +16,10 @@ data class Task(
     val startControlDate: Date,
     val endControlDate: Date,
     val description: String,
-    val storages: List<StorageModel>,
-    val publishers: List<PublisherModel>,
-    val taskItems: List<TaskItemModel>,
-    val taskFilters: TaskFiltersModel,
+    val storages: List<TaskStorage>,
+    val publishers: List<TaskPublisher>,
+    val taskItems: List<TaskItem>,
+    val taskFilters: TaskFilters,
     val state: State,
     val iteration: Int,
     val firstExaminedDeviceId: String?,

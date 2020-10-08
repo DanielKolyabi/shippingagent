@@ -6,6 +6,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.selects.select
 import ru.relabs.kurjercontroller.application.ControllApplication
 import ru.relabs.kurjercontroller.presentation.activities.MainActivity
+import java.io.File
 
 
 /**
@@ -52,3 +53,9 @@ suspend fun <E : Job> Iterable<E>.joinFirst(): E = select {
 }
 
 suspend fun <E : Deferred<R>, R> Iterable<E>.awaitFirst(): R = joinFirst().getCompleted()
+
+fun File.deleteIfEmpty() {
+    if (this.isDirectory && this.listFiles().isEmpty()) {
+        this.deleteRecursively()
+    }
+}

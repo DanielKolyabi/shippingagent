@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import ru.relabs.kurjercontroller.presentation.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.activity
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.utils.extensions.setVisible
 import ru.relabs.kurjercontroller.presentation.fragments.report.adapters.ReportPagerAdapter
@@ -32,7 +32,7 @@ import java.util.*
 class ReportPagerFragment : Fragment() {
 
     val tasks: MutableList<TaskModel> = mutableListOf()
-    val taskItems: MutableList<TaskItemModel> = mutableListOf()
+    val taskItems: MutableList<TaskItem> = mutableListOf()
     var selectedTask: Pair<Int, Int> = Pair(0, 0)
     val presenter = ReportPagerPresenter(this)
     lateinit var pagerAdapter: ReportPagerAdapter
@@ -110,7 +110,7 @@ class ReportPagerFragment : Fragment() {
         @JvmStatic
         fun newInstance(
             tasks: List<TaskModel>,
-            taskItems: List<TaskItemModel>,
+            taskItems: List<TaskItem>,
             selectedTaskId: Int,
             selectedTaskItemId: Int
         ) =

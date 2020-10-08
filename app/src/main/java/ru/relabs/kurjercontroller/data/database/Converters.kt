@@ -10,7 +10,7 @@ import com.google.gson.reflect.TypeToken
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import ru.relabs.kurjercontroller.data.database.models.ApartmentResult
-import ru.relabs.kurjercontroller.domain.models.AddressModel
+import ru.relabs.kurjercontroller.domain.models.Address
 import ru.relabs.kurjercontroller.domain.models.GPSCoordinatesModel
 import java.lang.reflect.Type
 import java.util.*
@@ -56,13 +56,13 @@ class Converters {
     }
 
     @TypeConverter
-    fun addressToJSON(value: AddressModel): String {
+    fun addressToJSON(value: Address): String {
         return gson.toJson(value)
     }
 
     @TypeConverter
-    fun jsonToAddress(json: String): AddressModel {
-        return gson.fromJson(json, AddressModel::class.java)
+    fun jsonToAddress(json: String): Address {
+        return gson.fromJson(json, Address::class.java)
     }
 
     @TypeConverter

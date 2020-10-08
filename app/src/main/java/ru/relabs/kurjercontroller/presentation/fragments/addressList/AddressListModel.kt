@@ -1,6 +1,5 @@
 package ru.relabs.kurjercontroller.presentation.fragments.addressList
 
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
 import ru.relabs.kurjercontroller.domain.models.TaskModel
 
 /**
@@ -9,11 +8,11 @@ import ru.relabs.kurjercontroller.domain.models.TaskModel
 sealed class AddressListModel {
 
     data class Address(
-        val taskItems: MutableList<TaskItemModel>
+        val taskItems: MutableList<ru.relabs.kurjercontroller.domain.models.TaskItem>
     ) : AddressListModel()
 
     data class TaskItem(
-        val taskItem: TaskItemModel,
+        val taskItem: ru.relabs.kurjercontroller.domain.models.TaskItem,
         val parentTask: TaskModel
     ) : AddressListModel()
 

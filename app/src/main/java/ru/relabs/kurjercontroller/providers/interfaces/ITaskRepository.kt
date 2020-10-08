@@ -1,6 +1,6 @@
 package ru.relabs.kurjercontroller.providers.interfaces
 
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.domain.models.TaskModel
 
 /**
@@ -8,9 +8,9 @@ import ru.relabs.kurjercontroller.domain.models.TaskModel
  */
 interface ITaskRepository {
     suspend fun getTasks(): List<TaskModel>
-    suspend fun getTaskItems(taskId: Int): List<TaskItemModel>
+    suspend fun getTaskItems(taskId: Int): List<TaskItem>
     suspend fun getTask(taskId: Int): TaskModel?
-    suspend fun getTaskItem(taskItemId: Int): TaskItemModel?
+    suspend fun getTaskItem(taskItemId: Int): TaskItem?
 
     suspend fun closeAllTasks()
 }

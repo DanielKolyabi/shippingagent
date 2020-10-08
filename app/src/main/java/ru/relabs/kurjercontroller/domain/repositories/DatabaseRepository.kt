@@ -1,27 +1,22 @@
 package ru.relabs.kurjercontroller.domain.repositories
 
-import android.location.Location
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
+import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.data.database.AppDatabase
 import ru.relabs.kurjercontroller.data.database.entities.*
-import ru.relabs.kurjercontroller.domain.mappers.ReportEntranceSelectionMapper
-import ru.relabs.kurjercontroller.domain.mappers.TaskItemEntranceResultMapper
-import ru.relabs.kurjercontroller.domain.mappers.TaskItemResultMapper
+import ru.relabs.kurjercontroller.domain.mappers.database.DatabaseEntranceApartmentsMapper
 import ru.relabs.kurjercontroller.domain.mappers.database.*
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.domain.providers.PathsProvider
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
-
-import ru.relabs.kurjercontroller.models.GPSCoordinatesModel
-import ru.relabs.kurjercontroller.models.TaskModel
-import ru.relabs.kurjercontroller.utils.Either
-import ru.relabs.kurjercontroller.utils.Left
-import ru.relabs.kurjercontroller.utils.Right
-import ru.relabs.kurjercontroller.utils.debug
+import ru.relabs.kurjercontroller.providers.TaskRepository
+import ru.relabs.kurjercontroller.utils.*
+import java.io.File
 import java.util.*
 
 class DatabaseRepository(
@@ -31,17 +26,11 @@ class DatabaseRepository(
     private val pathsProvider: PathsProvider
 ) {
 
-    suspend fun removeReport(report: ReportQueryItemEntity) {
-        db.reportQueryDao().delete(report)
-        if (report.removeAfterSend) {
-            db.photosDao().getByTaskItemId(report.taskItemId).forEach {
-                //Delete photo
-                val file = pathsProvider.getTaskItemPhotoFileByID(report.taskItemId, UUID.fromString(it.UUID))
-                file.delete()
-                db.photosDao().delete(it)
-            }
-            pathsProvider.getTaskItemPhotoFolderById(report.taskItemId).delete()
-        }
+    suspend fun removeReport(report: EntranceReportEntity) = withContext(Dispatchers.IO) {
+        db.entranceReportDao().delete(report)
+        db.entrancePhotoDao()
+            .getEntrancePhoto(report.taskId, report.taskItemId, report.entranceNumber)
+            .forEach { removePhoto(it) }
     }
 
     suspend fun clearTasks() = withContext(Dispatchers.IO) {
@@ -50,37 +39,80 @@ class DatabaseRepository(
         }
     }
 
-    suspend fun removeTask(taskId: TaskId) = withContext(Dispatchers.IO) {
-        //Remove all taskItems
-        db.taskItemDao().getAllForTask(taskId.id).forEach { taskItem ->
-            db.photosDao().getByTaskItemId(taskItem.id).forEach { photo ->
-                val file = pathsProvider.getTaskItemPhotoFileByID(photo.taskItemId, UUID.fromString(photo.UUID))
-                file.delete()
-                db.photosDao().delete(photo)
-            }
-
-            db.taskItemResultsDao().getByTaskItemId(taskItem.id)?.let { taskItemResult ->
-                db.entrancesDao().getByTaskItemResultId(taskItemResult.id).forEach { entrance ->
-                    db.entrancesDao().delete(entrance)
+    private suspend fun removeTaskItem(taskItem: TaskItemEntity) {
+        db.entranceDao().getByTaskItemId(taskItem.taskId, taskItem.taskItemId).forEach { entrance ->
+            db.entranceResultDao()
+                .deleteByEntrance(taskItem.taskId, taskItem.taskItemId, entrance.number)
+            db.entrancePhotoDao()
+                .getEntrancePhoto(taskItem.taskId, taskItem.taskItemId, entrance.number)
+                .forEach { photo ->
+                    removePhoto(photo)
                 }
-                db.taskItemResultsDao().delete(taskItemResult)
-            }
-            db.entranceDataDao().deleteAllForTaskItem(taskItem.id)
-            db.taskItemDao().delete(taskItem)
+            db.apartmentResultDao()
+                .deleteByEntrance(taskItem.taskId, taskItem.taskItemId, entrance.number)
+            db.entranceReportDao()
+                .deleteByEntrance(taskItem.taskId, taskItem.taskItemId, entrance.number)
+            db.entranceDao().delete(entrance)
         }
-        //Remove task
-        db.taskDao().getById(taskId.id)?.let {
-            db.taskDao().delete(it)
-        }
-
-        pathsProvider.getTaskRasterizeMapFileById(taskId).delete()
+        db.taskItemDao().delete(taskItem)
     }
 
-    fun removePhoto(photo: TaskItemPhoto) {
-        val file = pathsProvider.getTaskItemPhotoFileByID(photo.taskItemId.id, UUID.fromString(photo.UUID))
+    suspend fun removePhoto(entrancePhoto: EntrancePhotoEntity) = withContext(Dispatchers.IO) {
+        db.entrancePhotoDao().deleteById(entrancePhoto.id)
+        if (db.entrancePhotoDao().getByUUID(entrancePhoto.UUID).isEmpty()) {
+            deletePhotoFile(entrancePhoto)
+        }
+    }
+
+    suspend fun deletePhotoFile(entrancePhoto: EntrancePhotoEntity) {
+        val file = File(
+            entrancePhoto.realPath
+                ?: pathsProvider.getEntrancePhotoFileByID(
+                    TaskItemId(entrancePhoto.taskItemId),
+                    EntranceNumber(entrancePhoto.entranceNumber),
+                    entrancePhoto.UUID
+                ).path
+        )
+        val entranceFolder = file.parentFile
+        val taskItemFolder = entranceFolder.parentFile
         file.delete()
-        db.photosDao().deleteById(photo.id.id)
+        entranceFolder.deleteIfEmpty()
+        taskItemFolder.deleteIfEmpty()
     }
+
+    private suspend fun removeTask(taskId: TaskId) = withContext(Dispatchers.IO) {
+        db.taskPublisherDao().deleteByTaskId(taskId.id)
+        db.filtersDao().deleteByTaskId(taskId.id)
+        db.taskItemDao().getByTaskId(taskId.id)
+            .forEach { taskItem ->
+                db.entranceDao().getByTaskItemId(taskItem.taskId, taskItem.taskItemId)
+                    .forEach {
+                        deleteEntrance(taskItem.taskId, taskItem.taskItemId, it.number)
+                    }
+
+                safeDeleteAddress(taskItem.addressId)
+
+                db.taskItemDao().delete(taskItem)
+            }
+
+        db.taskDao().deleteById(taskId.id)
+    }
+
+    private suspend fun safeDeleteAddress(addressId: Int) {
+        if (db.taskItemDao().getByAddressId(addressId).isEmpty()) {
+            db.addressDao().deleteById(addressId)
+        }
+    }
+
+    suspend fun deleteEntrance(taskId: Int, taskItemId: Int, entranceNumber: Int) =
+        withContext(Dispatchers.IO) {
+            val entity = db.entranceDao().getByNumber(taskId, taskItemId, entranceNumber)
+                ?: return@withContext
+            db.entranceDao().delete(entity)
+            db.entranceResultDao().deleteByEntrance(entity.taskId, entity.taskItemId, entity.number)
+            db.apartmentResultDao()
+                .deleteByEntrance(entity.taskId, entity.taskItemId, entity.number)
+        }
 
     suspend fun putSendQuery(sendData: SendQueryData): Either<Exception, SendQueryItemEntity> = withContext(Dispatchers.IO) {
         when (val r = mapSendDataToEntity(sendData)) {
@@ -94,14 +126,6 @@ class DatabaseRepository(
 
     private fun mapSendDataToEntity(data: SendQueryData): Either<Exception, SendQueryItemEntity> {
         return when (data) {
-            is SendQueryData.PauseStart -> getAuthorizedSendQuery(
-                "$baseUrl/api/v1/pause/start",
-                "type=${data.pauseType.toInt()}&time=${data.startTime}"
-            )
-            is SendQueryData.PauseStop -> getAuthorizedSendQuery(
-                "$baseUrl/api/v1/pause/stop",
-                "type=${data.pauseType.toInt()}&time=${data.endTime}"
-            )
             is SendQueryData.TaskAccepted -> getAuthorizedSendQuery(
                 "$baseUrl/api/v1/tasks/${data.taskId.id}/accepted"
             )
@@ -127,74 +151,73 @@ class DatabaseRepository(
         )
     }
 
-    suspend fun getTasks(): List<Task> = withContext(Dispatchers.IO) {
-        db.taskDao().allOpened
-            .map { DatabaseTaskMapper.fromEntity(it, db) }
-            .filter { it.items.isNotEmpty() && Date() <= it.endTime }
-    }
+    private suspend fun closeTaskById(taskId: Int) = withContext(Dispatchers.IO) {
+        db.taskPublisherDao().deleteByTaskId(taskId)
+        db.filtersDao().deleteByTaskId(taskId)
+        db.taskItemDao().getByTaskId(taskId)
+            .forEach { taskItem ->
+                db.entranceDao().getByTaskItemId(taskItem.taskId, taskItem.taskItemId)
+                    .forEach {
+                        deleteEntrance(taskItem.taskId, taskItem.taskItemId, it.number)
+                    }
 
-    suspend fun closeTaskById(taskId: TaskId, sendClosed: Boolean) = closeTaskById(taskId.id, sendClosed)
+                safeDeleteAddress(taskItem.addressId)
 
-    suspend fun closeTaskById(taskId: Int, sendClosed: Boolean) = withContext(Dispatchers.IO) {
-        //Remove all taskItems
-        db.taskItemDao().getAllForTask(taskId).forEach { taskItem ->
-            db.taskItemResultsDao().getByTaskItemId(taskItem.id)?.let { taskItemResult ->
-                db.entrancesDao().getByTaskItemResultId(taskItemResult.id).forEach { entrance ->
-                    db.entrancesDao().delete(entrance)
-                }
-                db.taskItemResultsDao().delete(taskItemResult)
+                db.taskItemDao().delete(taskItem)
             }
-            db.entranceDataDao().deleteAllForTaskItem(taskItem.id)
-            db.taskItemDao().delete(taskItem)
-        }
-        //Remove task
-        db.taskDao().getById(taskId)?.let {
-            db.taskDao().delete(it)
-        }
-        //Remove rast map
-        pathsProvider.getTaskRasterizeMapFileById(TaskId(taskId)).delete()
+
+        db.taskDao().deleteById(taskId)
     }
 
-    suspend fun mergeTasks(tasks: List<Task>): Flow<MergeResult> = flow {
+    suspend fun merge(newTasks: List<Task>): Flow<MergeResult> = flow {
+
         val savedTasksIDs = db.taskDao().all.map { it.id }
-        val newTasksIDs = tasks.map { it.id.id }
+        val newTasksIDs = newTasks.map { it.id }
 
         //Задача отсутствует в ответе от сервера (удалено)
-        db.taskDao().all.filter { it.id !in newTasksIDs }.forEach { task ->
-            closeTaskById(task.id, false)
+        db.taskDao().all.filter { it.id !in newTasksIDs && !it.isOnline }.forEach { task ->
+            closeTaskById(task.id)
             emit(MergeResult.TaskRemoved(TaskId(task.id)))
+            Log.d("merge", "Close task: ${task.id}")
         }
 
         //Задача не присутствует в сохранённых (новая)
-        tasks.filter { it.id.id !in savedTasksIDs }.forEach { task ->
+        newTasks.filter { it.id.id !in savedTasksIDs }.forEach { task ->
             if (task.state.state == TaskState.CANCELED) {
-                debug("New task ${task.id} passed due 12 status")
+                Log.d("merge", "New task ${task.id} passed due 12 status")
                 return@forEach
             }
             //Add task
             val newTaskId = db.taskDao().insert(DatabaseTaskMapper.toEntity(task))
-            var openedTaskItems = 0
-            for (item in task.items) {
-                //Add address
-                db.addressDao().insert(DatabaseAddressMapper.toEntity(item.address))
-                //Add item
-                val reportForThisTask = db.reportQueryDao().getByTaskItemId(item.id.id)
-                if (item.state != TaskItemState.CLOSED && reportForThisTask == null) {
-                    openedTaskItems++
-                }
-                if (reportForThisTask != null) {
-                    db.taskItemDao().insert(DatabaseTaskItemMapper.toEntity(item.copy(state = TaskItemState.CLOSED)))
-                } else {
+            Log.d("merge", "Add task ID: $newTaskId")
+            var openedEntrances = 0
+            db.taskStorageDao().insertAll(task.storages.map { it.toEntity(task.id) })
+            db.taskPublisherDao().insertAll(task.publishers.map { it.toEntity() })
+            if (!task.filtered) {
+                task.taskItems.forEach { item ->
+                    db.addressDao().insert(item.address.toEntity())
                     db.taskItemDao().insert(DatabaseTaskItemMapper.toEntity(item))
+                    item.entrances.forEach { entrance ->
+                        val entity = DatabaseEntranceMapper.toEntity(entrance, item.taskId, item.id)
+                        if (db.entranceReportDao().getByNumber(entity.taskItemId, entity.number) != null) {
+                            entity.state = EntranceState.CLOSED.toInt()
+                        }
+                        db.entranceDao().insert(entity)
+                        if (entity.state == EntranceState.CREATED.toInt()) {
+                            openedEntrances++
+                        }
+                    }
                 }
-                db.entranceDataDao().insertAll(item.entrancesData.map { DatabaseEntranceDataMapper.toEntity(it, item.id) })
-                debug("Add taskItem ID: ${item.id.id}")
-            }
-            if (openedTaskItems <= 0) {
-                closeTaskById(newTaskId.toInt(), false)
+                if (openedEntrances <= 0) {
+                    closeTaskById(newTaskId.toInt())
+                } else {
+                    emit(MergeResult.TaskCreated(task))
+                    putSendQuery(SendQueryData.TaskReceived(task.id))
+                }
             } else {
-                putSendQuery(SendQueryData.TaskReceived(task.id))
+                saveFilters(task)
                 emit(MergeResult.TaskCreated(task))
+                putSendQuery(SendQueryData.TaskReceived(task.id))
             }
         }
 
@@ -203,79 +226,89 @@ class DatabaseRepository(
         Если она закрыта | выполнена на сервере - удалить с клиента
         Если итерация > сохранённой | состояние отличается от сохранённого и сохранённое != начато |
          */
-        tasks.filter { it.id.id in savedTasksIDs }.forEach { task ->
+        newTasks.filter { it.id.id in savedTasksIDs }.forEach { task ->
             val savedTask = db.taskDao().getById(task.id.id) ?: return@forEach
-            val savedTaskState = savedTask.state.toTaskState()
+            //Игнорируем задания с фильтрами, т.к. нет возможности на месте получить список TaskItems
+
             if (task.state.state == TaskState.CANCELED) {
-                if (savedTaskState == TaskState.STARTED) {
-                    putSendQuery(SendQueryData.TaskAccepted(TaskId(savedTask.id)))
+                if (savedTask.state.toTaskState() == TaskState.STARTED) {
+                    putSendQuery(SendQueryData.TaskAccepted(task.id))
                 } else {
-                    emit(MergeResult.TaskRemoved(TaskId(savedTask.id)))
-                    closeTaskById(savedTask.id, false)
+                    closeTaskById(savedTask.id)
+                    emit(MergeResult.TaskRemoved(task.id))
                 }
             } else if (task.state.state == TaskState.COMPLETED) {
-                emit(MergeResult.TaskRemoved(TaskId(savedTask.id)))
-                closeTaskById(savedTask.id, false)
+                closeTaskById(savedTask.id)
+                emit(MergeResult.TaskRemoved(task.id))
                 return@forEach
             } else if (
                 (savedTask.iteration < task.iteration)
-                || (task.state.state != savedTaskState && savedTaskState != TaskState.STARTED)
-                || (task.endTime != savedTask.endTime || task.startTime != savedTask.startTime)
+                || (task.state.state.toInt() != savedTask.state && savedTask.state.toAndroidState() != TaskModel.STARTED)
             ) {
-                emit(MergeResult.TaskUpdated(task))
-
-                putSendQuery(SendQueryData.TaskReceived(TaskId(savedTask.id)))
-
                 db.taskDao().update(DatabaseTaskMapper.toEntity(task))
+                db.taskStorageDao().insertAll(task.storages.map { it.toEntity(task.id) })
+                db.taskPublisherDao().insertAll(task.publishers.map { it.toEntity() })
 
-                val currentTasks = db.taskItemDao().getAllForTask(task.id.id).toMutableList()
+                val currentTaskItems = db.taskItemDao().getByTaskId(task.id.id).toMutableList()
 
-                //Add new tasks and update old tasks
-                task.items.forEach { newTaskItem ->
-                    currentTasks.removeAll { oldTaskItem -> oldTaskItem.id == newTaskItem.id.id }
+                task.taskItems.forEach { taskItem ->
+                    currentTaskItems.removeAll { oldTaskItem -> oldTaskItem.taskItemId == taskItem.id.id && oldTaskItem.taskId == taskItem.taskId.id }
 
-                    db.addressDao().insert(DatabaseAddressMapper.toEntity(newTaskItem.address))
-
-                    val reportForThisTask = db.reportQueryDao().getByTaskItemId(newTaskItem.id.id)
-
-                    db.taskItemDao().insert(
-                        if (reportForThisTask != null) {
-                            DatabaseTaskItemMapper.toEntity(newTaskItem.copy(state = TaskItemState.CLOSED))
-                        } else {
-                            DatabaseTaskItemMapper.toEntity(newTaskItem)
+                    db.addressDao().insert(taskItem.address.toEntity())
+                    db.taskItemDao().insert(DatabaseTaskItemMapper.toEntity(taskItem))
+                    taskItem.entrances.forEach { entrance ->
+                        val entity = DatabaseEntranceMapper.toEntity(entrance, taskItem.taskId, taskItem.id)
+                        if (db.entranceReportDao().getByNumber(entity.taskItemId, entity.number) != null) {
+                            entity.state = EntranceState.CLOSED.toInt()
                         }
-                    )
-
-                    db.entranceDataDao()
-                        .insertAll(newTaskItem.entrancesData.map { enData -> DatabaseEntranceDataMapper.toEntity(enData, newTaskItem.id) })
+                        db.entranceDao().insert(entity)
+                    }
                 }
 
-                //Remove old taskItems
-                currentTasks.forEach {
-                    removeTaskItem(it.id)
+                currentTaskItems.forEach {
+                    removeTaskItem(it)
                 }
-                //result.isTasksChanged = true
+                emit(MergeResult.TaskUpdated(task))
+            } else {
+                //MERGE CLOSE TIMINGS
+                task.taskItems.forEach { taskItem ->
+                    val savedItem = db.taskItemDao().getByTaskItemId(taskItem.taskId.id, taskItem.id.id)
+                    if (savedItem != null && savedItem.closeTime == null && taskItem.closeTime != null) {
+                        db.taskItemDao()
+                            .insert(savedItem.copy(closeTime = DateTime(taskItem.closeTime), isNew = true))
+                    }
+                }
+                emit(MergeResult.TaskUpdated(task))
             }
         }
     }.flowOn(Dispatchers.IO)
 
-    private fun removeTaskItem(taskItemId: Int) {
-        if (db.reportQueryDao().getByTaskItemId(taskItemId) == null) {
-            db.photosDao().deleteByTaskItemId(taskItemId)
+    private suspend fun saveFilters(
+        task: Task,
+        filters: TaskFilters = task.taskFilters,
+        withPlanned: Boolean = task.withPlanned
+    ) = withContext(Dispatchers.IO) {
+        db.taskDao().getById(task.id.id)?.let {
+            db.taskDao().update(it.copy(withPlanned = withPlanned))
         }
-        val result = db.taskItemResultsDao().getByTaskItemId(taskItemId)
-        if (result != null) {
-            db.entrancesDao().getByTaskItemResultId(result.id)
-            db.taskItemResultsDao().delete(result)
-        }
-        db.entranceDataDao().deleteAllForTaskItem(taskItemId)
-        db.taskItemDao().deleteById(taskItemId)
-    }
 
-    suspend fun getTask(id: TaskId): Task? = withContext(Dispatchers.IO) {
-        db.taskDao().getById(id.id)?.let {
-            DatabaseTaskMapper.fromEntity(it, db)
-        }
+        db.filtersDao().deleteByTaskId(task.id.id)
+
+        db.filtersDao().insertAll(filters.brigades.map {
+            DatabaseFilterMapper.toEntity(it, task.id, FilterEntity.BRIGADE_FILTER)
+        })
+        db.filtersDao().insertAll(filters.publishers.map {
+            DatabaseFilterMapper.toEntity(it, task.id, FilterEntity.PUBLISHER_FILTER)
+        })
+        db.filtersDao().insertAll(filters.users.map {
+            DatabaseFilterMapper.toEntity(it, task.id, FilterEntity.USER_FILTER)
+        })
+        db.filtersDao().insertAll(filters.districts.map {
+            DatabaseFilterMapper.toEntity(it, task.id, FilterEntity.DISTRICT_FILTER)
+        })
+        db.filtersDao().insertAll(filters.regions.map {
+            DatabaseFilterMapper.toEntity(it, task.id, FilterEntity.REGION_FILTER)
+        })
     }
 
     suspend fun examineTask(task: Task): Task = withContext(Dispatchers.IO) {
@@ -292,185 +325,79 @@ class DatabaseRepository(
         task.copy(state = Task.State(TaskState.EXAMINED, false))
     }
 
-    suspend fun getTaskItem(id: TaskItemId): TaskItem? = withContext(Dispatchers.IO) {
-        db.taskItemDao().getById(id.id)?.let { DatabaseTaskItemMapper.fromEntity(it, db) }
-    }
-
-    suspend fun getTaskItemPhotos(taskItem: TaskItem): List<TaskItemPhoto> = withContext(Dispatchers.IO) {
-        db.photosDao().getByTaskItemId(taskItem.id.id).map {
-            DatabasePhotoMapper.fromEntity(it)
-        }
-    }
-
-    suspend fun getTaskItemResult(taskItemId: TaskItemId): TaskItemResult? = withContext(Dispatchers.IO) {
-        db.taskItemResultsDao().getByTaskItemId(taskItemId.id)?.let {
-            TaskItemResultMapper.fromEntity(db, it)
-        }
-    }
-
-    suspend fun getTaskItemResult(taskItem: TaskItem): TaskItemResult? = withContext(Dispatchers.IO) {
-        getTaskItemResult(taskItem.id)
-    }
-
-    suspend fun updateTaskItemResult(updatedReport: TaskItemResult): TaskItemResult? = withContext(Dispatchers.IO) {
-        val newId = db.taskItemResultsDao().insert(TaskItemResultMapper.fromModel(updatedReport))
-        db.entrancesDao().insertAll(
-            updatedReport.entrances.map {
-                TaskItemEntranceResultMapper.fromModel(
-                    if (it.taskItemResultId.id == 0) {
-                        it.copy(taskItemResultId = TaskItemResultId(newId.toInt()))
-                    } else {
-                        it
-                    }
-                )
-            }
-        )
-
-        getTaskItemResult(updatedReport.taskItemId)
-    }
-
-    suspend fun createOrUpdateTaskItemEntranceResultSelection(
-        entrance: EntranceNumber,
-        taskItem: TaskItem,
-        selectionUpdater: (ReportEntranceSelection) -> ReportEntranceSelection
-    ): TaskItemResult? = withContext(Dispatchers.IO) {
-        val taskItemResult = db.taskItemResultsDao().getByTaskItemId(taskItem.id.id) ?: createEmptyTaskItemResult(taskItem.id)
-        val entranceResult = db.entrancesDao().getByTaskItemResultId(taskItemResult.id).firstOrNull { it.entrance == entrance.number }
-            ?: createEmptyTaskItemEntranceResult(TaskItemResultId(taskItemResult.id), entrance)
-
-        db.entrancesDao().update(
-            entranceResult.copy(
-                state = ReportEntranceSelectionMapper.toBits(
-                    selectionUpdater(ReportEntranceSelectionMapper.fromBits(entranceResult.state))
-                )
-            )
-        )
-
-        getTaskItemResult(taskItem)
-    }
-
-    suspend fun createOrUpdateTaskItemEntranceResultSelection(
-        entrance: EntranceNumber,
-        taskItem: TaskItem,
-        selection: ReportEntranceSelection
-    ): TaskItemResult? = withContext(Dispatchers.IO) {
-        createOrUpdateTaskItemEntranceResultSelection(entrance, taskItem) { selection }
-    }
-
-    private suspend fun createEmptyTaskItemEntranceResult(
-        taskItemResultId: TaskItemResultId,
-        entranceNumber: EntranceNumber
-    ): TaskItemResultEntranceEntity = withContext(Dispatchers.IO) {
-        val empty = TaskItemResultEntranceEntity.empty(taskItemResultId, entranceNumber)
-        val id = db.entrancesDao().insert(empty)
-
-        empty.copy(id = id.toInt())
-    }
-
-    private suspend fun createEmptyTaskItemResult(taskItemId: TaskItemId): TaskItemResultEntity = withContext(Dispatchers.IO) {
-        val empty = TaskItemResultEntity.empty(taskItemId)
-        val id = db.taskItemResultsDao().insert(empty)
-
-        empty.copy(id = id.toInt())
-    }
-
-    suspend fun savePhoto(entrance: Int, taskItem: TaskItem, uuid: UUID, location: Location?): TaskItemPhoto =
-        withContext(Dispatchers.IO) {
-            val gps = GPSCoordinatesModel(
-                location?.latitude ?: 0.0,
-                location?.longitude ?: 0.0,
-                location?.time?.let { Date(it) } ?: Date(0)
-            )
-
-            val photoEntity = TaskItemPhotoEntity(0, uuid.toString(), gps, taskItem.id.id, entrance)
-
-            val id = db.photosDao().insert(photoEntity)
-            DatabasePhotoMapper.fromEntity(photoEntity.copy(id = id.toInt()))
-        }
-
-    suspend fun closeTaskItem(taskItemId: TaskItemId, fromRemote: Boolean = false) = withContext(Dispatchers.IO) {
-        val taskItemEntity = db.taskItemDao().getById(taskItemId.id)
-        val parentTaskId = taskItemEntity?.taskId
-
-        taskItemEntity
-            ?.copy(state = TaskItemEntity.STATE_CLOSED)
-            ?.let { db.taskItemDao().update(it) }
-
-        parentTaskId?.let { taskId ->
-            db.taskDao().getById(taskId)?.let { parentTask ->
-                val state = parentTask.state.toTaskState()
-                if (state == TaskState.EXAMINED || state == TaskState.CREATED) {
-                    if (!fromRemote) {
-                        putSendQuery(SendQueryData.TaskAccepted(TaskId(parentTask.id)))
-                    }
-                    db.taskDao().update(parentTask.copy(state = TaskState.STARTED.toInt()))
-                }
-            }
-        }
-    }
-
-    suspend fun closeTaskItem(taskItem: TaskItem, fromRemote: Boolean = false) = withContext(Dispatchers.IO) {
-        closeTaskItem(taskItem.id, fromRemote)
-    }
-
-
-    suspend fun createTaskItemReport(reportItem: ReportQueryItemEntity) = withContext(Dispatchers.IO) {
-        db.reportQueryDao().insert(reportItem)
-    }
-
-    suspend fun isTaskCloseRequired(taskId: TaskId): Boolean = withContext(Dispatchers.IO) {
-        db.taskItemDao().getAllForTask(taskId.id).none { it.state == TaskItemEntity.STATE_CREATED }
+    suspend fun createEntranceReport(reportItem: EntranceReportEntity) = withContext(Dispatchers.IO) {
+        db.entranceReportDao().insert(reportItem)
     }
 
     suspend fun getNextSendQuery(): SendQueryItemEntity? = withContext(Dispatchers.IO) {
         db.sendQueryDao().all.firstOrNull()
     }
 
-    suspend fun getNextReportQuery(): ReportQueryItemEntity? = withContext(Dispatchers.IO) {
-        db.reportQueryDao().all.firstOrNull()
+    suspend fun getNextReportQuery(): EntranceReportEntity? = withContext(Dispatchers.IO) {
+        db.entranceReportDao().all.firstOrNull()
     }
 
     suspend fun getQueryItemsCount(): Int = withContext(Dispatchers.IO) {
-        db.reportQueryDao().all.size + db.sendQueryDao().all.size
+        db.entranceReportDao().all.size + db.sendQueryDao().all.size
     }
 
-    suspend fun removeSendQuery(sendQuery: SendQueryItemEntity) = withContext(Dispatchers.IO){
+    suspend fun removeSendQuery(sendQuery: SendQueryItemEntity) = withContext(Dispatchers.IO) {
         db.sendQueryDao().delete(sendQuery)
     }
 
-    suspend fun isOpenedTasksExists(): Boolean = withContext(Dispatchers.IO){
-        db.taskDao().allOpened.isNotEmpty()
-    }
-
-    suspend fun isMergeNeeded(newTasks: List<Task>): Boolean = withContext(Dispatchers.IO){
+    suspend fun isMergeNeeded(newTasks: List<Task>): Boolean = withContext(Dispatchers.IO) {
         val savedTasksIDs = db.taskDao().all.map { it.id }
+        val newTasksIDs = newTasks.map { it.id.id }
 
-        newTasks.filter { it.id.id !in savedTasksIDs }.forEach { task ->
+        db.taskDao().all.filter { it.id !in newTasksIDs && !it.isOnline }.forEach {
             return@withContext true
         }
-
+        newTasks.filter { it.id.id !in savedTasksIDs }.forEach {
+            return@withContext true
+        }
         newTasks.filter { it.id.id in savedTasksIDs }.forEach { task ->
-            val savedTask = db.taskDao().getById(task.id.id)!!
+            val savedTask = db.taskDao().getById(task.id.id) ?: return@forEach
             if (task.state.state == TaskState.CANCELED) {
-                return@withContext true
+                if (savedTask.state.toAndroidState() != TaskModel.STARTED) {
+                    return@withContext true
+                }
             } else if (task.state.state == TaskState.COMPLETED) {
                 return@withContext true
             } else if (
                 (savedTask.iteration < task.iteration)
-                || (task.state.state.toInt() != savedTask.state && savedTask.state != TaskModel.STARTED)
-                || (task.endTime != savedTask.endTime || task.startTime != savedTask.startTime && savedTask.state != TaskModel.STARTED)
+                || (task.state.state.toInt() != savedTask.state && savedTask.state.toAndroidState() != TaskModel.STARTED)
             ) {
                 return@withContext true
+            } else {
+                task.taskItems.forEach { taskItem ->
+                    val savedItem = db.taskItemDao().getByTaskItemId(taskItem.taskId.id, taskItem.id.id)
+                    if (savedItem != null && savedItem.closeTime == null && taskItem.closeTime != null) {
+                        return@withContext true
+                    }
+                }
             }
         }
         return@withContext false
     }
+
+    suspend fun getEntranceResult(
+        taskItem: TaskItem,
+        entrance: Entrance
+    ): EntranceResultEntity? = withContext(Dispatchers.IO) {
+        db.entranceResultDao().getByEntrance(taskItem.taskId.id, taskItem.id.id, entrance.number.number)
+    }
+
+    suspend fun getEntranceApartments(
+        taskItem: TaskItem,
+        entrance: Entrance
+    ): List<ApartmentResult> = withContext(Dispatchers.IO) {
+        db.apartmentResultDao()
+            .getByEntrance(taskItem.taskId.id, taskItem.id.id, entrance.number.number)
+            .map { DatabaseEntranceApartmentsMapper.fromEntity(it) }
+    }
 }
 
 sealed class SendQueryData {
-    data class PauseStart(val pauseType: PauseType, val startTime: Long) : SendQueryData()
-    data class PauseStop(val pauseType: PauseType, val endTime: Long) : SendQueryData()
-
     data class TaskAccepted(val taskId: TaskId) : SendQueryData()
     data class TaskReceived(val taskId: TaskId) : SendQueryData()
     data class TaskExamined(val taskId: TaskId) : SendQueryData()

@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import ru.relabs.kurjercontroller.presentation.delegateAdapter.BaseViewHolder
 import ru.relabs.kurjercontroller.presentation.delegateAdapter.IAdapterDelegate
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.presentation.fragments.addressList.AddressListModel
 import ru.relabs.kurjercontroller.presentation.fragments.addressList.holders.AddressListAddressHolder
 
@@ -13,7 +13,7 @@ import ru.relabs.kurjercontroller.presentation.fragments.addressList.holders.Add
  * Created by ProOrange on 11.08.2018.
  */
 class AddressListAddressDelegate(
-    private val onMapClick: (items: List<TaskItemModel>) -> Unit
+    private val onMapClick: (items: List<TaskItem>) -> Unit
 ) : IAdapterDelegate<AddressListModel> {
     override fun isForViewType(data: List<AddressListModel>, position: Int): Boolean {
         return data[position] is AddressListModel.Address

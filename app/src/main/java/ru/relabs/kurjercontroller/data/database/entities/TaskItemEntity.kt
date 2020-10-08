@@ -7,8 +7,8 @@ import androidx.room.PrimaryKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
-import ru.relabs.kurjercontroller.domain.models.AddressModel
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.mappers.database.DatabaseTaskItemMapper
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.providers.TaskRepository
 
 /**
@@ -47,25 +47,5 @@ data class TaskItemEntity(
     @ColumnInfo(name = "required_apartments")
     val requiredApartments: String,
     @ColumnInfo(name = "order_id")
-    val orderId: Int
-) {
-    suspend fun toModel(repository: TaskRepository): TaskItemModel = withContext(Dispatchers.IO) {
-        return@withContext TaskItemModel(
-            id = taskItemId,
-            defaultReportType = defaultReportType,
-            notes = notes,
-            required = required,
-            taskId = taskId,
-            publisherName = publisherName,
-            address = repository.db.addressDao().getById(addressId)?.toModel() ?: AddressModel.blank(),
-            entrances = repository.db.entranceDao().getByTaskItemId(taskId, taskItemId).map { it.toModel() }.toMutableList(),
-            closeTime = closeTime,
-            deliverymanId = deliverymanId,
-            isNew = isNew,
-            wrongMethod = wrongMethod,
-            buttonName = buttonName,
-            requiredApartments = requiredApartments,
-            publisherId = orderId
-        )
-    }
-}
+    val publisherId: Int
+)

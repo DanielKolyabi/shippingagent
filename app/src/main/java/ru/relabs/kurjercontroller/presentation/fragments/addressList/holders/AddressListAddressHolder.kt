@@ -5,7 +5,7 @@ import android.view.View
 import kotlinx.android.synthetic.main.holder_addr_list_address.view.*
 import ru.relabs.kurjercontroller.presentation.delegateAdapter.BaseViewHolder
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.utils.extensions.performFlash
 import ru.relabs.kurjercontroller.presentation.fragments.addressList.AddressListModel
 
@@ -14,7 +14,7 @@ import ru.relabs.kurjercontroller.presentation.fragments.addressList.AddressList
  * Created by ProOrange on 11.08.2018.
  */
 class AddressListAddressHolder(
-    private val onMapClick: (items: List<TaskItemModel>) -> Unit,
+    private val onMapClick: (items: List<TaskItem>) -> Unit,
     itemView: View
 ) : BaseViewHolder<AddressListModel>(itemView) {
     override fun onBindViewHolder(item: AddressListModel) {

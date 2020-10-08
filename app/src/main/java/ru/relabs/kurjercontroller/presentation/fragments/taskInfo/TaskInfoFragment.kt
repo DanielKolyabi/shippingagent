@@ -17,7 +17,7 @@ import ru.relabs.kurjercontroller.utils.CustomLog
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.domain.models.AddressModel
+import ru.relabs.kurjercontroller.domain.models.Address
 import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.presentation.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.presentation.activities.showError
@@ -28,7 +28,7 @@ class TaskInfoFragment : Fragment() {
 
     lateinit var task: TaskModel
 
-    var targetAddress: AddressModel? = null
+    var targetAddress: Address? = null
     val presenter = TaskInfoPresenter(this)
     val adapter = DelegateAdapter<TaskInfoModel>().apply {
         addDelegate(InfoAddressesHeaderDelegate())
@@ -64,7 +64,7 @@ class TaskInfoFragment : Fragment() {
 
     }
 
-    private fun scrollToAddress(address: AddressModel) {
+    private fun scrollToAddress(address: Address) {
         val idx = adapter.data.indexOfFirst {
             (it as? TaskInfoModel.TaskItem)?.taskItem?.address?.idnd == address.idnd
         }

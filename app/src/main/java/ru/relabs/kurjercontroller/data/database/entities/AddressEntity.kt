@@ -3,7 +3,7 @@ package ru.relabs.kurjercontroller.data.database.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import ru.relabs.kurjercontroller.domain.models.AddressModel
+import ru.relabs.kurjercontroller.domain.models.Address
 
 /**
  * Created by ProOrange on 31.08.2018.
@@ -25,8 +25,4 @@ data class AddressEntity(
     var gpsLat: Double,
     @ColumnInfo(name = "gps_long")
     var gpsLong: Double
-) {
-    fun toModel(): AddressModel {
-        return AddressModel(id, idnd, city, street, house, houseName, gpsLat, gpsLong)
-    }
-}
+)

@@ -19,11 +19,11 @@ android {
         }
     }
 
-    compileSdkVersion(28)
+    compileSdkVersion(29)
     defaultConfig {
         applicationId = "ru.relabs.kurjercontroller"
         minSdkVersion(21)
-        targetSdkVersion(28)
+        targetSdkVersion(29)
         versionCode = 25
         versionName = "25"
 

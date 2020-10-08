@@ -2,7 +2,7 @@ package ru.relabs.kurjercontroller.providers
 
 import kotlinx.coroutines.*
 import ru.relabs.kurjercontroller.data.database.entities.FilterEntity
-import ru.relabs.kurjercontroller.domain.models.FilterModel
+import ru.relabs.kurjercontroller.domain.models.TaskFilter
 import ru.relabs.kurjercontroller.providers.interfaces.FiltersResultOrError
 import ru.relabs.kurjercontroller.providers.interfaces.IFilterSearch
 
@@ -25,7 +25,7 @@ object MockFilterSearch : IFilterSearch {
     override fun searchFilters(
         filterType: Int,
         filterValue: String,
-        selectedFilters: List<FilterModel>,
+        selectedFilters: List<TaskFilter>,
         withPlanned: Boolean
     ): Deferred<FiltersResultOrError> {
         val deferred = CompletableDeferred<FiltersResultOrError>()
@@ -34,7 +34,7 @@ object MockFilterSearch : IFilterSearch {
             deferred.complete(
                 FiltersResultOrError(
                     result = listOf(
-                        FilterModel(
+                        TaskFilter(
                             1,
                             filterValue + "_" + filterType,
                             false,

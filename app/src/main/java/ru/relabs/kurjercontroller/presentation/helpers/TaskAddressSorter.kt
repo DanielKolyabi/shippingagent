@@ -1,6 +1,6 @@
 package ru.relabs.kurjercontroller.presentation.helpers
 
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.presentation.fragments.addressList.AddressListModel
 
 /**
@@ -70,8 +70,8 @@ object TaskAddressSorter {
         return internalSortTaskItemsStandart(new) + internalSortTaskItemsStandart(old)
     }
 
-    fun sortInfoTaskItemsAlphabetic(taskItems: List<TaskItemModel>): List<TaskItemModel> {
-        return taskItems.asSequence().sortedWith(compareBy<TaskItemModel> { it.address.city }
+    fun sortInfoTaskItemsAlphabetic(taskItems: List<TaskItem>): List<TaskItem> {
+        return taskItems.asSequence().sortedWith(compareBy<TaskItem> { it.address.city }
             .thenBy { it.address.street }
             .thenBy { it.address.house }
             .thenBy { it.address.houseName }

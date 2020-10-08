@@ -5,7 +5,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.utils.CancelableScope
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.presentation.activities.showError
 import ru.relabs.kurjercontroller.presentation.fragments.AddressYandexMapScreen
 import ru.relabs.kurjercontroller.presentation.fragments.TaskItemExplanationScreen
@@ -15,7 +15,7 @@ import ru.relabs.kurjercontroller.presentation.fragments.yandexMap.base.WRONG_ME
 class TaskInfoPresenter(val fragment: TaskInfoFragment) {
     val bgScope = CancelableScope(Dispatchers.Default)
 
-    fun onInfoClicked(taskItem: TaskItemModel) {
+    fun onInfoClicked(taskItem: TaskItem) {
         application().router.navigateTo(TaskItemExplanationScreen(taskItem))
     }
 

@@ -2,7 +2,7 @@ package ru.relabs.kurjercontroller.presentation.fragments.yandexMap
 
 import android.os.Bundle
 import android.view.View
-import ru.relabs.kurjercontroller.domain.models.StorageModel
+import ru.relabs.kurjercontroller.domain.models.TaskStorage
 import ru.relabs.kurjercontroller.presentation.fragments.yandexMap.base.BaseYandexMapFragment
 
 class AddressYandexMapFragment : BaseYandexMapFragment() {
@@ -14,7 +14,7 @@ class AddressYandexMapFragment : BaseYandexMapFragment() {
     var addressIds: List<AddressIdWithColor> = listOf()
     var addresses: List<AddressWithColor> = listOf()
     var deliverymanIds: List<Int> = listOf()
-    var storages: List<StorageModel> = listOf()
+    var storages: List<TaskStorage> = listOf()
     override val presenter = AddressYandexMapPresenter(this)
 
 
@@ -26,7 +26,7 @@ class AddressYandexMapFragment : BaseYandexMapFragment() {
                 savedCameraPosition = null
             }
             deliverymanIds = it.getIntArray("deliveryman_ids").toList()
-            storages = it.getParcelableArrayList<StorageModel>("storages")?.toList() ?: listOf()
+            storages = it.getParcelableArrayList<TaskStorage>("storages")?.toList() ?: listOf()
         }
     }
 
@@ -47,7 +47,7 @@ class AddressYandexMapFragment : BaseYandexMapFragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(addresses: List<AddressWithColor>, deliverymanIds: List<Int>, storages: List<StorageModel>) =
+        fun newInstance(addresses: List<AddressWithColor>, deliverymanIds: List<Int>, storages: List<TaskStorage>) =
             AddressYandexMapFragment().apply {
                 arguments = Bundle().apply {
                     putParcelableArrayList(

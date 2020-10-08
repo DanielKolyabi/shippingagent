@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import ru.relabs.kurjercontroller.domain.models.EntranceModel
+import ru.relabs.kurjercontroller.domain.models.Entrance
 
 /**
  * Created by ProOrange on 19.03.2019.
@@ -37,18 +37,8 @@ data class EntranceEntity(
     @ColumnInfo(name = "has_lookout")
     val hasLookout: Boolean
 ) {
-    fun toModel(): EntranceModel {
-        return EntranceModel(
-            number = number,
-            euroKey = euroKey,
-            key = key,
-            state = state,
-            code = code,
-            endApartments = endApartments,
-            floors = floors,
-            mailboxType = mailboxType,
-            startApartments = startApartments,
-            hasLookout = hasLookout
-        )
+    companion object {
+        const val STATE_CLOSED = 1
+        const val STATE_CREATED = 0
     }
 }

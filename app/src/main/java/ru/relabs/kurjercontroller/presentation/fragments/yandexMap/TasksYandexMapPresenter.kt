@@ -6,7 +6,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.logError
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 import ru.relabs.kurjercontroller.data.models.FiltersRequest
@@ -87,7 +87,7 @@ class TasksYandexMapPresenter(override val fragment: TasksYandexMapFragment) : B
         }
     }
 
-    fun addNewTaskItems(selectedLayer: YandexMapModel.TaskLayer, newTaskItems: List<TaskItemModel>) =
+    fun addNewTaskItems(selectedLayer: YandexMapModel.TaskLayer, newTaskItems: List<TaskItem>) =
         bgScope.launch(Dispatchers.IO) {
             selectedLayer.task.taskItems.addAll(newTaskItems)
 

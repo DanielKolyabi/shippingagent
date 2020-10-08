@@ -21,7 +21,7 @@ import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
 import ru.relabs.kurjercontroller.logError
-import ru.relabs.kurjercontroller.domain.models.EntranceModel
+import ru.relabs.kurjercontroller.domain.models.Entrance
 import ru.relabs.kurjercontroller.domain.models.EntrancePhotoModel
 import ru.relabs.kurjercontroller.presentation.activities.showError
 import ru.relabs.kurjercontroller.utils.extensions.setSelectButtonActive
@@ -162,12 +162,12 @@ class ReportPresenter(val fragment: ReportFragment) {
                     taskItem.entrances.firstOrNull {
                         it.number == fragment.entrance.number
                                 && taskItem != fragment.taskItem
-                                && it.state != EntranceModel.CLOSED
+                                && it.state != Entrance.CLOSED
                     }?.let {
                         application().tasksRepository.savePhoto(
                             photoModel.copy(
                                 taskItem = taskItem,
-                                entranceModel = it,
+                                entrance = it,
                                 realPath = photoModel.URI.path
                             )
                         )
@@ -277,7 +277,7 @@ class ReportPresenter(val fragment: ReportFragment) {
         changeApartmentInterval(fragment.entrance, from, to)
     }
 
-    private fun changeApartmentInterval(entrance: EntranceModel, from: Int, to: Int) {
+    private fun changeApartmentInterval(entrance: Entrance, from: Int, to: Int) {
         Log.d("Test Apps", "$entrance changed")
         var toApartment = to
         var fromApartment = from
@@ -297,7 +297,7 @@ class ReportPresenter(val fragment: ReportFragment) {
 
         bgScope.launch {
             fragment.allTaskItems.forEach {
-                if(it.entrances.firstOrNull { it.number == entrance.number }?.state != EntranceModel.CLOSED){
+                if(it.entrances.firstOrNull { it.number == entrance.number }?.state != Entrance.CLOSED){
                     application().tasksRepository.insertEntranceResult(
                         it,
                         entrance,

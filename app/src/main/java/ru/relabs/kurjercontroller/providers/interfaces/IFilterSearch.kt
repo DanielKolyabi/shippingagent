@@ -1,16 +1,22 @@
 package ru.relabs.kurjercontroller.providers.interfaces
 
 import kotlinx.coroutines.Deferred
-import ru.relabs.kurjercontroller.domain.models.FilterModel
+import ru.relabs.kurjercontroller.domain.models.TaskFilter
+import ru.relabs.kurjercontroller.utils.Either
 
 /**
  * Created by ProOrange on 22.03.2019.
  */
 interface IFilterSearch {
-    fun searchFilters(filterType: Int, filterValue: String, selectedFilters: List<FilterModel>, withPlanned: Boolean): Deferred<FiltersResultOrError>
+    fun searchFilters(
+        filterType: Int,
+        filterValue: String,
+        selectedFilters: List<TaskFilter>,
+        withPlanned: Boolean
+    ): Deferred<Either<Exception, List<TaskFilter>>>
 }
 
 data class FiltersResultOrError(
-    val result: List<FilterModel> = listOf(),
+    val result: List<TaskFilter> = listOf(),
     val error: Exception? = null
 )

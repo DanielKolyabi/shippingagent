@@ -4,65 +4,50 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import ru.relabs.kurjercontroller.utils.CancelableScope
-import ru.relabs.kurjercontroller.domain.models.FilterModel
-import ru.relabs.kurjercontroller.network.DeliveryServerAPI
-import ru.relabs.kurjercontroller.data.models.SearchFiltersRequest
-import ru.relabs.kurjercontroller.providers.interfaces.FiltersResultOrError
+import ru.relabs.kurjercontroller.domain.models.TaskFilter
+import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.providers.interfaces.IFilterSearch
+import ru.relabs.kurjercontroller.utils.CancelableScope
+import ru.relabs.kurjercontroller.utils.Either
+import ru.relabs.kurjercontroller.utils.Left
+import ru.relabs.kurjercontroller.utils.Right
 
 /**
  * Created by ProOrange on 16.05.2019.
  */
 
 
-class RemoteFilterSearch(val scope: CancelableScope, val token: String) :
-    IFilterSearch {
+class RemoteFilterSearch(
+    private val scope: CancelableScope,
+    private val repository: ControlRepository
+) : IFilterSearch {
     var searchJob: Job? = null
     override fun searchFilters(
         filterType: Int,
         filterValue: String,
-        selectedFilters: List<FilterModel>,
+        selectedFilters: List<TaskFilter>,
         withPlanned: Boolean
-    ): Deferred<FiltersResultOrError> {
-        val deferred = CompletableDeferred<FiltersResultOrError>()
+    ): Deferred<Either<Exception, List<TaskFilter>>> {
+        val deferred = CompletableDeferred<Either<Exception, List<TaskFilter>>>()
         searchJob?.cancel()
         searchJob = scope.launch {
-            val result = try {
-                DeliveryServerAPI.api.searchFilters(
-                    token, SearchFiltersRequest(
-                        filterType,
-                        filterValue,
-                        selectedFilters
-                            .filter { it.isActive() }
-                            .map { it.toFilterResponseModel() },
-                        withPlanned
-                    )
-                ).await().distinctBy { it.id to it.type }
-            } catch (e: Exception) {
-                deferred.complete(FiltersResultOrError(error = e))
-                return@launch
+            val result = repository.searchFilters(filterType, filterValue, selectedFilters.filter { it.isActive() }, withPlanned)
+            when (result) {
+                is Left -> deferred.complete(result)
+                is Right -> {
+                    val data = result.value
+                        .distinctBy { it.id to it.type }
+                        .filter { resultFilter ->
+                            selectedFilters.none { it.type == resultFilter.type && it.id == resultFilter.id }
+                        }
+                        .sortedBy { it.name }
+                    if (data.isEmpty()) {
+                        deferred.complete(Left(RuntimeException("Nothing found after filtering")))
+                    } else {
+                        deferred.complete(Right(data))
+                    }
+                }
             }
-
-            val filteredResult = result.filter { resultFilter ->
-                selectedFilters.firstOrNull {
-                    it.type == resultFilter.type && it.id == resultFilter.id
-                } == null
-            }.sortedBy {
-                it.name
-            }
-
-            if (filteredResult.isEmpty()) {
-                deferred.complete(
-                    FiltersResultOrError(
-                        error = Exception(
-                            "Nothing found after filtering"
-                        )
-                    )
-                )
-            }
-
-            deferred.complete(FiltersResultOrError(result = filteredResult.map { it.toModel() }))
         }
         return deferred
     }

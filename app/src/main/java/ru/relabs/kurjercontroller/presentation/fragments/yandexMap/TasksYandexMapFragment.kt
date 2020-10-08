@@ -14,8 +14,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.domain.models.AddressModel
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.Address
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.utils.extensions.placemarkColor
 import ru.relabs.kurjercontroller.utils.extensions.setVisible
@@ -62,7 +62,7 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
 
     var taskIds: List<Int> = listOf()
     var tasks: List<TaskModel> = listOf()
-    val newTaskItems: MutableList<TaskItemModel> = mutableListOf()
+    val newTaskItems: MutableList<TaskItem> = mutableListOf()
 
     var showedAddresses: List<AddressWithColor> = listOf()
 
@@ -126,7 +126,7 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
         }
     }
 
-    fun isAddressInVisibleRegion(address: AddressModel, region: VisibleRegion): Boolean {
+    fun isAddressInVisibleRegion(address: Address, region: VisibleRegion): Boolean {
         return address.lat > region.bottomLeft.latitude && address.long < region.topRight.longitude &&
                 address.long > region.bottomLeft.longitude && address.long < region.topRight.longitude
     }

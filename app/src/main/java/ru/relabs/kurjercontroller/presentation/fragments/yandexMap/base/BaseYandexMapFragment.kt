@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 import ru.relabs.kurjercontroller.presentation.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.domain.models.AddressModel
+import ru.relabs.kurjercontroller.domain.models.Address
 import ru.relabs.kurjercontroller.presentation.fragments.yandexMap.AddressWithColor
 import ru.relabs.kurjercontroller.presentation.fragments.yandexMap.ColoredIconProvider
 import ru.relabs.kurjercontroller.presentation.fragments.yandexMap.DeliverymanIconProvider
@@ -226,7 +226,7 @@ abstract class BaseYandexMapFragment : Fragment() {
         }
     }
 
-    fun getCameraPosition(addresses: List<AddressModel>): CameraPosition {
+    fun getCameraPosition(addresses: List<Address>): CameraPosition {
         when {
             addresses.isEmpty() -> {
                 return CameraPosition(
@@ -257,7 +257,7 @@ abstract class BaseYandexMapFragment : Fragment() {
         }
     }
 
-    fun makeFocus(addresses: List<AddressModel>) {
+    fun makeFocus(addresses: List<Address>) {
 
         mapview?.map?.move(
             savedCameraPosition
@@ -291,7 +291,7 @@ abstract class BaseYandexMapFragment : Fragment() {
 
 
     interface Callback {
-        suspend fun onAddressClicked(address: AddressModel)
+        suspend fun onAddressClicked(address: Address)
     }
 }
 

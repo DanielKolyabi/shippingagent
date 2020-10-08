@@ -5,7 +5,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.utils.CancelableScope
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.domain.models.toAndroidState
 import ru.relabs.kurjercontroller.presentation.activities.ErrorButtonsListener
@@ -70,7 +70,7 @@ class AddressListPresenter(val fragment: AddressListFragment) {
         }
     }
 
-    fun onAddressMapClicked(items: List<TaskItemModel>) {
+    fun onAddressMapClicked(items: List<TaskItem>) {
         val item = items.first()
 
         val placemarkColor = items.placemarkColor()

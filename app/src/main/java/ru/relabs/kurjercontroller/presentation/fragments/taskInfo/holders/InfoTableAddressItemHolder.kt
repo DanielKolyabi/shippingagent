@@ -4,13 +4,13 @@ import android.graphics.Color
 import android.view.View
 import kotlinx.android.synthetic.main.holder_task_details_address_list_item.view.*
 import ru.relabs.kurjercontroller.presentation.delegateAdapter.BaseViewHolder
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.presentation.fragments.taskInfo.TaskInfoModel
 
 /**
  * Created by ProOrange on 29.08.2018.
  */
-class InfoTableAddressItemHolder(itemView: View, val onInfoClicked: (item: TaskItemModel) -> Unit) :
+class InfoTableAddressItemHolder(itemView: View, val onInfoClicked: (item: TaskItem) -> Unit) :
     BaseViewHolder<TaskInfoModel>(itemView) {
     override fun onBindViewHolder(item: TaskInfoModel) {
         if (item !is TaskInfoModel.TaskItem) return

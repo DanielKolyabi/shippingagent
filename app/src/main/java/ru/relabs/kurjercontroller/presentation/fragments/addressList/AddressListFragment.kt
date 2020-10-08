@@ -22,8 +22,8 @@ import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.presentation.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.domain.models.AddressModel
-import ru.relabs.kurjercontroller.domain.models.EntranceModel
+import ru.relabs.kurjercontroller.domain.models.Address
+import ru.relabs.kurjercontroller.domain.models.Entrance
 import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.presentation.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.presentation.activities.showError
@@ -40,7 +40,7 @@ import ru.relabs.kurjercontroller.presentation.helpers.HintHelper
  * Created by ProOrange on 18.03.2019.
  */
 class AddressListFragment : Fragment(), ISearchableFragment {
-    var targetAddress: AddressModel? = null
+    var targetAddress: Address? = null
     var shouldReloadData: Boolean = false
 
     private val broadcastReceiver = object : BroadcastReceiver() {
@@ -76,7 +76,7 @@ class AddressListFragment : Fragment(), ISearchableFragment {
                         if (taskItem.id == taskItemId) {
                             for (entrance in taskItem.entrances) {
                                 if (entrance.number == entranceNumber) {
-                                    entrance.state = EntranceModel.CLOSED
+                                    entrance.state = Entrance.CLOSED
                                 }
                             }
                         }
@@ -210,7 +210,7 @@ class AddressListFragment : Fragment(), ISearchableFragment {
     }
 
 
-    private fun scrollToAddress(address: AddressModel) {
+    private fun scrollToAddress(address: Address) {
         val idx = adapter.data.indexOfFirst {
             (it as? AddressListModel.Address)?.taskItems?.firstOrNull()?.address?.idnd == address.idnd
         }

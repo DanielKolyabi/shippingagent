@@ -4,7 +4,8 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import ru.relabs.kurjercontroller.domain.models.StorageModel
+import ru.relabs.kurjercontroller.domain.mappers.database.DatabaseStorageMapper
+import ru.relabs.kurjercontroller.domain.models.TaskStorage
 
 /**
  * Created by ProOrange on 11.04.2019.
@@ -24,11 +25,4 @@ data class TaskStorageEntity(
     val address: String,
     val gpsLat: Float,
     val gpsLong: Float
-) {
-    fun toModel() = StorageModel(
-        id = storageId,
-        address = address,
-        lat = gpsLat,
-        long = gpsLong
-    )
-}
+)

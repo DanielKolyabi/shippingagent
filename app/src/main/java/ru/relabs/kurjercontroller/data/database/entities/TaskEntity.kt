@@ -6,7 +6,8 @@ import androidx.room.PrimaryKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
-import ru.relabs.kurjercontroller.domain.models.TaskModel
+import ru.relabs.kurjercontroller.domain.mappers.database.DatabaseTaskMapper
+import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.providers.TaskRepository
 
 /**
@@ -34,26 +35,7 @@ data class TaskEntity(
     @ColumnInfo(name = "is_online")
     val isOnline: Boolean = false,
     @ColumnInfo(name = "with_planned")
-    val withPlanned: Boolean = false
-) {
-    suspend fun toModel(repository: TaskRepository): TaskModel = withContext(Dispatchers.IO) {
-        return@withContext TaskModel(
-            id = id,
-            userId = userId,
-            initiator = initiator,
-            description = description,
-            endControlDate = endControlDate,
-            startControlDate = startControlDate,
-            state = state,
-            storages = repository.db.taskStorageDao().getByTaskId(id).map { it.toModel() },
-            taskFilters = repository.loadTaskFilters(id),
-            publishers = repository.db.taskPublisherDao().getByTaskId(id).map { it.toModel() },
-            taskItems = repository.db.taskItemDao().getByTaskId(id).map { it.toModel(repository) }.toMutableList(),
-            iteration = iteration,
-            firstExaminedDeviceId = firstExaminedDeviceId,
-            filtered = filtered,
-            isOnline = isOnline,
-            withPlanned = withPlanned
-        )
-    }
-}
+    val withPlanned: Boolean = false,
+    @ColumnInfo(name = "by_other_user")
+    val byOtherUser: Boolean = false //TODO: Need migration
+)

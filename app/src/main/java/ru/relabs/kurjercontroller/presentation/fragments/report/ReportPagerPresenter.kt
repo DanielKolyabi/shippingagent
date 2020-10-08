@@ -8,8 +8,8 @@ import ru.relabs.kurjercontroller.utils.CancelableScope
 import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.application.ControllApplication
-import ru.relabs.kurjercontroller.domain.models.EntranceModel
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.Entrance
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.presentation.fragments.report.adapters.ReportPagerAdapter
 
@@ -20,7 +20,7 @@ import ru.relabs.kurjercontroller.presentation.fragments.report.adapters.ReportP
 class ReportPagerPresenter(val fragment: ReportPagerFragment) {
     val bgScope = CancelableScope(Dispatchers.Default)
 
-    fun getSelectedTask(): Pair<TaskModel, TaskItemModel> {
+    fun getSelectedTask(): Pair<TaskModel, TaskItem> {
         val selectedTaskItem = fragment.taskItems.first {
             it.id == fragment.selectedTask.second && it.taskId == fragment.selectedTask.first
         }
@@ -61,8 +61,8 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
 
     private fun onEntranceClosed(
         task: TaskModel,
-        taskItem: TaskItemModel,
-        entrance: EntranceModel,
+        taskItem: TaskItem,
+        entrance: Entrance,
         useDatabase: Boolean = true
     ) {
         val location = application().currentLocation
@@ -91,9 +91,9 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
                 return@launch
             }
 
-            fragment.taskItems[idx].entrances[entranceIdx].state = EntranceModel.CLOSED
+            fragment.taskItems[idx].entrances[entranceIdx].state = Entrance.CLOSED
 
-            if (fragment.taskItems[idx].entrances.none { it.state == EntranceModel.CREATED }) {
+            if (fragment.taskItems[idx].entrances.none { it.state == Entrance.CREATED }) {
 
                 fragment.taskItems.removeAt(idx)
                 fragment.tasks.removeAt(idx)

@@ -8,8 +8,8 @@ import ru.relabs.kurjercontroller.utils.CancelableScope
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.data.database.entities.FilterEntity
 import ru.relabs.kurjercontroller.logError
-import ru.relabs.kurjercontroller.domain.models.FilterModel
-import ru.relabs.kurjercontroller.domain.models.TaskFiltersModel
+import ru.relabs.kurjercontroller.domain.models.TaskFilter
+import ru.relabs.kurjercontroller.domain.models.TaskFilters
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 import ru.relabs.kurjercontroller.data.models.FiltersRequest
 
@@ -21,7 +21,7 @@ class FiltersPresenter(val fragment: FiltersFragment) {
     val bgScope = CancelableScope(Dispatchers.Default)
     var loadFilterCountJob: Job? = null
 
-    fun loadFilteredTasksCount(filters: List<FilterModel>, withPlanned: Boolean) {
+    fun loadFilteredTasksCount(filters: List<TaskFilter>, withPlanned: Boolean) {
         val token = application().user.getUserCredentials()?.token
         if (token == null) {
             fragment.setStartButtonCount(-1, 0, false)
@@ -45,9 +45,9 @@ class FiltersPresenter(val fragment: FiltersFragment) {
         }
     }
 
-    fun toTaskFiltersModel(filters: List<FilterModel>): TaskFiltersModel {
+    fun toTaskFiltersModel(filters: List<TaskFilter>): TaskFilters {
 
-        return TaskFiltersModel(
+        return TaskFilters(
             filters.filter { it.type == FilterEntity.PUBLISHER_FILTER }.toMutableList(),
             filters.filter { it.type == FilterEntity.DISTRICT_FILTER }.toMutableList(),
             filters.filter { it.type == FilterEntity.REGION_FILTER }.toMutableList(),

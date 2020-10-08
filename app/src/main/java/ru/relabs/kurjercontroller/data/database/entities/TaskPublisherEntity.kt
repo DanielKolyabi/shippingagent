@@ -5,7 +5,10 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import org.joda.time.DateTime
-import ru.relabs.kurjercontroller.domain.models.PublisherModel
+import ru.relabs.kurjercontroller.domain.mappers.database.DatabasePublisherMapper
+import ru.relabs.kurjercontroller.domain.models.TaskPublisher
+import ru.relabs.kurjercontroller.domain.models.PublisherId
+import ru.relabs.kurjercontroller.domain.models.TaskId
 
 /**
  * Created by ProOrange on 11.04.2019.
@@ -27,14 +30,4 @@ data class TaskPublisherEntity(
     val startDistributionDate: DateTime,
     @ColumnInfo(name = "end_distribution_date")
     val endDistributionDate: DateTime
-) {
-    fun toModel(): PublisherModel {
-        return PublisherModel(
-            id = publisherId,
-            taskId = taskId,
-            endDistributionDate = endDistributionDate,
-            startDistributionDate = startDistributionDate,
-            name = name
-        )
-    }
-}
+)

@@ -10,14 +10,13 @@ import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_filters.*
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.data.database.entities.FilterEntity
-import ru.relabs.kurjercontroller.domain.models.FilterModel
-import ru.relabs.kurjercontroller.domain.models.TaskFiltersModel
-import ru.relabs.kurjercontroller.providers.RemoteFilterSearch
+import ru.relabs.kurjercontroller.domain.models.TaskFilter
+import ru.relabs.kurjercontroller.domain.models.TaskFilters
 import ru.relabs.kurjercontroller.presentation.fragments.filters.adapters.FilterSearchAdapter
 import ru.relabs.kurjercontroller.presentation.сustomView.FilterTagLayout
 import ru.relabs.kurjercontroller.presentation.сustomView.InstantAutocompleteTextView
+import ru.relabs.kurjercontroller.providers.RemoteFilterSearch
 import java.lang.ref.WeakReference
 
 
@@ -27,17 +26,14 @@ import java.lang.ref.WeakReference
 
 class FiltersFragment : Fragment() {
 
-    var onStartClicked: ((filters: TaskFiltersModel, withPlanned: Boolean) -> Unit)? = null
+    var onStartClicked: ((filters: TaskFilters, withPlanned: Boolean) -> Unit)? = null
     lateinit var adapter: FilterSearchAdapter
-    lateinit var filters: TaskFiltersModel
+    lateinit var filters: TaskFilters
     var withPlanned: Boolean = false
 
     val presenter = FiltersPresenter(this)
-    val filterSearch = RemoteFilterSearch(
-        presenter.bgScope,
-        application().user.getUserCredentials()?.token ?: ""
-    )
-    val allFilters: MutableList<FilterModel> = mutableListOf()
+    val filterSearch = RemoteFilterSearch(presenter.bgScope)
+    val allFilters: MutableList<TaskFilter> = mutableListOf()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -116,7 +112,7 @@ class FiltersFragment : Fragment() {
                 filterSearch,
                 filterType,
                 WeakReference(allFilters)
-            ) {planned_tasks?.isChecked ?: false}
+            ) { planned_tasks?.isChecked ?: false }
 
             textView.setAdapter(adapter)
             textView.threshold = 0
@@ -131,7 +127,7 @@ class FiltersFragment : Fragment() {
                     pos: Int,
                     p3: Long
                 ) {
-                    val item = adapter?.getItemAtPosition(pos) as? FilterModel
+                    val item = adapter?.getItemAtPosition(pos) as? TaskFilter
                     item ?: return
                     if (allFilters.contains(item)) {
                         textView?.setText("")
@@ -165,7 +161,7 @@ class FiltersFragment : Fragment() {
         allFilters.addAll(filters.users)
     }
 
-    private fun fillFilters(view: FilterTagLayout?, filters: List<FilterModel>) {
+    private fun fillFilters(view: FilterTagLayout?, filters: List<TaskFilter>) {
         view ?: return
         filters
             .sortedByDescending { it.fixed }
@@ -186,14 +182,14 @@ class FiltersFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            filters = it.getParcelable("filters") ?: TaskFiltersModel.blank()
+            filters = it.getParcelable("filters") ?: TaskFilters.blank()
             withPlanned = it.getBoolean("with_planned") ?: false
         }
     }
 
     companion object {
         @JvmStatic
-        fun newInstance(filters: TaskFiltersModel?, withPlanned: Boolean?) =
+        fun newInstance(filters: TaskFilters?, withPlanned: Boolean?) =
             FiltersFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable("filters", filters)

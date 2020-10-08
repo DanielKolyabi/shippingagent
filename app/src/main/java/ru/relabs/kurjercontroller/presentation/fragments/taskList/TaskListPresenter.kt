@@ -9,7 +9,7 @@ import ru.relabs.kurjercontroller.utils.CancelableScope
 import ru.relabs.kurjercontroller.utils.CustomLog
 import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.domain.models.TaskFiltersModel
+import ru.relabs.kurjercontroller.domain.models.TaskFilters
 import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 import ru.relabs.kurjercontroller.presentation.activities.ErrorButtonsListener
@@ -226,7 +226,7 @@ class TaskListPresenter(val fragment: TaskListFragment) {
         }
     }
 
-    fun onOnlineFiltersReceived(filters: TaskFiltersModel, withPlanned: Boolean, token: String) {
+    fun onOnlineFiltersReceived(filters: TaskFilters, withPlanned: Boolean, token: String) {
         fragment.showLoading(true, text = "Загрузка адресов")
         bgScope.launch {
             val task = application().tasksRepository.createOnlineTask(filters, withPlanned)

@@ -11,7 +11,7 @@ import ru.relabs.kurjercontroller.utils.CustomLog
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.presentation.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.presentation.activities.showError
 
@@ -20,7 +20,7 @@ import ru.relabs.kurjercontroller.presentation.activities.showError
  */
 class TaskItemExplanationFragment : Fragment() {
 
-    lateinit var taskItem: TaskItemModel
+    lateinit var taskItem: TaskItem
     val presenter = TaskItemExplanationPresenter(this)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -50,7 +50,7 @@ class TaskItemExplanationFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            val tempTaskItem: TaskItemModel? = it.getParcelable("taskItem")
+            val tempTaskItem: TaskItem? = it.getParcelable("taskItem")
             if (tempTaskItem == null) {
                 CustomLog.writeToFile("null taskItem in TaskInfoFragment")
                 activity()?.showError("Произошла ошибка", object: ErrorButtonsListener {
@@ -67,7 +67,7 @@ class TaskItemExplanationFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(taskItem: TaskItemModel) =
+        fun newInstance(taskItem: TaskItem) =
             TaskItemExplanationFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable("taskItem", taskItem)

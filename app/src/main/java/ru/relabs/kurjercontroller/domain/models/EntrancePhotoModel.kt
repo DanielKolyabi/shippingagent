@@ -11,8 +11,8 @@ import java.util.*
 data class EntrancePhotoModel(
     val id: Int,
     val uuid: String,
-    val taskItem: TaskItemModel,
-    val entranceModel: EntranceModel,
+    val taskItem: TaskItem,
+    val entrance: Entrance,
     val gps: GPSCoordinatesModel,
     val realPath: String?,
     val isEntrancePhoto: Boolean
@@ -22,14 +22,14 @@ data class EntrancePhotoModel(
             0,
             uuid,
             gps,
-            taskItem.taskId,
-            taskItem.id,
+            taskItem.taskId.id,
+            taskItem.id.id,
             taskItem.address.idnd,
-            entranceModel.number,
+            entrance.number.number,
             realPath,
             isEntrancePhoto
         )
 
     val URI: Uri
-        get() = Uri.fromFile(PathHelper.getEntrancePhotoFile(taskItem, entranceModel, UUID.fromString(uuid)))
+        get() = Uri.fromFile(PathHelper.getEntrancePhotoFile(taskItem, entrance, UUID.fromString(uuid)))
 }

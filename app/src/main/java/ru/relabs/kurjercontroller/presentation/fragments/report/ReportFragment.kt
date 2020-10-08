@@ -29,8 +29,8 @@ import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
-import ru.relabs.kurjercontroller.domain.models.EntranceModel
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.Entrance
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.presentation.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.presentation.activities.showError
@@ -60,9 +60,9 @@ class ReportFragment : Fragment() {
     var callback: Callback? = null
     val presenter = ReportPresenter(this)
     lateinit var task: TaskModel
-    lateinit var taskItem: TaskItemModel
-    lateinit var entrance: EntranceModel
-    var allTaskItems: List<TaskItemModel> = listOf()
+    lateinit var taskItem: TaskItem
+    lateinit var entrance: Entrance
+    var allTaskItems: List<TaskItem> = listOf()
     var saved: EntranceResultEntity? = null
 
     var defaultButtonBackground: Drawable? = null
@@ -113,15 +113,15 @@ class ReportFragment : Fragment() {
         bindControl()
         refreshData()
 
-        if (entrance.state == EntranceModel.CLOSED) {
+        if (entrance.state == Entrance.CLOSED) {
             setControlsLocked(true)
         } else {
             setControlsLocked(false)
         }
     }
 
-    private fun isClosed() = entrance.state == EntranceModel.CLOSED || entranceClosed
-    private fun isPhotoAvailable() = entrance.state == EntranceModel.CREATED
+    private fun isClosed() = entrance.state == Entrance.CLOSED || entranceClosed
+    private fun isPhotoAvailable() = entrance.state == Entrance.CREATED
 
     private fun bindDelegates() {
 
@@ -203,7 +203,7 @@ class ReportFragment : Fragment() {
         }
     }
 
-    fun onChanged(entrance: EntranceModel) {
+    fun onChanged(entrance: Entrance) {
         if (entrance.number != this.entrance.number) {
             return
         }
@@ -242,11 +242,11 @@ class ReportFragment : Fragment() {
     }
 
     fun updateIsEntranceClosedButton() {
-        entrance_closed?.isEnabled = entrance.state == EntranceModel.CREATED
+        entrance_closed?.isEnabled = entrance.state == Entrance.CREATED
     }
 
     fun updateCloseButtonActive() {
-        close_button?.isEnabled = entrance.state == EntranceModel.CREATED
+        close_button?.isEnabled = entrance.state == Entrance.CREATED
     }
 
     fun updateEditable() {
@@ -821,7 +821,7 @@ class ReportFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(task: TaskModel, taskItem: TaskItemModel, entrance: EntranceModel) =
+        fun newInstance(task: TaskModel, taskItem: TaskItem, entrance: Entrance) =
             ReportFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable("task", task.copy(taskItems = mutableListOf()))
@@ -832,8 +832,8 @@ class ReportFragment : Fragment() {
     }
 
     interface Callback {
-        fun onEntranceClosed(task: TaskModel, taskItem: TaskItemModel, entrance: EntranceModel)
-        fun getAllTaskItems(): List<TaskItemModel>
-        fun onEntranceChanged(entrance: EntranceModel)
+        fun onEntranceClosed(task: TaskModel, taskItem: TaskItem, entrance: Entrance)
+        fun getAllTaskItems(): List<TaskItem>
+        fun onEntranceChanged(entrance: Entrance)
     }
 }

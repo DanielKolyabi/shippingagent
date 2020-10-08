@@ -11,25 +11,25 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.domain.models.FilterModel
+import ru.relabs.kurjercontroller.domain.models.TaskFilter
 
 
 class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
     ViewGroup(context, attrs, defStyleAttr) {
     internal var deviceWidth: Int = 0
 
-    private val tags: MutableList<Pair<Int, FilterModel>> = mutableListOf()
-    var onFilterAppear: ((filter: FilterModel) -> Unit)? = null
-    var onFilterDisappear: ((filter: FilterModel) -> Unit)? = null
-    var onFilterActiveChangedPredicate: ((filter: FilterModel, newActiveState: Boolean) -> Boolean)? = null
-    var onFilterActiveChanged: ((filter: FilterModel) -> Unit)? = null
+    private val tags: MutableList<Pair<Int, TaskFilter>> = mutableListOf()
+    var onFilterAppear: ((filter: TaskFilter) -> Unit)? = null
+    var onFilterDisappear: ((filter: TaskFilter) -> Unit)? = null
+    var onFilterActiveChangedPredicate: ((filter: TaskFilter, newActiveState: Boolean) -> Boolean)? = null
+    var onFilterActiveChanged: ((filter: TaskFilter) -> Unit)? = null
 
 
     init {
         init(context)
     }
 
-    private fun changeTagIcon(view: ImageView, tag: FilterModel){
+    private fun changeTagIcon(view: ImageView, tag: TaskFilter){
         val drawable = if(tag.fixed){
             if(tag.active) {
                 context.getDrawable(R.drawable.ic_filter_active)
@@ -42,7 +42,7 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
         view.setImageDrawable(drawable)
     }
 
-    private fun bindTagControl(view: ImageView, tag: FilterModel){
+    private fun bindTagControl(view: ImageView, tag: TaskFilter){
         if(tag.fixed){
             view.setOnClickListener {
                 if(onFilterActiveChangedPredicate?.invoke(tag, !tag.active) == true) {
@@ -58,7 +58,7 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
         }
     }
 
-    fun add(tag: FilterModel) {
+    fun add(tag: TaskFilter) {
         val view = LayoutInflater.from(context).inflate(R.layout.item_filter, this, false)
         view.findViewById<TextView>(R.id.text).text = tag.name
         view.findViewById<ImageView>(R.id.close_icon).apply {
@@ -81,7 +81,7 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
 
     }
 
-    fun remove(tag: FilterModel) {
+    fun remove(tag: TaskFilter) {
         tags.firstOrNull { it.second == tag }?.let {
             removeView(findViewWithTag(it.first))
             onFilterDisappear?.invoke(it.second)

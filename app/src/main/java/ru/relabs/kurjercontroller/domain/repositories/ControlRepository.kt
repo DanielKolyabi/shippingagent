@@ -1,6 +1,5 @@
 package ru.relabs.kurjercontroller.domain.repositories
 
-import android.graphics.BitmapFactory
 import android.location.Location
 import android.net.Uri
 import android.webkit.MimeTypeMap
@@ -14,32 +13,35 @@ import retrofit2.HttpException
 import retrofit2.Response
 import ru.relabs.kurjercontroller.data.api.ControlApi
 import ru.relabs.kurjercontroller.data.database.AppDatabase
-import ru.relabs.kurjercontroller.data.database.entities.EntrancePhotoEntity
-import ru.relabs.kurjercontroller.data.database.entities.EntranceReportEntity
-import ru.relabs.kurjercontroller.data.database.entities.SendQueryItemEntity
+import ru.relabs.kurjercontroller.data.database.entities.*
 import ru.relabs.kurjercontroller.data.models.PhotoReportRequest
+import ru.relabs.kurjercontroller.data.models.SearchFiltersRequest
 import ru.relabs.kurjercontroller.data.models.TaskItemReportRequest
 import ru.relabs.kurjercontroller.data.models.auth.UserLogin
 import ru.relabs.kurjercontroller.data.models.common.ApiError
 import ru.relabs.kurjercontroller.data.models.common.ApiErrorContainer
 import ru.relabs.kurjercontroller.data.models.common.DomainException
 import ru.relabs.kurjercontroller.data.models.common.EitherE
+import ru.relabs.kurjercontroller.domain.mappers.network.FilterMapper
 import ru.relabs.kurjercontroller.domain.mappers.network.TaskMapper
 import ru.relabs.kurjercontroller.domain.mappers.network.UpdatesMapper
 import ru.relabs.kurjercontroller.domain.mappers.network.UserMapper
 import ru.relabs.kurjercontroller.domain.models.AppUpdatesInfo
 import ru.relabs.kurjercontroller.domain.models.Task
+import ru.relabs.kurjercontroller.domain.models.TaskFilter
 import ru.relabs.kurjercontroller.domain.models.User
 import ru.relabs.kurjercontroller.domain.providers.*
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
 import ru.relabs.kurjercontroller.logError
-import ru.relabs.kurjercontroller.utils.*
+import ru.relabs.kurjercontroller.utils.Either
+import ru.relabs.kurjercontroller.utils.Left
+import ru.relabs.kurjercontroller.utils.Right
+import ru.relabs.kurjercontroller.utils.debug
 import java.io.FileNotFoundException
-import java.net.URL
 
 class ControlRepository(
-    private val controlApi: ControlApi,
+    private val api: ControlApi,
     private val authTokenStorage: AuthTokenStorage,
     private val deviceIdProvider: DeviceUUIDProvider,
     private val deviceUniqueIdProvider: DeviceUniqueIdProvider,
@@ -48,10 +50,13 @@ class ControlRepository(
     private val networkClient: OkHttpClient,
     private val pathsProvider: PathsProvider
 ) {
+    private var availableEntranceKeys: List<String> = listOf()
+    private var availableEntranceEuroKeys: List<String> = listOf()
+
     fun isAuthenticated(): Boolean = authTokenStorage.getToken() != null
 
     suspend fun login(login: UserLogin, password: String): EitherE<Pair<User, String>> = anonymousRequest {
-        val r = controlApi.login(
+        val r = api.login(
             login.login,
             password,
             deviceIdProvider.getOrGenerateDeviceUUID().id,
@@ -63,7 +68,7 @@ class ControlRepository(
     }
 
     suspend fun login(token: String): EitherE<Pair<User, String>> = anonymousRequest {
-        val r = controlApi.loginByToken(
+        val r = api.loginByToken(
             token,
             deviceIdProvider.getOrGenerateDeviceUUID().id,
             currentTime()
@@ -75,11 +80,11 @@ class ControlRepository(
 
     suspend fun getRemoteTasks(): EitherE<List<Task>> = authenticatedRequest { token ->
         val deviceId = deviceIdProvider.getOrGenerateDeviceUUID()
-        controlApi.getTasks(token, currentTime()).map { TaskMapper.fromRaw(it, deviceId) }
+        api.getTasks(token, currentTime()).map { TaskMapper.fromRaw(it, deviceId) }
     }
 
     suspend fun getAppUpdatesInfo(): EitherE<AppUpdatesInfo> = anonymousRequest {
-        val updates = UpdatesMapper.fromRaw(controlApi.getUpdateInfo())
+        val updates = UpdatesMapper.fromRaw(api.getUpdateInfo())
 
         updates
     }
@@ -98,12 +103,12 @@ class ControlRepository(
 
     suspend fun updatePushToken(firebaseToken: FirebaseToken): EitherE<Boolean> = authenticatedRequest { token ->
         firebaseTokenProvider.set(firebaseToken)
-        controlApi.sendPushToken(token, firebaseToken.token)
+        api.sendPushToken(token, firebaseToken.token)
         true
     }
 
     suspend fun updateLocation(location: Location): EitherE<Boolean> = authenticatedRequest { token ->
-        controlApi.sendGPS(
+        api.sendGPS(
             token,
             location.latitude,
             location.longitude,
@@ -111,6 +116,53 @@ class ControlRepository(
         )
         true
     }
+
+    suspend fun searchFilters(
+        filterType: Int,
+        filterValue: String,
+        filters: List<TaskFilter>,
+        withPlanned: Boolean
+    ): EitherE<List<TaskFilter>> = authenticatedRequest { token ->
+        api.searchFilters(
+            token,
+            SearchFiltersRequest(
+                filterType,
+                filterValue,
+                filters
+                    .filter { it.isActive() }
+                    .map { it.toFilterResponseModel() },
+                withPlanned
+            )
+        ).map { FilterMapper.fromRaw(it) }
+    }
+
+    suspend fun getAvailableEntranceKeys(withRefresh: Boolean = false): EitherE<List<String>> = authenticatedRequest { token ->
+        if (!withRefresh && availableEntranceKeys.isEmpty()) {
+            availableEntranceKeys = database.entranceKeysDao().all.map { it.key }
+        }
+        if (withRefresh || availableEntranceKeys.isEmpty()) {
+            availableEntranceKeys = api.getAvailableEntranceKeys(token)
+            database.entranceKeysDao().clear()
+            database.entranceKeysDao()
+                .insertAll(availableEntranceKeys.map { EntranceKeyEntity(0, it) })
+        }
+
+        availableEntranceKeys
+    }
+
+    suspend fun getAvailableEntranceEuroKeys(withRefresh: Boolean = false): EitherE<List<String>> =
+        authenticatedRequest { token ->
+            if (!withRefresh && availableEntranceEuroKeys.isEmpty()) {
+                availableEntranceEuroKeys = database.entranceEuroKeysDao().all.map { it.key }
+            }
+            if ((withRefresh || availableEntranceEuroKeys.isEmpty()) && token.isNotBlank()) {
+                availableEntranceEuroKeys = api.getAvailableEntranceEuroKeys(token)
+                database.entranceEuroKeysDao().clear()
+                database.entranceEuroKeysDao()
+                    .insertAll(availableEntranceEuroKeys.map { EntranceEuroKeyEntity(0, it) })
+            }
+            availableEntranceEuroKeys
+        }
 
     //Reports
     suspend fun sendReport(item: EntranceReportEntity): Either<Exception, Unit> = Either.of {
@@ -142,7 +194,7 @@ class ControlRepository(
             item.entranceClosed
         )
 
-        controlApi.sendTaskReport(
+        api.sendTaskReport(
             item.taskItemId,
             item.token,
             reportObject,
@@ -170,14 +222,6 @@ class ControlRepository(
             RequestBody.run { photoFile.asRequestBody(MediaType.run { "image/jpeg".toMediaType() }) }
 
         return MultipartBody.Part.createFormData(partName, photoFile.name, requestFile)
-    }
-
-    suspend fun loadTaskMap(task: Task): Either<Exception, Unit> = Either.of {
-        val url = URL(task.rastMapUrl)
-        val bmp = BitmapFactory.decodeStream(url.openStream())
-        val mapFile = pathsProvider.getTaskRasterizeMapFile(task)
-        ImageUtils.saveImage(bmp, mapFile)
-        bmp.recycle()
     }
 
     suspend fun sendQuery(item: SendQueryItemEntity): Either<java.lang.Exception, Unit> = Either.of {

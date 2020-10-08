@@ -15,9 +15,9 @@ object TaskMapper {
         endControlDate = raw.endControlDate,
         description = raw.description,
         storages = raw.storages.map { StorageMapper.fromRaw(it) },
-        publishers = raw.publishers.map { PublishersMapper.fromRaw(it) },
+        publishers = raw.publishers.map { PublisherMapper.fromRaw(it) },
         taskItems = raw.items.map { TaskItemMapper.fromRaw(it) },
-        taskFilters = raw.taskFilters.map { FilterMapper.fromRaw(it) },
+        taskFilters = FilterMapper.fromRaw(raw.filters),
         state = Task.State(
             state = when (raw.state) {
                 0, 10, 11, 20 -> TaskState.CREATED

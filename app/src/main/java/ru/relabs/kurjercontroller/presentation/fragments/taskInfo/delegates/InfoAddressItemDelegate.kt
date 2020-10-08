@@ -5,14 +5,14 @@ import android.view.ViewGroup
 import ru.relabs.kurjercontroller.presentation.delegateAdapter.BaseViewHolder
 import ru.relabs.kurjercontroller.presentation.delegateAdapter.IAdapterDelegate
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.presentation.fragments.taskInfo.TaskInfoModel
 import ru.relabs.kurjercontroller.presentation.fragments.taskInfo.holders.InfoTableAddressItemHolder
 
 /**
  * Created by ProOrange on 29.08.2018.
  */
-class InfoAddressItemDelegate(val onInfoClicked: (item: TaskItemModel) -> Unit) : IAdapterDelegate<TaskInfoModel> {
+class InfoAddressItemDelegate(val onInfoClicked: (item: TaskItem) -> Unit) : IAdapterDelegate<TaskInfoModel> {
     override fun isForViewType(data: List<TaskInfoModel>, position: Int): Boolean {
         return data[position] is TaskInfoModel.TaskItem
     }

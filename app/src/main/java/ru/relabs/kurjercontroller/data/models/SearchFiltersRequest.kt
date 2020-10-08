@@ -2,7 +2,7 @@ package ru.relabs.kurjercontroller.data.models
 
 import com.google.gson.annotations.SerializedName
 import ru.relabs.kurjercontroller.data.models.tasks.FilterResponse
-import ru.relabs.kurjercontroller.domain.models.FilterModel
+import ru.relabs.kurjercontroller.domain.models.TaskFilter
 
 /**
  * Created by ProOrange on 16.05.2019.
@@ -19,7 +19,7 @@ data class FiltersRequest(
     @SerializedName("with_planned") val withPlanned: Boolean
 ) {
     companion object {
-        fun fromFiltersList(filters: List<FilterModel>, withPlanned: Boolean): FiltersRequest =
+        fun fromFiltersList(filters: List<TaskFilter>, withPlanned: Boolean): FiltersRequest =
             FiltersRequest(filters.filter { it.isActive() }.map {
                 FilterResponse(
                     it.id,

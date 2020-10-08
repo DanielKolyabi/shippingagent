@@ -7,11 +7,12 @@ import ru.relabs.kurjercontroller.domain.models.AddressId
 object AddressMapper {
     fun fromRaw(raw: AddressResponse) = Address(
         id = AddressId(raw.id),
+        idnd = raw.idnd,
         city = raw.city,
         street = raw.street,
         house = raw.house,
         houseName = raw.houseName,
-        lat = raw.lat,
-        long = raw.long
+        lat = raw.lat.toDouble(),
+        long = raw.long.toDouble()
     )
 }

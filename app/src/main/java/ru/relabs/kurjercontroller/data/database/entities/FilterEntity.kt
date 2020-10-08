@@ -19,7 +19,6 @@ data class FilterEntity(
     val taskId: Int,
     @ColumnInfo(name = "filter_type")
     val type: Int,
-
     @ColumnInfo(name = "filter_id")
     val filterId: Int,
     val name: String,
