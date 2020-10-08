@@ -13,9 +13,7 @@ import ru.relabs.kurjercontroller.data.database.models.ApartmentResult
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
 import ru.relabs.kurjercontroller.logError
 import ru.relabs.kurjercontroller.domain.models.*
-import ru.relabs.kurjercontroller.network.DeliveryServerAPI
-import ru.relabs.kurjercontroller.network.DeliveryServerAPI.api
-import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
+import ru.relabs.kurjercontroller.presentation.fragments.report.models.ApartmentListModel
 
 /**
  * Created by ProOrange on 11.04.2019.

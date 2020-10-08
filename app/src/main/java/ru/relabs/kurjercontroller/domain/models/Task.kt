@@ -2,6 +2,7 @@ package ru.relabs.kurjercontroller.domain.models
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
+import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.domain.mappers.MappingException
 import java.lang.RuntimeException
 import java.util.*
@@ -10,33 +11,32 @@ import java.util.*
 data class TaskId(val id: Int) : Parcelable
 
 @Parcelize
-data class CoupleType(val type: Int): Parcelable
-
-@Parcelize
 data class Task(
     val id: TaskId,
-    val state: State,
-    val name: String,
-    val edition: Int,
-    val copies: Int,
-    val packs: Int,
-    val remain: Int,
-    val area: Int,
-    val startTime: Date,
-    val endTime: Date,
-    val brigade: Int,
-    val brigadier: String,
-    val rastMapUrl: String,
     val userId: Int,
-    val city: String,
-    val storageAddress: String?,
+    val initiator: String,
+    val startControlDate: Date,
+    val endControlDate: Date,
+    val description: String,
+    val storages: List<StorageModel>,
+    val publishers: List<PublisherModel>,
+    val taskItems: List<TaskItemModel>,
+    val taskFilters: TaskFiltersModel,
+    val state: State,
     val iteration: Int,
-    val items: List<TaskItem>,
-    val coupleType: CoupleType
+    val firstExaminedDeviceId: String?,
+    val filtered: Boolean,
+    val isOnline: Boolean,
+    val withPlanned: Boolean
 ) : Parcelable {
-
-    val listName: String
-        get() = "${name} №${edition}, ${copies}экз., (${brigade}бр/${area}уч)"
+    val name: String
+        get() {
+            return if(filtered){
+                description.ifEmpty { "Фильтров: ${taskFilters.all.size}" }
+            }else{
+                publishers.joinToString("\n", transform = {it.name})
+            }
+        }
     @Parcelize
     data class State(
         val state: TaskState,

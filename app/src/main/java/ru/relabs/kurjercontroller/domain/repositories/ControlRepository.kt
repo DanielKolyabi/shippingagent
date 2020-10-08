@@ -73,14 +73,9 @@ class ControlRepository(
         user to token
     }
 
-    suspend fun getTasks(): EitherE<List<Task>> = authenticatedRequest { token ->
+    suspend fun getRemoteTasks(): EitherE<List<Task>> = authenticatedRequest { token ->
         val deviceId = deviceIdProvider.getOrGenerateDeviceUUID()
-        controlApi.getTasks(
-            token,
-            currentTime()
-        ).map {
-            TaskMapper.fromRaw(it, deviceId)
-        }
+        controlApi.getTasks(token, currentTime()).map { TaskMapper.fromRaw(it, deviceId) }
     }
 
     suspend fun getAppUpdatesInfo(): EitherE<AppUpdatesInfo> = anonymousRequest {
@@ -104,11 +99,6 @@ class ControlRepository(
     suspend fun updatePushToken(firebaseToken: FirebaseToken): EitherE<Boolean> = authenticatedRequest { token ->
         firebaseTokenProvider.set(firebaseToken)
         controlApi.sendPushToken(token, firebaseToken.token)
-        true
-    }
-
-    suspend fun updateDeviceIMEI(): EitherE<Boolean> = authenticatedRequest { token ->
-        controlApi.sendDeviceImei(token, deviceUniqueIdProvider.get().id)
         true
     }
 

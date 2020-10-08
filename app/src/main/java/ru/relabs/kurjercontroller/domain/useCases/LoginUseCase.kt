@@ -7,7 +7,6 @@ import ru.relabs.kurjercontroller.data.models.common.EitherE
 import ru.relabs.kurjercontroller.domain.models.User
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
-import ru.relabs.kurjercontroller.domain.repositories.RadiusRepository
 import ru.relabs.kurjercontroller.domain.storage.AppPreferences
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
 import ru.relabs.kurjercontroller.domain.storage.CurrentUserStorage
@@ -18,7 +17,6 @@ class LoginUseCase(
     private val controlRepository: ControlRepository,
     private val currentUserStorage: CurrentUserStorage,
     private val databaseRepository: DatabaseRepository,
-    private val radiusRepository: RadiusRepository,
     private val authTokenStorage: AuthTokenStorage,
     private val appPreferences: AppPreferences
 ){
@@ -52,13 +50,9 @@ class LoginUseCase(
         val lastUserLogin = currentUserStorage.getCurrentUserLogin()
         if (lastUserLogin != login) {
             databaseRepository.clearTasks()
-            radiusRepository.resetData()
         }
         authTokenStorage.saveToken(token)
         currentUserStorage.saveCurrentUserLogin(login)
-
-        radiusRepository.startRemoteUpdating()
-        controlRepository.updateDeviceIMEI()
         controlRepository.updatePushToken()
     }
 
@@ -66,6 +60,5 @@ class LoginUseCase(
         appPreferences.setUserAutologinEnabled(false)
         authTokenStorage.resetToken()
         currentUserStorage.resetCurrentUserLogin()
-        ReportService.instance?.stopTaskClosingTimer()
     }
 }

@@ -2,7 +2,7 @@ package ru.relabs.kurjercontroller
 
 import androidx.fragment.app.Fragment
 import ru.relabs.kurjercontroller.application.ControllApplication
-import ru.relabs.kurjercontroller.ui.activities.MainActivity
+import ru.relabs.kurjercontroller.presentation.activities.MainActivity
 import ru.relabs.kurjercontroller.utils.CustomLog
 
 

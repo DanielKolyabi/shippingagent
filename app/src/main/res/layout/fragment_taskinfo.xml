@@ -4,7 +4,7 @@
                                              xmlns:tools="http://schemas.android.com/tools"
                                              android:layout_width="match_parent"
                                              android:layout_height="match_parent"
-                                             tools:context=".ui.fragments.taskInfo.TaskInfoFragment">
+                                             tools:context=".presentation.fragments.taskInfo.TaskInfoFragment">
 
 
     <androidx.recyclerview.widget.RecyclerView

@@ -26,7 +26,7 @@
             android:usesCleartextTraffic="true"
             android:theme="@style/AppTheme">
         <activity
-                android:name=".ui.activities.SplashActivity"
+                android:name=".presentation.activities.SplashActivity"
                 android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -34,7 +34,7 @@
             </intent-filter>
         </activity>
         <activity
-                android:name=".ui.activities.MainActivity"
+                android:name=".presentation.activities.MainActivity"
                 android:screenOrientation="portrait"/>
 
 

@@ -26,7 +26,7 @@ import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
 import ru.relabs.kurjercontroller.domain.controllers.TaskEventController
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
-import ru.relabs.kurjercontroller.ui.activities.MainActivity
+import ru.relabs.kurjercontroller.presentation.activities.MainActivity
 import ru.relabs.kurjercontroller.utils.*
 
 const val CHANNEL_ID = "controller_notification_channel"
@@ -60,6 +60,8 @@ class ReportService : Service(), KoinComponent {
             stopSelf()
             return Service.START_STICKY
         }
+
+        instance = this
 
         startForeground(
             1, notification(
@@ -101,7 +103,7 @@ class ReportService : Service(), KoinComponent {
                             }
                         }
                         System.currentTimeMillis() - lastTasksChecking > TASK_CHECK_DELAY -> {
-                            when (val tasks = repository.getTasks()) {
+                            when (val tasks = repository.getRemoteTasks()) {
                                 is Right -> if (databaseRepository.isMergeNeeded(tasks.value)) {
                                     taskEventController.send(TaskEvent.TasksUpdateRequired(false))
                                 }
@@ -219,6 +221,7 @@ class ReportService : Service(), KoinComponent {
     }
 
     companion object {
+        var instance: ReportService? = null
         var isRunning: Boolean = false
         var isAppPaused: Boolean = false
         private val appCtx: Context = ControllApplication.appContext

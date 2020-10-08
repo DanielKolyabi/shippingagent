@@ -1,11 +1,23 @@
 package ru.relabs.kurjercontroller.domain.mappers.network
 
 import ru.relabs.kurjercontroller.data.models.tasks.TaskResponse
-import ru.relabs.kurjercontroller.domain.models.*
+import ru.relabs.kurjercontroller.domain.models.DeviceId
+import ru.relabs.kurjercontroller.domain.models.Task
+import ru.relabs.kurjercontroller.domain.models.TaskId
+import ru.relabs.kurjercontroller.domain.models.TaskState
 
 object TaskMapper {
     fun fromRaw(raw: TaskResponse, deviceId: DeviceId): Task = Task(
         id = TaskId(raw.id),
+        userId = raw.userId,
+        initiator = raw.initiator,
+        startControlDate = raw.startControlDate,
+        endControlDate = raw.endControlDate,
+        description = raw.description,
+        storages = raw.storages.map { StorageMapper.fromRaw(it) },
+        publishers = raw.publishers.map { PublishersMapper.fromRaw(it) },
+        taskItems = raw.items.map { TaskItemMapper.fromRaw(it) },
+        taskFilters = raw.taskFilters.map { FilterMapper.fromRaw(it) },
         state = Task.State(
             state = when (raw.state) {
                 0, 10, 11, 20 -> TaskState.CREATED
@@ -17,24 +29,10 @@ object TaskMapper {
             },
             byOtherUser = raw.firstExaminedDeviceId != deviceId.id
         ),
-        name = raw.name,
-        edition = raw.edition,
-        copies = raw.copies,
-        packs = raw.packs,
-        remain = raw.remain,
-        area = raw.area,
-        startTime = raw.startTime,
-        endTime = raw.endTime,
-        brigade = raw.brigade,
-        brigadier = raw.brigadier,
-        rastMapUrl = raw.rastMapUrl,
-        userId = raw.userId,
-        city = raw.city,
-        storageAddress = raw.storageAddress,
         iteration = raw.iteration,
-        items = raw.items.map {
-            TaskItemMapper.fromRaw(it)
-        },
-        coupleType = CoupleType(raw.coupleType)
+        firstExaminedDeviceId = raw.firstExaminedDeviceId,
+        filtered = raw.filtered,
+        isOnline = false,
+        withPlanned = false
     )
 }

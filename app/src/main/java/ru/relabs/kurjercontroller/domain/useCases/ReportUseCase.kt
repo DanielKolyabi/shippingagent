@@ -1,6 +1,7 @@
 package ru.relabs.kurjercontroller.domain.useCases
 
 import android.location.Location
+import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
 import ru.relabs.kurjercontroller.domain.controllers.TaskEventController
 import ru.relabs.kurjercontroller.domain.mappers.ReportEntranceSelectionMapper
@@ -9,7 +10,6 @@ import ru.relabs.kurjercontroller.domain.models.GPSCoordinatesModel
 import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
-import ru.relabs.kurjercontroller.domain.repositories.RadiusRepository
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
 import ru.relabs.kurjercontroller.utils.calculateDistance
 import java.util.*
@@ -18,7 +18,6 @@ import kotlin.math.roundToInt
 class ReportUseCase(
     private val databaseRepository: DatabaseRepository,
     private val tokenStorage: AuthTokenStorage,
-    private val radiusRepository: RadiusRepository,
     private val taskEventController: TaskEventController
 ) {
 
@@ -47,9 +46,7 @@ class ReportUseCase(
             tokenStorage.getToken() ?: "",
             (batteryLevel * 100).roundToInt(),
             isCloseTaskRequired,
-            distance.toInt(),
-            (radiusRepository.allowedCloseRadius as? AllowedCloseRadius.Required)?.distance ?: 0,
-            radiusRepository.allowedCloseRadius is AllowedCloseRadius.Required
+            distance.toInt()
         )
 
         databaseRepository.createTaskItemReport(reportItem)
@@ -65,7 +62,7 @@ class ReportUseCase(
     }
 
     private fun getReportLocation(location: Location?) = when (location) {
-        null -> GPSCoordinatesModel(0.0, 0.0, Date(0))
-        else -> GPSCoordinatesModel(location.latitude, location.longitude, Date(location.time))
+        null -> GPSCoordinatesModel(0.0, 0.0, DateTime(0))
+        else -> GPSCoordinatesModel(location.latitude, location.longitude, DateTime(location.time))
     }
 }

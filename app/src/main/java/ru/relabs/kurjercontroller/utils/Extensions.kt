@@ -5,7 +5,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.selects.select
 import ru.relabs.kurjercontroller.application.ControllApplication
-import ru.relabs.kurjercontroller.ui.activities.MainActivity
+import ru.relabs.kurjercontroller.presentation.activities.MainActivity
 
 
 /**
