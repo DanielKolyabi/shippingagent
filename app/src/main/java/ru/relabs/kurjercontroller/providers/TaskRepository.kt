@@ -393,7 +393,7 @@ class TaskRepository(val db: AppDatabase) {
             val task = db.taskDao().getById(taskItem.taskId)?.toModel(this@TaskRepository) ?: run {
                 CustomLog.writeToFile("closeEntrance: Can't find task ${taskItem.taskId}")
                 return@withContext
-            }
+            } 
 
             if (task.state.toAndroidState() != TaskModel.STARTED) {
                 startTaskStatus(task)

@@ -26,8 +26,8 @@ android {
         applicationId "ru.relabs.kurjercontroller"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 24
-        versionName "24"
+        versionCode 25
+        versionName "25"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         buildConfigField("int", "MAX_ADDRESSES_IN_FILTERS", "500")
@@ -37,10 +37,10 @@ android {
     flavorDimensions "default"
     productFlavors{
         productServer{
-            buildConfigField("String", "API_URL", '"https://courrmobileapi.courr.ru"')
+            buildConfigField("String", "API_URL", '"https://courrmobileapi.courdm.ru"')
         }
         debugServer{
-            buildConfigField("String", "API_URL", '"http://warp.courr.ru:8084"')
+            buildConfigField("String", "API_URL", '"http://warp.courdm.ru:8084"')
         }
         localServer{
             buildConfigField("String", "API_URL", '"http://192.168.31.18:8090"')
