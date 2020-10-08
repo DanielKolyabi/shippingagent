@@ -17,10 +17,10 @@ import com.yandex.mapkit.map.MapObject
 import com.yandex.mapkit.user_location.UserLocationLayer
 import kotlinx.android.synthetic.main.fragment_yandex_map.*
 import kotlinx.coroutines.launch
-import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
+import ru.relabs.kurjercontroller.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.models.AddressModel
+import ru.relabs.kurjercontroller.domain.models.AddressModel
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.AddressWithColor
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.ColoredIconProvider
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.DeliverymanIconProvider

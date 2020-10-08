@@ -4,10 +4,10 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import ru.relabs.kurjercontroller.CancelableScope
-import ru.relabs.kurjercontroller.models.FilterModel
+import ru.relabs.kurjercontroller.utils.CancelableScope
+import ru.relabs.kurjercontroller.domain.models.FilterModel
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
-import ru.relabs.kurjercontroller.network.models.SearchFiltersRequest
+import ru.relabs.kurjercontroller.data.models.SearchFiltersRequest
 import ru.relabs.kurjercontroller.providers.interfaces.FiltersResultOrError
 import ru.relabs.kurjercontroller.providers.interfaces.IFilterSearch
 

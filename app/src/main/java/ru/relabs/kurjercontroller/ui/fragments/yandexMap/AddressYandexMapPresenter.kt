@@ -3,9 +3,8 @@ package ru.relabs.kurjercontroller.ui.fragments.yandexMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.relabs.kurjercontroller.CancelableScope
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.base.BaseYandexMapPresenter
 
 class AddressYandexMapPresenter(override val fragment: AddressYandexMapFragment): BaseYandexMapPresenter(fragment) {

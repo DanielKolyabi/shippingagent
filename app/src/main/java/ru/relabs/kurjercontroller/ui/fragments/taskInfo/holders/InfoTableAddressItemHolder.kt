@@ -3,9 +3,8 @@ package ru.relabs.kurjercontroller.ui.fragments.taskInfo.holders
 import android.graphics.Color
 import android.view.View
 import kotlinx.android.synthetic.main.holder_task_details_address_list_item.view.*
-import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
-import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.models.TaskItemModel
+import ru.relabs.kurjercontroller.ui.delegateAdapter.BaseViewHolder
+import ru.relabs.kurjercontroller.domain.models.TaskItemModel
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.TaskInfoModel
 
 /**

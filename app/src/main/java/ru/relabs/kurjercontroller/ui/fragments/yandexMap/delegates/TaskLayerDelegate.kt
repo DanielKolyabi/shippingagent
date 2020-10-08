@@ -2,8 +2,8 @@ package ru.relabs.kurjercontroller.ui.fragments.yandexMap.delegates
 
 import android.view.ViewGroup
 import android.widget.Button
-import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
-import ru.relabs.kurjer.ui.delegateAdapter.IAdapterDelegate
+import ru.relabs.kurjercontroller.ui.delegateAdapter.BaseViewHolder
+import ru.relabs.kurjercontroller.ui.delegateAdapter.IAdapterDelegate
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.models.YandexMapModel
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.holders.TaskButtonHolder
 

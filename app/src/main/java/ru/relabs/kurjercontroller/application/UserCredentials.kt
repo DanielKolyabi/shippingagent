@@ -6,7 +6,7 @@ import ru.relabs.kurjercontroller.BuildConfig
 /**
  * Created by ProOrange on 18.03.2019.
  */
-class UserCredentials(val application: MyApplication) {
+class UserCredentials(val application: ControllApplication) {
     var user: UserModel = UserModel.Unauthorized
 
     fun storeUserCredentials() {

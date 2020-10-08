@@ -1,7 +1,7 @@
 package ru.relabs.kurjercontroller.ui.fragments.addressList
 
-import ru.relabs.kurjercontroller.models.TaskItemModel
-import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskModel
 
 /**
  * Created by ProOrange on 09.08.2018.

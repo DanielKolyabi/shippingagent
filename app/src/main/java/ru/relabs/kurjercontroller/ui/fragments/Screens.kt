@@ -1,7 +1,7 @@
 package ru.relabs.kurjercontroller.ui.fragments
 
 import androidx.fragment.app.Fragment
-import ru.relabs.kurjercontroller.models.*
+import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.ui.fragments.addressList.AddressListFragment
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.AddressYandexMapFragment
 import ru.relabs.kurjercontroller.ui.fragments.filters.FiltersFragment

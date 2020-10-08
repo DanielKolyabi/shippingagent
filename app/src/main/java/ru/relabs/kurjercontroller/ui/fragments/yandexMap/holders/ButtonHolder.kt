@@ -2,8 +2,8 @@ package ru.relabs.kurjercontroller.ui.fragments.yandexMap.holders
 
 import android.view.View
 import android.widget.Button
-import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
-import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
+import ru.relabs.kurjercontroller.ui.delegateAdapter.BaseViewHolder
+import ru.relabs.kurjercontroller.utils.extensions.setSelectButtonActive
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.models.YandexMapModel
 
 /**

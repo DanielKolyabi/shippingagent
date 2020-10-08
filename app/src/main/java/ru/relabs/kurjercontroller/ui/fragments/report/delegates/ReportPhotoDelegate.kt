@@ -3,8 +3,8 @@ package ru.relabs.kurjercontroller.ui.fragments.report.delegates
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
-import ru.relabs.kurjer.ui.delegateAdapter.IAdapterDelegate
+import ru.relabs.kurjercontroller.ui.delegateAdapter.BaseViewHolder
+import ru.relabs.kurjercontroller.ui.delegateAdapter.IAdapterDelegate
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportPhotosListModel
 import ru.relabs.kurjercontroller.ui.fragments.report.holders.ReportPhotoHolder

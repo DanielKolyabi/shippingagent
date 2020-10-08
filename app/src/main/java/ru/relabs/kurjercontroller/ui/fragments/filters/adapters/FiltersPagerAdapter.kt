@@ -4,8 +4,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.PagerAdapter
-import ru.relabs.kurjercontroller.models.TaskFiltersModel
-import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.domain.models.TaskFiltersModel
+import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.ui.fragments.filters.FiltersFragment
 
 /**

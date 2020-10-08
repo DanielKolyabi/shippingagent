@@ -5,17 +5,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.BuildConfig
-import ru.relabs.kurjercontroller.CustomLog
+import ru.relabs.kurjercontroller.utils.CustomLog
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.database.AppDatabase
-import ru.relabs.kurjercontroller.database.entities.*
-import ru.relabs.kurjercontroller.database.models.ApartmentResult
+import ru.relabs.kurjercontroller.data.database.AppDatabase
+import ru.relabs.kurjercontroller.data.database.entities.*
+import ru.relabs.kurjercontroller.data.database.models.ApartmentResult
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
 import ru.relabs.kurjercontroller.logError
-import ru.relabs.kurjercontroller.models.*
+import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI.api
-import ru.relabs.kurjercontroller.network.models.FiltersRequest
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 
 /**

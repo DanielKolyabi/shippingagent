@@ -11,7 +11,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.models.FilterModel
+import ru.relabs.kurjercontroller.domain.models.FilterModel
 
 
 class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :

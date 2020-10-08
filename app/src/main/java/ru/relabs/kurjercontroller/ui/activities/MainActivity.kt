@@ -23,12 +23,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.relabs.kurjercontroller.*
-import ru.relabs.kurjercontroller.application.MyApplication
+import ru.relabs.kurjercontroller.application.ControllApplication
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
-import ru.relabs.kurjercontroller.network.NetworkHelper
-import ru.relabs.kurjercontroller.network.models.UpdateInfo
-import ru.relabs.kurjercontroller.ui.extensions.hideKeyboard
-import ru.relabs.kurjercontroller.ui.extensions.setVisible
+import ru.relabs.kurjercontroller.utils.NetworkHelper
+import ru.relabs.kurjercontroller.data.modelsOld.UpdateInfo
+import ru.relabs.kurjercontroller.services.ReportService
+import ru.relabs.kurjercontroller.utils.extensions.hideKeyboard
+import ru.relabs.kurjercontroller.utils.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.ISearchableFragment
 import ru.relabs.kurjercontroller.ui.fragments.LoginScreen
 import ru.relabs.kurjercontroller.ui.fragments.SearchInputAdapter
@@ -41,6 +42,8 @@ import ru.relabs.kurjercontroller.ui.fragments.taskInfo.TaskInfoFragment
 import ru.relabs.kurjercontroller.ui.fragments.taskItemExplanation.TaskItemExplanationFragment
 import ru.relabs.kurjercontroller.ui.fragments.taskList.TaskListFragment
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.AddressYandexMapFragment
+import ru.relabs.kurjercontroller.utils.CancelableScope
+import ru.relabs.kurjercontroller.utils.CustomLog
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import ru.terrakok.cicerone.android.support.SupportAppScreen
 import ru.terrakok.cicerone.commands.Command
@@ -173,7 +176,7 @@ class MainActivity : AppCompatActivity() {
             onBackPressed()
         }
         device_uuid.setOnClickListener {
-            val deviceUUID = (application as? MyApplication)?.deviceUUID?.split("-")?.last() ?: ""
+            val deviceUUID = (application as? ControllApplication)?.deviceUUID?.split("-")?.last() ?: ""
             if (deviceUUID == "") {
                 showError("Не удалось получить device UUID")
                 return@setOnClickListener

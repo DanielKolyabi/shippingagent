@@ -3,7 +3,7 @@ package ru.relabs.kurjercontroller.ui.fragments.yandexMap
 import android.graphics.Color
 import android.os.Parcel
 import android.os.Parcelable
-import ru.relabs.kurjercontroller.models.AddressModel
+import ru.relabs.kurjercontroller.domain.models.AddressModel
 
 /**
  * Created by ProOrange on 06.06.2019.

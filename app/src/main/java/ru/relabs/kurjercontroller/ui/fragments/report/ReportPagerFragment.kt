@@ -15,12 +15,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_report_pager.*
 import kotlinx.coroutines.launch
-import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
+import ru.relabs.kurjercontroller.ui.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.activity
-import ru.relabs.kurjercontroller.models.TaskItemModel
-import ru.relabs.kurjercontroller.models.TaskModel
-import ru.relabs.kurjercontroller.ui.extensions.setVisible
+import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskModel
+import ru.relabs.kurjercontroller.utils.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.report.adapters.ReportPagerAdapter
 import ru.relabs.kurjercontroller.ui.fragments.report.delegates.ReportTasksDelegate
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportTasksListModel

@@ -1,6 +1,6 @@
 package ru.relabs.kurjercontroller.ui.fragments.taskList
 
-import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.domain.models.TaskModel
 
 /**
  * Created by ProOrange on 18.03.2019.

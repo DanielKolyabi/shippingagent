@@ -1,6 +1,6 @@
 package ru.relabs.kurjercontroller.ui.fragments.yandexMap.models
 
-import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.domain.models.TaskModel
 
 /**
  * Created by ProOrange on 06.06.2019.

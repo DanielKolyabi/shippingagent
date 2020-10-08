@@ -3,13 +3,11 @@ package ru.relabs.kurjercontroller.ui.activities
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
-import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import com.crashlytics.android.Crashlytics
 import io.fabric.sdk.android.Fabric
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.ReportService
-import ru.relabs.kurjercontroller.application
+import ru.relabs.kurjercontroller.services.ReportService
 
 class SplashActivity : AppCompatActivity() {
 

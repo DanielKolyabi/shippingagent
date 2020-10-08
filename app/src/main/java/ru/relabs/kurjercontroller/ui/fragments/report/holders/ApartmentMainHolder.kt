@@ -3,12 +3,10 @@ package ru.relabs.kurjercontroller.ui.fragments.report.holders
 import android.graphics.Color
 import android.graphics.Typeface
 import android.view.View
-import androidx.core.graphics.ColorUtils
 import kotlinx.android.synthetic.main.holder_report_appartament.view.*
-import kotlinx.android.synthetic.main.holder_report_appartament_button_group_addition.view.*
 import kotlinx.android.synthetic.main.holder_report_appartament_button_group_main.view.*
-import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
-import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
+import ru.relabs.kurjercontroller.ui.delegateAdapter.BaseViewHolder
+import ru.relabs.kurjercontroller.utils.extensions.setSelectButtonActive
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ApartmentListModel
 
 

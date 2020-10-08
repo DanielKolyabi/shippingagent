@@ -1,4 +1,4 @@
-package ru.relabs.kurjer.ui.delegateAdapter
+package ru.relabs.kurjercontroller.ui.delegateAdapter
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView

@@ -11,16 +11,15 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_login.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.network.NetworkHelper
+import ru.relabs.kurjercontroller.utils.NetworkHelper
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
-import ru.relabs.kurjercontroller.ui.extensions.setVisible
+import ru.relabs.kurjercontroller.utils.extensions.setVisible
 
 
 class LoginFragment : Fragment() {

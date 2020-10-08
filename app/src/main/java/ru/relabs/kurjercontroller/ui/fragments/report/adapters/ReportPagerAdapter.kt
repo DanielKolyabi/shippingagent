@@ -3,9 +3,9 @@ package ru.relabs.kurjercontroller.ui.fragments.report.adapters
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
-import ru.relabs.kurjercontroller.models.EntranceModel
-import ru.relabs.kurjercontroller.models.TaskItemModel
-import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.domain.models.EntranceModel
+import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.ui.fragments.report.ReportFragment
 import java.lang.ref.WeakReference
 

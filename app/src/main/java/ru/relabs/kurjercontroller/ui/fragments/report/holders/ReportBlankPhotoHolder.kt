@@ -2,7 +2,7 @@ package ru.relabs.kurjercontroller.ui.fragments.report.holders
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
+import ru.relabs.kurjercontroller.ui.delegateAdapter.BaseViewHolder
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportPhotosListModel
 
 /**

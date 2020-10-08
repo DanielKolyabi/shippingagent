@@ -4,12 +4,12 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.view.View
 import kotlinx.android.synthetic.main.holder_tasklist_task.view.*
-import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
+import ru.relabs.kurjercontroller.ui.delegateAdapter.BaseViewHolder
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.models.TaskModel
-import ru.relabs.kurjercontroller.ui.extensions.performFlash
-import ru.relabs.kurjercontroller.ui.extensions.setVisible
+import ru.relabs.kurjercontroller.domain.models.TaskModel
+import ru.relabs.kurjercontroller.utils.extensions.performFlash
+import ru.relabs.kurjercontroller.utils.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.taskList.TaskListModel
 
 /**

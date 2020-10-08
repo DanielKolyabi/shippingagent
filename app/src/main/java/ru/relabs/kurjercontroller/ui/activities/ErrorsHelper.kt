@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.appcompat.app.AlertDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import ru.relabs.kurjercontroller.CustomLog
+import ru.relabs.kurjercontroller.utils.CustomLog
 
 /**
  * Created by ProOrange on 18.03.2019.

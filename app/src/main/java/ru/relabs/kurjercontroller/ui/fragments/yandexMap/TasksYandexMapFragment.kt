@@ -14,11 +14,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.models.AddressModel
-import ru.relabs.kurjercontroller.models.TaskItemModel
-import ru.relabs.kurjercontroller.models.TaskModel
-import ru.relabs.kurjercontroller.ui.extensions.placemarkColor
-import ru.relabs.kurjercontroller.ui.extensions.setVisible
+import ru.relabs.kurjercontroller.domain.models.AddressModel
+import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskModel
+import ru.relabs.kurjercontroller.utils.extensions.placemarkColor
+import ru.relabs.kurjercontroller.utils.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.base.BaseYandexMapFragment
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.base.WRONG_METHOD_OUTLINE_COLOR
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.models.YandexMapModel

@@ -7,11 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_task_item_explanation.*
-import ru.relabs.kurjercontroller.CustomLog
+import ru.relabs.kurjercontroller.utils.CustomLog
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskItemModel
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
 

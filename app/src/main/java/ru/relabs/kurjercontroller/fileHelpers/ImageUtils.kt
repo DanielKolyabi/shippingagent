@@ -1,4 +1,4 @@
-package ru.relabs.kurjer.files
+package ru.relabs.kurjercontroller.files
 
 import android.content.ContentResolver
 import android.graphics.Bitmap

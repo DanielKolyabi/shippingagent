@@ -1,9 +1,9 @@
 package ru.relabs.kurjercontroller.ui.fragments.yandexMap.base
 
 import kotlinx.coroutines.*
-import ru.relabs.kurjercontroller.CancelableScope
+import ru.relabs.kurjercontroller.utils.CancelableScope
 import ru.relabs.kurjercontroller.logError
-import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.models.DeliverymanPositionData
 import java.util.*

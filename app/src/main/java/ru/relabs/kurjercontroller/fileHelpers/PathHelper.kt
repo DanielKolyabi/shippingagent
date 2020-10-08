@@ -1,9 +1,9 @@
 package ru.relabs.kurjercontroller.fileHelpers
 
 import android.os.Environment
-import ru.relabs.kurjercontroller.models.EntranceModel
-import ru.relabs.kurjercontroller.models.EntrancePhotoModel
-import ru.relabs.kurjercontroller.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.EntranceModel
+import ru.relabs.kurjercontroller.domain.models.EntrancePhotoModel
+import ru.relabs.kurjercontroller.domain.models.TaskItemModel
 import java.io.File
 import java.util.*
 

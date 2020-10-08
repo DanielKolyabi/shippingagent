@@ -12,13 +12,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.relabs.kurjer.ui.delegateAdapter.DelegateAdapter
-import ru.relabs.kurjercontroller.CustomLog
+import ru.relabs.kurjercontroller.ui.delegateAdapter.DelegateAdapter
+import ru.relabs.kurjercontroller.utils.CustomLog
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.models.AddressModel
-import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.domain.models.AddressModel
+import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.delegates.*

@@ -4,13 +4,13 @@ import kotlinx.android.synthetic.main.fragment_report_pager.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.relabs.kurjercontroller.CancelableScope
+import ru.relabs.kurjercontroller.utils.CancelableScope
 import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.application.MyApplication
-import ru.relabs.kurjercontroller.models.EntranceModel
-import ru.relabs.kurjercontroller.models.TaskItemModel
-import ru.relabs.kurjercontroller.models.TaskModel
+import ru.relabs.kurjercontroller.application.ControllApplication
+import ru.relabs.kurjercontroller.domain.models.EntranceModel
+import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.ui.fragments.report.adapters.ReportPagerAdapter
 
 /**
@@ -156,7 +156,7 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
 
     suspend fun removeNewFromTasks(){
         fragment.taskItems.filter { it.isNew }.forEach {
-            MyApplication.instance.database.taskItemDao().insert(
+            ControllApplication.instance.database.taskItemDao().insert(
                 it.copy(isNew = false).toEntity()
             )
         }

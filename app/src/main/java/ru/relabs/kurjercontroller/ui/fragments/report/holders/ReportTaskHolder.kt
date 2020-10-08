@@ -2,7 +2,7 @@ package ru.relabs.kurjercontroller.ui.fragments.report.holders
 
 import android.view.View
 import kotlinx.android.synthetic.main.holder_report_task.view.*
-import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
+import ru.relabs.kurjercontroller.ui.delegateAdapter.BaseViewHolder
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.ui.fragments.report.models.ReportTasksListModel
 

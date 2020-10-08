@@ -2,8 +2,8 @@ package ru.relabs.kurjercontroller.ui.fragments.taskList.delegates
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
-import ru.relabs.kurjer.ui.delegateAdapter.IAdapterDelegate
+import ru.relabs.kurjercontroller.ui.delegateAdapter.BaseViewHolder
+import ru.relabs.kurjercontroller.ui.delegateAdapter.IAdapterDelegate
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.ui.fragments.taskList.TaskListModel
 import ru.relabs.kurjercontroller.ui.fragments.taskList.holders.TaskHolder

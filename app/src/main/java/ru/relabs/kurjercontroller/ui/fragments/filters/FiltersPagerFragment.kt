@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_report_pager.*
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.models.TaskModel
-import ru.relabs.kurjercontroller.ui.extensions.setVisible
+import ru.relabs.kurjercontroller.domain.models.TaskModel
+import ru.relabs.kurjercontroller.utils.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.filters.adapters.FiltersPagerAdapter
 import java.util.*
 

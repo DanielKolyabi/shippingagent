@@ -11,9 +11,9 @@ import kotlinx.android.synthetic.main.fragment_filters.*
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.database.entities.FilterEntity
-import ru.relabs.kurjercontroller.models.FilterModel
-import ru.relabs.kurjercontroller.models.TaskFiltersModel
+import ru.relabs.kurjercontroller.data.database.entities.FilterEntity
+import ru.relabs.kurjercontroller.domain.models.FilterModel
+import ru.relabs.kurjercontroller.domain.models.TaskFiltersModel
 import ru.relabs.kurjercontroller.providers.RemoteFilterSearch
 import ru.relabs.kurjercontroller.ui.fragments.filters.adapters.FilterSearchAdapter
 import ru.relabs.kurjercontroller.ui.сustomView.FilterTagLayout

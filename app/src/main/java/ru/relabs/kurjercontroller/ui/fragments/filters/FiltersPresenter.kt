@@ -4,14 +4,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.relabs.kurjercontroller.CancelableScope
+import ru.relabs.kurjercontroller.utils.CancelableScope
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.database.entities.FilterEntity
+import ru.relabs.kurjercontroller.data.database.entities.FilterEntity
 import ru.relabs.kurjercontroller.logError
-import ru.relabs.kurjercontroller.models.FilterModel
-import ru.relabs.kurjercontroller.models.TaskFiltersModel
+import ru.relabs.kurjercontroller.domain.models.FilterModel
+import ru.relabs.kurjercontroller.domain.models.TaskFiltersModel
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
-import ru.relabs.kurjercontroller.network.models.FiltersRequest
+import ru.relabs.kurjercontroller.data.models.FiltersRequest
 
 /**
  * Created by ProOrange on 18.03.2019.

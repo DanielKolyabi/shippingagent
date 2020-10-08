@@ -2,9 +2,9 @@ package ru.relabs.kurjercontroller.ui.fragments.taskInfo.holders
 
 import android.view.View
 import kotlinx.android.synthetic.main.holder_task_details_list_info.view.*
-import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
-import ru.relabs.kurjercontroller.models.TaskModel
-import ru.relabs.kurjercontroller.ui.extensions.setVisible
+import ru.relabs.kurjercontroller.ui.delegateAdapter.BaseViewHolder
+import ru.relabs.kurjercontroller.domain.models.TaskModel
+import ru.relabs.kurjercontroller.utils.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.TaskInfoModel
 
 /**

@@ -1,18 +1,17 @@
 package ru.relabs.kurjercontroller.ui.fragments.addressList
 
-import android.graphics.Color
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.relabs.kurjercontroller.CancelableScope
+import ru.relabs.kurjercontroller.utils.CancelableScope
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.models.TaskItemModel
-import ru.relabs.kurjercontroller.models.TaskModel
-import ru.relabs.kurjercontroller.models.toAndroidState
+import ru.relabs.kurjercontroller.domain.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskModel
+import ru.relabs.kurjercontroller.domain.models.toAndroidState
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError
 import ru.relabs.kurjercontroller.ui.activities.showErrorSuspend
-import ru.relabs.kurjercontroller.ui.extensions.placemarkColor
+import ru.relabs.kurjercontroller.utils.extensions.placemarkColor
 import ru.relabs.kurjercontroller.ui.fragments.AddressYandexMapScreen
 import ru.relabs.kurjercontroller.ui.fragments.ReportScreen
 import ru.relabs.kurjercontroller.ui.fragments.TasksYandexMapScreen

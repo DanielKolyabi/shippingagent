@@ -8,8 +8,8 @@ import androidx.viewpager.widget.PagerAdapter
 import kotlinx.android.synthetic.main.holder_report_appartament_button_group_addition.view.*
 import kotlinx.android.synthetic.main.holder_report_appartament_button_group_main.view.*
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.ui.extensions.setSelectButtonActive
-import ru.relabs.kurjercontroller.ui.extensions.setVisible
+import ru.relabs.kurjercontroller.utils.extensions.setSelectButtonActive
+import ru.relabs.kurjercontroller.utils.extensions.setVisible
 
 /**
  * Created by ProOrange on 16.04.2019.

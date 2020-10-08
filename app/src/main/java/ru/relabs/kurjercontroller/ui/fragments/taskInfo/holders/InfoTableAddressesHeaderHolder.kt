@@ -1,7 +1,7 @@
 package ru.relabs.kurjercontroller.ui.fragments.taskInfo.holders
 
 import android.view.View
-import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
+import ru.relabs.kurjercontroller.ui.delegateAdapter.BaseViewHolder
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.TaskInfoModel
 
 /**

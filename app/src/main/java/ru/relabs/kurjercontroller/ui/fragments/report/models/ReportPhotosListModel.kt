@@ -1,6 +1,6 @@
 package ru.relabs.kurjercontroller.ui.fragments.report.models
 
-import ru.relabs.kurjercontroller.models.EntrancePhotoModel
+import ru.relabs.kurjercontroller.domain.models.EntrancePhotoModel
 
 /**
  * Created by ProOrange on 30.08.2018.

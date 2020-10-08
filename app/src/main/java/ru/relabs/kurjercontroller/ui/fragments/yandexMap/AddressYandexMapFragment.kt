@@ -2,7 +2,7 @@ package ru.relabs.kurjercontroller.ui.fragments.yandexMap
 
 import android.os.Bundle
 import android.view.View
-import ru.relabs.kurjercontroller.models.StorageModel
+import ru.relabs.kurjercontroller.domain.models.StorageModel
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.base.BaseYandexMapFragment
 
 class AddressYandexMapFragment : BaseYandexMapFragment() {

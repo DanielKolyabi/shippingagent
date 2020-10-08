@@ -5,13 +5,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
-import ru.relabs.kurjercontroller.CancelableScope
-import ru.relabs.kurjercontroller.CustomLog
+import ru.relabs.kurjercontroller.utils.CancelableScope
+import ru.relabs.kurjercontroller.utils.CustomLog
 import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.models.TaskFiltersModel
-import ru.relabs.kurjercontroller.models.TaskModel
-import ru.relabs.kurjercontroller.models.toAndroidState
+import ru.relabs.kurjercontroller.domain.models.TaskFiltersModel
+import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 import ru.relabs.kurjercontroller.ui.activities.ErrorButtonsListener
 import ru.relabs.kurjercontroller.ui.activities.showError

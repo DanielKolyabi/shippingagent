@@ -1,8 +1,9 @@
 package ru.relabs.kurjercontroller
 
 import androidx.fragment.app.Fragment
-import ru.relabs.kurjercontroller.application.MyApplication
+import ru.relabs.kurjercontroller.application.ControllApplication
 import ru.relabs.kurjercontroller.ui.activities.MainActivity
+import ru.relabs.kurjercontroller.utils.CustomLog
 
 
 /**
@@ -10,8 +11,8 @@ import ru.relabs.kurjercontroller.ui.activities.MainActivity
  */
 
 
-fun application(): MyApplication {
-    return MyApplication.instance
+fun application(): ControllApplication {
+    return ControllApplication.appContext as ControllApplication
 }
 
 fun Fragment.activity(): MainActivity? {

@@ -2,10 +2,10 @@ package ru.relabs.kurjercontroller.ui.fragments.taskInfo.delegates
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
-import ru.relabs.kurjer.ui.delegateAdapter.IAdapterDelegate
+import ru.relabs.kurjercontroller.ui.delegateAdapter.BaseViewHolder
+import ru.relabs.kurjercontroller.ui.delegateAdapter.IAdapterDelegate
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskItemModel
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.TaskInfoModel
 import ru.relabs.kurjercontroller.ui.fragments.taskInfo.holders.InfoTableAddressItemHolder
 

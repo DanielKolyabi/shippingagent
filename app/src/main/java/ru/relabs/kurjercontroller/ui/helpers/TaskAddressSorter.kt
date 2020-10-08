@@ -1,6 +1,6 @@
 package ru.relabs.kurjercontroller.ui.helpers
 
-import ru.relabs.kurjercontroller.models.TaskItemModel
+import ru.relabs.kurjercontroller.domain.models.TaskItemModel
 import ru.relabs.kurjercontroller.ui.fragments.addressList.AddressListModel
 
 /**

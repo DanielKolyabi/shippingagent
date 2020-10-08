@@ -2,8 +2,8 @@ package ru.relabs.kurjercontroller.ui.fragments.yandexMap.holders
 
 import android.view.View
 import kotlinx.android.synthetic.main.holder_load_deliverymans.view.*
-import ru.relabs.kurjer.ui.delegateAdapter.BaseViewHolder
-import ru.relabs.kurjercontroller.ui.extensions.setVisible
+import ru.relabs.kurjercontroller.ui.delegateAdapter.BaseViewHolder
+import ru.relabs.kurjercontroller.utils.extensions.setVisible
 import ru.relabs.kurjercontroller.ui.fragments.yandexMap.models.YandexMapModel
 
 /**
