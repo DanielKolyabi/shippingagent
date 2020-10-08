@@ -25,6 +25,7 @@ import ru.relabs.kurjercontroller.data.models.TaskItemReportRequest
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
 import ru.relabs.kurjercontroller.logError
 import ru.relabs.kurjercontroller.data.modelsOld.PhotoReportModel
+import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.ui.activities.MainActivity
 import ru.relabs.kurjercontroller.ui.activities.REQUEST_LOCATION
 import java.io.File
@@ -116,67 +117,6 @@ object NetworkHelper {
 
 
         return file
-    }
-
-
-    suspend fun sendReport(api: ControlApi, data: EntranceReportEntity, photos: List<EntrancePhotoEntity>): Boolean {
-
-        val photosMap = mutableMapOf<String, PhotoReportRequest>()
-        val photoParts = mutableListOf<MultipartBody.Part>()
-
-        var imgCount = 0
-        photos.forEachIndexed { i, photo ->
-            try {
-                photoParts.add(
-                    photoEntityToPart(
-                        "img_$imgCount",
-                        data,
-                        photo
-                    )
-                )
-                photosMap["img_$imgCount"] = PhotoReportRequest("", photo.gps)
-                imgCount++
-            } catch (e: Throwable) {
-                e.logError()
-            }
-        }
-
-        val reportObject = TaskItemReportRequest(
-            data.taskId, data.taskItemId, data.idnd, data.entranceNumber,
-            data.startAppartaments, data.endAppartaments, data.floors,
-            data.description, data.code, data.key,
-            data.euroKey, data.isDeliveryWrong, data.hasLookupPost,
-            data.token, data.apartmentResult, data.closeTime,
-            photosMap, data.publisherId, data.mailboxType,
-            data.gpsLat, data.gpsLong, data.gpsTime,
-            data.entranceClosed
-        )
-
-        api.sendTaskReport(data.taskItemId, data.token, reportObject, photoParts)
-
-        return true
-    }
-
-    private fun photoEntityToPart(
-        partName: String,
-        reportEnt: EntranceReportEntity,
-        photoEnt: EntrancePhotoEntity
-    ): MultipartBody.Part {
-        val photoFile = PathHelper.getEntrancePhotoFileByID(
-            reportEnt.taskItemId,
-            photoEnt.entranceNumber,
-            photoEnt.UUID
-        )
-        if (!photoFile.exists()) {
-            throw FileNotFoundException(photoFile.path)
-        }
-        val extension = Uri.fromFile(photoFile).toString().split(".").last()
-        val mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
-
-        val requestFile =
-            RequestBody.run { photoFile.asRequestBody(MediaType.run { "image/jpeg".toMediaType() }) }
-
-        return MultipartBody.Part.createFormData(partName, photoFile.name, requestFile)
     }
 
     fun isGPSEnabled(context: Context?): Boolean{

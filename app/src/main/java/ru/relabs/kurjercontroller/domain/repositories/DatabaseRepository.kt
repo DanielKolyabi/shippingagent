@@ -25,7 +25,7 @@ import ru.relabs.kurjercontroller.utils.debug
 import java.util.*
 
 class DatabaseRepository(
-    private val db: AppDatabase,
+    val db: AppDatabase,
     private val authTokenStorage: AuthTokenStorage,
     private val baseUrl: String,
     private val pathsProvider: PathsProvider

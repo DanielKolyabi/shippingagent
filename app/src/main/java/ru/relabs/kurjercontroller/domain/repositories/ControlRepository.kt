@@ -2,6 +2,8 @@ package ru.relabs.kurjercontroller.domain.repositories
 
 import android.graphics.BitmapFactory
 import android.location.Location
+import android.net.Uri
+import android.webkit.MimeTypeMap
 import com.google.gson.Gson
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -12,6 +14,8 @@ import retrofit2.HttpException
 import retrofit2.Response
 import ru.relabs.kurjercontroller.data.api.ControlApi
 import ru.relabs.kurjercontroller.data.database.AppDatabase
+import ru.relabs.kurjercontroller.data.database.entities.EntrancePhotoEntity
+import ru.relabs.kurjercontroller.data.database.entities.EntranceReportEntity
 import ru.relabs.kurjercontroller.data.database.entities.SendQueryItemEntity
 import ru.relabs.kurjercontroller.data.models.PhotoReportRequest
 import ru.relabs.kurjercontroller.data.models.TaskItemReportRequest
@@ -20,14 +24,19 @@ import ru.relabs.kurjercontroller.data.models.common.ApiError
 import ru.relabs.kurjercontroller.data.models.common.ApiErrorContainer
 import ru.relabs.kurjercontroller.data.models.common.DomainException
 import ru.relabs.kurjercontroller.data.models.common.EitherE
-import ru.relabs.kurjercontroller.domain.mappers.network.*
-import ru.relabs.kurjercontroller.domain.models.*
+import ru.relabs.kurjercontroller.domain.mappers.network.TaskMapper
+import ru.relabs.kurjercontroller.domain.mappers.network.UpdatesMapper
+import ru.relabs.kurjercontroller.domain.mappers.network.UserMapper
+import ru.relabs.kurjercontroller.domain.models.AppUpdatesInfo
+import ru.relabs.kurjercontroller.domain.models.Task
+import ru.relabs.kurjercontroller.domain.models.User
 import ru.relabs.kurjercontroller.domain.providers.*
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
+import ru.relabs.kurjercontroller.fileHelpers.PathHelper
+import ru.relabs.kurjercontroller.logError
 import ru.relabs.kurjercontroller.utils.*
 import java.io.FileNotFoundException
 import java.net.URL
-import java.util.*
 
 class ControlRepository(
     private val controlApi: ControlApi,
@@ -114,67 +123,63 @@ class ControlRepository(
     }
 
     //Reports
-    suspend fun sendReport(item: ReportQueryItemEntity): Either<Exception, Unit> = Either.of {
+    suspend fun sendReport(item: EntranceReportEntity): Either<Exception, Unit> = Either.of {
         val photosMap = mutableMapOf<String, PhotoReportRequest>()
         val photoParts = mutableListOf<MultipartBody.Part>()
-        val photos = database.photosDao().getByTaskItemId(item.taskItemId)
+        val photos = database.entrancePhotoDao().getEntrancePhoto(item.taskId, item.taskItemId, item.entranceNumber)
 
         var imgCount = 0
         photos.forEachIndexed { i, photo ->
             try {
-                photoParts.add(photoEntityToPart("img_$imgCount", item, photo))
-                photosMap["img_$imgCount"] =
-                    PhotoReportRequest("", photo.gps, photo.entranceNumber)
+                photoParts.add(
+                    photoEntityToPart("img_$imgCount", item, photo)
+                )
+                photosMap["img_$imgCount"] = PhotoReportRequest("", photo.gps)
                 imgCount++
             } catch (e: Throwable) {
-                e.fillInStackTrace().log()
+                e.logError()
             }
         }
 
         val reportObject = TaskItemReportRequest(
-            item.taskId, item.taskItemId, item.imageFolderId,
-            item.gps, item.closeTime, item.userDescription, item.entrances, photosMap,
-            item.batteryLevel, item.closeDistance, item.allowedDistance, item.radiusRequired
+            item.taskId, item.taskItemId, item.idnd, item.entranceNumber,
+            item.startAppartaments, item.endAppartaments, item.floors,
+            item.description, item.code, item.key,
+            item.euroKey, item.isDeliveryWrong, item.hasLookupPost,
+            item.token, item.apartmentResult, item.closeTime,
+            photosMap, item.publisherId, item.mailboxType,
+            item.gpsLat, item.gpsLong, item.gpsTime,
+            item.entranceClosed
         )
 
         controlApi.sendTaskReport(
             item.taskItemId,
+            item.token,
             reportObject,
-            photoParts,
-            item.token
+            photoParts
         )
     }
 
-    private fun photoEntityToPart(partName: String, reportEnt: ReportQueryItemEntity, photoEnt: TaskItemPhotoEntity): MultipartBody.Part {
-        val photoFile = pathsProvider.getTaskItemPhotoFileByID(
+    private fun photoEntityToPart(
+        partName: String,
+        reportEnt: EntranceReportEntity,
+        photoEnt: EntrancePhotoEntity
+    ): MultipartBody.Part {
+        val photoFile = PathHelper.getEntrancePhotoFileByID(
             reportEnt.taskItemId,
-            UUID.fromString(photoEnt.UUID)
+            photoEnt.entranceNumber,
+            photoEnt.UUID
         )
         if (!photoFile.exists()) {
             throw FileNotFoundException(photoFile.path)
         }
+        val extension = Uri.fromFile(photoFile).toString().split(".").last()
+        val mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
 
-        val request =
+        val requestFile =
             RequestBody.run { photoFile.asRequestBody(MediaType.run { "image/jpeg".toMediaType() }) }
 
-        return MultipartBody.Part.createFormData(partName, photoFile.name, request)
-    }
-
-    //Pauses
-    suspend fun getLastPauseTimes(): EitherE<PauseTimes> = authenticatedRequest { token ->
-        PauseMapper.fromRaw(controlApi.getLastPauseTimes(token))
-    }
-
-    suspend fun isPauseAllowed(pauseType: PauseType): EitherE<Boolean> = authenticatedRequest { token ->
-        controlApi.isPauseAllowed(token, pauseType.ordinal).status
-    }
-
-    suspend fun getPauseDurations(): EitherE<PauseDurations> = anonymousRequest {
-        PauseMapper.fromRaw(controlApi.getPauseDurations())
-    }
-
-    suspend fun getAllowedCloseRadius(): EitherE<AllowedCloseRadius> = authenticatedRequest { token ->
-        RadiusMapper.fromRaw(controlApi.getRadius(token))
+        return MultipartBody.Part.createFormData(partName, photoFile.name, requestFile)
     }
 
     suspend fun loadTaskMap(task: Task): Either<Exception, Unit> = Either.of {
@@ -212,17 +217,6 @@ class ControlRepository(
         }
     }
 
-    //Could be sended in other user session
-    suspend fun startPause(pauseType: PauseType, token: String, startTime: Long): EitherE<Boolean> = anonymousRequest {
-        controlApi.startPause(token, pauseType.toInt(), startTime)
-        true
-    }
-
-    suspend fun stopPause(pauseType: PauseType, token: String, stopTime: Long): EitherE<Boolean> = anonymousRequest {
-        controlApi.stopPause(token, pauseType.toInt(), stopTime)
-        true
-    }
-
     private fun currentTime(): String = DateTime().toString("yyyy-MM-dd'T'HH:mm:ss")
 
     private suspend inline fun <T> authenticatedRequest(crossinline block: suspend (token: String) -> T): EitherE<T> {
@@ -230,25 +224,26 @@ class ControlRepository(
             ?: Left(DomainException.ApiException(ApiError(401, "Empty token", null)))
     }
 
-    private suspend inline fun <T> anonymousRequest(crossinline block: suspend () -> T): EitherE<T> = withContext(Dispatchers.IO) {
-        return@withContext try {
-            Right(block())
-        } catch (e: CancellationException) {
-            debug("CancellationException $e")
-            Left(DomainException.CanceledException)
-        } catch (e: HttpException) {
-            debug("HttpException $e")
-            if (e.code() == 401) {
-                Left(DomainException.ApiException(ApiError(401, "Unauthorized", null)))
-            } else {
-                mapApiException(e)?.let { Left(it) } ?: Left(DomainException.UnknownException)
-            }
-        } catch (e: Exception) {
-            debug("UnknownException $e")
+    private suspend inline fun <T> anonymousRequest(crossinline block: suspend () -> T): EitherE<T> =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                Right(block())
+            } catch (e: CancellationException) {
+                debug("CancellationException $e")
+                Left(DomainException.CanceledException)
+            } catch (e: HttpException) {
+                debug("HttpException $e")
+                if (e.code() == 401) {
+                    Left(DomainException.ApiException(ApiError(401, "Unauthorized", null)))
+                } else {
+                    mapApiException(e)?.let { Left(it) } ?: Left(DomainException.UnknownException)
+                }
+            } catch (e: Exception) {
+                debug("UnknownException $e")
 //            FirebaseCrashlytics.getInstance().recordException(e)
-            Left(DomainException.UnknownException)
+                Left(DomainException.UnknownException)
+            }
         }
-    }
 
     private fun mapApiException(httpException: HttpException): DomainException.ApiException? {
         return parseErrorBody(httpException.response())?.let { DomainException.ApiException(it) }
