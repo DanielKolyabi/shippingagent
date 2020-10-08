@@ -243,7 +243,7 @@ class DatabaseRepository(
                 return@forEach
             } else if (
                 (savedTask.iteration < task.iteration)
-                || (task.state.state.toInt() != savedTask.state && savedTask.state.toAndroidState() != TaskModel.STARTED)
+                || (task.state.state.toInt() != savedTask.state && savedTask.state != TaskState.STARTED.toInt())
             ) {
                 db.taskDao().update(DatabaseTaskMapper.toEntity(task))
                 db.taskStorageDao().insertAll(task.storages.map { it.toEntity(task.id) })
@@ -358,14 +358,14 @@ class DatabaseRepository(
         newTasks.filter { it.id.id in savedTasksIDs }.forEach { task ->
             val savedTask = db.taskDao().getById(task.id.id) ?: return@forEach
             if (task.state.state == TaskState.CANCELED) {
-                if (savedTask.state.toAndroidState() != TaskModel.STARTED) {
+                if (savedTask.state != TaskState.STARTED.toInt()) {
                     return@withContext true
                 }
             } else if (task.state.state == TaskState.COMPLETED) {
                 return@withContext true
             } else if (
                 (savedTask.iteration < task.iteration)
-                || (task.state.state.toInt() != savedTask.state && savedTask.state.toAndroidState() != TaskModel.STARTED)
+                || (task.state.state.toInt() != savedTask.state && savedTask.state != TaskState.STARTED.toInt())
             ) {
                 return@withContext true
             } else {
