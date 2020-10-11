@@ -3,6 +3,7 @@ package ru.relabs.kurjercontroller.domain.models
 import android.graphics.Color
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
+import org.joda.time.DateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
@@ -24,7 +25,7 @@ data class TaskItem(
     val address: Address,
     val entrances: List<Entrance>,
     val notes: List<String>,
-    var closeTime: Date? = null,
+    var closeTime: DateTime? = null,
     val deliverymanId: Int,
     var isNew: Boolean,
     val wrongMethod: Boolean,
@@ -54,7 +55,7 @@ data class TaskItem(
             Color.BLUE
         } else {
             val currentTime = Date().time
-            val diff = abs(TimeUnit.MILLISECONDS.toSeconds(currentTime - (closeTime?.time ?: currentTime)))
+            val diff = abs(TimeUnit.MILLISECONDS.toSeconds(currentTime - (closeTime?.millis ?: currentTime)))
             when {
                 diff < 1.5 * 60 * 60 -> Color.GREEN
                 diff < 3 * 60 * 60 -> Color.YELLOW

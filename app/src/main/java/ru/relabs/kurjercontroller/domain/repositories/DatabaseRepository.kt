@@ -414,6 +414,20 @@ class DatabaseRepository(
             }
         }
     }
+
+    suspend fun getTaskItems(taskItemId: TaskItemId): List<TaskItem> = withContext(Dispatchers.IO) {
+        db.taskItemDao()
+            .getAllByTaskItemId(taskItemId.id)
+            .map { DatabaseTaskItemMapper.fromEntity(it, db) }
+    }
+
+    suspend fun getTask(taskId: TaskId): Task? = withContext(Dispatchers.IO) {
+        db.taskDao().getById(taskId.id)?.let { DatabaseTaskMapper.fromEntity(it, db) }
+    }
+
+    suspend fun updateTaskItem(item: TaskItem) = withContext(Dispatchers.IO) {
+        db.taskItemDao().insert(DatabaseTaskItemMapper.toEntity(item))
+    }
 }
 
 sealed class SendQueryData {

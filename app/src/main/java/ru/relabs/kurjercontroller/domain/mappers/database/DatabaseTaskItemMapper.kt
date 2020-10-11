@@ -17,7 +17,7 @@ object DatabaseTaskItemMapper {
             ?: Address.blank(),
         entrances = db.entranceDao().getByTaskItemId(entity.taskId, entity.taskItemId)
             .map { DatabaseEntranceMapper.fromEntity(it) },
-        closeTime = entity.closeTime?.toDate(),
+        closeTime = entity.closeTime,
         deliverymanId = entity.deliverymanId,
         isNew = entity.isNew,
         wrongMethod = entity.wrongMethod,
@@ -35,7 +35,7 @@ object DatabaseTaskItemMapper {
         required = model.required,
         addressId = model.address.id.id,
         notes = model.notes,
-        closeTime = model.closeTime?.let { DateTime(it) },
+        closeTime = model.closeTime,
         deliverymanId = model.deliverymanId,
         isNew = model.isNew,
         wrongMethod = model.wrongMethod,

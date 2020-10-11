@@ -6,9 +6,7 @@ import ru.relabs.kurjercontroller.presentation.fragmentsOld.addressList.AddressL
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.AddressYandexMapFragment
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.filters.FiltersFragment
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.filters.FiltersPagerFragment
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.login.LoginFragment
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.report.ReportPagerFragment
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.taskInfo.TaskInfoFragment
 import ru.relabs.kurjercontroller.presentation.taskItemExplanation.TaskItemExplanationFragment
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.taskList.TaskListFragment
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.AddressWithColor
