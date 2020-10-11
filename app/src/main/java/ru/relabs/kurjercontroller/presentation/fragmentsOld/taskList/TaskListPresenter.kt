@@ -9,6 +9,7 @@ import ru.relabs.kurjercontroller.utils.CancelableScope
 import ru.relabs.kurjercontroller.utils.CustomLog
 import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.application
+import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.domain.models.TaskFilters
 import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
@@ -27,35 +28,35 @@ class TaskListPresenter(val fragment: TaskListFragment) {
     var networkUpdateStarted = false
 
     fun onTaskClicked(pos: Int) {
-        val item = fragment.adapter.data[pos] as? TaskListModel.TaskItem
-        item ?: return
-        application().router.navigateTo(TaskInfoScreen(item.task))
+//        val item = fragment.adapter.data[pos] as? TaskListModel.TaskItem
+//        item ?: return
+//        application().router.navigateTo(TaskInfoScreen(item.task))
     }
 
     fun onTaskSelected(pos: Int) {
-        if (pos < 0) {
-            return
-        }
-        if (fragment.adapter.data[pos] !is TaskListModel.TaskItem) {
-            return
-        }
-        if ((fragment.adapter.data[pos] as TaskListModel.TaskItem).task.androidState == TaskModel.CREATED) {
-            fragment.context?.showError("Вы должны ознакомиться с заданием")
-            return
-        }
-        val clickedItem = (fragment.adapter.data[pos] as TaskListModel.TaskItem)
-        val selectedTasks = getSelectedTasks()
-        val selectedFilteredTasksCount = selectedTasks.count { it.task.filtered }
-        if (selectedFilteredTasksCount >= 3 && !clickedItem.selected && clickedItem.task.filtered) {
-            fragment.context?.showError("Невозможно выбрать более 3 заданий с фильтрами")
-            return
-        }
-
-        clickedItem.selected = !clickedItem.selected
-        fragment.adapter.notifyItemChanged(pos)
-
-        markIntersectedTasks()
-        updateStartButton()
+//        if (pos < 0) {
+//            return
+//        }
+//        if (fragment.adapter.data[pos] !is TaskListModel.TaskItem) {
+//            return
+//        }
+//        if ((fragment.adapter.data[pos] as TaskListModel.TaskItem).task.androidState == TaskModel.CREATED) {
+//            fragment.context?.showError("Вы должны ознакомиться с заданием")
+//            return
+//        }
+//        val clickedItem = (fragment.adapter.data[pos] as TaskListModel.TaskItem)
+//        val selectedTasks = getSelectedTasks()
+//        val selectedFilteredTasksCount = selectedTasks.count { it.task.filtered }
+//        if (selectedFilteredTasksCount >= 3 && !clickedItem.selected && clickedItem.task.filtered) {
+//            fragment.context?.showError("Невозможно выбрать более 3 заданий с фильтрами")
+//            return
+//        }
+//
+//        clickedItem.selected = !clickedItem.selected
+//        fragment.adapter.notifyItemChanged(pos)
+//
+//        markIntersectedTasks()
+//        updateStartButton()
     }
 
     private fun getSelectedTasks(): List<TaskListModel.TaskItem> =
@@ -64,51 +65,52 @@ class TaskListPresenter(val fragment: TaskListFragment) {
             .mapNotNull { it as? TaskListModel.TaskItem }
 
     private fun markIntersectedTasks() {
-        val tasks = fragment.adapter.data
-        val selectedTasks = getSelectedTasks()
-        val oldStates = tasks.map {
-            if (it !is TaskListModel.TaskItem) false
-            else it.hasAddressIntersection
-        }
-
-        val newStates = oldStates.map { false }.toMutableList()
-
-        for (selectedTask in selectedTasks) {
-            for ((i, task) in tasks.withIndex()) {
-                if (task == selectedTask) continue
-                if (task !is TaskListModel.TaskItem) continue
-                if (selectedTask !is TaskListModel.TaskItem) continue
-                if (newStates[i]) continue
-
-                if (isTasksHasIntersectedAddresses(selectedTask.task, task.task)) {
-                    newStates[i] = true
-                }
-            }
-        }
-
-        oldStates.forEachIndexed { i, state ->
-            if (state != newStates[i]) {
-                (fragment.adapter.data[i] as TaskListModel.TaskItem).hasAddressIntersection =
-                    newStates[i]
-                fragment.adapter.notifyItemChanged(i)
-            }
-        }
+//        val tasks = fragment.adapter.data
+//        val selectedTasks = getSelectedTasks()
+//        val oldStates = tasks.map {
+//            if (it !is TaskListModel.TaskItem) false
+//            else it.hasAddressIntersection
+//        }
+//
+//        val newStates = oldStates.map { false }.toMutableList()
+//
+//        for (selectedTask in selectedTasks) {
+//            for ((i, task) in tasks.withIndex()) {
+//                if (task == selectedTask) continue
+//                if (task !is TaskListModel.TaskItem) continue
+//                if (selectedTask !is TaskListModel.TaskItem) continue
+//                if (newStates[i]) continue
+//
+//                if (isTasksHasIntersectedAddresses(selectedTask.task, task.task)) {
+//                    newStates[i] = true
+//                }
+//            }
+//        }
+//
+//        oldStates.forEachIndexed { i, state ->
+//            if (state != newStates[i]) {
+//                (fragment.adapter.data[i] as TaskListModel.TaskItem).hasAddressIntersection =
+//                    newStates[i]
+//                fragment.adapter.notifyItemChanged(i)
+//            }
+//        }
     }
 
-    private fun isTasksHasIntersectedAddresses(task1: TaskModel, task2: TaskModel): Boolean {
-        for (taskItem in task1.taskItems) {
-            if (task2.taskItems.any { it.address.idnd == taskItem.address.idnd }) {
-                return true
-            }
-        }
+    private fun isTasksHasIntersectedAddresses(task1: Task, task2: Task): Boolean {
+//        for (taskItem in task1.taskItems) {
+//            if (task2.taskItems.any { it.address.idnd == taskItem.address.idnd }) {
+//                return true
+//            }
+//        }
+//        return false
         return false
     }
 
     fun updateStartButton() {
-        val isSelected = fragment.adapter.data.any {
-            (it as? TaskListModel.TaskItem)?.selected ?: false
-        }
-        fragment.start_button?.isEnabled = isSelected
+//        val isSelected = fragment.adapter.data.any {
+//            (it as? TaskListModel.TaskItem)?.selected ?: false
+//        }
+//        fragment.start_button?.isEnabled = isSelected
     }
 
     fun onStartClicked() {
@@ -256,54 +258,54 @@ class TaskListPresenter(val fragment: TaskListFragment) {
     }
 
     suspend fun loadTasks() = withContext(Dispatchers.IO) {
-        removeOutdatedOnlineTask()
-
-        fragment.populateTaskList(application().tasksRepository.getTasks().filter {
-            it.state.toAndroidState() != TaskModel.COMPLETED && it.state.toAndroidState() != TaskModel.CANCELED
-        })
-
-        withContext(Dispatchers.Main) { updateStartButton() }
+//        removeOutdatedOnlineTask()
+//
+//        fragment.populateTaskList(application().tasksRepository.getTasks().filter {
+//            it.state.toAndroidState() != TaskModel.COMPLETED && it.state.toAndroidState() != TaskModel.CANCELED
+//        })
+//
+//        withContext(Dispatchers.Main) { updateStartButton() }
     }
 
     suspend fun performNetworkUpdate() = withContext(Dispatchers.IO) {
-
-        val user = application().user.getUserCredentials()
-        if (user == null) {
-            fragment.context?.showErrorSuspend("Что-то пошло не так. Перезагрузите приложение.")
-            return@withContext
-        }
-        if (networkUpdateStarted) {
-            return@withContext
-        }
-
-        fragment.showLoadingAsync(true, true, "Загрузка заданий")
-
-        try {
-            application().tasksRepository.getAvailableEntranceKeys(user.token, true)
-            application().tasksRepository.getAvailableEntranceEuroKeys(user.token, true)
-        } catch (e: java.lang.Exception) {
-            CustomLog.writeToFile(CustomLog.getStacktraceAsString(e))
-        }
-
-        networkUpdateStarted = true
-        val tasks = try {
-            application().tasksRepository.loadRemoteTasks(user.token)
-        } catch (e: Exception) {
-            fragment.context?.showErrorSuspend("Не удалось получить список заданий.")
-            networkUpdateStarted = false
-            fragment.showLoadingAsync(false)
-            return@withContext
-        }
-        val mergeResult = application().tasksRepository.mergeTasks(tasks)
-        fragment.showLoadingAsync(false)
-        networkUpdateStarted = false
-        loadTasks()
-
-        when {
-            mergeResult.isTasksChanged -> fragment.context?.showErrorSuspend("Задания были обновлены.")
-            mergeResult.isNewTasksAdded -> fragment.context?.showErrorSuspend("Обновление прошло успешно.")
-            else -> fragment.context?.showErrorSuspend("Нет новых заданий.")
-        }
+//
+//        val user = application().user.getUserCredentials()
+//        if (user == null) {
+//            fragment.context?.showErrorSuspend("Что-то пошло не так. Перезагрузите приложение.")
+//            return@withContext
+//        }
+//        if (networkUpdateStarted) {
+//            return@withContext
+//        }
+//
+//        fragment.showLoadingAsync(true, true, "Загрузка заданий")
+//
+//        try {
+//            application().tasksRepository.getAvailableEntranceKeys(user.token, true)
+//            application().tasksRepository.getAvailableEntranceEuroKeys(user.token, true)
+//        } catch (e: java.lang.Exception) {
+//            CustomLog.writeToFile(CustomLog.getStacktraceAsString(e))
+//        }
+//
+//        networkUpdateStarted = true
+//        val tasks = try {
+//            application().tasksRepository.loadRemoteTasks(user.token)
+//        } catch (e: Exception) {
+//            fragment.context?.showErrorSuspend("Не удалось получить список заданий.")
+//            networkUpdateStarted = false
+//            fragment.showLoadingAsync(false)
+//            return@withContext
+//        }
+//        val mergeResult = application().tasksRepository.mergeTasks(tasks)
+//        fragment.showLoadingAsync(false)
+//        networkUpdateStarted = false
+//        loadTasks()
+//
+//        when {
+//            mergeResult.isTasksChanged -> fragment.context?.showErrorSuspend("Задания были обновлены.")
+//            mergeResult.isNewTasksAdded -> fragment.context?.showErrorSuspend("Обновление прошло успешно.")
+//            else -> fragment.context?.showErrorSuspend("Нет новых заданий.")
+//        }
     }
 
 }

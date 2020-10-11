@@ -20,17 +20,6 @@ import ru.terrakok.cicerone.android.support.SupportAppScreen
  * Created by ProOrange on 20.03.2019.
  */
 
-class LoginScreen : SupportAppScreen() {
-    override fun getFragment(): Fragment {
-        return LoginFragment()
-    }
-}
-
-class TaskListScreen(private val loadFromNetwork: Boolean) : SupportAppScreen() {
-    override fun getFragment(): Fragment {
-        return TaskListFragment.newInstance(loadFromNetwork)
-    }
-}
 
 class AddressListScreen(private val taskIds: List<Int>) : SupportAppScreen() {
     override fun getFragment(): Fragment {
@@ -39,7 +28,7 @@ class AddressListScreen(private val taskIds: List<Int>) : SupportAppScreen() {
 }
 
 class ReportScreen(
-    private val taskItems: List<Pair<TaskModel, TaskItem>>,
+    private val taskItems: List<Pair<Task, TaskItem>>,
     private val selectedTaskId: Int,
     private val selectedTaskItemId: Int
 ) :
@@ -55,7 +44,7 @@ class ReportScreen(
 }
 
 class TasksYandexMapScreen(
-    private val tasks: List<TaskModel>,
+    private val tasks: List<Task>,
     private val onAddressClicked: suspend (address: Address) -> Unit,
     private val onNewAddressesAdded: () -> Unit
 ) : SupportAppScreen() {
@@ -89,20 +78,8 @@ class AddressYandexMapScreen(
     }
 }
 
-class TaskInfoScreen(private val task: TaskModel) : SupportAppScreen() {
-    override fun getFragment(): Fragment {
-        return TaskInfoFragment.newInstance(task)
-    }
-}
-
-class TaskItemExplanationScreen(private val taskItem: TaskItem) : SupportAppScreen() {
-    override fun getFragment(): Fragment {
-        return TaskItemExplanationFragment.newInstance(taskItem)
-    }
-}
-
 class FiltersScreen(
-    val tasks: List<TaskModel>,
+    val tasks: List<Task>,
     private val onAllFiltersApplied: () -> Unit
 ) : SupportAppScreen() {
     override fun getFragment(): Fragment {

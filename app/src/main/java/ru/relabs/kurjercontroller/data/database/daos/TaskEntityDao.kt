@@ -9,6 +9,9 @@ import ru.relabs.kurjercontroller.data.database.entities.TaskEntity
 @Dao
 interface TaskEntityDao {
 
+    @get:Query("SELECT * FROM tasks WHERE state != 4")
+    val allOpened: List<TaskEntity>
+
     @get:Query("SELECT * FROM tasks")
     val all: List<TaskEntity>
 

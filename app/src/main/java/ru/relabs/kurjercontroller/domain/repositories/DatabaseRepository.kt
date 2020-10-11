@@ -9,15 +9,15 @@ import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.data.database.AppDatabase
 import ru.relabs.kurjercontroller.data.database.entities.*
-import ru.relabs.kurjercontroller.domain.mappers.database.DatabaseEntranceApartmentsMapper
 import ru.relabs.kurjercontroller.domain.mappers.database.*
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.domain.providers.PathsProvider
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
-import ru.relabs.kurjercontroller.providers.TaskRepository
-import ru.relabs.kurjercontroller.utils.*
+import ru.relabs.kurjercontroller.utils.Either
+import ru.relabs.kurjercontroller.utils.Left
+import ru.relabs.kurjercontroller.utils.Right
+import ru.relabs.kurjercontroller.utils.deleteIfEmpty
 import java.io.File
-import java.util.*
 
 class DatabaseRepository(
     val db: AppDatabase,
@@ -25,6 +25,16 @@ class DatabaseRepository(
     private val baseUrl: String,
     private val pathsProvider: PathsProvider
 ) {
+
+    suspend fun getOnlineTask(): Task? = withContext(Dispatchers.IO) {
+        db.taskDao().getOnlineTask()?.let { DatabaseTaskMapper.fromEntity(it, db) }
+    }
+
+    suspend fun getTasks(): List<Task> = withContext(Dispatchers.IO) {
+        db.taskDao().allOpened
+            .map { DatabaseTaskMapper.fromEntity(it, db) }
+            .filter { it.taskItems.isNotEmpty() }
+    }
 
     suspend fun removeReport(report: EntranceReportEntity) = withContext(Dispatchers.IO) {
         db.entranceReportDao().delete(report)
@@ -394,6 +404,15 @@ class DatabaseRepository(
         db.apartmentResultDao()
             .getByEntrance(taskItem.taskId.id, taskItem.id.id, entrance.number.number)
             .map { DatabaseEntranceApartmentsMapper.fromEntity(it) }
+    }
+
+    suspend fun closeOutdatedOnlineTask() {
+        getOnlineTask()?.let {
+            val currentTime = DateTime()
+            if (it.endControlDate.plusHours(1) < currentTime.withTimeAtStartOfDay()) {
+                closeTaskById(it.id.id)
+            }
+        }
     }
 }
 

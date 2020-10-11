@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.domain.models.Address
+import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.utils.extensions.setVisible
@@ -253,7 +254,7 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
     companion object {
 
         @JvmStatic
-        fun newInstance(tasks: List<TaskModel>) =
+        fun newInstance(tasks: List<Task>) =
             TasksYandexMapFragment().apply {
                 arguments = Bundle().apply {
                     putIntegerArrayList(

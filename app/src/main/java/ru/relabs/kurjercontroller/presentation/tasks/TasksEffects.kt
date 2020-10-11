@@ -15,7 +15,6 @@ import ru.relabs.kurjercontroller.presentation.base.tea.CommonMessages
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.utils.Left
 import ru.relabs.kurjercontroller.utils.Right
-import java.util.*
 
 /**
  * Created by Daniil Kurchanov on 02.04.2020.
@@ -29,14 +28,13 @@ object TasksEffects {
     }
 
     fun effectTaskSelected(task: Task): TasksEffect = { c, s ->
-        if (task.state.state == TaskState.EXAMINED || task.state.state == TaskState.STARTED) {
-            if (Date() > task.startTime) {
+        when {
+            task.state.state == TaskState.CREATED ->
+                c.showSnackbar(R.string.task_list_not_examined)
+            s.selectedTasks.count { it.filtered } > 3 ->
+                c.showSnackbar(R.string.task_list_too_many_filtered)
+            else ->
                 messages.send(TasksMessages.msgTaskSelected(task))
-            } else {
-                c.showSnackbar(R.string.task_list_not_started)
-            }
-        } else {
-            c.showSnackbar(R.string.task_list_not_examined)
         }
     }
 
@@ -52,21 +50,16 @@ object TasksEffects {
 
     fun effectLoadTasks(withNetwork: Boolean): TasksEffect = { c, s ->
         messages.send(TasksMessages.msgAddLoaders(1))
+        c.databaseRepository.closeOutdatedOnlineTask()
         if (withNetwork) {
             var tasksUpdated = false
             var tasksCreated = false
 
-            when (val r = c.deliveryRepository.getTasks()) {
-                is Right -> c.databaseRepository.mergeTasks(r.value).collect {
+            when (val r = c.deliveryRepository.getRemoteTasks()) {
+                is Right -> c.databaseRepository.merge(r.value).collect {
                     when (it) {
-                        is MergeResult.TaskCreated -> {
-                            c.deliveryRepository.loadTaskMap(it.task)
-                            tasksCreated = true
-                        }
-                        is MergeResult.TaskUpdated -> {
-                            c.deliveryRepository.loadTaskMap(it.task)
-                            tasksUpdated = true
-                        }
+                        is MergeResult.TaskCreated -> tasksCreated = true
+                        is MergeResult.TaskUpdated -> tasksUpdated = true
                         is MergeResult.TaskRemoved -> tasksUpdated = true
                     }
                 }
@@ -99,7 +92,7 @@ object TasksEffects {
                         is TaskEvent.TaskClosed ->
                             messages.send(TasksMessages.msgTaskClosed(event.taskId))
                         is TaskEvent.TasksUpdateRequired -> withContext(Dispatchers.Main) {
-                            if(event.showDialogInTasks && s.loaders == 0){
+                            if (event.showDialogInTasks && s.loaders == 0) {
                                 c.showUpdateRequiredOnVisible()
                             }
                         }

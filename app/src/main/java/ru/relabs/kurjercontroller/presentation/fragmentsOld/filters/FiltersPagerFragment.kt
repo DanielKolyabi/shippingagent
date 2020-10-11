@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_report_pager.*
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.domain.models.TaskModel
+import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.utils.extensions.setVisible
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.filters.adapters.FiltersPagerAdapter
 import java.util.*
@@ -17,7 +17,7 @@ import java.util.*
  */
 class FiltersPagerFragment : Fragment() {
 
-    var tasks: MutableList<TaskModel> = mutableListOf()
+    var tasks: MutableList<Task> = mutableListOf()
     val presenter = FiltersPagerPresenter(this)
     lateinit var pagerAdapter: FiltersPagerAdapter
     var onAllFiltersApplied: (() -> Unit)? = null
@@ -60,7 +60,7 @@ class FiltersPagerFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(tasks: List<TaskModel>) =
+        fun newInstance(tasks: List<Task>) =
             FiltersPagerFragment().apply {
                 arguments = Bundle().apply {
                     putParcelableArrayList("tasks", ArrayList(tasks.map { it.copy(taskItems = mutableListOf()) }))

@@ -144,4 +144,5 @@
     <string name="details_address_column">Адрес</string>
     <string name="details_filter_column">Фильтр</string>
     <string name="details_filter_value_column">Значение</string>
+    <string name="task_list_too_many_filtered">Невозможно выбрать более 3 заданий с фильтрами</string>
 </resources>

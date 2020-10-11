@@ -13,13 +13,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_report_pager.*
 import kotlinx.coroutines.launch
 import ru.relabs.kurjercontroller.presentation.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.activity
-import ru.relabs.kurjercontroller.domain.models.TaskItem
-import ru.relabs.kurjercontroller.domain.models.TaskModel
+import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.utils.extensions.setVisible
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.report.adapters.ReportPagerAdapter
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.report.delegates.ReportTasksDelegate
@@ -31,7 +31,7 @@ import java.util.*
  */
 class ReportPagerFragment : Fragment() {
 
-    val tasks: MutableList<TaskModel> = mutableListOf()
+    val tasks: MutableList<Task> = mutableListOf()
     val taskItems: MutableList<TaskItem> = mutableListOf()
     var selectedTask: Pair<Int, Int> = Pair(0, 0)
     val presenter = ReportPagerPresenter(this)
@@ -73,7 +73,7 @@ class ReportPagerFragment : Fragment() {
                 it,
                 taskItems[i],
                 i,
-                taskItems[i].id == selectedTask.second && taskItems[i].taskId == selectedTask.first
+                taskItems[i].id.id == selectedTask.second && taskItems[i].taskId.id == selectedTask.first
             )
         })
         taskListAdapter.notifyDataSetChanged()
@@ -109,7 +109,7 @@ class ReportPagerFragment : Fragment() {
     companion object {
         @JvmStatic
         fun newInstance(
-            tasks: List<TaskModel>,
+            tasks: List<Task>,
             taskItems: List<TaskItem>,
             selectedTaskId: Int,
             selectedTaskItemId: Int
@@ -117,7 +117,7 @@ class ReportPagerFragment : Fragment() {
             ReportPagerFragment().apply {
                 arguments = Bundle().apply {
                     putParcelableArrayList("task_item_ids", ArrayList(taskItems.map { TaskItemIdWithTaskId(it.taskId, it.id) }))
-                    putIntArray("task_ids", tasks.map { it.id }.toIntArray())
+                    putIntArray("task_ids", tasks.map { it.id.id }.toIntArray())
 //                    putParcelableArrayList("tasks", ArrayList(tasks))
 //                    putParcelableArrayList("task_items", ArrayList(taskItems))
                     putInt("selected_task_id", selectedTaskId)
@@ -127,32 +127,8 @@ class ReportPagerFragment : Fragment() {
     }
 }
 
+@Parcelize
 data class TaskItemIdWithTaskId(
-    val taskId: Int,
-    val taskItemId: Int
-) : Parcelable {
-    constructor(parcel: Parcel) : this(
-        parcel.readInt(),
-        parcel.readInt()
-    ) {
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(taskId)
-        parcel.writeInt(taskItemId)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<TaskItemIdWithTaskId> {
-        override fun createFromParcel(parcel: Parcel): TaskItemIdWithTaskId {
-            return TaskItemIdWithTaskId(parcel)
-        }
-
-        override fun newArray(size: Int): Array<TaskItemIdWithTaskId?> {
-            return arrayOfNulls(size)
-        }
-    }
-}
+    val taskId: TaskId,
+    val taskItemId: TaskItemId
+) : Parcelable
