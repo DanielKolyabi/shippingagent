@@ -33,11 +33,7 @@ import ru.relabs.kurjercontroller.domain.models.User
 import ru.relabs.kurjercontroller.domain.providers.*
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
-import ru.relabs.kurjercontroller.logError
-import ru.relabs.kurjercontroller.utils.Either
-import ru.relabs.kurjercontroller.utils.Left
-import ru.relabs.kurjercontroller.utils.Right
-import ru.relabs.kurjercontroller.utils.debug
+import ru.relabs.kurjercontroller.utils.*
 import java.io.FileNotFoundException
 
 class ControlRepository(
@@ -136,6 +132,12 @@ class ControlRepository(
         ).map { FilterMapper.fromRaw(it) }
     }
 
+    suspend fun refreshAvailableKeys(): EitherE<Unit> {
+        return getAvailableEntranceKeys(true)
+            .bind { getAvailableEntranceEuroKeys(true) }
+            .fmap { Unit }
+    }
+
     suspend fun getAvailableEntranceKeys(withRefresh: Boolean = false): EitherE<List<String>> = authenticatedRequest { token ->
         if (!withRefresh && availableEntranceKeys.isEmpty()) {
             availableEntranceKeys = database.entranceKeysDao().all.map { it.key }
@@ -179,7 +181,7 @@ class ControlRepository(
                 photosMap["img_$imgCount"] = PhotoReportRequest("", photo.gps)
                 imgCount++
             } catch (e: Throwable) {
-                e.logError()
+                e.fillInStackTrace().log()
             }
         }
 

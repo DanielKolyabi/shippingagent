@@ -24,7 +24,7 @@ class TasksContext(val examinedConsumer: TasksFragment, val errorContext: ErrorC
     RouterContext by RouterContextMainImpl(),
     KoinComponent {
 
-    val deliveryRepository: ControlRepository by inject()
+    val controlRepository: ControlRepository by inject()
     val databaseRepository: DatabaseRepository by inject()
     val taskEventController: TaskEventController by inject()
 

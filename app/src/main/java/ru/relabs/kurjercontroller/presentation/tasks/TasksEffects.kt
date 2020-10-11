@@ -55,7 +55,9 @@ object TasksEffects {
             var tasksUpdated = false
             var tasksCreated = false
 
-            when (val r = c.deliveryRepository.getRemoteTasks()) {
+            c.controlRepository.refreshAvailableKeys()
+
+            when (val r = c.controlRepository.getRemoteTasks()) {
                 is Right -> c.databaseRepository.merge(r.value).collect {
                     when (it) {
                         is MergeResult.TaskCreated -> tasksCreated = true

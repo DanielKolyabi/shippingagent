@@ -247,14 +247,14 @@ class TaskListPresenter(val fragment: TaskListFragment) {
     }
 
     suspend fun removeOutdatedOnlineTask() = withContext(Dispatchers.IO) {
-        val rep = application().tasksRepository
-        rep.getOnlineTask()?.let {
-            if (it.endControlDate.plusHours(1) < DateTime().apply {
-                    minusMillis(millisOfDay)
-                }) {
-                rep.closeTaskById(it.id)
-            }
-        }
+//        val rep = application().tasksRepository
+//        rep.getOnlineTask()?.let {
+//            if (it.endControlDate.plusHours(1) < DateTime().apply {
+//                    minusMillis(millisOfDay)
+//                }) {
+//                rep.closeTaskById(it.id)
+//            }
+//        }
     }
 
     suspend fun loadTasks() = withContext(Dispatchers.IO) {
