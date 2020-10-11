@@ -1,7 +1,7 @@
 package ru.relabs.kurjercontroller.presentation.helpers
 
 import ru.relabs.kurjercontroller.domain.models.TaskItem
-import ru.relabs.kurjercontroller.presentation.fragments.addressList.AddressListModel
+import ru.relabs.kurjercontroller.presentation.fragmentsOld.addressList.AddressListModel
 
 /**
  * Created by ProOrange on 31.08.2018.

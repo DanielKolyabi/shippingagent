@@ -7,7 +7,7 @@ import org.koin.android.ext.koin.androidApplication
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import ru.relabs.kurjercontroller.BuildConfig
-import ru.relabs.kurjercontroller.application.ControllApplication
+import ru.relabs.kurjercontroller.ControllApplication
 import ru.relabs.kurjercontroller.data.api.ApiProvider
 import ru.relabs.kurjercontroller.data.database.AppDatabase
 import ru.relabs.kurjercontroller.data.database.migrations.Migrations

@@ -4,7 +4,7 @@
                                                    xmlns:tools="http://schemas.android.com/tools"
                                                    android:layout_width="match_parent"
                                                    android:layout_height="match_parent"
-                                                   tools:context=".presentation.fragments.report.ReportPagerFragment">
+                                                   tools:context=".presentation.fragmentsOld.report.ReportPagerFragment">
 
     <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/tasks_list"

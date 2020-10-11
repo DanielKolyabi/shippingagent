@@ -7,10 +7,7 @@ import android.util.Log
 import androidx.core.content.FileProvider
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.BuildConfig
-import java.io.File
-import java.io.FileWriter
-import java.io.PrintWriter
-import java.io.StringWriter
+import java.io.*
 
 /**
  * Created by ProOrange on 02.10.2018.
@@ -27,17 +24,17 @@ object CustomLog {
         return stacktrace
     }
 
-    fun share(context: Activity) {
+    fun share(context: Activity): Either<Exception, Unit> = Either.of {
         val dir = File(
             Environment.getExternalStorageDirectory(),
-            "deliverycontr"
+            "deliveryman"
         )
         val f = File(dir, CRASH_FILENAME)
         if (!f.exists()) {
-            throw Exception("crash.log not found")
+            throw FileNotFoundException()
         }
 
-        val uri = FileProvider.getUriForFile(context, "ru.relabs.kurjercontroller.file_provider", f)
+        val uri = FileProvider.getUriForFile(context, "com.relabs.kurjer.file_provider", f)
         val intent = Intent().apply {
             action = Intent.ACTION_SEND
             putExtra(Intent.EXTRA_TEXT, "crash.log")
@@ -47,13 +44,13 @@ object CustomLog {
         context.startActivity(intent)
     }
 
-    fun writeToFile(message: String) {
+    fun writeToFile(currentStacktrace: String) {
         try {
 
             //Gets the Android external storage directory & Create new folder Crash_Reports
             val dir = File(
                 Environment.getExternalStorageDirectory(),
-                "deliverycontr"
+                "deliveryman"
             )
             if (!dir.exists()) {
                 dir.mkdirs()
@@ -64,15 +61,17 @@ object CustomLog {
             val reportFile = File(dir, CRASH_FILENAME)
             val fileWriter = FileWriter(reportFile, true)
             fileWriter.append("\n${DateTime().toString("yyyy-MM-dd'T'HH:mm:ss")} Ver.${BuildConfig.VERSION_NAME}:\n")
-            fileWriter.append(message)
+            fileWriter.append(currentStacktrace)
             fileWriter.flush()
             fileWriter.close()
 
-            if (reportFile.length() > 10 * 1024 * 1024) {
+            if (reportFile.length() > 3 * 1024 * 1024) {
                 val writer = PrintWriter(reportFile)
                 writer.print("")
                 writer.close()
             }
+
+            Log.d("CustomLog", currentStacktrace)
         } catch (e: Exception) {
             Log.e("ExceptionHandler", e.message)
         }

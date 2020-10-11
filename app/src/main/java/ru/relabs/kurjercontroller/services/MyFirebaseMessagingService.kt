@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
-import ru.relabs.kurjercontroller.application.ControllApplication
+import ru.relabs.kurjercontroller.ControllApplication
 import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.network.DeliveryServerAPI
 import ru.relabs.kurjercontroller.utils.CancelableScope

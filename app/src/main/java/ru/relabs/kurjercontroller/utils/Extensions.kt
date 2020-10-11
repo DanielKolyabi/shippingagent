@@ -4,8 +4,8 @@ import androidx.fragment.app.Fragment
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.selects.select
-import ru.relabs.kurjercontroller.application.ControllApplication
-import ru.relabs.kurjercontroller.presentation.activities.MainActivity
+import ru.relabs.kurjercontroller.ControllApplication
+import ru.relabs.kurjercontroller.presentation.splash.MainActivity
 import java.io.File
 
 

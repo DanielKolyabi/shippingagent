@@ -12,7 +12,7 @@ import ru.relabs.kurjercontroller.data.database.models.ApartmentResult
 import ru.relabs.kurjercontroller.domain.mappers.database.DatabaseEntranceMapper
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
-import ru.relabs.kurjercontroller.presentation.fragments.report.models.ApartmentListModel
+import ru.relabs.kurjercontroller.presentation.fragmentsOld.report.models.ApartmentListModel
 import ru.relabs.kurjercontroller.utils.CustomLog
 
 /**

@@ -13,8 +13,8 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.LocationSettingsStatusCodes
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
-import ru.relabs.kurjercontroller.presentation.activities.MainActivity
-import ru.relabs.kurjercontroller.presentation.activities.REQUEST_LOCATION
+import ru.relabs.kurjercontroller.presentation.splash.MainActivity
+import ru.relabs.kurjercontroller.presentation.splash.REQUEST_LOCATION
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
