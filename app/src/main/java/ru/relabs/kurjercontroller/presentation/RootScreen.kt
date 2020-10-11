@@ -3,6 +3,7 @@ package ru.relabs.kurjercontroller.presentation
 import androidx.fragment.app.Fragment
 import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.domain.models.TaskItem
+import ru.relabs.kurjercontroller.presentation.addresses.AddressesFragment
 import ru.relabs.kurjercontroller.presentation.login.LoginFragment
 import ru.relabs.kurjercontroller.presentation.taskDetails.IExaminedConsumer
 import ru.relabs.kurjercontroller.presentation.taskDetails.TaskDetailsFragment
@@ -23,4 +24,6 @@ sealed class RootScreen(protected val fabric: () -> Fragment) : SupportAppScreen
         RootScreen({ TaskDetailsFragment.newInstance(task, parent) }) where F : Fragment, F : IExaminedConsumer
 
     class TaskItemDetails(taskItem: TaskItem) : RootScreen({ TaskItemExplanationFragment.newInstance(taskItem) })
+
+    class Addresses(tasks: List<Task>) : RootScreen({ AddressesFragment.newInstance(tasks.map { it.id }) })
 }

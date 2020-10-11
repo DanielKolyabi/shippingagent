@@ -18,7 +18,6 @@ import kotlinx.android.synthetic.main.fragment_report_pager.*
 import kotlinx.coroutines.launch
 import ru.relabs.kurjercontroller.presentation.delegateAdapter.DelegateAdapter
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.activity
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.utils.extensions.setVisible
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.report.adapters.ReportPagerAdapter
@@ -61,7 +60,6 @@ class ReportPagerFragment : Fragment() {
         tasks_list.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
         tasks_list.adapter = taskListAdapter
 
-        activity()?.changeTitle(getTitle())
         presenter.initTasks(taskIds, taskItemIds)
     }
 

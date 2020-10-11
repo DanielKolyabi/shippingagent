@@ -7,7 +7,7 @@
 
 
     <Button
-            android:id="@+id/task_button"
+            android:id="@+id/btn_task"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -22,7 +22,7 @@
             tools:text="Вечерняя Москва №4" />
 
     <ImageView
-            android:id="@+id/flare_new"
+            android:id="@+id/iv_new_flare"
             android:rotation="0"
             android:translationZ="555dp"
             android:layout_width="0dp"
@@ -32,9 +32,9 @@
             app:layout_constraintDimensionRatio="1:1"
             android:layout_height="0dp"
             android:background="@drawable/ic_new"
-            app:layout_constraintStart_toStartOf="@id/task_button"
-            app:layout_constraintBottom_toBottomOf="@id/task_button"
-            app:layout_constraintTop_toTopOf="@id/task_button"
+            app:layout_constraintStart_toStartOf="@id/btn_task"
+            app:layout_constraintBottom_toBottomOf="@id/btn_task"
+            app:layout_constraintTop_toTopOf="@id/btn_task"
             android:visibility="gone"
             tools:visibility="visible"/>
 

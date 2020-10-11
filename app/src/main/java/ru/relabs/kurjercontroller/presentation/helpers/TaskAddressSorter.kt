@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.presentation.helpers
 
+import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.addressList.AddressListModel
 
@@ -8,64 +9,48 @@ import ru.relabs.kurjercontroller.presentation.fragmentsOld.addressList.AddressL
  */
 object TaskAddressSorter {
 
-    fun getAddressesWithTasksList(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel> {
-        val result = mutableListOf<AddressListModel>()
-        var lastAddressId = -1
-        var lastAddressModel: AddressListModel.Address = AddressListModel.Address(mutableListOf())
-        taskItems.forEach {
-            if (lastAddressId != it.taskItem.address.idnd) {
-                lastAddressId = it.taskItem.address.idnd
-                lastAddressModel = AddressListModel.Address(mutableListOf(it.taskItem))
-                result.add(lastAddressModel)
-            }
-            lastAddressModel.taskItems.add(it.taskItem)
-            result.add(AddressListModel.TaskItem(it.taskItem, it.parentTask))
-        }
-        return result
-    }
 
-
-    private fun internalSortTaskItemsCloseTime(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem>{
-        return taskItems.sortedWith(compareByDescending<AddressListModel.TaskItem> { it.taskItem.closeTime }
-            .thenBy { it.taskItem.address.city }
-            .thenBy { it.taskItem.address.street }
-            .thenBy { it.taskItem.address.house }
-            .thenBy { it.taskItem.address.houseName }
-            .thenBy { !it.taskItem.isClosed }
+    private fun internalSortTaskItemsCloseTime(taskItems: List<Pair<Task, TaskItem>>): List<Pair<Task, TaskItem>>{
+        return taskItems.sortedWith(compareByDescending<Pair<Task, TaskItem>> { it.second.closeTime }
+            .thenBy { it.second.address.city }
+            .thenBy { it.second.address.street }
+            .thenBy { it.second.address.house }
+            .thenBy { it.second.address.houseName }
+            .thenBy { !it.second.isClosed }
         ).groupBy {
-            it.taskItem.address.idnd
+            it.second.address.idnd
         }.toList().sortedBy {
-            !it.second.any { !it.taskItem.isClosed }
+            !it.second.any { !it.second.isClosed }
         }.toMap().flatMap {
             it.value
         }
     }
 
-    fun sortTaskItemsCloseTime(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
-        val new = taskItems.filter { it.taskItem.isNew }
-        val old = taskItems.filter { !it.taskItem.isNew }
+    fun sortTaskItemsCloseTime(taskItems: List<Pair<Task, TaskItem>>): List<Pair<Task, TaskItem>> {
+        val new = taskItems.filter { it.second.isNew }
+        val old = taskItems.filter { !it.second.isNew }
 
         return internalSortTaskItemsCloseTime(new) + internalSortTaskItemsCloseTime(old)
     }
 
-    private fun internalSortTaskItemsStandart(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
-        return taskItems.sortedWith(compareBy<AddressListModel.TaskItem> { it.taskItem.address.city }
-            .thenBy { it.taskItem.address.street }
-            .thenBy { it.taskItem.address.house }
-            .thenBy { it.taskItem.address.houseName }
-            .thenBy { !it.taskItem.isClosed }
+    private fun internalSortTaskItemsStandart(taskItems: List<Pair<Task, TaskItem>>): List<Pair<Task, TaskItem>> {
+        return taskItems.sortedWith(compareBy<Pair<Task, TaskItem>> { it.second.address.city }
+            .thenBy { it.second.address.street }
+            .thenBy { it.second.address.house }
+            .thenBy { it.second.address.houseName }
+            .thenBy { !it.second.isClosed }
         ).groupBy {
-            it.taskItem.address.idnd
+            it.second.address.idnd
         }.toList().sortedBy {
-            !it.second.any { !it.taskItem.isClosed }
+            !it.second.any { !it.second.isClosed }
         }.toMap().flatMap {
             it.value
         }
     }
 
-    fun sortTaskItemsStandart(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
-        val new = taskItems.filter { it.taskItem.isNew }
-        val old = taskItems.filter { !it.taskItem.isNew }
+    fun sortTaskItemsStandart(taskItems: List<Pair<Task, TaskItem>>): List<Pair<Task, TaskItem>> {
+        val new = taskItems.filter { it.second.isNew }
+        val old = taskItems.filter { !it.second.isNew }
 
         return internalSortTaskItemsStandart(new) + internalSortTaskItemsStandart(old)
     }
@@ -82,24 +67,24 @@ object TaskAddressSorter {
         }
     }
 
-    private fun internalSortTaskItemsAlphabetic(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
-        return taskItems.sortedWith(compareBy<AddressListModel.TaskItem> { it.taskItem.address.city }
-            .thenBy { it.taskItem.address.street }
-            .thenBy { it.taskItem.address.house }
-            .thenBy { it.taskItem.address.houseName }
-            .thenBy { !it.taskItem.isClosed }
+    private fun internalSortTaskItemsAlphabetic(taskItems: List<Pair<Task, TaskItem>>): List<Pair<Task, TaskItem>> {
+        return taskItems.sortedWith(compareBy<Pair<Task, TaskItem>> { it.second.address.city }
+            .thenBy { it.second.address.street }
+            .thenBy { it.second.address.house }
+            .thenBy { it.second.address.houseName }
+            .thenBy { !it.second.isClosed }
         ).groupBy {
-            it.taskItem.address.idnd
+            it.second.address.idnd
         }.toList().sortedBy {
-            !it.second.any { !it.taskItem.isClosed }
+            !it.second.any { !it.second.isClosed }
         }.toMap().flatMap {
             it.value
         }
     }
 
-    fun sortTaskItemsAlphabetic(taskItems: List<AddressListModel.TaskItem>): List<AddressListModel.TaskItem> {
-        val new = taskItems.filter { it.taskItem.isNew }
-        val old = taskItems.filter { !it.taskItem.isNew }
+    fun sortTaskItemsAlphabetic(taskItems: List<Pair<Task, TaskItem>>): List<Pair<Task, TaskItem>> {
+        val new = taskItems.filter { it.second.isNew }
+        val old = taskItems.filter { !it.second.isNew }
 
         return internalSortTaskItemsAlphabetic(new) + internalSortTaskItemsAlphabetic(old)
     }

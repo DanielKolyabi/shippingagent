@@ -27,16 +27,16 @@ class AddressListScreen(private val taskIds: List<Int>) : SupportAppScreen() {
 
 class ReportScreen(
     private val taskItems: List<Pair<Task, TaskItem>>,
-    private val selectedTaskId: Int,
-    private val selectedTaskItemId: Int
+    private val selectedTaskId: TaskId,
+    private val selectedTaskItemId: TaskItemId
 ) :
     SupportAppScreen() {
     override fun getFragment(): Fragment {
         return ReportPagerFragment.newInstance(
             taskItems.map { it.first },
             taskItems.map { it.second },
-            selectedTaskId,
-            selectedTaskItemId
+            selectedTaskId.id,
+            selectedTaskItemId.id
         )
     }
 }

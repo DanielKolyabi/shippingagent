@@ -145,4 +145,5 @@
     <string name="details_filter_column">Фильтр</string>
     <string name="details_filter_value_column">Значение</string>
     <string name="task_list_too_many_filtered">Невозможно выбрать более 3 заданий с фильтрами</string>
+    <string name="close_task_error_single">Можно закрыть только одно задание</string>
 </resources>

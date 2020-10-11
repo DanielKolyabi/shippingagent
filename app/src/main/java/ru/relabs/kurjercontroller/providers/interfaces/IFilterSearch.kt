@@ -15,8 +15,3 @@ interface IFilterSearch {
         withPlanned: Boolean
     ): Deferred<Either<Exception, List<TaskFilter>>>
 }
-
-data class FiltersResultOrError(
-    val result: List<TaskFilter> = listOf(),
-    val error: Exception? = null
-)

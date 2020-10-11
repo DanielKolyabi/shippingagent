@@ -145,6 +145,9 @@ class DatabaseRepository(
             is SendQueryData.TaskExamined -> getAuthorizedSendQuery(
                 "$baseUrl/api/v1/tasks/${data.taskId.id}/examined"
             )
+            is SendQueryData.TaskCompleted -> getAuthorizedSendQuery(
+                "$baseUrl/api/v1/tasks/${data.taskId.id}/completed"
+            )
         }
     }
 
@@ -161,7 +164,9 @@ class DatabaseRepository(
         )
     }
 
-    private suspend fun closeTaskById(taskId: Int) = withContext(Dispatchers.IO) {
+    suspend fun closeTaskById(taskId: TaskId, sendClosed: Boolean) = closeTaskById(taskId.id, sendClosed)
+
+    private suspend fun closeTaskById(taskId: Int, sendClosed: Boolean) = withContext(Dispatchers.IO) {
         db.taskPublisherDao().deleteByTaskId(taskId)
         db.filtersDao().deleteByTaskId(taskId)
         db.taskItemDao().getByTaskId(taskId)
@@ -177,6 +182,10 @@ class DatabaseRepository(
             }
 
         db.taskDao().deleteById(taskId)
+
+        if(sendClosed){
+            putSendQuery(SendQueryData.TaskCompleted(TaskId(taskId)))
+        }
     }
 
     suspend fun merge(newTasks: List<Task>): Flow<MergeResult> = flow {
@@ -186,7 +195,7 @@ class DatabaseRepository(
 
         //Задача отсутствует в ответе от сервера (удалено)
         db.taskDao().all.filter { it.id !in newTasksIDs && !it.isOnline }.forEach { task ->
-            closeTaskById(task.id)
+            closeTaskById(task.id, false)
             emit(MergeResult.TaskRemoved(TaskId(task.id)))
             Log.d("merge", "Close task: ${task.id}")
         }
@@ -219,7 +228,7 @@ class DatabaseRepository(
                     }
                 }
                 if (openedEntrances <= 0) {
-                    closeTaskById(newTaskId.toInt())
+                    closeTaskById(newTaskId.toInt(), false)
                 } else {
                     emit(MergeResult.TaskCreated(task))
                     putSendQuery(SendQueryData.TaskReceived(task.id))
@@ -244,11 +253,11 @@ class DatabaseRepository(
                 if (savedTask.state.toTaskState() == TaskState.STARTED) {
                     putSendQuery(SendQueryData.TaskAccepted(task.id))
                 } else {
-                    closeTaskById(savedTask.id)
+                    closeTaskById(savedTask.id, false)
                     emit(MergeResult.TaskRemoved(task.id))
                 }
             } else if (task.state.state == TaskState.COMPLETED) {
-                closeTaskById(savedTask.id)
+                closeTaskById(savedTask.id, true)
                 emit(MergeResult.TaskRemoved(task.id))
                 return@forEach
             } else if (
@@ -410,7 +419,7 @@ class DatabaseRepository(
         getOnlineTask()?.let {
             val currentTime = DateTime()
             if (it.endControlDate.plusHours(1) < currentTime.withTimeAtStartOfDay()) {
-                closeTaskById(it.id.id)
+                closeTaskById(it.id.id, false)
             }
         }
     }
@@ -434,6 +443,7 @@ sealed class SendQueryData {
     data class TaskAccepted(val taskId: TaskId) : SendQueryData()
     data class TaskReceived(val taskId: TaskId) : SendQueryData()
     data class TaskExamined(val taskId: TaskId) : SendQueryData()
+    data class TaskCompleted(val taskId: TaskId) : SendQueryData()
 }
 
 sealed class MergeResult {
