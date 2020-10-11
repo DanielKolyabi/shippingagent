@@ -1,4 +1,4 @@
-package ru.relabs.kurjercontroller.presentation.fragmentsOld.taskItemExplanation
+package ru.relabs.kurjercontroller.presentation.taskItemExplanation
 
 import android.os.Bundle
 import android.text.Html
@@ -9,23 +9,19 @@ import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_task_item_explanation.*
 import ru.relabs.kurjercontroller.utils.CustomLog
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.activity
-import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.domain.models.TaskItem
-import ru.relabs.kurjercontroller.presentation.splash.ErrorButtonsListener
-import ru.relabs.kurjercontroller.presentation.splash.showError
+import ru.relabs.kurjercontroller.utils.extensions.showDialog
 
 /**
  * Created by ProOrange on 18.03.2019.
  */
 class TaskItemExplanationFragment : Fragment() {
 
-    lateinit var taskItem: TaskItem
-    val presenter = TaskItemExplanationPresenter(this)
+    private var taskItem: TaskItem? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        taskItem.notes.forEachIndexed { num, text ->
+        (taskItem?.notes ?: emptyList()).forEachIndexed { num, text ->
             setInfoText(num, text)
         }
     }
@@ -53,11 +49,7 @@ class TaskItemExplanationFragment : Fragment() {
             val tempTaskItem: TaskItem? = it.getParcelable("taskItem")
             if (tempTaskItem == null) {
                 CustomLog.writeToFile("null taskItem in TaskInfoFragment")
-                activity()?.showError("Произошла ошибка", object: ErrorButtonsListener {
-                    override fun positiveListener() {
-                        application().router.exit()
-                    }
-                })
+                showDialog(resources.getString(R.string.fatal_error_title, "tief:100"))
                 return
             }
 

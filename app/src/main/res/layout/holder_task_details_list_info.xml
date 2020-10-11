@@ -6,7 +6,7 @@
                                              android:layout_height="wrap_content">
 
     <ImageView
-            android:id="@+id/hint_icon"
+            android:id="@+id/ic_hint"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_marginStart="8dp"
@@ -18,7 +18,7 @@
             app:layout_goneMarginStart="8dp"/>
 
     <TextView
-            android:id="@+id/publisher_label"
+            android:id="@+id/tv_publisher_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -26,105 +26,105 @@
             android:fontFamily="@string/text_font"
             android:text="@string/edition_label"
             android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@+id/hint_icon"
+            app:layout_constraintStart_toEndOf="@+id/ic_hint"
             app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
-            android:id="@+id/publisher_text"
+            android:id="@+id/tv_publisher"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/publisher_label"
-            app:layout_constraintTop_toTopOf="@+id/publisher_label"
+            app:layout_constraintStart_toEndOf="@+id/tv_publisher_label"
+            app:layout_constraintTop_toTopOf="@+id/tv_publisher_label"
             tools:text="Вечерняя Москва №4"/>
 
 
     <TextView
-            android:id="@+id/control_dates_label"
+            android:id="@+id/tv_control_dates_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:fontFamily="@string/text_font"
             android:text="@string/control_dates_label"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@+id/publisher_label"
-            app:layout_constraintTop_toBottomOf="@id/publisher_text"/>
+            app:layout_constraintStart_toStartOf="@+id/tv_publisher_label"
+            app:layout_constraintTop_toBottomOf="@id/tv_publisher"/>
 
     <TextView
-            android:id="@+id/control_dates_text"
+            android:id="@+id/tv_control_dates"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/control_dates_label"
-            app:layout_constraintTop_toTopOf="@+id/control_dates_label"
+            app:layout_constraintStart_toEndOf="@+id/tv_control_dates_label"
+            app:layout_constraintTop_toTopOf="@+id/tv_control_dates_label"
             tools:text="07.02.2018 - 11.02.2018"/>
 
 
     <TextView
-            android:id="@+id/distribution_dates_label"
+            android:id="@+id/tv_distribution_dates_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:fontFamily="@string/text_font"
             android:text="@string/distribution_dates_label"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@+id/publisher_label"
-            app:layout_constraintTop_toBottomOf="@id/control_dates_label"/>
+            app:layout_constraintStart_toStartOf="@+id/tv_publisher_label"
+            app:layout_constraintTop_toBottomOf="@id/tv_control_dates_label"/>
 
     <TextView
-            android:id="@+id/distribution_dates_text"
+            android:id="@+id/tv_distribution_dates"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginTop="4dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@id/distribution_dates_label"
-            app:layout_constraintTop_toBottomOf="@+id/distribution_dates_label"
+            app:layout_constraintStart_toStartOf="@id/tv_distribution_dates_label"
+            app:layout_constraintTop_toBottomOf="@+id/tv_distribution_dates_label"
             tools:text="Вечерняя москва №2: 02.03.2019 - 04.12.2019"/>
 
 
     <TextView
-            android:id="@+id/storage_label"
+            android:id="@+id/tv_storage_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:fontFamily="@string/text_font"
             android:text="@string/storage_label"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@+id/publisher_label"
-            app:layout_constraintTop_toBottomOf="@id/distribution_dates_text"/>
+            app:layout_constraintStart_toStartOf="@+id/tv_publisher_label"
+            app:layout_constraintTop_toBottomOf="@id/tv_distribution_dates"/>
 
     <TextView
-            android:id="@+id/storage_text"
+            android:id="@+id/tv_storage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/storage_label"
-            app:layout_constraintTop_toTopOf="@+id/storage_label"
+            app:layout_constraintStart_toEndOf="@+id/tv_storage_label"
+            app:layout_constraintTop_toTopOf="@+id/tv_storage_label"
             tools:text="Москва, Южнобутовская ул., 68, под. 3 (в машину у подъезда).\nСветлана, 8-999-999-99-99"/>
 
     <TextView
-            android:id="@+id/description_label"
+            android:id="@+id/tv_description_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:fontFamily="@string/text_font"
             android:text="@string/description_label"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@+id/publisher_label"
-            app:layout_constraintTop_toBottomOf="@id/storage_text"/>
+            app:layout_constraintStart_toStartOf="@+id/tv_publisher_label"
+            app:layout_constraintTop_toBottomOf="@id/tv_storage"/>
 
     <TextView
-            android:id="@+id/description_text"
+            android:id="@+id/tv_description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/description_label"
-            app:layout_constraintTop_toTopOf="@+id/description_label"
+            app:layout_constraintStart_toEndOf="@+id/tv_description_label"
+            app:layout_constraintTop_toTopOf="@+id/tv_description_label"
             tools:text="Бла-бла-бла"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

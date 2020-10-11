@@ -15,29 +15,29 @@
             app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
-            android:id="@+id/col1_header"
+            android:id="@+id/tv_filter"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Фильтр"
+            android:text="@string/details_filter_column"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/col2_header"
+            app:layout_constraintEnd_toStartOf="@+id/tv_filter_value"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
-            android:id="@+id/col2_header"
+            android:id="@+id/tv_filter_value"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Значение"
+            android:text="@string/details_filter_value_column"
             android:gravity="center"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/col1_header"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_filter"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/col1_header"
-            app:layout_constraintTop_toTopOf="@+id/col1_header"/>
+            app:layout_constraintStart_toEndOf="@+id/tv_filter"
+            app:layout_constraintTop_toTopOf="@+id/tv_filter"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

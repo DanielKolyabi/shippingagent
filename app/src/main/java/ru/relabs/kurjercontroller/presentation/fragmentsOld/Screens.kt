@@ -9,7 +9,7 @@ import ru.relabs.kurjercontroller.presentation.fragmentsOld.filters.FiltersPager
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.login.LoginFragment
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.report.ReportPagerFragment
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.taskInfo.TaskInfoFragment
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.taskItemExplanation.TaskItemExplanationFragment
+import ru.relabs.kurjercontroller.presentation.taskItemExplanation.TaskItemExplanationFragment
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.taskList.TaskListFragment
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.AddressWithColor
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.TasksYandexMapFragment

@@ -23,6 +23,7 @@ import ru.relabs.kurjercontroller.presentation.base.tea.rendersCollector
 import ru.relabs.kurjercontroller.presentation.base.tea.sendMessage
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.base.BaseYandexMapFragment
 import ru.relabs.kurjercontroller.presentation.host.HostActivity
+import ru.relabs.kurjercontroller.presentation.taskDetails.IExaminedConsumer
 import ru.relabs.kurjercontroller.utils.debug
 import ru.relabs.kurjercontroller.utils.extensions.showDialog
 import ru.relabs.kurjercontroller.utils.extensions.showSnackbar
