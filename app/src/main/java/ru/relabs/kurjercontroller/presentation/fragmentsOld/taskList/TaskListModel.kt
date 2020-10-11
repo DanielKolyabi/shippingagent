@@ -1,6 +1,6 @@
 package ru.relabs.kurjercontroller.presentation.fragmentsOld.taskList
 
-import ru.relabs.kurjercontroller.domain.models.TaskModel
+import ru.relabs.kurjercontroller.domain.models.Task
 
 /**
  * Created by ProOrange on 18.03.2019.
@@ -12,7 +12,7 @@ sealed class TaskListModel {
         val text: String = ""
     ) : TaskListModel()
     data class TaskItem(
-        val task: TaskModel,
+        val task: Task,
         var selected: Boolean = false,
         var hasAddressIntersection: Boolean = false
     ): TaskListModel()
