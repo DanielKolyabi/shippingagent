@@ -234,7 +234,7 @@ class DatabaseRepository(
                     putSendQuery(SendQueryData.TaskReceived(task.id))
                 }
             } else {
-                saveFilters(task)
+                saveFilters(task.id, task.taskFilters, task.withPlanned)
                 emit(MergeResult.TaskCreated(task))
                 putSendQuery(SendQueryData.TaskReceived(task.id))
             }
@@ -302,31 +302,31 @@ class DatabaseRepository(
         }
     }.flowOn(Dispatchers.IO)
 
-    private suspend fun saveFilters(
-        task: Task,
-        filters: TaskFilters = task.taskFilters,
-        withPlanned: Boolean = task.withPlanned
+    suspend fun saveFilters(
+        taskId: TaskId,
+        filters: TaskFilters,
+        withPlanned: Boolean
     ) = withContext(Dispatchers.IO) {
-        db.taskDao().getById(task.id.id)?.let {
+        db.taskDao().getById(taskId.id)?.let {
             db.taskDao().update(it.copy(withPlanned = withPlanned))
         }
 
-        db.filtersDao().deleteByTaskId(task.id.id)
+        db.filtersDao().deleteByTaskId(taskId.id)
 
         db.filtersDao().insertAll(filters.brigades.map {
-            DatabaseFilterMapper.toEntity(it, task.id, FilterEntity.BRIGADE_FILTER)
+            DatabaseFilterMapper.toEntity(it, taskId, FilterEntity.BRIGADE_FILTER)
         })
         db.filtersDao().insertAll(filters.publishers.map {
-            DatabaseFilterMapper.toEntity(it, task.id, FilterEntity.PUBLISHER_FILTER)
+            DatabaseFilterMapper.toEntity(it, taskId, FilterEntity.PUBLISHER_FILTER)
         })
         db.filtersDao().insertAll(filters.users.map {
-            DatabaseFilterMapper.toEntity(it, task.id, FilterEntity.USER_FILTER)
+            DatabaseFilterMapper.toEntity(it, taskId, FilterEntity.USER_FILTER)
         })
         db.filtersDao().insertAll(filters.districts.map {
-            DatabaseFilterMapper.toEntity(it, task.id, FilterEntity.DISTRICT_FILTER)
+            DatabaseFilterMapper.toEntity(it, taskId, FilterEntity.DISTRICT_FILTER)
         })
         db.filtersDao().insertAll(filters.regions.map {
-            DatabaseFilterMapper.toEntity(it, task.id, FilterEntity.REGION_FILTER)
+            DatabaseFilterMapper.toEntity(it, taskId, FilterEntity.REGION_FILTER)
         })
     }
 

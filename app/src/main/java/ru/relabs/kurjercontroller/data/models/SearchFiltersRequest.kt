@@ -17,16 +17,4 @@ data class SearchFiltersRequest(
 data class FiltersRequest(
     @SerializedName("selected_filters") val filters: List<FilterResponse>,
     @SerializedName("with_planned") val withPlanned: Boolean
-) {
-    companion object {
-        fun fromFiltersList(filters: List<TaskFilter>, withPlanned: Boolean): FiltersRequest =
-            FiltersRequest(filters.filter { it.isActive() }.map {
-                FilterResponse(
-                    it.id,
-                    it.name,
-                    it.fixed,
-                    it.type
-                )
-            }, withPlanned)
-    }
-}
+)

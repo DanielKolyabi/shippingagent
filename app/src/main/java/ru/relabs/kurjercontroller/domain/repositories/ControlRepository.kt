@@ -14,6 +14,7 @@ import retrofit2.Response
 import ru.relabs.kurjercontroller.data.api.ControlApi
 import ru.relabs.kurjercontroller.data.database.AppDatabase
 import ru.relabs.kurjercontroller.data.database.entities.*
+import ru.relabs.kurjercontroller.data.models.FiltersRequest
 import ru.relabs.kurjercontroller.data.models.PhotoReportRequest
 import ru.relabs.kurjercontroller.data.models.SearchFiltersRequest
 import ru.relabs.kurjercontroller.data.models.TaskItemReportRequest
@@ -22,14 +23,10 @@ import ru.relabs.kurjercontroller.data.models.common.ApiError
 import ru.relabs.kurjercontroller.data.models.common.ApiErrorContainer
 import ru.relabs.kurjercontroller.data.models.common.DomainException
 import ru.relabs.kurjercontroller.data.models.common.EitherE
-import ru.relabs.kurjercontroller.domain.mappers.network.FilterMapper
-import ru.relabs.kurjercontroller.domain.mappers.network.TaskMapper
-import ru.relabs.kurjercontroller.domain.mappers.network.UpdatesMapper
-import ru.relabs.kurjercontroller.domain.mappers.network.UserMapper
-import ru.relabs.kurjercontroller.domain.models.AppUpdatesInfo
-import ru.relabs.kurjercontroller.domain.models.Task
-import ru.relabs.kurjercontroller.domain.models.TaskFilter
-import ru.relabs.kurjercontroller.domain.models.User
+import ru.relabs.kurjercontroller.data.models.tasks.FilterResponse
+import ru.relabs.kurjercontroller.domain.mappers.FilterTypeMapper
+import ru.relabs.kurjercontroller.domain.mappers.network.*
+import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.domain.providers.*
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
@@ -114,7 +111,7 @@ class ControlRepository(
     }
 
     suspend fun searchFilters(
-        filterType: Int,
+        filterType: FilterType,
         filterValue: String,
         filters: List<TaskFilter>,
         withPlanned: Boolean
@@ -122,7 +119,7 @@ class ControlRepository(
         api.searchFilters(
             token,
             SearchFiltersRequest(
-                filterType,
+                FilterTypeMapper.toInt(filterType),
                 filterValue,
                 filters
                     .filter { it.isActive() }
@@ -164,6 +161,13 @@ class ControlRepository(
                     .insertAll(availableEntranceEuroKeys.map { EntranceEuroKeyEntity(0, it) })
             }
             availableEntranceEuroKeys
+        }
+
+    suspend fun countFilteredTasks(filters: List<TaskFilter>, withPlanned: Boolean): EitherE<FilteredTasksCount> =
+        authenticatedRequest { token ->
+            val activeFilters = filters.filter { it.isActive() }
+            val req = FiltersRequest(activeFilters.map { FilterResponse(it.id, it.name, it.fixed, it.type) }, withPlanned)
+            FilteredTasksCountMapper.fromRaw(api.countFilteredTasks(token, req))
         }
 
     //Reports

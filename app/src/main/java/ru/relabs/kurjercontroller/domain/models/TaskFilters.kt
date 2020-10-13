@@ -3,10 +3,15 @@ package ru.relabs.kurjercontroller.domain.models
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 import ru.relabs.kurjercontroller.data.models.tasks.FilterResponse
+import ru.relabs.kurjercontroller.domain.mappers.FilterTypeMapper
 
 /**
  * Created by ProOrange on 21.03.2019.
  */
+enum class FilterType{
+    Publisher, District, Region, Brigade, User
+}
+
 @Parcelize
 data class TaskFilters(
     val publishers: List<TaskFilter>,
@@ -43,11 +48,11 @@ data class TaskFilter(
     val name: String,
     val fixed: Boolean,
     var active: Boolean,
-    val type: Int
+    val type: FilterType
 ) : Parcelable {
 
     fun isActive() = if (fixed) active else true
 
     fun toFilterResponseModel(): FilterResponse =
-        FilterResponse(id, name, fixed, type)
+        FilterResponse(id, name, fixed, FilterTypeMapper.toInt(type))
 }

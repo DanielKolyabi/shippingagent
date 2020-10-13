@@ -39,6 +39,18 @@ fun Fragment.showSnackbar(
     }
 }
 
+fun Fragment.showSnackbar(
+    resource: Int,
+    action: SnackbarAction? = null,
+    onDismiss: (() -> Unit)? = null,
+    onDisappear: (() -> Unit)? = null,
+    length: Int? = null
+) {
+    this.view?.let {
+        showSnackbar(it, it.resources.getString(resource), action, onDismiss, onDisappear, length)
+    }
+}
+
 fun showSnackbar(
     view: View,
     message: String,

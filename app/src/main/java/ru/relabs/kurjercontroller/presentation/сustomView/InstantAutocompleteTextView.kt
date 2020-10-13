@@ -3,7 +3,6 @@ package ru.relabs.kurjercontroller.presentation.сustomView
 import android.content.Context
 import android.graphics.Rect
 import android.util.AttributeSet
-import android.widget.AutoCompleteTextView
 import ru.relabs.kurjercontroller.R
 
 /**
@@ -13,12 +12,12 @@ class InstantAutocompleteTextView(
     ctx: Context,
     attrs: AttributeSet?,
     defStyleAttr: Int
-) : AutoCompleteTextView(ctx, attrs, defStyleAttr) {
+) : androidx.appcompat.widget.AppCompatAutoCompleteTextView(ctx, attrs, defStyleAttr) {
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, R.attr.autoCompleteTextViewStyle)
     constructor(context: Context) : this(context, null)
 
-    fun performFiltering(){
+    fun performFiltering() {
         performFiltering(text, 0)
     }
 
@@ -28,7 +27,7 @@ class InstantAutocompleteTextView(
 
     override fun onFocusChanged(focused: Boolean, direction: Int, previouslyFocusedRect: Rect?) {
         super.onFocusChanged(focused, direction, previouslyFocusedRect)
-        if(focused && filter != null){
+        if (focused && filter != null) {
             performFiltering(text, 0)
         }
     }

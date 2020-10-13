@@ -19,42 +19,28 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
     internal var deviceWidth: Int = 0
 
     private val tags: MutableList<Pair<Int, TaskFilter>> = mutableListOf()
-    var onFilterAppear: ((filter: TaskFilter) -> Unit)? = null
-    var onFilterDisappear: ((filter: TaskFilter) -> Unit)? = null
-    var onFilterActiveChangedPredicate: ((filter: TaskFilter, newActiveState: Boolean) -> Boolean)? = null
-    var onFilterActiveChanged: ((filter: TaskFilter) -> Unit)? = null
-
+    var onFilterRemoveClicked: ((TaskFilter) -> Unit)? = null
 
     init {
         init(context)
     }
 
-    private fun changeTagIcon(view: ImageView, tag: TaskFilter){
-        val drawable = if(tag.fixed){
-            if(tag.active) {
+    private fun changeTagIcon(view: ImageView, tag: TaskFilter) {
+        val drawable = if (tag.fixed) {
+            if (tag.active) {
                 context.getDrawable(R.drawable.ic_filter_active)
-            }else{
+            } else {
                 context.getDrawable(R.drawable.ic_filter_not_active)
             }
-        }else{
+        } else {
             context.getDrawable(R.drawable.ic_remove_filter)
         }
         view.setImageDrawable(drawable)
     }
 
-    private fun bindTagControl(view: ImageView, tag: TaskFilter){
-        if(tag.fixed){
-            view.setOnClickListener {
-                if(onFilterActiveChangedPredicate?.invoke(tag, !tag.active) == true) {
-                    tag.active = !tag.active
-                    changeTagIcon(view, tag)
-                    onFilterActiveChanged?.invoke(tag)
-                }
-            }
-        }else{
-            view.setOnClickListener {
-                remove(tag)
-            }
+    private fun bindTagControl(view: ImageView, tag: TaskFilter) {
+        view.setOnClickListener {
+            onFilterRemoveClicked?.invoke(tag)
         }
     }
 
@@ -76,15 +62,17 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
 
         view.tag = indexedTag.first
 
-        onFilterAppear?.invoke(tag)
         addView(view)
+    }
 
+    fun clear() {
+        tags.clear()
+        removeAllViews()
     }
 
     fun remove(tag: TaskFilter) {
         tags.firstOrNull { it.second == tag }?.let {
             removeView(findViewWithTag(it.first))
-            onFilterDisappear?.invoke(it.second)
             tags.remove(it)
         }
     }
@@ -166,7 +154,7 @@ class FilterTagLayout @JvmOverloads constructor(context: Context, attrs: Attribu
             mLeftWidth += child.measuredWidth
             maxWidth = Math.max(maxWidth, mLeftWidth)
 
-            if (mLeftWidth > deviceWidth*0.9) {
+            if (mLeftWidth > deviceWidth * 0.9) {
                 maxHeight += child.measuredHeight
                 mLeftWidth = child.measuredWidth
             } else {

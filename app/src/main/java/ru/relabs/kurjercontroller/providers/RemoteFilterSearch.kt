@@ -1,9 +1,6 @@
 package ru.relabs.kurjercontroller.providers
 
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import ru.relabs.kurjercontroller.domain.models.TaskFilter
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.providers.interfaces.IFilterSearch
@@ -18,7 +15,7 @@ import ru.relabs.kurjercontroller.utils.Right
 
 
 class RemoteFilterSearch(
-    private val scope: CancelableScope,
+    private val scope: CoroutineScope,
     private val repository: ControlRepository
 ) : IFilterSearch {
     var searchJob: Job? = null
@@ -30,7 +27,7 @@ class RemoteFilterSearch(
     ): Deferred<Either<Exception, List<TaskFilter>>> {
         val deferred = CompletableDeferred<Either<Exception, List<TaskFilter>>>()
         searchJob?.cancel()
-        searchJob = scope.launch {
+        searchJob = scope.launch(Dispatchers.IO) {
             val result = repository.searchFilters(filterType, filterValue, selectedFilters.filter { it.isActive() }, withPlanned)
             when (result) {
                 is Left -> deferred.complete(result)

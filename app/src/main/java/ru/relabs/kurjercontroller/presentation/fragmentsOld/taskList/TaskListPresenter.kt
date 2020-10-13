@@ -7,20 +7,11 @@ import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.utils.CancelableScope
 import ru.relabs.kurjercontroller.utils.CustomLog
-import ru.relabs.kurjercontroller.activity
-import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.domain.models.TaskFilters
-import ru.relabs.kurjercontroller.domain.models.TaskModel
-import ru.relabs.kurjercontroller.network.DeliveryServerAPI
-import ru.relabs.kurjercontroller.presentation.splash.ErrorButtonsListener
-import ru.relabs.kurjercontroller.presentation.splash.showError
-import ru.relabs.kurjercontroller.presentation.splash.showErrorAsync
-import ru.relabs.kurjercontroller.presentation.splash.showErrorSuspend
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.AddressListScreen
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.FiltersScreen
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.OnlineFiltersScreen
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.TaskInfoScreen
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.taskList.holders.TaskHolder
 
 class TaskListPresenter(val fragment: TaskListFragment) {
@@ -59,10 +50,10 @@ class TaskListPresenter(val fragment: TaskListFragment) {
 //        updateStartButton()
     }
 
-    private fun getSelectedTasks(): List<TaskListModel.TaskItem> =
-        fragment.adapter.data
-            .filter { it is TaskListModel.TaskItem && it.selected }
-            .mapNotNull { it as? TaskListModel.TaskItem }
+    private fun getSelectedTasks(): List<TaskListModel.TaskItem> = emptyList()
+//        fragment.adapter.data
+//            .filter { it is TaskListModel.TaskItem && it.selected }
+//            .mapNotNull { it as? TaskListModel.TaskItem }
 
     private fun markIntersectedTasks() {
 //        val tasks = fragment.adapter.data

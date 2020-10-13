@@ -21,8 +21,8 @@ data class FiltersResponse(
 }
 
 data class FilteredTasksCountResponse(
-    @SerializedName("closed")    val closedCount: Int,
-    @SerializedName("planned")    val plannedCount: Int
+    @SerializedName("closed") val closedCount: Int,
+    @SerializedName("planned") val plannedCount: Int
 )
 
 data class FilterResponse(

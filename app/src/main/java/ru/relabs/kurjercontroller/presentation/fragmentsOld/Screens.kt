@@ -2,14 +2,13 @@ package ru.relabs.kurjercontroller.presentation.fragmentsOld
 
 import androidx.fragment.app.Fragment
 import ru.relabs.kurjercontroller.domain.models.*
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.addressList.AddressListFragment
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.AddressYandexMapFragment
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.filters.FiltersFragment
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.filters.FiltersPagerFragment
+import ru.relabs.kurjercontroller.presentation.filters.editor.FiltersEditorFragment
+import ru.relabs.kurjercontroller.presentation.filters.editor.IFiltersEditorConsumer
+import ru.relabs.kurjercontroller.presentation.filters.pager.FiltersPagerFragment
+import ru.relabs.kurjercontroller.presentation.filters.pager.IFiltersConsumer
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.report.ReportPagerFragment
-import ru.relabs.kurjercontroller.presentation.taskItemExplanation.TaskItemExplanationFragment
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.taskList.TaskListFragment
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.AddressWithColor
+import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.AddressYandexMapFragment
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.TasksYandexMapFragment
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.base.BaseYandexMapFragment
 import ru.terrakok.cicerone.android.support.SupportAppScreen
@@ -76,23 +75,18 @@ class AddressYandexMapScreen(
     }
 }
 
-class FiltersScreen(
+class FiltersScreen<T>(
     val tasks: List<Task>,
-    private val onAllFiltersApplied: () -> Unit
-) : SupportAppScreen() {
+    val target: T
+) : SupportAppScreen() where T : Fragment, T : IFiltersConsumer {
     override fun getFragment(): Fragment {
-        val fragment = FiltersPagerFragment.newInstance(tasks)
-        fragment.onAllFiltersApplied = onAllFiltersApplied
+        val fragment = FiltersPagerFragment.newInstance(tasks, target)
         return fragment
     }
 }
 
-class OnlineFiltersScreen(
-    private val onStartClicked: (filters: TaskFilters, withPlanned: Boolean) -> Unit
-) : SupportAppScreen() {
+class OnlineFiltersScreen<T>(val target: T) : SupportAppScreen() where T : Fragment, T : IFiltersEditorConsumer {
     override fun getFragment(): Fragment {
-        return FiltersFragment.newInstance(null, false).apply {
-            onStartClicked = this@OnlineFiltersScreen.onStartClicked
-        }
+        return FiltersEditorFragment.newInstance(TaskId(-1), null, false, target)
     }
 }
