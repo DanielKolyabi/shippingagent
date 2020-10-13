@@ -146,4 +146,5 @@
     <string name="details_filter_value_column">Значение</string>
     <string name="task_list_too_many_filtered">Невозможно выбрать более 3 заданий с фильтрами</string>
     <string name="close_task_error_single">Можно закрыть только одно задание</string>
+    <string name="online_no_access">У вас нет прав на составление заданий</string>
 </resources>

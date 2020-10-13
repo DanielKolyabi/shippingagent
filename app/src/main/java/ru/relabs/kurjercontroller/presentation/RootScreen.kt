@@ -2,8 +2,13 @@ package ru.relabs.kurjercontroller.presentation
 
 import androidx.fragment.app.Fragment
 import ru.relabs.kurjercontroller.domain.models.Task
+import ru.relabs.kurjercontroller.domain.models.TaskId
 import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.presentation.addresses.AddressesFragment
+import ru.relabs.kurjercontroller.presentation.filters.editor.FiltersEditorFragment
+import ru.relabs.kurjercontroller.presentation.filters.editor.IFiltersEditorConsumer
+import ru.relabs.kurjercontroller.presentation.filters.pager.FiltersPagerFragment
+import ru.relabs.kurjercontroller.presentation.filters.pager.IFiltersConsumer
 import ru.relabs.kurjercontroller.presentation.login.LoginFragment
 import ru.relabs.kurjercontroller.presentation.taskDetails.IExaminedConsumer
 import ru.relabs.kurjercontroller.presentation.taskDetails.TaskDetailsFragment
@@ -26,4 +31,18 @@ sealed class RootScreen(protected val fabric: () -> Fragment) : SupportAppScreen
     class TaskItemDetails(taskItem: TaskItem) : RootScreen({ TaskItemExplanationFragment.newInstance(taskItem) })
 
     class Addresses(tasks: List<Task>) : RootScreen({ AddressesFragment.newInstance(tasks.map { it.id }) })
+
+    class FiltersScreen<T>(
+        private val tasks: List<Task>,
+        private val target: T
+    ) : RootScreen({ FiltersPagerFragment.newInstance(tasks, target) }) where T : Fragment, T : IFiltersConsumer
+
+    class OnlineFiltersScreen<T>(private val target: T) : RootScreen({
+        FiltersEditorFragment.newInstance(
+            TaskId(-1),
+            null,
+            false,
+            target
+        )
+    }) where T : Fragment, T : IFiltersEditorConsumer
 }

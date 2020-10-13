@@ -10,7 +10,16 @@ object DatabasePublisherMapper {
         id = PublisherId(entity.id),
         name = entity.name,
         taskId = TaskId(entity.taskId),
-        startDistributionDate = entity.startDistributionDate.toDate(),
-        endDistributionDate = entity.endDistributionDate.toDate()
+        startDistributionDate = entity.startDistributionDate,
+        endDistributionDate = entity.endDistributionDate
+    )
+
+    fun toEntity(model: TaskPublisher) = TaskPublisherEntity(
+        id = 0,
+        name = model.name,
+        taskId = model.taskId.id,
+        startDistributionDate = model.startDistributionDate,
+        endDistributionDate = model.endDistributionDate,
+        publisherId = model.id.id
     )
 }

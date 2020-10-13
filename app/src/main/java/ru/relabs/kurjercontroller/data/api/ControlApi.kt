@@ -7,6 +7,7 @@ import ru.relabs.kurjercontroller.data.models.SearchFiltersRequest
 import ru.relabs.kurjercontroller.data.models.TaskItemReportRequest
 import ru.relabs.kurjercontroller.data.models.UpdatesResponse
 import ru.relabs.kurjercontroller.data.models.auth.AuthResponse
+import ru.relabs.kurjercontroller.data.models.common.StatusResponse
 import ru.relabs.kurjercontroller.data.models.tasks.*
 
 interface ControlApi {
@@ -78,5 +79,5 @@ interface ControlApi {
     suspend fun getFilteredTaskItems(@Query("token") token: String, @Body req: FiltersRequest): FilteredTaskDataResponse
 
     @GET("api/v1/controller/has_online")
-    suspend fun hasOnlineAccess(@Query("token") token: String)
+    suspend fun hasOnlineAccess(@Query("token") token: String): StatusResponse
 }

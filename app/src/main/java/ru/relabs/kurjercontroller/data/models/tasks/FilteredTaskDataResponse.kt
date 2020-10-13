@@ -1,7 +1,6 @@
 package ru.relabs.kurjercontroller.data.models.tasks
 
 import com.google.gson.annotations.SerializedName
-import ru.relabs.kurjercontroller.domain.models.TaskModel
 
 /**
  * Created by ProOrange on 22.05.2019.

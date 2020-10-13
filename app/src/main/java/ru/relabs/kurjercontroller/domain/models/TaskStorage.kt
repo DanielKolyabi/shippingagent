@@ -17,13 +17,4 @@ data class TaskStorage(
     val address: String,
     val lat: Float,
     val long: Float
-) : Parcelable {
-    fun toEntity(taskId: TaskId) = TaskStorageEntity(
-        id = 0,
-        taskId = taskId.id,
-        storageId = id.id,
-        gpsLat = lat,
-        gpsLong = long,
-        address = address
-    )
-}
+) : Parcelable

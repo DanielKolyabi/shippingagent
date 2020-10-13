@@ -9,6 +9,7 @@ import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.data.database.AppDatabase
 import ru.relabs.kurjercontroller.data.database.entities.*
+import ru.relabs.kurjercontroller.domain.mappers.FilterTypeMapper
 import ru.relabs.kurjercontroller.domain.mappers.database.*
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.domain.providers.PathsProvider
@@ -183,7 +184,7 @@ class DatabaseRepository(
 
         db.taskDao().deleteById(taskId)
 
-        if(sendClosed){
+        if (sendClosed) {
             putSendQuery(SendQueryData.TaskCompleted(TaskId(taskId)))
         }
     }
@@ -210,8 +211,8 @@ class DatabaseRepository(
             val newTaskId = db.taskDao().insert(DatabaseTaskMapper.toEntity(task))
             Log.d("merge", "Add task ID: $newTaskId")
             var openedEntrances = 0
-            db.taskStorageDao().insertAll(task.storages.map { it.toEntity(task.id) })
-            db.taskPublisherDao().insertAll(task.publishers.map { it.toEntity() })
+            db.taskStorageDao().insertAll(task.storages.map { DatabaseStorageMapper.toEntity(it, task.id) })
+            db.taskPublisherDao().insertAll(task.publishers.map { DatabasePublisherMapper.toEntity(it) })
             if (!task.filtered) {
                 task.taskItems.forEach { item ->
                     db.addressDao().insert(item.address.toEntity())
@@ -265,7 +266,7 @@ class DatabaseRepository(
                 || (task.state.state.toInt() != savedTask.state && savedTask.state != TaskState.STARTED.toInt())
             ) {
                 db.taskDao().update(DatabaseTaskMapper.toEntity(task))
-                db.taskStorageDao().insertAll(task.storages.map { it.toEntity(task.id) })
+                db.taskStorageDao().insertAll(task.storages.map { DatabaseStorageMapper.toEntity(it, task.id) })
                 db.taskPublisherDao().insertAll(task.publishers.map { it.toEntity() })
 
                 val currentTaskItems = db.taskItemDao().getByTaskId(task.id.id).toMutableList()
@@ -436,6 +437,68 @@ class DatabaseRepository(
 
     suspend fun updateTaskItem(item: TaskItem) = withContext(Dispatchers.IO) {
         db.taskItemDao().insert(DatabaseTaskItemMapper.toEntity(item))
+    }
+
+    suspend fun createOnlineTask(filters: TaskFilters, withPlanned: Boolean): Task = withContext(Dispatchers.IO) {
+        db.taskDao().deleteOnlineTask()
+        val currentDate = DateTime()
+        val startDate = currentDate.minusMillis(currentDate.millisOfDay)
+        val entity = TaskEntity(
+            id = -1,
+            filtered = true,
+            userId = -1,
+            description = "Онлайн задание",
+            initiator = "Онлайн",
+            startControlDate = startDate,
+            endControlDate = startDate.plusDays(1),
+            firstExaminedDeviceId = null,
+            iteration = 0,
+            state = TaskState.STARTED.toInt(),
+            isOnline = true,
+            withPlanned = withPlanned
+        )
+        val taskId = db.taskDao().insert(entity)
+        db.filtersDao().insertAll(filters.all.map {
+            FilterEntity(
+                id = 0,
+                taskId = taskId.toInt(),
+                active = it.active,
+                fixed = it.fixed,
+                filterId = it.id,
+                name = it.name,
+                type = FilterTypeMapper.toInt(it.type)
+            )
+        })
+
+        DatabaseTaskMapper.fromEntity(entity, db)
+    }
+
+    suspend fun reloadFilteredTaskItems(task: Task) = withContext(Dispatchers.IO) {
+        db.taskPublisherDao().deleteByTaskId(task.id.id)
+        db.taskItemDao().getByTaskId(task.id.id)
+            .forEach { taskItem ->
+                db.entranceDao().getByTaskItemId(taskItem.taskId, taskItem.taskItemId)
+                    .forEach {
+                        deleteEntrance(taskItem.taskId, taskItem.taskItemId, it.number)
+                    }
+
+                safeDeleteAddress(taskItem.addressId)
+
+                db.taskItemDao().delete(taskItem)
+            }
+
+        //INSERT NEW
+        db.taskPublisherDao().insertAll(task.publishers.map { DatabasePublisherMapper.toEntity(it) })
+        db.taskStorageDao().insertAll(task.storages.map { DatabaseStorageMapper.toEntity(it, task.id) })
+        db.addressDao().insertAll(task.taskItems.map { DatabaseAddressMapper.toEntity(it.address) })
+        db.taskItemDao().insertAll(task.taskItems.map { DatabaseTaskItemMapper.toEntity(it) })
+        task.taskItems.forEach { taskItem ->
+            db.entranceDao().insertAll(
+                taskItem
+                    .entrances
+                    .map { DatabaseEntranceMapper.toEntity(it, taskItem.taskId, taskItem.id) }
+            )
+        }
     }
 }
 

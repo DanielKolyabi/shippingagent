@@ -6,6 +6,7 @@ import ru.relabs.kurjercontroller.domain.controllers.TaskEventController
 import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
+import ru.relabs.kurjercontroller.domain.useCases.OnlineTaskUseCase
 import ru.relabs.kurjercontroller.presentation.base.tea.*
 
 /**
@@ -19,7 +20,7 @@ data class TasksState(
     val searchFilter: String = ""
 )
 
-class TasksContext(val examinedConsumer: TasksFragment, val errorContext: ErrorContextImpl = ErrorContextImpl()) :
+class TasksContext(val consumer: TasksFragment, val errorContext: ErrorContextImpl = ErrorContextImpl()) :
     ErrorContext by errorContext,
     RouterContext by RouterContextMainImpl(),
     KoinComponent {
@@ -27,6 +28,7 @@ class TasksContext(val examinedConsumer: TasksFragment, val errorContext: ErrorC
     val controlRepository: ControlRepository by inject()
     val databaseRepository: DatabaseRepository by inject()
     val taskEventController: TaskEventController by inject()
+    val onlineTaskUseCase: OnlineTaskUseCase by inject()
 
     var showSnackbar: suspend (Int) -> Unit = {}
     var showUpdateRequiredOnVisible: () -> Unit = {}

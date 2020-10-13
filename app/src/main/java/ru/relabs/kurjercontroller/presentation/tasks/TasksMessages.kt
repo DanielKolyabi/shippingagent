@@ -4,7 +4,6 @@ import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.domain.models.TaskId
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffects
-import ru.relabs.kurjercontroller.presentation.base.tea.msgEmpty
 import ru.relabs.kurjercontroller.presentation.base.tea.msgState
 import ru.relabs.kurjercontroller.utils.SearchUtils
 
@@ -84,6 +83,21 @@ object TasksMessages {
             )
         }
 
-    fun msgOnlineClicked(): TasksMessage =
-        msgEmpty() //TODO: Online filters screen
+    fun msgOnlineClicked(): TasksMessage = msgEffects(
+        { s ->
+            if (s.tasks.any { it.isOnline } && s.selectedTasks.none { it.isOnline }) {
+                s.copy(selectedTasks = s.selectedTasks + s.tasks.filter { it.isOnline })
+            } else {
+                s
+            }
+        },
+        { s ->
+            listOfNotNull(
+                TasksEffects.effectNavigateOnlineFilters().takeIf { s.tasks.none { it.isOnline } }
+            )
+        }
+    )
+
+    fun msgOnlineFiltersSelected(): TasksMessage =
+        msgEffect(TasksEffects.effectStartOnline())
 }

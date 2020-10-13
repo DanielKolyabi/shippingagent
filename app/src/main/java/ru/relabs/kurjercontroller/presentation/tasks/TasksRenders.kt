@@ -36,7 +36,7 @@ object TasksRenders {
                         val date = DateTime(it.key)
                         val groupTitle =
                             date.dayOfWeek().getAsText(Locale("ru", "RU")).capitalize() + ", " + date.toString("dd.MM.yyyy")
-                        listOf(TasksItem.Header(groupTitle)) + it.value.map {task ->
+                        listOf(TasksItem.Header(groupTitle)) + it.value.map { task ->
                             TasksItem.TaskItem(task, intersections.getOrElse(task) { false }, selectedTasks.contains(task))
                         }
                     }
@@ -68,6 +68,11 @@ object TasksRenders {
     fun renderStartButton(view: View): TasksRender = renderT(
         { it.selectedTasks.isNotEmpty() },
         { view.visible = it }
+    )
+
+    fun renderOnlineButton(view: View): TasksRender = renderT(
+        { it.loaders == 0 },
+        { view.isEnabled = it }
     )
 
     private fun searchIntersections(

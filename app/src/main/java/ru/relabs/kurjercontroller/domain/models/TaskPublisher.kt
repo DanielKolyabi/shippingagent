@@ -15,8 +15,8 @@ data class TaskPublisher(
     val id: PublisherId,
     val name: String,
     val taskId: TaskId,
-    val startDistributionDate: Date,
-    val endDistributionDate: Date
+    val startDistributionDate: DateTime,
+    val endDistributionDate: DateTime
 ) : Parcelable {
     fun toEntity(): TaskPublisherEntity =
         TaskPublisherEntity(

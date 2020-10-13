@@ -49,6 +49,10 @@ class FiltersPagerFragment : BaseFragment(),
         )
         view.view_pager.adapter = pagerAdapter
         view.view_pager.currentItem = 0
+
+        view.iv_menu.setOnClickListener {
+            router.exit()
+        }
     }
 
     override fun onCreateView(
@@ -89,7 +93,7 @@ class FiltersPagerFragment : BaseFragment(),
 
     companion object {
         @JvmStatic
-        fun <T> newInstance(tasks: List<Task>, targetFragment: T) where T: Fragment, T:IFiltersConsumer =
+        fun <T> newInstance(tasks: List<Task>, targetFragment: T) where T : Fragment, T : IFiltersConsumer =
             FiltersPagerFragment().apply {
                 setTargetFragment(targetFragment, FILTERS_CONSUMER_REQUEST_CODE)
                 arguments = Bundle().apply {

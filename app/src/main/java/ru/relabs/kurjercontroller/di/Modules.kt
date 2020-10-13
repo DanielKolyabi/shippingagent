@@ -14,13 +14,14 @@ import ru.relabs.kurjercontroller.data.database.migrations.Migrations
 import ru.relabs.kurjercontroller.domain.controllers.ServiceEventController
 import ru.relabs.kurjercontroller.domain.controllers.TaskEventController
 import ru.relabs.kurjercontroller.domain.providers.*
-import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
+import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.domain.storage.AppPreferences
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
 import ru.relabs.kurjercontroller.domain.storage.CurrentUserStorage
 import ru.relabs.kurjercontroller.domain.useCases.AppUpdateUseCase
 import ru.relabs.kurjercontroller.domain.useCases.LoginUseCase
+import ru.relabs.kurjercontroller.domain.useCases.OnlineTaskUseCase
 import ru.relabs.kurjercontroller.domain.useCases.ReportUseCase
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.Router
@@ -51,7 +52,12 @@ val fileSystemModule = module {
 }
 
 val storagesModule = module {
-    single<SharedPreferences> { androidApplication().getSharedPreferences(get(Modules.SHARED_PREFERENCES_NAME), Context.MODE_PRIVATE) }
+    single<SharedPreferences> {
+        androidApplication().getSharedPreferences(
+            get(Modules.SHARED_PREFERENCES_NAME),
+            Context.MODE_PRIVATE
+        )
+    }
     single<AppPreferences> { AppPreferences(get<SharedPreferences>()) }
     single<AuthTokenStorage> { AuthTokenStorage(get<AppPreferences>()) }
     single<CurrentUserStorage> { CurrentUserStorage(get<AppPreferences>()) }
@@ -85,7 +91,7 @@ val storagesModule = module {
         ApiProvider(get<String>(Modules.DELIVERY_URL))
     }
 
-    single<PathsProvider>{
+    single<PathsProvider> {
         PathsProvider(
             get<File>(Modules.FILES_DIR)
         )
@@ -139,6 +145,13 @@ val useCasesModule = module {
             get<DatabaseRepository>(),
             get<AuthTokenStorage>(),
             get<TaskEventController>()
+        )
+    }
+
+    single<OnlineTaskUseCase> {
+        OnlineTaskUseCase(
+            get<ControlRepository>(),
+            get<DatabaseRepository>()
         )
     }
 }

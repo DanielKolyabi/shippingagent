@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.synthetic.main.fragment_tasks.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -13,6 +14,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.domain.models.Task
+import ru.relabs.kurjercontroller.domain.models.TaskFilters
+import ru.relabs.kurjercontroller.domain.models.TaskId
 import ru.relabs.kurjercontroller.presentation.base.fragment.BaseFragment
 import ru.relabs.kurjercontroller.presentation.base.fragment.FragmentStyleable
 import ru.relabs.kurjercontroller.presentation.base.fragment.IFragmentStyleable
@@ -21,6 +24,7 @@ import ru.relabs.kurjercontroller.presentation.base.tea.debugCollector
 import ru.relabs.kurjercontroller.presentation.base.tea.defaultController
 import ru.relabs.kurjercontroller.presentation.base.tea.rendersCollector
 import ru.relabs.kurjercontroller.presentation.base.tea.sendMessage
+import ru.relabs.kurjercontroller.presentation.filters.editor.IFiltersEditorConsumer
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.base.BaseYandexMapFragment
 import ru.relabs.kurjercontroller.presentation.host.HostActivity
 import ru.relabs.kurjercontroller.presentation.taskDetails.IExaminedConsumer
@@ -35,7 +39,8 @@ import ru.relabs.kurjercontroller.utils.extensions.showSnackbar
 
 class TasksFragment : BaseFragment(),
     IFragmentStyleable by FragmentStyleable(false),
-    IExaminedConsumer {
+    IExaminedConsumer,
+    IFiltersEditorConsumer {
 
     private val controller = defaultController(TasksState(), TasksContext(this))
     private var renderJob: Job? = null
@@ -58,7 +63,7 @@ class TasksFragment : BaseFragment(),
     override fun onResume() {
         super.onResume()
         BaseYandexMapFragment.savedCameraPosition = null //TODO: Remove after yandex map refactor
-        if(shouldShowUpdateRequiredOnResume){
+        if (shouldShowUpdateRequiredOnResume) {
             showUpdateRequiredOnVisible()
         }
     }
@@ -96,7 +101,8 @@ class TasksFragment : BaseFragment(),
             val renders = listOf(
                 TasksRenders.renderList(tasksAdapter),
                 TasksRenders.renderLoading(view.loading),
-                TasksRenders.renderStartButton(view.btn_start)
+                TasksRenders.renderStartButton(view.btn_start),
+                TasksRenders.renderOnlineButton(view.btn_online)
             )
             launch { controller.stateFlow().collect(rendersCollector(renders)) }
             launch { controller.stateFlow().collect(debugCollector { debug(it) }) }
@@ -112,7 +118,7 @@ class TasksFragment : BaseFragment(),
     }
 
     private fun showUpdateRequiredOnVisible() {
-        if(taskUpdateRequiredDialogShowed){
+        if (taskUpdateRequiredDialogShowed) {
             return
         }
         if (isVisible) {
@@ -160,6 +166,15 @@ class TasksFragment : BaseFragment(),
 
     override fun interceptBackPressed(): Boolean {
         return false
+    }
+
+    //Filters Editor Start Clicked (for online)
+    override fun onStartClicked(taskId: TaskId, filters: TaskFilters, withPlanned: Boolean) {
+        if(taskId.id == -1){
+            uiScope.sendMessage(controller, TasksMessages.msgOnlineFiltersSelected())
+        }else{
+            FirebaseCrashlytics.getInstance().log("Not expected taskId in onStartClicked")
+        }
     }
 
     companion object {

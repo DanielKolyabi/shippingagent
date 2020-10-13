@@ -171,71 +171,71 @@ class TaskListPresenter(val fragment: TaskListFragment) {
     }
 
     suspend fun startOnline() = withContext(Dispatchers.Main) {
-        val exists = application().tasksRepository.isOnlineTaskExists()
-        if (exists) {
-            val idx = fragment.adapter.data.indexOfFirst {
-                (it is TaskListModel.TaskItem) && it.task.isOnline
-            }
-            val holderView =
-                fragment.tasks_list?.findViewHolderForAdapterPosition(idx) as? TaskHolder
-            holderView?.setSelected()
-            updateStartButton()
-            return@withContext
-        }
-        val token = application().user.getUserCredentials()?.token
-        if (token == null) {
-            fragment.context?.showError("Произошла ошибка")
-            return@withContext
-        }
-
-        application().router.navigateTo(
-            OnlineFiltersScreen { filters, withPlanned ->
-                application().router.exit()
-                onOnlineFiltersReceived(filters, withPlanned, token)
-            }
-        )
+//        val exists = application().tasksRepository.isOnlineTaskExists()
+//        if (exists) {
+//            val idx = fragment.adapter.data.indexOfFirst {
+//                (it is TaskListModel.TaskItem) && it.task.isOnline
+//            }
+//            val holderView =
+//                fragment.tasks_list?.findViewHolderForAdapterPosition(idx) as? TaskHolder
+//            holderView?.setSelected()
+//            updateStartButton()
+//            return@withContext
+//        }
+//        val token = application().user.getUserCredentials()?.token
+//        if (token == null) {
+//            fragment.context?.showError("Произошла ошибка")
+//            return@withContext
+//        }
+//
+//        application().router.navigateTo(
+//            OnlineFiltersScreen { filters, withPlanned ->
+//                application().router.exit()
+//                onOnlineFiltersReceived(filters, withPlanned, token)
+//            }
+//        )
     }
 
     fun onOnlineClicked() {
-        fragment.online_button?.isEnabled = false
-        val token = application().user.getUserCredentials()?.token ?: return
-        bgScope.launch(Dispatchers.IO) {
-            val hasAccess = try {
-                DeliveryServerAPI.api.hasOnlineAccess(token).await().status
-            } catch (e: Exception) {
-                fragment.activity()?.showErrorAsync("Не удалось проверить права.")
-                return@launch
-            } finally {
-                withContext(Dispatchers.Main) {
-                    fragment.online_button?.isEnabled = true
-                }
-            }
-
-            if (!hasAccess) {
-                fragment.activity()?.showErrorAsync("У вас нет прав на составление заданий.")
-            } else {
-                startOnline()
-            }
-        }
+//        fragment.online_button?.isEnabled = false
+//        val token = application().user.getUserCredentials()?.token ?: return
+//        bgScope.launch(Dispatchers.IO) {
+//            val hasAccess = try {
+//                DeliveryServerAPI.api.hasOnlineAccess(token).await().status
+//            } catch (e: Exception) {
+//                fragment.activity()?.showErrorAsync("Не удалось проверить права.")
+//                return@launch
+//            } finally {
+//                withContext(Dispatchers.Main) {
+//                    fragment.online_button?.isEnabled = true
+//                }
+//            }
+//
+//            if (!hasAccess) {
+//                fragment.activity()?.showErrorAsync("У вас нет прав на составление заданий.")
+//            } else {
+//                startOnline()
+//            }
+//        }
     }
 
-    fun onOnlineFiltersReceived(filters: TaskFilters, withPlanned: Boolean, token: String) {
-        fragment.showLoading(true, text = "Загрузка адресов")
-        bgScope.launch {
-            val task = application().tasksRepository.createOnlineTask(filters, withPlanned)
-            val newTask = try {
-                application().tasksRepository.reloadFilteredTaskItems(token, task)
-            } catch (e: java.lang.Exception) {
-                fragment.context?.showErrorSuspend("Не удалось загрузить список адресов.")
-                return@launch
-            }
-
-            withContext(Dispatchers.Main) {
-                fragment.showLoading(false)
-                application().router.navigateTo(AddressListScreen(listOf(newTask.id)))
-            }
-        }
-    }
+//    fun onOnlineFiltersReceived(filters: TaskFilters, withPlanned: Boolean, token: String) {
+//        fragment.showLoading(true, text = "Загрузка адресов")
+//        bgScope.launch {
+//            val task = application().tasksRepository.createOnlineTask(filters, withPlanned)
+//            val newTask = try {
+//                application().tasksRepository.reloadFilteredTaskItems(token, task)
+//            } catch (e: java.lang.Exception) {
+//                fragment.context?.showErrorSuspend("Не удалось загрузить список адресов.")
+//                return@launch
+//            }
+//
+//            withContext(Dispatchers.Main) {
+//                fragment.showLoading(false)
+//                application().router.navigateTo(AddressListScreen(listOf(newTask.id)))
+//            }
+//        }
+//    }
 
     suspend fun removeOutdatedOnlineTask() = withContext(Dispatchers.IO) {
 //        val rep = application().tasksRepository

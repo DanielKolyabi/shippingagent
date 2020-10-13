@@ -8,6 +8,7 @@ import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
 import ru.relabs.kurjercontroller.domain.models.Task
+import ru.relabs.kurjercontroller.domain.models.TaskFilters
 import ru.relabs.kurjercontroller.domain.models.TaskState
 import ru.relabs.kurjercontroller.domain.repositories.MergeResult
 import ru.relabs.kurjercontroller.presentation.RootScreen
@@ -23,7 +24,7 @@ object TasksEffects {
 
     fun effectNavigateTaskInfo(task: Task): TasksEffect = { c, s ->
         withContext(Dispatchers.Main) {
-            c.router.navigateTo(RootScreen.TaskInfo(task, c.examinedConsumer))
+            c.router.navigateTo(RootScreen.TaskInfo(task, c.consumer))
         }
     }
 
@@ -102,5 +103,33 @@ object TasksEffects {
                 }
             }
         }
+    }
+
+    fun effectNavigateOnlineFilters(): TasksEffect = { c, s ->
+        messages.send(TasksMessages.msgAddLoaders(1))
+        when (val r = c.controlRepository.getIsOnlineAvailable()) {
+            is Left -> c.showSnackbar(R.string.unknown_network_error)
+            is Right -> when (r.value) {
+                false -> c.showSnackbar(R.string.online_no_access)
+                true -> withContext(Dispatchers.Main) {
+                    c.router.navigateTo(RootScreen.OnlineFiltersScreen(c.consumer))
+                }
+            }
+        }
+        messages.send(TasksMessages.msgAddLoaders(-1))
+    }
+
+    fun effectStartOnline(filters: TaskFilters, withPlanned: Boolean): TasksEffect = { c, s ->
+        messages.send(TasksMessages.msgAddLoaders(1))
+        withContext(Dispatchers.Main) {
+            c.router.exit() //Exit from filters edit screen
+        }
+        when (val r = c.onlineTaskUseCase.createOnlineTask(filters, withPlanned)) {
+            is Left -> c.showSnackbar(R.string.unknown_runtime_error)
+            is Right -> withContext(Dispatchers.Main) {
+                c.router.navigateTo(RootScreen.Addresses(listOf(r.value)))
+            }
+        }
+        messages.send(TasksMessages.msgAddLoaders(-1))
     }
 }

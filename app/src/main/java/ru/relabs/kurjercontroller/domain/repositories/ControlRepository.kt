@@ -166,9 +166,27 @@ class ControlRepository(
     suspend fun countFilteredTasks(filters: List<TaskFilter>, withPlanned: Boolean): EitherE<FilteredTasksCount> =
         authenticatedRequest { token ->
             val activeFilters = filters.filter { it.isActive() }
-            val req = FiltersRequest(activeFilters.map { FilterResponse(it.id, it.name, it.fixed, it.type) }, withPlanned)
+            val req = FiltersRequest(
+                activeFilters.map { FilterResponse(it.id, it.name, it.fixed, FilterTypeMapper.toInt(it.type)) },
+                withPlanned
+            )
             FilteredTasksCountMapper.fromRaw(api.countFilteredTasks(token, req))
         }
+
+    suspend fun getFilteredTaskItems(filters: List<TaskFilter>, withPlanned: Boolean): EitherE<FilteredTasksData> =
+        authenticatedRequest { token ->
+            val activeFilters = filters.filter { it.isActive() }
+            val req = FiltersRequest(
+                activeFilters.map { FilterResponse(it.id, it.name, it.fixed, FilterTypeMapper.toInt(it.type)) },
+                withPlanned
+            )
+
+            FilteredTasksDataMapper.fromRaw(api.getFilteredTaskItems(token, req))
+        }
+
+    suspend fun getIsOnlineAvailable(): EitherE<Boolean> = authenticatedRequest { token ->
+        api.hasOnlineAccess(token).status
+    }
 
     //Reports
     suspend fun sendReport(item: EntranceReportEntity): Either<Exception, Unit> = Either.of {

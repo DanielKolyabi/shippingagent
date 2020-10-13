@@ -75,18 +75,3 @@ class AddressYandexMapScreen(
     }
 }
 
-class FiltersScreen<T>(
-    val tasks: List<Task>,
-    val target: T
-) : SupportAppScreen() where T : Fragment, T : IFiltersConsumer {
-    override fun getFragment(): Fragment {
-        val fragment = FiltersPagerFragment.newInstance(tasks, target)
-        return fragment
-    }
-}
-
-class OnlineFiltersScreen<T>(val target: T) : SupportAppScreen() where T : Fragment, T : IFiltersEditorConsumer {
-    override fun getFragment(): Fragment {
-        return FiltersEditorFragment.newInstance(TaskId(-1), null, false, target)
-    }
-}
