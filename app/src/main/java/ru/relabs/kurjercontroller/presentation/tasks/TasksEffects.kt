@@ -43,13 +43,53 @@ object TasksEffects {
         messages.send(TasksMessages.msgTaskUnselected(task))
     }
 
-    fun effectNavigateAddresses(): TasksEffect = { c, s ->
-        withContext(Dispatchers.Main) {
-            c.router.navigateTo(RootScreen.Addresses(s.selectedTasks))
+    fun effectNavigateAddresses(withFilteredTasksReload: Boolean): TasksEffect = { c, s ->
+        val filteredTasks = s.selectedTasks.filter { it.filtered }
+        if (filteredTasks.isNotEmpty() && withFilteredTasksReload) {
+            withContext(Dispatchers.Main) {
+                c.router.navigateTo(RootScreen.FiltersScreen(filteredTasks, c.consumer))
+            }
+        } else {
+            withContext(Dispatchers.Main) {
+                c.router.navigateTo(RootScreen.Addresses(s.selectedTasks))
+            }
         }
     }
 
-    fun effectLoadTasks(withNetwork: Boolean): TasksEffect = { c, s ->
+    fun effectReloadFilteredItemsAndStart(): TasksEffect = { c, s ->
+        messages.send(TasksMessages.msgAddLoaders(1))
+        effectLoadTasks(false, false)(c, s)
+        messages.send(msgEffect(effectUpdateFilteredItems(s.selectedTasks.filter { it.filtered })))
+        messages.send(TasksMessages.msgAddLoaders(-1))
+    }
+
+    private fun effectUpdateFilteredItems(tasks: List<Task>): TasksEffect = { c, s ->
+        messages.send(TasksMessages.msgAddLoaders(1))
+        val failed = tasks.mapNotNull {
+            when (val r = c.onlineTaskUseCase.updateFilteredTaskItems(it)) {
+                is Left -> it
+                is Right -> null
+            }
+        }
+        when {
+            failed.isNotEmpty() && failed.size < s.selectedTasks.size -> {
+                messages.send(TasksMessages.msgTasksUnselected(failed))
+                withContext(Dispatchers.Main) {
+                    c.showPartialTaskItemsLoadingError(failed)
+                }
+            }
+            failed.isNotEmpty() && failed.size == s.selectedTasks.size -> {
+                messages.send(TasksMessages.msgTasksUnselected(s.selectedTasks))
+                withContext(Dispatchers.Main) {
+                    c.showTaskItemsLoadingError()
+                }
+            }
+            else -> messages.send(msgEffect(effectNavigateAddresses(false)))
+        }
+        messages.send(TasksMessages.msgAddLoaders(-1))
+    }
+
+    fun effectLoadTasks(withNetwork: Boolean, withClearSelected: Boolean): TasksEffect = { c, s ->
         messages.send(TasksMessages.msgAddLoaders(1))
         c.databaseRepository.closeOutdatedOnlineTask()
         if (withNetwork) {
@@ -76,14 +116,14 @@ object TasksEffects {
             }
             c.showSnackbar(message)
         }
-        messages.send(TasksMessages.msgTasksLoaded(c.databaseRepository.getTasks()))
+        messages.send(TasksMessages.msgTasksLoaded(c.databaseRepository.getTasks(), withClearSelected))
         messages.send(TasksMessages.msgAddLoaders(-1))
     }
 
     fun effectRefresh(): TasksEffect = { c, s ->
         when (s.loaders > 0) {
             true -> c.showSnackbar(R.string.task_list_update_in_progress)
-            false -> messages.send(msgEffect(effectLoadTasks(true)))
+            false -> messages.send(msgEffect(effectLoadTasks(true, true)))
         }
     }
 

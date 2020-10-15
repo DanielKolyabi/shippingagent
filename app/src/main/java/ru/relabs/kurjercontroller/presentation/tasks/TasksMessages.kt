@@ -1,6 +1,7 @@
 package ru.relabs.kurjercontroller.presentation.tasks
 
 import ru.relabs.kurjercontroller.domain.models.Task
+import ru.relabs.kurjercontroller.domain.models.TaskFilters
 import ru.relabs.kurjercontroller.domain.models.TaskId
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffects
@@ -16,7 +17,7 @@ object TasksMessages {
         { it },
         {
             listOf(
-                TasksEffects.effectLoadTasks(refreshTasks),
+                TasksEffects.effectLoadTasks(refreshTasks, true),
                 TasksEffects.effectLaunchEventConsumers()
             )
         }
@@ -45,13 +46,13 @@ object TasksMessages {
         msgState { it.copy(selectedTasks = it.selectedTasks.filter { it != task }) }
 
     fun msgStartClicked(): TasksMessage =
-        msgEffect(TasksEffects.effectNavigateAddresses())
+        msgEffect(TasksEffects.effectNavigateAddresses(true))
 
     fun msgAddLoaders(i: Int): TasksMessage =
         msgState { it.copy(loaders = it.loaders + i) }
 
-    fun msgTasksLoaded(tasks: List<Task>): TasksMessage =
-        msgState { it.copy(tasks = tasks, selectedTasks = listOf()) }
+    fun msgTasksLoaded(tasks: List<Task>, withClearSelected: Boolean): TasksMessage =
+        msgState { it.copy(tasks = tasks, selectedTasks = if (withClearSelected) listOf() else it.selectedTasks) }
 
     fun msgRefresh(): TasksMessage =
         msgEffect(TasksEffects.effectRefresh())
@@ -98,6 +99,15 @@ object TasksMessages {
         }
     )
 
-    fun msgOnlineFiltersSelected(): TasksMessage =
-        msgEffect(TasksEffects.effectStartOnline())
+    fun msgOnlineFiltersSelected(filters: TaskFilters, withPlanned: Boolean): TasksMessage =
+        msgEffect(TasksEffects.effectStartOnline(filters, withPlanned))
+
+    fun msgSelectedFiltersUpdated(): TasksMessage =
+        msgEffect(TasksEffects.effectReloadFilteredItemsAndStart())
+
+    fun msgTasksUnselected(unselected: List<Task>): TasksMessage =
+        msgState { it.copy(selectedTasks = it.selectedTasks.filter { it.id !in unselected.map { it.id } }) }
+
+    fun msgStartAfterPartialFail(): TasksMessage =
+        msgEffect(TasksEffects.effectNavigateAddresses(false))
 }

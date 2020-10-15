@@ -17,28 +17,31 @@ class OnlineTaskUseCase(
     suspend fun createOnlineTask(filters: TaskFilters, withPlanned: Boolean): Either<Exception, Task> =
         withContext(Dispatchers.IO) {
             val task = databaseRepository.createOnlineTask(filters, withPlanned)
-
-            controlRepository.getFilteredTaskItems(task.taskFilters.all, task.withPlanned).fmap {
-                val task = Task(
-                    id = task.id,
-                    state = task.state,
-                    startControlDate = task.startControlDate,
-                    endControlDate = task.endControlDate,
-                    description = task.description,
-                    initiator = task.initiator,
-                    userId = task.userId,
-                    storages = it.storages,
-                    taskItems = it.items.map { it.copy(taskId = task.id) },
-                    publishers = it.publishers.map { it.copy(taskId = task.id) },
-                    taskFilters = task.taskFilters,
-                    iteration = task.iteration,
-                    firstExaminedDeviceId = task.firstExaminedDeviceId,
-                    filtered = task.filtered,
-                    isOnline = false,
-                    withPlanned = false
-                )
-                databaseRepository.reloadFilteredTaskItems(task)
-                task
-            }
+            updateFilteredTaskItems(task)
         }
+
+    suspend fun updateFilteredTaskItems(task: Task): Either<Exception, Task> = withContext(Dispatchers.IO){
+        controlRepository.getFilteredTaskItems(task.taskFilters.all, task.withPlanned).fmap {
+            val task = Task(
+                id = task.id,
+                state = task.state,
+                startControlDate = task.startControlDate,
+                endControlDate = task.endControlDate,
+                description = task.description,
+                initiator = task.initiator,
+                userId = task.userId,
+                storages = it.storages,
+                taskItems = it.items.map { it.copy(taskId = task.id) },
+                publishers = it.publishers.map { it.copy(taskId = task.id) },
+                taskFilters = task.taskFilters,
+                iteration = task.iteration,
+                firstExaminedDeviceId = task.firstExaminedDeviceId,
+                filtered = task.filtered,
+                isOnline = false,
+                withPlanned = false
+            )
+            databaseRepository.reloadFilteredTaskItems(task)
+            task
+        }
+    }
 }

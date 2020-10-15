@@ -147,4 +147,6 @@
     <string name="task_list_too_many_filtered">Невозможно выбрать более 3 заданий с фильтрами</string>
     <string name="close_task_error_single">Можно закрыть только одно задание</string>
     <string name="online_no_access">У вас нет прав на составление заданий</string>
+    <string name="tasks_items_partial_update_fail">Не удалось загрузить адреса для заданий:\n%s\nЗадания были исключены</string>
+    <string name="tasks_items_update_fail">Не удалось загрузить адреса</string>
 </resources>

@@ -25,6 +25,7 @@ import ru.relabs.kurjercontroller.presentation.base.tea.defaultController
 import ru.relabs.kurjercontroller.presentation.base.tea.rendersCollector
 import ru.relabs.kurjercontroller.presentation.base.tea.sendMessage
 import ru.relabs.kurjercontroller.presentation.filters.editor.IFiltersEditorConsumer
+import ru.relabs.kurjercontroller.presentation.filters.pager.IFiltersConsumer
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.base.BaseYandexMapFragment
 import ru.relabs.kurjercontroller.presentation.host.HostActivity
 import ru.relabs.kurjercontroller.presentation.taskDetails.IExaminedConsumer
@@ -40,7 +41,8 @@ import ru.relabs.kurjercontroller.utils.extensions.showSnackbar
 class TasksFragment : BaseFragment(),
     IFragmentStyleable by FragmentStyleable(false),
     IExaminedConsumer,
-    IFiltersEditorConsumer {
+    IFiltersEditorConsumer,
+    IFiltersConsumer {
 
     private val controller = defaultController(TasksState(), TasksContext(this))
     private var renderJob: Job? = null
@@ -110,6 +112,24 @@ class TasksFragment : BaseFragment(),
         controller.context.errorContext.attach(view)
         controller.context.showSnackbar = { withContext(Dispatchers.Main) { showSnackbar(resources.getString(it)) } }
         controller.context.showUpdateRequiredOnVisible = ::showUpdateRequiredOnVisible
+        controller.context.showPartialTaskItemsLoadingError = ::showPartialTaskItemsLoadingError
+        controller.context.showTaskItemsLoadingError = ::showTaskItemsLoadingError
+    }
+
+    private fun showPartialTaskItemsLoadingError(tasks: List<Task>) {
+        showDialog(
+            resources.getString(R.string.tasks_items_partial_update_fail, tasks.joinToString { it.name + "\n" }),
+            R.string.ok to {
+                uiScope.sendMessage(controller, TasksMessages.msgStartAfterPartialFail())
+            }
+        )
+    }
+
+    private fun showTaskItemsLoadingError() {
+        showDialog(
+            resources.getString(R.string.tasks_items_update_fail),
+            R.string.ok to {}
+        )
     }
 
     override fun onPause() {
@@ -158,6 +178,9 @@ class TasksFragment : BaseFragment(),
         renderJob?.cancel()
         controller.context.errorContext.detach()
         controller.context.showSnackbar = {}
+        controller.context.showUpdateRequiredOnVisible = {}
+        controller.context.showPartialTaskItemsLoadingError = {}
+        controller.context.showTaskItemsLoadingError = {}
     }
 
     override fun onExamined(task: Task) {
@@ -170,11 +193,15 @@ class TasksFragment : BaseFragment(),
 
     //Filters Editor Start Clicked (for online)
     override fun onStartClicked(taskId: TaskId, filters: TaskFilters, withPlanned: Boolean) {
-        if(taskId.id == -1){
-            uiScope.sendMessage(controller, TasksMessages.msgOnlineFiltersSelected())
-        }else{
+        if (taskId.id == -1) {
+            uiScope.sendMessage(controller, TasksMessages.msgOnlineFiltersSelected(filters, withPlanned))
+        } else {
             FirebaseCrashlytics.getInstance().log("Not expected taskId in onStartClicked")
         }
+    }
+
+    override fun onAllFiltersApplied() {
+        uiScope.sendMessage(controller, TasksMessages.msgSelectedFiltersUpdated())
     }
 
     companion object {

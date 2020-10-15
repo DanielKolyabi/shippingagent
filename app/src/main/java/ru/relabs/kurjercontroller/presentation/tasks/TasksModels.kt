@@ -32,6 +32,8 @@ class TasksContext(val consumer: TasksFragment, val errorContext: ErrorContextIm
 
     var showSnackbar: suspend (Int) -> Unit = {}
     var showUpdateRequiredOnVisible: () -> Unit = {}
+    var showPartialTaskItemsLoadingError: (tasks: List<Task>) -> Unit = {}
+    var showTaskItemsLoadingError: () -> Unit = {}
 }
 
 typealias TasksMessage = ElmMessage<TasksContext, TasksState>
