@@ -11,6 +11,7 @@ import ru.relabs.kurjercontroller.data.database.AppDatabase
 import ru.relabs.kurjercontroller.data.database.entities.*
 import ru.relabs.kurjercontroller.domain.mappers.FilterTypeMapper
 import ru.relabs.kurjercontroller.domain.mappers.database.*
+import ru.relabs.kurjercontroller.domain.mappers.network.AddressMapper
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.domain.providers.PathsProvider
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
@@ -26,6 +27,10 @@ class DatabaseRepository(
     private val baseUrl: String,
     private val pathsProvider: PathsProvider
 ) {
+
+    suspend fun getAddress(id: AddressId): Address? = withContext(Dispatchers.IO) {
+        AddressMapper.fromRaw(db.addressDao().getById(id.id))
+    }
 
     suspend fun getOnlineTask(): Task? = withContext(Dispatchers.IO) {
         db.taskDao().getOnlineTask()?.let { DatabaseTaskMapper.fromEntity(it, db) }

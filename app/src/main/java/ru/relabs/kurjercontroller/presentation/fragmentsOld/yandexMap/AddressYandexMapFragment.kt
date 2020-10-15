@@ -25,7 +25,7 @@ class AddressYandexMapFragment : BaseYandexMapFragment() {
             if (addressIds.size < 2) {
                 savedCameraPosition = null
             }
-            deliverymanIds = it.getIntArray("deliveryman_ids").toList()
+            deliverymanIds = it.getIntArray("deliveryman_ids")?.toList().orEmpty()
             storages = it.getParcelableArrayList<TaskStorage>("storages")?.toList() ?: listOf()
         }
     }
@@ -52,7 +52,7 @@ class AddressYandexMapFragment : BaseYandexMapFragment() {
                 arguments = Bundle().apply {
                     putParcelableArrayList(
                         "address_ids",
-                        ArrayList(addresses.map { AddressIdWithColor(it.address.id, it.color, it.outlineColor) })
+                        ArrayList(addresses.map { AddressIdWithColor(it.address.id.id, it.color, it.outlineColor) })
                     )
                     putParcelableArrayList(
                         "storages",

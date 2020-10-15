@@ -25,6 +25,7 @@ import ru.relabs.kurjercontroller.data.models.common.DomainException
 import ru.relabs.kurjercontroller.data.models.common.EitherE
 import ru.relabs.kurjercontroller.data.models.tasks.FilterResponse
 import ru.relabs.kurjercontroller.domain.mappers.FilterTypeMapper
+import ru.relabs.kurjercontroller.domain.mappers.UserLocationMapper
 import ru.relabs.kurjercontroller.domain.mappers.network.*
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.domain.providers.*
@@ -92,6 +93,10 @@ class ControlRepository(
                 throw t.value
             }
         }
+    }
+
+    suspend fun getUserPosition(id: Int): EitherE<List<UserLocation>> = authenticatedRequest { token ->
+        UserLocationMapper.fromRaw(api.requestUserPosition(id))
     }
 
     suspend fun updatePushToken(firebaseToken: FirebaseToken): EitherE<Boolean> = authenticatedRequest { token ->

@@ -17,11 +17,11 @@ import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.domain.models.Address
 import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.domain.models.TaskItem
-import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.utils.extensions.setVisible
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.base.BaseYandexMapFragment
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.base.WRONG_METHOD_OUTLINE_COLOR
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.models.YandexMapModel
+import ru.relabs.kurjercontroller.utils.extensions.placemarkColor
 
 class TasksYandexMapFragment : BaseYandexMapFragment() {
 
@@ -35,7 +35,7 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
             if (updatedId > 0 && updatedDateTime > 0) {
                 tasks.forEach {
                     it.taskItems.forEach {
-                        if (it.id == updatedId) {
+                        if (it.id.id == updatedId) {
                             it.isNew = true
                             it.closeTime = DateTime(updatedDateTime * 1000)
                         }
@@ -61,7 +61,7 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
     var onNewTaskItemsAdded: (() -> Unit)? = null
 
     var taskIds: List<Int> = listOf()
-    var tasks: List<TaskModel> = listOf()
+    var tasks: List<Task> = listOf()
     val newTaskItems: MutableList<TaskItem> = mutableListOf()
 
     var showedAddresses: List<AddressWithColor> = listOf()
@@ -185,7 +185,7 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
         showedAddresses.forEach(::showAddress)
     }
 
-    fun showTask(task: TaskModel) {
+    fun showTask(task: Task) {
         clearMap()
         val addresses = task.taskItems.map { it.address }.distinctBy { it.idnd }
         val coloredAddresses = task.taskItems
@@ -218,7 +218,7 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
         makeFocus(showedAddresses.map { it.address })
     }
 
-    suspend fun setTaskLayerLoading(task: TaskModel, loading: Boolean) =
+    suspend fun setTaskLayerLoading(task: Task, loading: Boolean) =
         withContext(Dispatchers.Main) {
             val layer =
                 adapter.data.firstOrNull { it is YandexMapModel.TaskLayer && it.task.id == task.id }
@@ -259,7 +259,7 @@ class TasksYandexMapFragment : BaseYandexMapFragment() {
                 arguments = Bundle().apply {
                     putIntegerArrayList(
                         "task_ids",
-                        ArrayList(tasks.map { it.id })
+                        ArrayList(tasks.map { it.id.id })
                     )
                 }
             }

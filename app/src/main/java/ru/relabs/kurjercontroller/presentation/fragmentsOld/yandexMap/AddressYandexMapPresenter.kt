@@ -3,18 +3,24 @@ package ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.domain.models.TaskModel
+import org.koin.core.KoinComponent
+import org.koin.core.inject
+import ru.relabs.kurjercontroller.domain.models.AddressId
+import ru.relabs.kurjercontroller.domain.models.Task
+import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.base.BaseYandexMapPresenter
 
-class AddressYandexMapPresenter(override val fragment: AddressYandexMapFragment): BaseYandexMapPresenter(fragment) {
+class AddressYandexMapPresenter(override val fragment: AddressYandexMapFragment): BaseYandexMapPresenter(fragment), KoinComponent {
+
+    val databaseRepository: DatabaseRepository by inject()
+
     override fun getDeliverymanIDs(): List<Int> {
         return fragment.deliverymanIds
     }
 
     override fun onPredefinedAddressesLayerSelected() {}
 
-    override fun onTaskLayerSelected(taskModel: TaskModel) {}
+    override fun onTaskLayerSelected(taskModel: Task) {}
 
     override fun onCommonLayerSelected() {}
 
@@ -22,7 +28,7 @@ class AddressYandexMapPresenter(override val fragment: AddressYandexMapFragment)
         bgScope.launch {
 
             fragment.addresses = fragment.addressIds.mapNotNull {
-                val address = application().tasksRepository.getAddress(it.id) ?: return@mapNotNull null
+                val address = databaseRepository.getAddress(AddressId(it.id)) ?: return@mapNotNull null
                 return@mapNotNull AddressWithColor(address, it.color, it.outlineColor)
             }.distinctBy {
                 it.address.idnd

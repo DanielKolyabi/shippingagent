@@ -4,17 +4,23 @@ import kotlinx.android.synthetic.main.fragment_yandex_map.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.relabs.kurjercontroller.application
-import ru.relabs.kurjercontroller.logError
-import ru.relabs.kurjercontroller.domain.models.TaskItem
-import ru.relabs.kurjercontroller.domain.models.TaskModel
-import ru.relabs.kurjercontroller.network.DeliveryServerAPI
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 import ru.relabs.kurjercontroller.data.models.FiltersRequest
-import ru.relabs.kurjercontroller.utils.extensions.setVisible
+import ru.relabs.kurjercontroller.domain.models.Task
+import ru.relabs.kurjercontroller.domain.models.TaskId
+import ru.relabs.kurjercontroller.domain.models.TaskItem
+import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.base.BaseYandexMapPresenter
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.models.YandexMapModel
+import ru.relabs.kurjercontroller.utils.Left
+import ru.relabs.kurjercontroller.utils.Right
+import ru.relabs.kurjercontroller.utils.extensions.setVisible
+import ru.relabs.kurjercontroller.utils.log
 
-class TasksYandexMapPresenter(override val fragment: TasksYandexMapFragment) : BaseYandexMapPresenter(fragment) {
+class TasksYandexMapPresenter(override val fragment: TasksYandexMapFragment) : BaseYandexMapPresenter(fragment), KoinComponent {
+    val databaseRepository: DatabaseRepository by inject()
+
     override fun getDeliverymanIDs(): List<Int> {
         return fragment.tasks
             .flatMap {
@@ -29,7 +35,7 @@ class TasksYandexMapPresenter(override val fragment: TasksYandexMapFragment) : B
         fragment.add_button?.setVisible(false)
     }
 
-    override fun onTaskLayerSelected(taskModel: TaskModel) {
+    override fun onTaskLayerSelected(taskModel: Task) {
         fragment.showTask(taskModel)
         fragment.updateAddButton()
     }
@@ -43,7 +49,7 @@ class TasksYandexMapPresenter(override val fragment: TasksYandexMapFragment) : B
         bgScope.launch {
 
             fragment.tasks = fragment.taskIds.mapNotNull {
-                application().tasksRepository.getTask(it)
+                databaseRepository.getTask(TaskId(it))
             }
 
             loadNewTaskItems(fragment.tasks)
@@ -55,29 +61,24 @@ class TasksYandexMapPresenter(override val fragment: TasksYandexMapFragment) : B
         }
     }
 
-    fun loadNewTaskItems(tasks: List<TaskModel>) = bgScope.launch(Dispatchers.IO) {
-        val token = application().user.getUserCredentials()?.token ?: return@launch
-
+    fun loadNewTaskItems(tasks: List<Task>) = bgScope.launch(Dispatchers.IO) {
         tasks.filter { it.filtered }.forEach { task ->
             fragment.setTaskLayerLoading(task, true)
-            val response = try {
-                DeliveryServerAPI.api.getFilteredTaskItems(
-                    token,
-                    FiltersRequest.fromFiltersList(task.taskFilters.all, task.withPlanned)
-                ).await()
-            } catch (e: Exception) {
-                e.logError()
-                return@forEach
-            }
 
             val currentAddresses = task.taskItems.map { it.address.id }
 
-            fragment.newTaskItems.addAll(
-                response.items
-                    .filter { !currentAddresses.contains(it.address.id) }
-                    .map { it.copy(taskId = task.id).toModel() }
-            )
-            fragment.setTaskLayerLoading(task, false)
+            when (val r = controlRepository.getFilteredTaskItems(task.taskFilters.all, task.withPlanned)) {
+                is Right -> fragment.newTaskItems.addAll(
+                    r.value
+                        .items
+                        .filter { !currentAddresses.contains(it.address.id) }
+                        .map { it.copy(taskId = task.id) }
+                )
+                is Left -> {
+                    r.value.log()
+                    return@forEach
+                }
+            }
         }
         withContext(Dispatchers.Main) {
             when (val selectedLayer = fragment.getSelectedLayer()) {
@@ -89,10 +90,10 @@ class TasksYandexMapPresenter(override val fragment: TasksYandexMapFragment) : B
 
     fun addNewTaskItems(selectedLayer: YandexMapModel.TaskLayer, newTaskItems: List<TaskItem>) =
         bgScope.launch(Dispatchers.IO) {
-            selectedLayer.task.taskItems.addAll(newTaskItems)
+//            selectedLayer.task.taskItems.addAll(newTaskItems)
 
             newTaskItems.forEach {
-                application().tasksRepository.saveTaskItem(it)
+//                databaseRepository.saveTaskItem(it)
             }
 
             withContext(Dispatchers.Main) {
@@ -103,11 +104,12 @@ class TasksYandexMapPresenter(override val fragment: TasksYandexMapFragment) : B
         }
 
     fun updateCurrentLayer() {
-        return when(val layer = fragment.getSelectedLayer()){
+        return when (val layer = fragment.getSelectedLayer()) {
             YandexMapModel.CommonLayer -> onCommonLayerSelected()
             YandexMapModel.PredefinedAddressesLayer -> onPredefinedAddressesLayerSelected()
             is YandexMapModel.TaskLayer -> onTaskLayerSelected(layer.task)
-            else -> {}
+            else -> {
+            }
         }
     }
 }
