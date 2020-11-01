@@ -276,7 +276,7 @@ class ControlRepository(
             .post(postDataBuilder.build())
             .build()
         val client = networkClient.newCall(request).execute()
-        if (client.code != 200) {
+        if (client.code != 200 && client.code != 401) {
             throw Exception("Wrong response code.")
         }
     }

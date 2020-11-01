@@ -7,20 +7,31 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_task_item_explanation.*
+import kotlinx.android.synthetic.main.fragment_task_item_explanation.view.*
+import kotlinx.android.synthetic.main.fragment_tasks.view.*
+import kotlinx.android.synthetic.main.fragment_tasks.view.iv_menu
+import kotlinx.android.synthetic.main.fragment_tasks.view.tv_title
+import org.koin.android.ext.android.inject
 import ru.relabs.kurjercontroller.utils.CustomLog
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.utils.extensions.showDialog
+import ru.terrakok.cicerone.Router
 
 /**
  * Created by ProOrange on 18.03.2019.
  */
 class TaskItemExplanationFragment : Fragment() {
 
+    private val router: Router by inject()
     private var taskItem: TaskItem? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        view.tv_title.text = taskItem?.address?.name ?: "Неизвестно"
+        view.iv_menu.setOnClickListener {
+            router.exit()
+        }
         (taskItem?.notes ?: emptyList()).forEachIndexed { num, text ->
             setInfoText(num, text)
         }

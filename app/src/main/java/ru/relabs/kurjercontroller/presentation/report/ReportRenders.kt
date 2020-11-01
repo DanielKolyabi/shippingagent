@@ -12,6 +12,7 @@ import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.presentation.base.DefaultListDiffCallback
 import ru.relabs.kurjercontroller.presentation.base.recycler.DelegateAdapter
 import ru.relabs.kurjercontroller.presentation.base.tea.renderT
+import ru.relabs.kurjercontroller.utils.debug
 import ru.relabs.kurjercontroller.utils.extensions.renderText
 import ru.relabs.kurjercontroller.utils.extensions.setSelectButtonActive
 import ru.relabs.kurjercontroller.utils.extensions.visible
@@ -105,7 +106,7 @@ object ReportRenders {
             val (startAps, endAps) = apartmentInterval
             if (startAps != null && endAps != null && taskItem != null) {
                 val requiredApartments = taskItem.getRequiredApartments()
-                val apartments = (startAps..endAps)
+                val apartments = (startAps..endAps + 1)
                     .map { apartment -> apartment to requiredApartments.firstOrNull { it.number == apartment } }
                     .map { (apartmentNumber, requiredData) ->
                         val saved = savedApartments.firstOrNull { it.apartmentNumber.number == apartmentNumber }
@@ -122,24 +123,21 @@ object ReportRenders {
                 val requiredApartmentsElements = apartments.filter { it.required }
                 val notRequiredApartmentElements = apartments.filter { !it.required }
                 val buttonGroup = apartments.firstOrNull()?.buttonGroup ?: ReportApartmentButtonsMode.Main
-                val items = if (buttonGroup == ReportApartmentButtonsMode.Main && hasLookout) {
-                    listOf(
-                        ReportApartmentItem.Lookout(
-                            savedApartments.firstOrNull { it.apartmentNumber.number == -2 }?.buttonState ?: 0
-                        )
-                    )
+                val headerModeItem = if (buttonGroup == ReportApartmentButtonsMode.Main && hasLookout) {
+                    ReportApartmentItem.Lookout(savedApartments.firstOrNull { it.apartmentNumber.number == -2 }?.buttonState ?: 0)
                 } else if (buttonGroup == ReportApartmentButtonsMode.Additional) {
-                    listOf(
-                        ReportApartmentItem.Entrance(
-                            savedApartments.firstOrNull { it.apartmentNumber.number == -1 }?.buttonState ?: 0
-                        )
+                    ReportApartmentItem.Entrance(
+                        savedApartments.firstOrNull { it.apartmentNumber.number == -1 }?.buttonState ?: 0
                     )
                 } else {
-                    emptyList()
-                } +
-                        requiredApartmentsElements +
-                        listOf(ReportApartmentItem.Divider) +
-                        notRequiredApartmentElements
+                    null
+                }
+                val items =
+                    listOfNotNull(headerModeItem) +
+                            requiredApartmentsElements +
+                            listOfNotNull(ReportApartmentItem.Divider.takeIf { requiredApartments.isNotEmpty() }) +
+                            notRequiredApartmentElements
+
 
                 val diff = DiffUtil.calculateDiff(DefaultListDiffCallback(apartmentsAdapter.items, items))
 

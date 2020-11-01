@@ -13,7 +13,7 @@ object EntranceMapper {
         key = raw.key,
         code = raw.code ?: "",
         startApartments = raw.startApartments,
-        endApartments = raw.startApartments,
+        endApartments = raw.endApartments,
         floors = raw.floors,
         mailboxType = raw.mailboxType,
         state = when(raw.state){

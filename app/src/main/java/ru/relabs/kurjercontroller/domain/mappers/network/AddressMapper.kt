@@ -13,8 +13,8 @@ object AddressMapper {
         street = raw.street,
         house = raw.house,
         houseName = raw.houseName,
-        lat = raw.lat.toDouble(),
-        long = raw.long.toDouble()
+        lat = raw.lat,
+        long = raw.long
     )
 
     fun fromEntity(entity: AddressEntity) = Address(

@@ -130,9 +130,13 @@ object AddressesAdapter {
     fun blankAdapter(): IAdapterDelegate<AddressesItem> = delegateDefine(
         { it is AddressesItem.Blank },
         { p ->
-            holderDefine(p, R.layout.holder_empty, { it as AddressesItem.Blank }) {
+            holderDefine(p, R.layout.holder_empty, { it as AddressesItem.Blank }) { (closeable) ->
+                val height = when(closeable){
+                    true -> 112
+                    false -> 56
+                }
                 itemView.layoutParams =
-                    FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, itemView.context.dpToPx(56).toInt())
+                    FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, itemView.context.dpToPx(height).toInt())
             }
         }
     )

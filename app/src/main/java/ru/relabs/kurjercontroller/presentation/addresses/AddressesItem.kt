@@ -11,7 +11,7 @@ sealed class AddressesItem {
     data class OtherAddresses(val count: Int): AddressesItem()
 
     object Loading: AddressesItem()
-    object Blank: AddressesItem()
+    data class Blank(val closeable: Boolean): AddressesItem()
     data class Search(val filter: String): AddressesItem()
 }
 

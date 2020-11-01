@@ -67,6 +67,6 @@ class ReportPagerAdapter(
 
     override fun getPageTitle(position: Int): CharSequence? {
         val entrance = openedEntrances()[position]
-        return "Подъезд ${entrance.number} из $count"
+        return "Подъезд ${entrance.number.number} из $count"
     }
 }

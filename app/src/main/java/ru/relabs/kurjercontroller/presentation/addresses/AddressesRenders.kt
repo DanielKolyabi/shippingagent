@@ -56,7 +56,7 @@ object AddressesRenders {
                     listOfNotNull(
                         AddressesItem.OtherAddresses(allTaskItemsCount - filteredTaskItemsCount)
                             .takeIf { searchFilter.isNotEmpty() },
-                        AddressesItem.Blank
+                        AddressesItem.Blank(tasks.size == 1)
                             .takeIf { tasks.isNotEmpty() }
                     )
 

@@ -6,13 +6,13 @@ import kotlinx.android.parcel.Parcelize
 
 data class AddressResponse(
     @SerializedName("id") val id: Int,
-    @SerializedName("id") val idnd: Int,
+    @SerializedName("idnd") val idnd: Int,
     @SerializedName("city") val city: String,
     @SerializedName("street") val street: String,
     @SerializedName("house") val house: Int,
     @SerializedName("house_name") val houseName: String,
-    @SerializedName("lat") val lat: Float,
-    @SerializedName("long") val long: Float
+    @SerializedName("lat") val lat: Double,
+    @SerializedName("long") val long: Double
 )
 //    fun toModel(): AddressModel {
 //        return AddressModel(

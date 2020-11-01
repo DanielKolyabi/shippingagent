@@ -74,10 +74,10 @@ class ReportFragment : BaseFragment() {
             }
         })
 
-        val entranceKeysAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, emptyList())
+        val entranceKeysAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, mutableListOf())
         view.entrance_key.adapter = entranceKeysAdapter
 
-        val entranceEuroKeysAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, emptyList())
+        val entranceEuroKeysAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, mutableListOf())
         view.entrance_euro_key.adapter = entranceEuroKeysAdapter
 
         val photosAdapter = DelegateAdapter(
@@ -106,7 +106,7 @@ class ReportFragment : BaseFragment() {
                 { number -> uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionClicked(number)) }
             )
         )
-        view.appartaments_list.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
+        view.appartaments_list.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.VERTICAL, false)
         view.appartaments_list.adapter = apartmentsAdapter
         view.appartaments_list.addOnItemTouchListener(listInterceptor)
 
