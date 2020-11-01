@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 data class UpdateDataResponse(
     @SerializedName("version") val version: Int,
-    @SerializedName("url") val url: String,
+    @SerializedName("url") val url: String?,
     @SerializedName("is_required") val isRequired: Boolean
 )
 

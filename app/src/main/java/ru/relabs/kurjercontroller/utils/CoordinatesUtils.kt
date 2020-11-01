@@ -1,6 +1,7 @@
 package ru.relabs.kurjercontroller.utils
 
-import ru.relabs.kurjercontroller.models.GPSCoordinatesModel
+import org.joda.time.DateTime
+import ru.relabs.kurjercontroller.domain.models.GPSCoordinatesModel
 import java.util.*
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -15,8 +16,8 @@ fun Double.toRadians() = Math.toRadians(this)
 
 fun calculateDistance(fromLat: Double, fromLong: Double, toLat: Double, toLong: Double): Double {
     return calculateDistance(
-        GPSCoordinatesModel(fromLat, fromLong, Date()),
-        GPSCoordinatesModel(toLat, toLong, Date())
+        GPSCoordinatesModel(fromLat, fromLong, DateTime()),
+        GPSCoordinatesModel(toLat, toLong, DateTime())
     )
 }
 

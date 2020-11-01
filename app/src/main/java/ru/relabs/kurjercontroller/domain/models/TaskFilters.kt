@@ -2,14 +2,33 @@ package ru.relabs.kurjercontroller.domain.models
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
+import ru.relabs.kurjercontroller.data.database.entities.FilterEntity
 import ru.relabs.kurjercontroller.data.models.tasks.FilterResponse
 import ru.relabs.kurjercontroller.domain.mappers.FilterTypeMapper
+import ru.relabs.kurjercontroller.domain.mappers.MappingException
 
 /**
  * Created by ProOrange on 21.03.2019.
  */
-enum class FilterType{
+enum class FilterType {
     Publisher, District, Region, Brigade, User
+}
+
+fun FilterType.toInt() = when (this) {
+    FilterType.Publisher -> FilterEntity.PUBLISHER_FILTER
+    FilterType.District -> FilterEntity.DISTRICT_FILTER
+    FilterType.Region -> FilterEntity.REGION_FILTER
+    FilterType.Brigade -> FilterEntity.BRIGADE_FILTER
+    FilterType.User -> FilterEntity.USER_FILTER
+}
+
+fun Int.toFilterType() = when (this) {
+    FilterEntity.PUBLISHER_FILTER -> FilterType.Publisher
+    FilterEntity.DISTRICT_FILTER -> FilterType.District
+    FilterEntity.REGION_FILTER -> FilterType.Region
+    FilterEntity.BRIGADE_FILTER -> FilterType.Brigade
+    FilterEntity.USER_FILTER -> FilterType.User
+    else -> throw MappingException("filterType", this)
 }
 
 @Parcelize

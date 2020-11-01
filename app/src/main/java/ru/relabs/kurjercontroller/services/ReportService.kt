@@ -26,7 +26,7 @@ import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
 import ru.relabs.kurjercontroller.domain.controllers.TaskEventController
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
-import ru.relabs.kurjercontroller.presentation.splash.MainActivity
+import ru.relabs.kurjercontroller.presentation.host.HostActivity
 import ru.relabs.kurjercontroller.utils.*
 
 const val CHANNEL_ID = "controller_notification_channel"
@@ -123,7 +123,7 @@ class ReportService : Service(), KoinComponent {
     }
 
     private fun updateActivityState() {
-        if (!lastActivityRunningState && MainActivity.isRunning) {
+        if (!lastActivityRunningState && !isAppPaused) {
             lastActivityResumeTime = System.currentTimeMillis()
         }
 

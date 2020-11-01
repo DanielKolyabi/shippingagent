@@ -4,6 +4,7 @@ import ru.relabs.kurjercontroller.data.models.tasks.FilterResponse
 import ru.relabs.kurjercontroller.data.models.tasks.FiltersResponse
 import ru.relabs.kurjercontroller.domain.models.TaskFilter
 import ru.relabs.kurjercontroller.domain.models.TaskFilters
+import ru.relabs.kurjercontroller.domain.models.toFilterType
 
 object FilterMapper {
     fun fromRaw(raw: FiltersResponse) = TaskFilters(
@@ -19,6 +20,6 @@ object FilterMapper {
         name = raw.name,
         fixed = raw.fixed,
         active = raw.fixed,
-        type = raw.type
+        type = raw.type.toFilterType()
     )
 }

@@ -5,7 +5,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.selects.select
 import ru.relabs.kurjercontroller.ControllApplication
-import ru.relabs.kurjercontroller.presentation.splash.MainActivity
+import ru.relabs.kurjercontroller.presentation.host.HostActivity
 import java.io.File
 
 
@@ -18,8 +18,8 @@ fun application(): ControllApplication {
     return ControllApplication.appContext as ControllApplication
 }
 
-fun Fragment.activity(): MainActivity? {
-    return this.context as? MainActivity
+fun Fragment.activity(): HostActivity? {
+    return this.context as? HostActivity
 }
 
 fun Throwable.log() {

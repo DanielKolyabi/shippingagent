@@ -3,12 +3,7 @@ package ru.relabs.kurjercontroller.data.database.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
-import ru.relabs.kurjercontroller.domain.mappers.database.DatabaseTaskMapper
-import ru.relabs.kurjercontroller.domain.models.Task
-import ru.relabs.kurjercontroller.providers.TaskRepository
 
 /**
  * Created by ProOrange on 19.03.2019.

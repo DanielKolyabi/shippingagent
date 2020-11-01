@@ -7,17 +7,19 @@ import ru.relabs.kurjercontroller.domain.models.AppUpdatesInfo
 
 object UpdatesMapper {
     fun fromRaw(raw: UpdatesResponse): AppUpdatesInfo = AppUpdatesInfo(
-        required = raw.required?.let {
-            AppUpdate(
-                version = it.version,
-                url = Uri.parse(it.url),
+        required = when (val uri = raw.required?.url) {
+            null -> null
+            else -> AppUpdate(
+                version = raw.required.version,
+                url = Uri.parse(uri),
                 isRequired = true
             )
         },
-        optional = raw.optional?.let {
-            AppUpdate(
-                version = it.version,
-                url = Uri.parse(it.url),
+        optional = when (val uri = raw.optional?.url) {
+            null -> null
+            else -> AppUpdate(
+                version = raw.optional.version,
+                url = Uri.parse(uri),
                 isRequired = false
             )
         }

@@ -5,9 +5,9 @@ import kotlinx.coroutines.flow.collect
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
 import ru.relabs.kurjercontroller.domain.models.*
+import ru.relabs.kurjercontroller.presentation.RootScreen
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.AddressYandexMapScreen
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.ReportScreen
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.TasksYandexMapScreen
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.AddressWithColor
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.base.WRONG_METHOD_OUTLINE_COLOR
@@ -37,12 +37,12 @@ object AddressesEffects {
 
     fun effectNavigateReport(task: Task, item: TaskItem): AddressesEffect = { c, s ->
         val sameAddressItems = s.tasks
-            .flatMap { it.taskItems.map { taskItem -> it to taskItem } }
-            .filter { it.second.address.idnd == item.address.idnd && it.second.isClosed == item.isClosed }
+            .flatMap { it.taskItems.map { taskItem -> taskItem } }
+            .filter { it.address.idnd == item.address.idnd && it.isClosed == item.isClosed }
 
         withContext(Dispatchers.Main) {
             c.router.navigateTo(
-                ReportScreen(
+                RootScreen.Report(
                     sameAddressItems,
                     item.taskId,
                     item.id

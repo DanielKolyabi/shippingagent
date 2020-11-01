@@ -26,7 +26,6 @@ import ru.relabs.kurjercontroller.presentation.base.tea.rendersCollector
 import ru.relabs.kurjercontroller.presentation.base.tea.sendMessage
 import ru.relabs.kurjercontroller.presentation.filters.editor.IFiltersEditorConsumer
 import ru.relabs.kurjercontroller.presentation.filters.pager.IFiltersConsumer
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.base.BaseYandexMapFragment
 import ru.relabs.kurjercontroller.presentation.host.HostActivity
 import ru.relabs.kurjercontroller.presentation.taskDetails.IExaminedConsumer
 import ru.relabs.kurjercontroller.utils.debug
@@ -64,7 +63,7 @@ class TasksFragment : BaseFragment(),
 
     override fun onResume() {
         super.onResume()
-        BaseYandexMapFragment.savedCameraPosition = null //TODO: Remove after yandex map refactor
+//        BaseYandexMapFragment.savedCameraPosition = null //TODO: Remove after yandex map refactor
         if (shouldShowUpdateRequiredOnResume) {
             showUpdateRequiredOnVisible()
         }

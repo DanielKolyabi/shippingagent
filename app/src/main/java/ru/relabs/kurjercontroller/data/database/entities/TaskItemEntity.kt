@@ -4,12 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
-import ru.relabs.kurjercontroller.domain.mappers.database.DatabaseTaskItemMapper
-import ru.relabs.kurjercontroller.domain.models.TaskItem
-import ru.relabs.kurjercontroller.providers.TaskRepository
 
 /**
  * Created by ProOrange on 19.03.2019.

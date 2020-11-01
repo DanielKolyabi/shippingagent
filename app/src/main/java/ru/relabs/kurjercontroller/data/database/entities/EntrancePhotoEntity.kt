@@ -3,13 +3,9 @@ package ru.relabs.kurjercontroller.data.database.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import ru.relabs.kurjercontroller.domain.mappers.database.DatabaseEntranceMapper
-import ru.relabs.kurjercontroller.domain.mappers.database.DatabaseTaskItemMapper
-import ru.relabs.kurjercontroller.domain.models.EntrancePhotoModel
 import ru.relabs.kurjercontroller.domain.models.GPSCoordinatesModel
-import ru.relabs.kurjercontroller.providers.TaskRepository
+
+//import ru.relabs.kurjercontroller.providers.TaskRepository
 
 /**
  * Created by ProOrange on 19.03.2019.
@@ -33,22 +29,22 @@ data class EntrancePhotoEntity(
     @ColumnInfo(name = "is_entrance_photo")
     var isEntrancePhoto: Boolean
 ) {
-    suspend fun toModel(repository: TaskRepository): EntrancePhotoModel = withContext(Dispatchers.IO) {
-        val taskItem = repository.db.taskItemDao().getByTaskItemId(taskId, taskItemId)?.let {
-            DatabaseTaskItemMapper.fromEntity(it, repository.db)
-        } ?: throw Exception("TaskItem ${taskItemId} not found")
-        val entrance = repository.db.entranceDao().getByNumber(taskId, taskItemId, entranceNumber)?.let {
-            DatabaseEntranceMapper.fromEntity(it)
-        } ?: throw Exception("Entrance ${taskItemId} ${entranceNumber} not found")
-
-        EntrancePhotoModel(
-            id = id,
-            entrance = entrance,
-            gps = gps,
-            uuid = UUID,
-            taskItem = taskItem,
-            realPath = realPath,
-            isEntrancePhoto = isEntrancePhoto
-        )
-    }
+//    suspend fun toModel(repository: TaskRepository): EntrancePhotoModel = withContext(Dispatchers.IO) {
+//        val taskItem = repository.db.taskItemDao().getByTaskItemId(taskId, taskItemId)?.let {
+//            DatabaseTaskItemMapper.fromEntity(it, repository.db)
+//        } ?: throw Exception("TaskItem ${taskItemId} not found")
+//        val entrance = repository.db.entranceDao().getByNumber(taskId, taskItemId, entranceNumber)?.let {
+//            DatabaseEntranceMapper.fromEntity(it)
+//        } ?: throw Exception("Entrance ${taskItemId} ${entranceNumber} not found")
+//
+//        EntrancePhotoModel(
+//            id = id,
+//            entrance = entrance,
+//            gps = gps,
+//            uuid = UUID,
+//            taskItem = taskItem,
+//            realPath = realPath,
+//            isEntrancePhoto = isEntrancePhoto
+//        )
+//    }
 }

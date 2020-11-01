@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.domain.mappers.network
 
+import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.data.models.tasks.TaskPublisherResponse
 import ru.relabs.kurjercontroller.domain.models.TaskPublisher
 import ru.relabs.kurjercontroller.domain.models.PublisherId
@@ -10,7 +11,7 @@ object PublisherMapper {
         id = PublisherId(raw.id),
         name = raw.name,
         taskId = TaskId(raw.taskId),
-        startDistributionDate = raw.startDistributionDate,
-        endDistributionDate = raw.endDistributionDate
+        startDistributionDate = DateTime(raw.startDistributionDate),
+        endDistributionDate = DateTime(raw.endDistributionDate)
     )
 }

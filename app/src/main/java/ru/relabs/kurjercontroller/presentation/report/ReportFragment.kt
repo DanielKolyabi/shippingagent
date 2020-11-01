@@ -201,7 +201,7 @@ class ReportFragment : BaseFragment() {
         const val ARG_TASK_ITEM = "taskItem"
         const val ARG_ENTRANCES = "entrances"
 
-        fun newInstance(task: Task, taskItem: TaskItem, entrances: Entrance) = ReportFragment().apply{
+        fun newInstance(task: Task, taskItem: TaskItem, entrance: Entrance) = ReportFragment().apply{
             arguments = Bundle().apply{
                 putParcelable(ARG_TASK, task)
                 putParcelable(ARG_TASK_ITEM, taskItem)

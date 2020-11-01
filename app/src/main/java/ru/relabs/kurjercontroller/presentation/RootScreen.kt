@@ -4,12 +4,15 @@ import androidx.fragment.app.Fragment
 import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.domain.models.TaskId
 import ru.relabs.kurjercontroller.domain.models.TaskItem
+import ru.relabs.kurjercontroller.domain.models.TaskItemId
 import ru.relabs.kurjercontroller.presentation.addresses.AddressesFragment
 import ru.relabs.kurjercontroller.presentation.filters.editor.FiltersEditorFragment
 import ru.relabs.kurjercontroller.presentation.filters.editor.IFiltersEditorConsumer
 import ru.relabs.kurjercontroller.presentation.filters.pager.FiltersPagerFragment
 import ru.relabs.kurjercontroller.presentation.filters.pager.IFiltersConsumer
 import ru.relabs.kurjercontroller.presentation.login.LoginFragment
+import ru.relabs.kurjercontroller.presentation.reportPager.ReportPagerFragment
+import ru.relabs.kurjercontroller.presentation.reportPager.TaskItemWithTaskIds
 import ru.relabs.kurjercontroller.presentation.taskDetails.IExaminedConsumer
 import ru.relabs.kurjercontroller.presentation.taskDetails.TaskDetailsFragment
 import ru.relabs.kurjercontroller.presentation.taskItemExplanation.TaskItemExplanationFragment
@@ -45,4 +48,16 @@ sealed class RootScreen(protected val fabric: () -> Fragment) : SupportAppScreen
             target
         )
     }) where T : Fragment, T : IFiltersEditorConsumer
+
+
+    class Report(
+        private val taskItems: List<TaskItem>,
+        private val selectedTaskId: TaskId,
+        private val selectedTaskItemId: TaskItemId
+    ) : RootScreen({
+        ReportPagerFragment.newInstance(
+            taskItems.map { TaskItemWithTaskIds(it.taskId, it.id) },
+            TaskItemWithTaskIds(selectedTaskId, selectedTaskItemId)
+        )
+    })
 }

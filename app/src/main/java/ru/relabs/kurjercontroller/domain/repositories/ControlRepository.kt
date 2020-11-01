@@ -74,7 +74,8 @@ class ControlRepository(
 
     suspend fun getRemoteTasks(): EitherE<List<Task>> = authenticatedRequest { token ->
         val deviceId = deviceIdProvider.getOrGenerateDeviceUUID()
-        api.getTasks(token, currentTime()).map { TaskMapper.fromRaw(it, deviceId) }
+        val tasks = api.getTasks(token, currentTime())
+        tasks.map { TaskMapper.fromRaw(it, deviceId) }
     }
 
     suspend fun getAppUpdatesInfo(): EitherE<AppUpdatesInfo> = anonymousRequest {

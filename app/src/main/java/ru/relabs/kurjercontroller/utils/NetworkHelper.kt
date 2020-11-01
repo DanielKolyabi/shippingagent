@@ -13,8 +13,8 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.LocationSettingsStatusCodes
 import ru.relabs.kurjercontroller.fileHelpers.PathHelper
-import ru.relabs.kurjercontroller.presentation.splash.MainActivity
-import ru.relabs.kurjercontroller.presentation.splash.REQUEST_LOCATION
+import ru.relabs.kurjercontroller.presentation.host.HostActivity
+import ru.relabs.kurjercontroller.presentation.host.featureCheckers.REQUEST_LOCATION
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
@@ -109,7 +109,7 @@ object NetworkHelper {
         return (context?.getSystemService(Context.LOCATION_SERVICE) as? LocationManager)?.isProviderEnabled(GPS_PROVIDER) ?: false
     }
 
-    fun displayLocationSettingsRequest(context: Context, activity: MainActivity) {
+    fun displayLocationSettingsRequest(context: Context, activity: HostActivity) {
         val googleApiClient = GoogleApiClient.Builder(context)
             .addApi(LocationServices.API).build()
         googleApiClient.connect()

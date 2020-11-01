@@ -7,7 +7,7 @@ import ru.relabs.kurjercontroller.domain.models.Entrance
 import ru.relabs.kurjercontroller.domain.models.EntranceState
 import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.domain.models.TaskItem
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.report.ReportFragment
+import ru.relabs.kurjercontroller.presentation.report.ReportFragment
 import java.lang.ref.WeakReference
 
 /**
@@ -43,21 +43,21 @@ class ReportPagerAdapter(
         fragments[position] = WeakReference(fragment)
 
         //TODO: Refactor?
-        fragment.callback = object : ReportFragment.Callback {
-            override fun getAllTaskItems(): List<TaskItem> =
-                this@ReportPagerAdapter.getAllTaskItems()
-
-
-            override fun onEntranceClosed(task: Task, taskItem: TaskItem, entrance: Entrance) {
-                this@ReportPagerAdapter.onEntranceClosed(task, taskItem, entrance)
-            }
-
-            override fun onEntranceChanged(entrance: Entrance) {
-                fragments.forEach { ref ->
-                    ref.value.get()?.onChanged(entrance)
-                }
-            }
-        }
+//        fragment.callback = object : ReportFragment.Callback {
+//            override fun getAllTaskItems(): List<TaskItem> =
+//                this@ReportPagerAdapter.getAllTaskItems()
+//
+//
+//            override fun onEntranceClosed(task: Task, taskItem: TaskItem, entrance: Entrance) {
+//                this@ReportPagerAdapter.onEntranceClosed(task, taskItem, entrance)
+//            }
+//
+//            override fun onEntranceChanged(entrance: Entrance) {
+//                fragments.forEach { ref ->
+//                    ref.value.get()?.onChanged(entrance)
+//                }
+//            }
+//        }
 
         return fragment
     }

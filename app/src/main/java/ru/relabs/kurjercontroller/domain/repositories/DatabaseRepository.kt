@@ -29,7 +29,7 @@ class DatabaseRepository(
 ) {
 
     suspend fun getAddress(id: AddressId): Address? = withContext(Dispatchers.IO) {
-        db.addressDao().getById(id.id)?.let{
+        db.addressDao().getById(id.id)?.let {
             AddressMapper.fromEntity(it)
         }
     }
@@ -202,7 +202,7 @@ class DatabaseRepository(
         val newTasksIDs = newTasks.map { it.id }
 
         //Задача отсутствует в ответе от сервера (удалено)
-        db.taskDao().all.filter { it.id !in newTasksIDs && !it.isOnline }.forEach { task ->
+        db.taskDao().all.filter { TaskId(it.id) !in newTasksIDs && !it.isOnline }.forEach { task ->
             closeTaskById(task.id, false)
             emit(MergeResult.TaskRemoved(TaskId(task.id)))
             Log.d("merge", "Close task: ${task.id}")
@@ -221,10 +221,10 @@ class DatabaseRepository(
             db.taskStorageDao().insertAll(task.storages.map { DatabaseStorageMapper.toEntity(it, task.id) })
             db.taskPublisherDao().insertAll(task.publishers.map { DatabasePublisherMapper.toEntity(it) })
             if (!task.filtered) {
-                task.taskItems.forEach { item ->
+                for (item in task.taskItems) {
                     db.addressDao().insert(item.address.toEntity())
                     db.taskItemDao().insert(DatabaseTaskItemMapper.toEntity(item))
-                    item.entrances.forEach { entrance ->
+                    for (entrance in item.entrances) {
                         val entity = DatabaseEntranceMapper.toEntity(entrance, item.taskId, item.id)
                         if (db.entranceReportDao().getByNumber(entity.taskItemId, entity.number) != null) {
                             entity.state = EntranceState.CLOSED.toInt()
@@ -322,19 +322,19 @@ class DatabaseRepository(
         db.filtersDao().deleteByTaskId(taskId.id)
 
         db.filtersDao().insertAll(filters.brigades.map {
-            DatabaseFilterMapper.toEntity(it, taskId, FilterEntity.BRIGADE_FILTER)
+            DatabaseFilterMapper.toEntity(it, taskId, FilterType.Publisher)
         })
         db.filtersDao().insertAll(filters.publishers.map {
-            DatabaseFilterMapper.toEntity(it, taskId, FilterEntity.PUBLISHER_FILTER)
+            DatabaseFilterMapper.toEntity(it, taskId, FilterType.Publisher)
         })
         db.filtersDao().insertAll(filters.users.map {
-            DatabaseFilterMapper.toEntity(it, taskId, FilterEntity.USER_FILTER)
+            DatabaseFilterMapper.toEntity(it, taskId, FilterType.User)
         })
         db.filtersDao().insertAll(filters.districts.map {
-            DatabaseFilterMapper.toEntity(it, taskId, FilterEntity.DISTRICT_FILTER)
+            DatabaseFilterMapper.toEntity(it, taskId, FilterType.District)
         })
         db.filtersDao().insertAll(filters.regions.map {
-            DatabaseFilterMapper.toEntity(it, taskId, FilterEntity.REGION_FILTER)
+            DatabaseFilterMapper.toEntity(it, taskId, FilterType.Region)
         })
     }
 

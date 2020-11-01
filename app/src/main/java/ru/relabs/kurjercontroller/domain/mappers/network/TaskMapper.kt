@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.domain.mappers.network
 
+import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.data.models.tasks.TaskResponse
 import ru.relabs.kurjercontroller.domain.models.DeviceId
 import ru.relabs.kurjercontroller.domain.models.Task
@@ -11,8 +12,8 @@ object TaskMapper {
         id = TaskId(raw.id),
         userId = raw.userId,
         initiator = raw.initiator,
-        startControlDate = raw.startControlDate,
-        endControlDate = raw.endControlDate,
+        startControlDate = DateTime(raw.startControlDate),
+        endControlDate = DateTime(raw.endControlDate),
         description = raw.description,
         storages = raw.storages.map { StorageMapper.fromRaw(it) },
         publishers = raw.publishers.map { PublisherMapper.fromRaw(it) },
