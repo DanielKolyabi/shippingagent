@@ -1,11 +1,14 @@
 package ru.relabs.kurjercontroller.presentation.helpers
 
+import android.app.Activity
+import android.content.Context
 import android.content.SharedPreferences
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.Transformation
 import androidx.constraintlayout.widget.ConstraintLayout
 import kotlinx.android.synthetic.main.include_hint_container.view.*
+import ru.relabs.kurjercontroller.BuildConfig
 
 /**
  * Created by ProOrange on 27.08.2018.
@@ -17,6 +20,13 @@ class HintHelper(
     val preferences: SharedPreferences?,
     var maxHeight: Int = 200 * hintContainer.resources.displayMetrics.density.toInt()
 ) {
+
+    constructor(
+        hintContainer: View,
+        text: String,
+        expanded: Boolean = false,
+        activity: Activity
+    ) : this(hintContainer, text, expanded, activity.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE))
 
     var expandedHeight = 0
 

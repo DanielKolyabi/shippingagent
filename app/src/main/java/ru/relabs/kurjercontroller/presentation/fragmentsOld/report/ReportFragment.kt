@@ -30,6 +30,7 @@ import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.application
 import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.domain.models.Entrance
+import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.domain.models.TaskModel
 import ru.relabs.kurjercontroller.presentation.splash.ErrorButtonsListener
@@ -52,7 +53,7 @@ class ReportFragment : Fragment() {
     var entranceClosed: Boolean = false
     var mailboxType: Int = 1
     var apartmentAdapter = DelegateAdapter<ApartmentListModel>()
-    val photosAdapter = DelegateAdapter<ReportPhotosListModel>()
+//    val photosAdapter = DelegateAdapter<ReportPhotosListModel>()
 
     private lateinit var hintHelper: HintHelper
     var keyAdapter: ArrayAdapter<String>? = null
@@ -67,34 +68,11 @@ class ReportFragment : Fragment() {
 
     var defaultButtonBackground: Drawable? = null
 
-    fun updateHintHelperMaximumHeight() {
-
-        hintHelper?.maxHeight = (appartaments_list?.height ?: 0) + (hint_container?.height ?: 0)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         entrance_code?.transformationMethod = null
         defaultButtonBackground = mailbox_euro?.background
-
-        hintHelper = HintHelper(
-            hint_container,
-            "",
-            false,
-            activity?.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
-        )
-        showHintText(taskItem.notes)
-
-        hint_container.viewTreeObserver.addOnGlobalLayoutListener(object :
-            ViewTreeObserver.OnGlobalLayoutListener {
-
-            override fun onGlobalLayout() {
-                hint_container?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
-
-                updateHintHelperMaximumHeight()
-            }
-        })
 
         allTaskItems = callback?.getAllTaskItems() ?: listOf(taskItem)
 
@@ -172,26 +150,20 @@ class ReportFragment : Fragment() {
                 presenter.onLookoutButtonStateChanged(newState)
             }
         )
-        photosAdapter.addDelegate(ReportPhotoDelegate { holder ->
-            if (!isPhotoAvailable()) return@ReportPhotoDelegate
-            presenter.onRemovePhotoClicked(holder)
-        })
-        photosAdapter.addDelegate(ReportBlankPhotoDelegate {
-            if (!isPhotoAvailable()) return@ReportBlankPhotoDelegate
-            presenter.onBlankPhotoClicked(false)
-        })
-        photosAdapter.addDelegate(ReportBlankMultiPhotoDelegate {
-            if (!isPhotoAvailable()) return@ReportBlankMultiPhotoDelegate
-            presenter.onBlankMultiPhotoClicked()
-        })
+//        photosAdapter.addDelegate(ReportPhotoDelegate { holder ->
+//            if (!isPhotoAvailable()) return@ReportPhotoDelegate
+//            presenter.onRemovePhotoClicked(holder)
+//        })
+//        photosAdapter.addDelegate(ReportBlankPhotoDelegate {
+//            if (!isPhotoAvailable()) return@ReportBlankPhotoDelegate
+//            presenter.onBlankPhotoClicked(false)
+//        })
+//        photosAdapter.addDelegate(ReportBlankMultiPhotoDelegate {
+//            if (!isPhotoAvailable()) return@ReportBlankMultiPhotoDelegate
+//            presenter.onBlankMultiPhotoClicked()
+//        })
     }
 
-    fun showHintText(notes: List<String>) {
-        val text = Html.fromHtml("<b>Код: ${entrance.code}</b><br/>" + (3 downTo 1).map {
-            "<b>Пр. $it</b><br/>" + notes.getOrElse(it - 1) { "" }
-        }.joinToString("<br/>"))
-        hint_text.text = text
-    }
 
     private fun refreshData() {
         presenter.bgScope.launch {
@@ -300,9 +272,9 @@ class ReportFragment : Fragment() {
         appartaments_list?.layoutManager = LinearLayoutManager(context)
         appartaments_list?.adapter = apartmentAdapter
 
-        photos_list?.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
-        photos_list?.isNestedScrollingEnabled = true
-        photos_list?.adapter = photosAdapter
+//        photos_list?.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+//        photos_list?.isNestedScrollingEnabled = true
+//        photos_list?.adapter = photosAdapter
 
         floors?.setText(entrance.floors.toString())
 
@@ -832,7 +804,7 @@ class ReportFragment : Fragment() {
     }
 
     interface Callback {
-        fun onEntranceClosed(task: TaskModel, taskItem: TaskItem, entrance: Entrance)
+        fun onEntranceClosed(task: Task, taskItem: TaskItem, entrance: Entrance)
         fun getAllTaskItems(): List<TaskItem>
         fun onEntranceChanged(entrance: Entrance)
     }

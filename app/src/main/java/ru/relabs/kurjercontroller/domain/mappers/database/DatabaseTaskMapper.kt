@@ -13,8 +13,8 @@ object DatabaseTaskMapper {
         id = TaskId(taskEntity.id),
         userId = taskEntity.userId,
         initiator = taskEntity.initiator,
-        startControlDate = taskEntity.startControlDate.toDate(),
-        endControlDate = taskEntity.endControlDate.toDate(),
+        startControlDate = taskEntity.startControlDate,
+        endControlDate = taskEntity.endControlDate,
         description = taskEntity.description,
         storages = db.taskStorageDao().getByTaskId(taskEntity.id).map{
             DatabaseStorageMapper.fromEntity(it)
@@ -42,8 +42,8 @@ object DatabaseTaskMapper {
         id = task.id.id,
         userId = task.userId,
         initiator = task.initiator,
-        startControlDate = DateTime(task.startControlDate),
-        endControlDate = DateTime(task.endControlDate),
+        startControlDate = task.startControlDate,
+        endControlDate = task.endControlDate,
         description = task.description,
         state = task.state.state.toInt(),
         iteration = task.iteration,

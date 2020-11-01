@@ -149,4 +149,7 @@
     <string name="online_no_access">У вас нет прав на составление заданий</string>
     <string name="tasks_items_partial_update_fail">Не удалось загрузить адреса для заданий:\n%s\nЗадания были исключены</string>
     <string name="tasks_items_update_fail">Не удалось загрузить адреса</string>
+    <string name="key_loading">Загрузка</string>
+    <string name="button_group_main">Опрос</string>
+    <string name="button_group_addition">БезОп</string>
 </resources>

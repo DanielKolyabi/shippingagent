@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 import org.joda.time.DateTime
+import ru.relabs.kurjercontroller.presentation.report.ReportApartmentButtonsMode
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
@@ -20,7 +21,7 @@ data class TaskItem(
     val id: TaskItemId, //iddot
     val taskId: TaskId,
     val publisherName: String,
-    val defaultReportType: Int,
+    val defaultReportType: ReportApartmentButtonsMode,
     val required: Boolean,
     val address: Address,
     val entrances: List<Entrance>,

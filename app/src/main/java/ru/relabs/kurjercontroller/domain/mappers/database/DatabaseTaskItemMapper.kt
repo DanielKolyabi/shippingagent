@@ -4,11 +4,13 @@ import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.data.database.AppDatabase
 import ru.relabs.kurjercontroller.data.database.entities.TaskItemEntity
 import ru.relabs.kurjercontroller.domain.models.*
+import ru.relabs.kurjercontroller.presentation.report.toApartmentButtonsMode
+import ru.relabs.kurjercontroller.presentation.report.toInt
 
 object DatabaseTaskItemMapper {
     fun fromEntity(entity: TaskItemEntity, db: AppDatabase): TaskItem = TaskItem(
         id = TaskItemId(entity.taskItemId),
-        defaultReportType = entity.defaultReportType,
+        defaultReportType = entity.defaultReportType.toApartmentButtonsMode(),
         notes = entity.notes,
         required = entity.required,
         taskId = TaskId(entity.taskId),
@@ -31,7 +33,7 @@ object DatabaseTaskItemMapper {
         taskId = model.taskId.id,
         taskItemId = model.id.id,
         publisherName = model.publisherName,
-        defaultReportType = model.defaultReportType,
+        defaultReportType = model.defaultReportType.toInt(),
         required = model.required,
         addressId = model.address.id.id,
         notes = model.notes,

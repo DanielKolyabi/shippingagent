@@ -12,6 +12,7 @@ import ru.relabs.kurjercontroller.domain.models.TaskPublisher
 import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
+import ru.relabs.kurjercontroller.presentation.report.ReportApartmentButtonsMode
 
 class ReportUseCase(
     private val databaseRepository: DatabaseRepository,
@@ -43,7 +44,10 @@ class ReportUseCase(
                 ApartmentResult(
                     it.apartmentNumber,
                     it.buttonState,
-                    it.buttonGroup,
+                    when(it.buttonGroup){
+                        ReportApartmentButtonsMode.Main -> 0
+                        ReportApartmentButtonsMode.Additional -> 1
+                    },
                     it.description
                 )
             },

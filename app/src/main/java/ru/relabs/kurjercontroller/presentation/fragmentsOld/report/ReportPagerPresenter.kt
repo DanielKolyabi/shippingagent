@@ -19,33 +19,33 @@ import ru.relabs.kurjercontroller.presentation.fragmentsOld.report.adapters.Repo
 class ReportPagerPresenter(val fragment: ReportPagerFragment) {
     val bgScope = CancelableScope(Dispatchers.Default)
 
-    fun getSelectedTask(): Pair<TaskModel, TaskItem> {
-        val selectedTaskItem = fragment.taskItems.first {
-            it.id == fragment.selectedTask.second && it.taskId == fragment.selectedTask.first
-        }
-        val selectedTask = fragment.tasks.first {
-            it.id == selectedTaskItem.taskId
-        }
-        return Pair(selectedTask, selectedTaskItem)
-    }
+//    fun getSelectedTask(): Pair<TaskModel, TaskItem> {
+////        val selectedTaskItem = fragment.taskItems.first {
+////            it.id == fragment.selectedTask.second && it.taskId == fragment.selectedTask.first
+////        }
+////        val selectedTask = fragment.tasks.first {
+////            it.id == selectedTaskItem.taskId
+////        }
+////        return Pair(selectedTask, selectedTaskItem)
+//    }
 
     fun updatePagerAdapter() {
-        val manager = fragment.fragmentManager ?: return
-
-        val selectedTask = getSelectedTask()
-        fragment.pagerAdapter = ReportPagerAdapter(
-            selectedTask.first,
-            selectedTask.second,
-            { task, taskItem, entrance ->
-                onEntranceClosed(task, taskItem, entrance)
-            },
-            {
-                fragment.taskItems.toList()
-            },
-            manager
-        )
-        fragment.view_pager?.adapter = fragment.pagerAdapter
-        fragment.view_pager?.currentItem = 0
+//        val manager = fragment.fragmentManager ?: return
+//
+//        val selectedTask = getSelectedTask()
+//        fragment.pagerAdapter = ReportPagerAdapter(
+//            selectedTask.first,
+//            selectedTask.second,
+//            { task, taskItem, entrance ->
+//                onEntranceClosed(task, taskItem, entrance)
+//            },
+//            {
+//                fragment.taskItems.toList()
+//            },
+//            manager
+//        )
+//        fragment.view_pager?.adapter = fragment.pagerAdapter
+//        fragment.view_pager?.currentItem = 0
     }
 
     fun onEntranceClosedRemote(taskId: Int, taskItemId: Int, entranceNumber: Int) {
@@ -118,46 +118,46 @@ class ReportPagerPresenter(val fragment: ReportPagerFragment) {
     }
 
     fun onTaskChanged(taskNumber: Int) {
-        fragment.selectedTask = Pair(fragment.taskItems[taskNumber].taskId, fragment.taskItems[taskNumber].id)
-        fragment.updateTasks()
-        updatePagerAdapter()
+//        fragment.selectedTask = Pair(fragment.taskItems[taskNumber].taskId, fragment.taskItems[taskNumber].id)
+//        fragment.updateTasks()
+//        updatePagerAdapter()
     }
 
     fun initTasks(taskIds: IntArray?, taskItemIds: List<TaskItemIdWithTaskId>?){
-        bgScope.launch {
-            loadTasks(taskIds)
-            loadTaskItems(taskItemIds)
-
-            withContext(Dispatchers.Main){
-                fragment.updateTasks()
-                updatePagerAdapter()
-                fragment.activity()?.changeTitle(fragment.getTitle())
-            }
-        }
+//        bgScope.launch {
+//            loadTasks(taskIds)
+//            loadTaskItems(taskItemIds)
+//
+//            withContext(Dispatchers.Main){
+//                fragment.updateTasks()
+//                updatePagerAdapter()
+//                fragment.activity()?.changeTitle(fragment.getTitle())
+//            }
+//        }
     }
 
-    suspend fun loadTasks(ids: IntArray?) {
-        ids ?: return
-        fragment.tasks.addAll(ids.toList().mapNotNull {
-            application().tasksRepository.getTask(it)
-        })
-    }
-
-    suspend fun loadTaskItems(ids: List<TaskItemIdWithTaskId>?) {
-        ids ?: return
-        fragment.taskItems.addAll(ids.mapNotNull {
-            val item = application().tasksRepository.getTaskItem(it.taskId, it.taskItemId)
-            item
-        })
-
-        removeNewFromTasks()
-    }
-
-    suspend fun removeNewFromTasks(){
-        fragment.taskItems.filter { it.isNew }.forEach {
-            ControllApplication.instance.database.taskItemDao().insert(
-                it.copy(isNew = false).toEntity()
-            )
-        }
-    }
+//    suspend fun loadTasks(ids: IntArray?) {
+//        ids ?: return
+//        fragment.tasks.addAll(ids.toList().mapNotNull {
+//            application().tasksRepository.getTask(it)
+//        })
+//    }
+//
+//    suspend fun loadTaskItems(ids: List<TaskItemIdWithTaskId>?) {
+//        ids ?: return
+//        fragment.taskItems.addAll(ids.mapNotNull {
+//            val item = application().tasksRepository.getTaskItem(it.taskId, it.taskItemId)
+//            item
+//        })
+//
+//        removeNewFromTasks()
+//    }
+//
+//    suspend fun removeNewFromTasks(){
+//        fragment.taskItems.filter { it.isNew }.forEach {
+//            ControllApplication.instance.database.taskItemDao().insert(
+//                it.copy(isNew = false).toEntity()
+//            )
+//        }
+//    }
 }

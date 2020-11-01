@@ -8,7 +8,7 @@ import kotlinx.android.parcel.Parcelize
 data class PhotoId(val id: Int): Parcelable
 
 @Parcelize
-data class TaskItemPhoto(
+data class EntrancePhoto(
     val id: PhotoId,
     val UUID: String,
     val taskItemId: TaskItemId,

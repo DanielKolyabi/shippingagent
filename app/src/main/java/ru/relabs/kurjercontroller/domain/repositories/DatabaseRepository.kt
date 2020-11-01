@@ -29,7 +29,9 @@ class DatabaseRepository(
 ) {
 
     suspend fun getAddress(id: AddressId): Address? = withContext(Dispatchers.IO) {
-        AddressMapper.fromRaw(db.addressDao().getById(id.id))
+        db.addressDao().getById(id.id)?.let{
+            AddressMapper.fromEntity(it)
+        }
     }
 
     suspend fun getOnlineTask(): Task? = withContext(Dispatchers.IO) {
@@ -430,6 +432,12 @@ class DatabaseRepository(
         }
     }
 
+    suspend fun getTaskItem(taskId: TaskId, taskItemId: TaskItemId): TaskItem? = withContext(Dispatchers.IO) {
+        db.taskItemDao()
+            .getByTaskItemId(taskId.id, taskItemId.id)
+            ?.let { DatabaseTaskItemMapper.fromEntity(it, db) }
+    }
+
     suspend fun getTaskItems(taskItemId: TaskItemId): List<TaskItem> = withContext(Dispatchers.IO) {
         db.taskItemDao()
             .getAllByTaskItemId(taskItemId.id)
@@ -504,6 +512,16 @@ class DatabaseRepository(
                     .map { DatabaseEntranceMapper.toEntity(it, taskItem.taskId, taskItem.id) }
             )
         }
+    }
+
+    suspend fun markAsOld(taskItem: TaskItem) = withContext(Dispatchers.IO) {
+        db.taskItemDao().insert(DatabaseTaskItemMapper.toEntity(taskItem).copy(isNew = false))
+    }
+
+    suspend fun getEntrancePhotos(taskItem: TaskItem, entrance: Entrance): List<EntrancePhoto> = withContext(Dispatchers.IO) {
+        db.entrancePhotoDao()
+            .getEntrancePhoto(taskItem.taskId.id, taskItem.id.id, entrance.number.number)
+            .map { DatabaseEntrancePhotoMapper.fromEntity(it) }
     }
 }
 
