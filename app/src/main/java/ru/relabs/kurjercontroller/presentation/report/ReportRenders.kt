@@ -29,7 +29,7 @@ object ReportRenders {
     fun renderEntranceKeys(spinner: Spinner, adapter: ArrayAdapter<String>): ReportRender = renderT(
         {
             (it.entranceKeys.takeIf { it.isNotEmpty() }
-                ?: listOf(adapter.context.getString(R.string.key_loading))) to it.selectedKey
+                ?: listOf(adapter.context.getString(R.string.loading))) to it.selectedKey
         },
         { (keys, selectedKey) ->
             adapter.clear()
@@ -43,7 +43,7 @@ object ReportRenders {
     fun renderEntranceEuroKeys(spinner: Spinner, adapter: ArrayAdapter<String>): ReportRender = renderT(
         {
             (it.entranceEuroKeys.takeIf { it.isNotEmpty() }
-                ?: listOf(adapter.context.getString(R.string.key_loading))) to it.selectedEuroKey
+                ?: listOf(adapter.context.getString(R.string.loading))) to it.selectedEuroKey
         },
         { (keys, selectedKey) ->
             adapter.clear()
@@ -106,7 +106,7 @@ object ReportRenders {
             val (startAps, endAps) = apartmentInterval
             if (startAps != null && endAps != null && taskItem != null) {
                 val requiredApartments = taskItem.getRequiredApartments()
-                val apartments = (startAps..endAps + 1)
+                val apartments = (startAps..endAps)
                     .map { apartment -> apartment to requiredApartments.firstOrNull { it.number == apartment } }
                     .map { (apartmentNumber, requiredData) ->
                         val saved = savedApartments.firstOrNull { it.apartmentNumber.number == apartmentNumber }
@@ -132,13 +132,14 @@ object ReportRenders {
                 } else {
                     null
                 }
+                debug("$buttonGroup $hasLookout")
                 val items =
                     listOfNotNull(headerModeItem) +
                             requiredApartmentsElements +
                             listOfNotNull(ReportApartmentItem.Divider.takeIf { requiredApartments.isNotEmpty() }) +
                             notRequiredApartmentElements
 
-
+                debug("$items")
                 val diff = DiffUtil.calculateDiff(DefaultListDiffCallback(apartmentsAdapter.items, items))
 
                 apartmentsAdapter.items.clear()
@@ -205,6 +206,4 @@ object ReportRenders {
         { (it.entrance?.state == EntranceState.CLOSED) ?: it.saved?.entranceClosed ?: false },
         { button.setSelectButtonActive(it) }
     )
-
-
 }

@@ -155,7 +155,7 @@ class HostActivity : AppCompatActivity(), IFragmentHolder {
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 setDataAndType(
-                    FileProvider.getUriForFile(this@HostActivity, "com.relabs.kurjer.file_provider", updateFile),
+                    FileProvider.getUriForFile(this@HostActivity, "ru.relabs.kurjercontroller.file_provider", updateFile),
                     "application/vnd.android.package-archive"
                 )
             } else {

@@ -24,6 +24,8 @@ fun Int.toApartmentButtonsMode(): ReportApartmentButtonsMode = when(this){
     else -> throw MappingException("buttonGroup", this)
 }
 
+const val ENTRANCE_NUMBER_TASK_ITEM = -1
+
 sealed class ReportApartmentItem {
     data class Apartment(
         val number: Int,

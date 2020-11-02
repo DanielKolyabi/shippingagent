@@ -12,7 +12,9 @@ import ru.relabs.kurjercontroller.domain.models.EntrancePhoto
 import ru.relabs.kurjercontroller.presentation.base.recycler.IAdapterDelegate
 import ru.relabs.kurjercontroller.presentation.base.recycler.delegateDefine
 import ru.relabs.kurjercontroller.presentation.base.recycler.holderDefine
+import ru.relabs.kurjercontroller.presentation.fragmentsOld.report.adapters.ApartmentButtonsPagerAdapter
 import ru.relabs.kurjercontroller.utils.extensions.setSelectButtonActive
+import ru.relabs.kurjercontroller.utils.extensions.setVisible
 
 object ReportAdapter {
 
@@ -46,6 +48,58 @@ object ReportAdapter {
         { it is ReportApartmentItem.Divider },
         { p ->
             holderDefine(p, R.layout.holder_divider, { it as ReportApartmentItem.Divider }) { }
+        }
+    )
+
+    fun lookout(onStateChanged: (state: Int) -> Unit): IAdapterDelegate<ReportApartmentItem> = delegateDefine(
+        { it is ReportApartmentItem.Lookout },
+        { p ->
+            holderDefine(p, R.layout.holder_report_appartament, { it as ReportApartmentItem.Lookout }) { (state) ->
+                itemView.buttons_list?.setOnTouchListener { view, motionEvent ->
+                    itemView.buttons_list?.scrollX = 0
+                    return@setOnTouchListener true
+                }
+
+                itemView.description_button?.setVisible(false)
+                itemView.appartament_number?.text = "Вахта"
+                itemView.buttons_list?.adapter = ApartmentButtonsPagerAdapter(
+                    itemView.context,
+                    state,
+                    { newState ->
+                        onStateChanged(newState)
+                    },
+                    {},
+                    false
+                )
+                itemView.buttons_list?.currentItem = 0
+            }
+        }
+    )
+
+
+    fun entrance(onStateChanged: (state: Int) -> Unit): IAdapterDelegate<ReportApartmentItem> = delegateDefine(
+        { it is ReportApartmentItem.Entrance },
+        { p ->
+            holderDefine(p, R.layout.holder_report_appartament, { it as ReportApartmentItem.Entrance }) { (state) ->
+
+                itemView.buttons_list?.setOnTouchListener { view, motionEvent ->
+                    itemView.buttons_list?.scrollX = 0
+                    return@setOnTouchListener true
+                }
+
+                itemView.description_button?.setVisible(false)
+                itemView.appartament_number?.text = "Под."
+                itemView.buttons_list?.adapter = ApartmentButtonsPagerAdapter(
+                    itemView.context,
+                    state,
+                    { newState ->
+                        onStateChanged(newState)
+                    },
+                    {},
+                    false
+                )
+                itemView.buttons_list?.currentItem = 1
+            }
         }
     )
 

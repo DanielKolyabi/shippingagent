@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_report_pager.view.*
 import kotlinx.android.synthetic.main.fragment_report_pager.view.loading
-import kotlinx.android.synthetic.main.fragment_task_details.view.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -89,7 +88,8 @@ class ReportPagerFragment : BaseFragment() {
             val renders = listOf(
                 ReportPagerRenders.renderLoading(view.loading),
                 ReportPagerRenders.renderTasks(taskButtonsAdapter),
-                ReportPagerRenders.renderPager(pagerAdapter)
+                ReportPagerRenders.renderPager(pagerAdapter),
+                ReportPagerRenders.renderTitle(view.tv_title)
             )
             launch { controller.stateFlow().collect(rendersCollector(renders)) }
             launch { controller.stateFlow().collect(debugCollector { debug(it) }) }
@@ -100,7 +100,9 @@ class ReportPagerFragment : BaseFragment() {
     private fun bindControls(
         view: View
     ) {
-
+        view.iv_menu.setOnClickListener {
+            uiScope.sendMessage(controller, ReportPagerMessages.msgNavigateBack())
+        }
     }
 
     override fun onDestroyView() {

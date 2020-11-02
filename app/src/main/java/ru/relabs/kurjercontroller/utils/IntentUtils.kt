@@ -9,7 +9,7 @@ object IntentUtils {
     fun getImageViewIntent(file: File, ctx: Context): Intent {
         val intent = Intent()
         intent.action = Intent.ACTION_VIEW
-        val uri = FileProvider.getUriForFile(ctx, "com.relabs.kurjer.file_provider", file)
+        val uri = FileProvider.getUriForFile(ctx, "ru.relabs.kurjercontroller.file_provider", file)
         intent.setDataAndType(uri, "image/*")
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         return intent

@@ -3,6 +3,7 @@ package ru.relabs.kurjercontroller.presentation.reportPager
 import ru.relabs.kurjercontroller.domain.models.Entrance
 import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.domain.models.TaskItem
+import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffects
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEmpty
 import ru.relabs.kurjercontroller.presentation.base.tea.msgState
@@ -31,4 +32,7 @@ object ReportPagerMessages {
 
     fun msgEntranceClosed(task: Task, taskItem: TaskItem, entrance: Entrance): ReportPagerMessage =
         msgEmpty() //TODO
+
+    fun msgNavigateBack(): ReportPagerMessage =
+        msgEffect(ReportPagerEffects.effectNavigateBack())
 }

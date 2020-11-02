@@ -1,7 +1,9 @@
 package ru.relabs.kurjercontroller.presentation.reportPager
 
 import android.view.View
+import android.widget.TextView
 import androidx.viewpager.widget.ViewPager
+import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.presentation.base.recycler.DelegateAdapter
 import ru.relabs.kurjercontroller.presentation.base.tea.renderT
 import ru.relabs.kurjercontroller.utils.extensions.visible
@@ -33,5 +35,10 @@ object ReportPagerRenders {
                 adapter.setTaskWithItem(null)
             }
         }
+    )
+
+    fun renderTitle(view: TextView): ReportPagerRender = renderT(
+        { it.tasks.firstOrNull()?.taskItem?.address?.name ?: view.resources.getString(R.string.loading) },
+        { view.text = it }
     )
 }

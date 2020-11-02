@@ -6,7 +6,9 @@ import org.koin.core.inject
 import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.domain.models.ApartmentResult
 import ru.relabs.kurjercontroller.domain.models.Entrance
+import ru.relabs.kurjercontroller.domain.models.EntranceNumber
 import ru.relabs.kurjercontroller.domain.models.EntrancePhoto
+import ru.relabs.kurjercontroller.domain.providers.LocationProvider
 import ru.relabs.kurjercontroller.domain.providers.PathsProvider
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
@@ -42,11 +44,13 @@ class ReportContext(val errorContext: ErrorContextImpl = ErrorContextImpl()) :
     RouterContext by RouterContextMainImpl(),
     KoinComponent {
 
+    val locationProvider: LocationProvider by inject()
     val databaseRepository: DatabaseRepository by inject()
     val controlRepository: ControlRepository by inject()
     val pathsProvider: PathsProvider by inject()
 
-    var requestPhoto: (entrance: Int, multiplePhoto: Boolean, targetFile: File, uuid: UUID) -> Unit = { _, _, _, _ -> }
+    var showError: suspend (code: String, isFatal: Boolean) -> Unit = { _, _ -> }
+    var requestPhoto: (entrance: EntranceNumber, multiplePhoto: Boolean, targetFile: File, uuid: UUID) -> Unit = { _, _, _, _ -> }
 }
 
 typealias ReportMessage = ElmMessage<ReportContext, ReportState>

@@ -1,11 +1,15 @@
 package ru.relabs.kurjercontroller.presentation.report
 
+import android.graphics.Bitmap
 import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.domain.models.*
+import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffects
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEmpty
 import ru.relabs.kurjercontroller.presentation.base.tea.msgState
 import ru.relabs.kurjercontroller.presentation.reportPager.ReportTaskWithItem
+import java.io.File
+import java.util.*
 
 /**
  * Created by Daniil Kurchanov on 02.04.2020.
@@ -31,7 +35,7 @@ object ReportMessages {
         msgState { it.copy(loaders = it.loaders + i) }
 
     fun msgDataLoaded(
-        savedEntrance: EntranceResultEntity?,
+        savedEntrance: EntranceResultEntity,
         savedApartments: List<ApartmentResult>,
         entranceEuroKeys: List<String>,
         entranceKeys: List<String>,
@@ -49,45 +53,132 @@ object ReportMessages {
             )
         }
 
-    fun msgPhotoClicked(apartment: Int?, multiPhoto: Boolean): ReportMessage =
-        msgEmpty()
+    fun msgPhotoClicked(): ReportMessage =
+        msgEffect(ReportEffects.effectCreatePhoto(false))
 
-    fun msgRemovePhotoClicked(photo: EntrancePhoto): ReportMessage =
-        msgEmpty()
+    fun msgRemovePhotoClicked(removedPhoto: EntrancePhoto): ReportMessage = msgEffects(
+        { state -> state.copy(selectedEntrancePhotos = state.selectedEntrancePhotos.filter { photo -> photo.photo != removedPhoto }) },
+        { listOf(ReportEffects.effectRemovePhoto(removedPhoto)) }
+    )
 
-    fun msgApartmentStateChanged(entranceNumber: Int, newState: Int): ReportMessage =
-        msgEmpty()
+    fun msgNewPhoto(newPhoto: PhotoWithUri): ReportMessage =
+        msgState { it.copy(selectedEntrancePhotos = it.selectedEntrancePhotos + listOf(newPhoto)) }
 
-    fun msgAllApartmentStateChanged(entranceNumber: Int, newState: Int): ReportMessage =
-        msgEmpty()
+    fun msgPhotoError(errorCode: Int): ReportMessage =
+        msgEffect(ReportEffects.effectShowPhotoError(errorCode))
+
+    fun msgPhotoCaptured(entrance: EntranceNumber, multiplePhoto: Boolean, targetFile: File, uuid: UUID): ReportMessage =
+        msgEffects(
+            { it },
+            {
+                listOfNotNull(
+                    ReportEffects.effectSavePhotoFromFile(entrance, targetFile, uuid),
+                    ReportEffects.effectCreatePhoto(multiplePhoto).takeIf { multiplePhoto }
+                )
+            }
+        )
+
+    fun msgPhotoCaptured(
+        entrance: EntranceNumber,
+        multiplePhoto: Boolean,
+        bitmap: Bitmap,
+        targetFile: File,
+        uuid: UUID
+    ): ReportMessage = msgEffects(
+        { it },
+        {
+            listOfNotNull(
+                ReportEffects.effectSavePhotoFromBitmap(entrance, bitmap, targetFile, uuid),
+                ReportEffects.effectCreatePhoto(multiplePhoto).takeIf { multiplePhoto }
+            )
+        }
+    )
+
+    fun msgApartmentStateChanged(apartmentNumber: Int, newState: Int): ReportMessage =
+        msgEffect(ReportEffects.effectChangeApartmentState(apartmentNumber, newState))
+
+    fun msgAllApartmentStateChanged(apartmentNumber: Int, newState: Int): ReportMessage =
+        msgEffect(ReportEffects.effectChangeAllApartmentState(apartmentNumber, newState))
 
     fun msgApartmentDescriptionClicked(entranceNumber: Int): ReportMessage =
         msgEmpty()
 
-    fun msgApartmentsFromChanged(startApartment: Int?): ReportMessage =
-        msgEmpty()
+    private fun msgUpdateSavedAndSave(mapper: (ReportState) -> ReportState): ReportMessage = msgEffects(
+        { mapper(it) },
+        { listOfNotNull(mapper(it).saved?.let { ReportEffects.effectSaveEntranceChanges(it) }) }
+    )
 
-    fun msgApartmentsToChanged(endApartment: Int?): ReportMessage =
-        msgEmpty()
+    fun msgApartmentsFromChanged(startApartment: Int?): ReportMessage = msgUpdateSavedAndSave {
+        it.copy(saved = it.saved?.copy(apartmentFrom = startApartment ?: it.saved.apartmentFrom))
+    }
 
-    fun msgCodeChanged(code: String): ReportMessage =
-        msgEmpty()
+    fun msgApartmentsToChanged(endApartment: Int?): ReportMessage = msgUpdateSavedAndSave {
+        it.copy(saved = it.saved?.copy(apartmentTo = endApartment ?: it.saved.apartmentTo))
+    }
 
-    fun msgKeySelected(key: String): ReportMessage =
-        msgEmpty()
+    fun msgCodeChanged(code: String): ReportMessage = msgUpdateSavedAndSave {
+        it.copy(saved = it.saved?.copy(code = code))
+    }
 
-    fun msgEuroKeySelected(euroKey: String): ReportMessage =
-        msgEmpty()
+    fun msgKeySelected(key: String): ReportMessage = msgUpdateSavedAndSave {
+        it.copy(saved = it.saved?.copy(key = key))
+    }
 
-    fun msgLayoutErrorChanged(): ReportMessage =
-        msgEmpty()
+    fun msgEuroKeySelected(euroKey: String): ReportMessage = msgUpdateSavedAndSave {
+        it.copy(saved = it.saved?.copy(euroKey = euroKey))
+    }
 
-    fun msgLookoutChanged(): ReportMessage =
-        msgEmpty()
+    fun msgLayoutErrorChanged(): ReportMessage = msgUpdateSavedAndSave {
+        it.copy(saved = it.saved?.copy(isDeliveryWrong = it.saved.isDeliveryWrong?.not()))
+    }
 
-    fun msgMailboxTypeChanged(type: Int): ReportMessage =
-        msgEmpty()
+    fun msgLookoutChanged(): ReportMessage = msgUpdateSavedAndSave {
+        it.copy(saved = it.saved?.copy(hasLookupPost = it.saved.hasLookupPost?.not()))
+    }
 
-    fun msgEntranceClosedClicked(): ReportMessage =
-        msgEmpty()
+    fun msgMailboxTypeChanged(type: Int): ReportMessage = msgUpdateSavedAndSave {
+        it.copy(saved = it.saved?.copy(mailboxType = type))
+    }
+
+    fun msgEntranceClosedClicked(): ReportMessage = msgUpdateSavedAndSave {
+        it.copy(saved = it.saved?.copy(entranceClosed = it.saved.entranceClosed?.not()))
+    }
+
+    fun msgChangeApartmentButtonGroup(apartment: Int, newButtonGroup: ReportApartmentButtonsMode): ReportMessage = msgState { s ->
+        if (s.task != null && s.entrance != null) {
+            s.copy(savedApartments = if (s.savedApartments.firstOrNull { it.apartmentNumber.number == apartment } != null) {
+                s.savedApartments.map {
+                    if (it.apartmentNumber.number == apartment) {
+                        it.copy(buttonGroup = newButtonGroup)
+                    } else {
+                        it
+                    }
+                }
+            } else {
+                s.savedApartments + listOf(
+                    ApartmentResult(
+                        ApartmentResultId(0),
+                        s.task.taskItem.taskId,
+                        s.task.taskItem.id,
+                        s.entrance.number,
+                        ApartmentNumber(apartment),
+                        newButtonGroup,
+                        0,
+                        ""
+                    )
+                )
+            }
+            )
+        } else {
+            s
+        }
+    }
+
+    fun msgListTypeChanged(): ReportMessage =
+        msgEffect(ReportEffects.effectChangeButtonGroup())
+
+    fun msgNavigateBack(): ReportMessage =
+        msgEffect(ReportEffects.effectNavigateBack())
+
+
 }

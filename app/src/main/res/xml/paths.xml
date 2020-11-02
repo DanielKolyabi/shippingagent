@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <external-path  name="files" path="deliverycontr/"/>
+    <external-path  name="files" path="deliveryman/"/>
+    <external-path  name="files" path="."/>
+    <files-path
+            name="photos"
+            path="photos/" />
+    <files-path
+            name="maps"
+            path="maps/" />
+    <files-path
+            name="updates"
+            path="updates/" />
 </paths>

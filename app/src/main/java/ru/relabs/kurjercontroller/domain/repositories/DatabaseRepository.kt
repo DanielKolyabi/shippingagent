@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.domain.repositories
 
+import android.location.Location
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +21,7 @@ import ru.relabs.kurjercontroller.utils.Left
 import ru.relabs.kurjercontroller.utils.Right
 import ru.relabs.kurjercontroller.utils.deleteIfEmpty
 import java.io.File
+import java.util.*
 
 class DatabaseRepository(
     val db: AppDatabase,
@@ -51,6 +53,30 @@ class DatabaseRepository(
             .forEach { removePhoto(it) }
     }
 
+    suspend fun savePhoto(entrance: EntranceNumber, taskItem: TaskItem, uuid: UUID, location: Location?): EntrancePhoto =
+        withContext(Dispatchers.IO) {
+            val gps = GPSCoordinatesModel(
+                location?.latitude ?: 0.0,
+                location?.longitude ?: 0.0,
+                location?.time?.let { DateTime(it) } ?: DateTime()
+            )
+
+            //TODO: Watch wtf is RealPath and isEntrancePhoto
+            val photoEntity = EntrancePhotoEntity(
+                0,
+                uuid.toString(),
+                gps,
+                taskItem.taskId.id,
+                taskItem.id.id,
+                taskItem.address.idnd,
+                entrance.number,
+                null,
+                true
+            )
+            val id = db.entrancePhotoDao().insert(photoEntity)
+            DatabaseEntrancePhotoMapper.fromEntity(photoEntity.copy(id = id.toInt()))
+        }
+
     suspend fun clearTasks() = withContext(Dispatchers.IO) {
         db.taskDao().all.forEach {
             removeTask(TaskId(it.id))
@@ -74,6 +100,8 @@ class DatabaseRepository(
         }
         db.taskItemDao().delete(taskItem)
     }
+
+    suspend fun removePhoto(entrancePhoto: EntrancePhoto) = DatabaseEntrancePhotoMapper.toEntity(entrancePhoto)
 
     suspend fun removePhoto(entrancePhoto: EntrancePhotoEntity) = withContext(Dispatchers.IO) {
         db.entrancePhotoDao().deleteById(entrancePhoto.id)
@@ -522,6 +550,14 @@ class DatabaseRepository(
         db.entrancePhotoDao()
             .getEntrancePhoto(taskItem.taskId.id, taskItem.id.id, entrance.number.number)
             .map { DatabaseEntrancePhotoMapper.fromEntity(it) }
+    }
+
+    suspend fun saveApartmentResult(apartment: ApartmentResult) = withContext(Dispatchers.IO) {
+        db.apartmentResultDao().insert(DatabaseEntranceApartmentsMapper.toEntity(apartment))
+    }
+
+    suspend fun saveEntranceResult(entrance: EntranceResultEntity) = withContext(Dispatchers.IO) {
+        db.entranceResultDao().insert(entrance)
     }
 }
 

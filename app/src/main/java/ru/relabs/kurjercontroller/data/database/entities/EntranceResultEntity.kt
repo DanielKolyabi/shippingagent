@@ -4,6 +4,8 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import ru.relabs.kurjercontroller.domain.models.Entrance
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 
 /**
  * Created by ProOrange on 19.03.2019.
@@ -39,4 +41,24 @@ data class EntranceResultEntity(
     val mailboxType: Int?,
     @ColumnInfo(name = "entrance_closed")
     val entranceClosed: Boolean?
-)
+) {
+    companion object {
+        fun fromEntrance(taskItem: TaskItem, entrance: Entrance) = EntranceResultEntity(
+            id = 0,
+            taskId = taskItem.taskId.id,
+            taskItemId = taskItem.id.id,
+            entranceNumber = entrance.number.number,
+            hasLookupPost = entrance.hasLookout,
+            isDeliveryWrong = false,
+            description = "",
+            code = entrance.code,
+            apartmentFrom = entrance.startApartments,
+            apartmentTo = entrance.endApartments,
+            floors = entrance.floors,
+            key = entrance.key,
+            euroKey = entrance.euroKey,
+            mailboxType = entrance.mailboxType,
+            entranceClosed = false
+        )
+    }
+}

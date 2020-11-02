@@ -34,7 +34,7 @@ object CustomLog {
             throw FileNotFoundException()
         }
 
-        val uri = FileProvider.getUriForFile(context, "com.relabs.kurjer.file_provider", f)
+        val uri = FileProvider.getUriForFile(context, "ru.relabs.kurjercontroller.file_provider", f)
         val intent = Intent().apply {
             action = Intent.ACTION_SEND
             putExtra(Intent.EXTRA_TEXT, "crash.log")

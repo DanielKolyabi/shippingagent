@@ -1,21 +1,30 @@
 package ru.relabs.kurjercontroller.presentation.report
 
+import android.app.Activity
+import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.synthetic.main.fragment_report.view.*
 import kotlinx.android.synthetic.main.fragment_tasks.view.loading
 import kotlinx.android.synthetic.main.include_hint_container.view.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.domain.models.Entrance
+import ru.relabs.kurjercontroller.domain.models.EntranceNumber
 import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.presentation.base.TextChangeListener
@@ -27,6 +36,9 @@ import ru.relabs.kurjercontroller.presentation.base.tea.rendersCollector
 import ru.relabs.kurjercontroller.presentation.base.tea.sendMessage
 import ru.relabs.kurjercontroller.presentation.helpers.HintHelper
 import ru.relabs.kurjercontroller.utils.debug
+import ru.relabs.kurjercontroller.utils.extensions.showDialog
+import java.io.File
+import java.util.*
 
 
 /**
@@ -34,6 +46,7 @@ import ru.relabs.kurjercontroller.utils.debug
  */
 
 class ReportFragment : BaseFragment() {
+    private var nextPhotoData: ReportPhotoData? = null
 
     private val controller = defaultController(ReportState(), ReportContext())
     private var renderJob: Job? = null
@@ -43,7 +56,7 @@ class ReportFragment : BaseFragment() {
         val task = arguments?.getParcelable<Task>(ARG_TASK)
         val taskItem = arguments?.getParcelable<TaskItem>(ARG_TASK_ITEM)
         val entrance = arguments?.getParcelable<Entrance>(ARG_ENTRANCES)
-        if(task == null || taskItem == null || entrance == null){
+        if (task == null || taskItem == null || entrance == null) {
             //TODO: Show error
             return
         }
@@ -77,12 +90,13 @@ class ReportFragment : BaseFragment() {
         val entranceKeysAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, mutableListOf())
         view.entrance_key.adapter = entranceKeysAdapter
 
-        val entranceEuroKeysAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, mutableListOf())
+        val entranceEuroKeysAdapter =
+            ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, mutableListOf())
         view.entrance_euro_key.adapter = entranceEuroKeysAdapter
 
         val photosAdapter = DelegateAdapter(
             ReportAdapter.photoSingle {
-                uiScope.sendMessage(controller, ReportMessages.msgPhotoClicked(null, false))
+                uiScope.sendMessage(controller, ReportMessages.msgPhotoClicked())
             },
             ReportAdapter.photo {
                 uiScope.sendMessage(controller, ReportMessages.msgRemovePhotoClicked(it))
@@ -92,6 +106,8 @@ class ReportFragment : BaseFragment() {
         view.photos_list.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
         view.photos_list.adapter = photosAdapter
         view.photos_list.addOnItemTouchListener(listInterceptor)
+
+        view.entrance_code.transformationMethod = null
 
         val apartmentsAdapter = DelegateAdapter(
             ReportAdapter.apartmentDivider(),
@@ -104,7 +120,9 @@ class ReportFragment : BaseFragment() {
                 { number, state -> uiScope.sendMessage(controller, ReportMessages.msgApartmentStateChanged(number, state)) },
                 { number, state -> uiScope.sendMessage(controller, ReportMessages.msgAllApartmentStateChanged(number, state)) },
                 { number -> uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionClicked(number)) }
-            )
+            ),
+            ReportAdapter.entrance { state -> uiScope.sendMessage(controller, ReportMessages.msgApartmentStateChanged(-1, state)) },
+            ReportAdapter.lookout { state -> uiScope.sendMessage(controller, ReportMessages.msgApartmentStateChanged(-2, state)) }
         )
         view.appartaments_list.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.VERTICAL, false)
         view.appartaments_list.adapter = apartmentsAdapter
@@ -148,11 +166,81 @@ class ReportFragment : BaseFragment() {
             launch { controller.stateFlow().collect(debugCollector { debug(it) }) }
         }
         controller.context.errorContext.attach(view)
+
+        controller.context.showError = ::showFatalError
+        controller.context.requestPhoto = ::requestPhoto
     }
 
-    private fun bindControls(
-        view: View
-    ) {
+    private suspend fun showFatalError(code: String, isFatal: Boolean) = withContext(Dispatchers.Main) {
+        FirebaseCrashlytics.getInstance().log("fatal error $isFatal $code")
+        showDialog(
+            getString(R.string.unknown_runtime_error_code, code),
+            R.string.ok to {
+                if (isFatal) {
+                    uiScope.sendMessage(controller, ReportMessages.msgNavigateBack())
+                }
+            }
+        )
+
+        Unit
+    }
+
+    private fun requestPhoto(entrance: EntranceNumber, multiplePhoto: Boolean, targetFile: File, uuid: UUID) {
+        val photoUri = FileProvider.getUriForFile(
+            requireContext(),
+            "ru.relabs.kurjercontroller.file_provider",
+            targetFile
+        )
+
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+        if (intent.resolveActivity(requireContext().packageManager) != null) {
+            nextPhotoData = ReportPhotoData(entrance, multiplePhoto, targetFile, uuid)
+            startActivityForResult(intent, REQUEST_PHOTO_CODE)
+        } else {
+            uiScope.sendMessage(controller, ReportMessages.msgPhotoError(1))
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode != REQUEST_PHOTO_CODE) return
+        val photoData = nextPhotoData
+        nextPhotoData = null
+        if (resultCode != Activity.RESULT_OK && resultCode != Activity.RESULT_CANCELED) {
+            uiScope.sendMessage(controller, ReportMessages.msgPhotoError(2))
+            return
+        }
+        if (resultCode == Activity.RESULT_CANCELED) {
+            return
+        }
+
+        if (photoData == null) {
+            uiScope.sendMessage(controller, ReportMessages.msgPhotoError(3))
+            return
+        }
+        //Find photo in target file
+        if (photoData.targetFile.exists()) {
+            uiScope.sendMessage(
+                controller,
+                ReportMessages.msgPhotoCaptured(photoData.entrance, photoData.multiplePhoto, photoData.targetFile, photoData.uuid)
+            )
+            return
+        }
+        //Find photo in result data
+        if (data != null) {
+            (data.extras?.get("data") as? Bitmap)?.let {
+                uiScope.sendMessage(
+                    controller,
+                    ReportMessages.msgPhotoCaptured(photoData.entrance, photoData.multiplePhoto, it, photoData.targetFile, photoData.uuid)
+                )
+                return
+            }
+        }
+        uiScope.sendMessage(controller, ReportMessages.msgPhotoError(4))
+    }
+
+    private fun bindControls(view: View) {
         view.entrance_key.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -184,12 +272,17 @@ class ReportFragment : BaseFragment() {
         view.entrance_closed.setOnClickListener {
             uiScope.sendMessage(controller, ReportMessages.msgEntranceClosedClicked())
         }
+        view.list_type_button.setOnClickListener {
+            uiScope.sendMessage(controller, ReportMessages.msgListTypeChanged())
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         renderJob?.cancel()
         controller.context.errorContext.detach()
+        controller.context.showError = { _, _ -> }
+        controller.context.requestPhoto = { _, _, _, _ -> }
     }
 
     override fun interceptBackPressed(): Boolean {
@@ -200,13 +293,21 @@ class ReportFragment : BaseFragment() {
         const val ARG_TASK = "task"
         const val ARG_TASK_ITEM = "taskItem"
         const val ARG_ENTRANCES = "entrances"
+        const val REQUEST_PHOTO_CODE = 501
 
-        fun newInstance(task: Task, taskItem: TaskItem, entrance: Entrance) = ReportFragment().apply{
-            arguments = Bundle().apply{
+        fun newInstance(task: Task, taskItem: TaskItem, entrance: Entrance) = ReportFragment().apply {
+            arguments = Bundle().apply {
                 putParcelable(ARG_TASK, task)
                 putParcelable(ARG_TASK_ITEM, taskItem)
                 putParcelable(ARG_ENTRANCES, entrance)
             }
         }
     }
+
+    private data class ReportPhotoData(
+        val entrance: EntranceNumber,
+        val multiplePhoto: Boolean,
+        val targetFile: File,
+        val uuid: UUID
+    )
 }
