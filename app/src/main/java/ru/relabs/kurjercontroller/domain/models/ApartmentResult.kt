@@ -3,6 +3,7 @@ package ru.relabs.kurjercontroller.domain.models
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 import ru.relabs.kurjercontroller.presentation.report.ReportApartmentButtonsMode
+import ru.relabs.kurjercontroller.presentation.reportPager.ReportTaskWithItem
 
 @Parcelize
 data class ApartmentResultId(val id: Int): Parcelable
@@ -20,4 +21,17 @@ data class ApartmentResult(
     val buttonGroup: ReportApartmentButtonsMode,
     val buttonState: Int,
     val description: String
-): Parcelable
+): Parcelable{
+    companion object {
+        fun empty(task: ReportTaskWithItem, entrance: Entrance, apartmentNumber: Int) = ApartmentResult(
+            ApartmentResultId(0),
+            task.taskItem.taskId,
+            task.taskItem.id,
+            entrance.number,
+            ApartmentNumber(apartmentNumber),
+            ReportApartmentButtonsMode.Main,
+            0,
+            ""
+        )
+    }
+}

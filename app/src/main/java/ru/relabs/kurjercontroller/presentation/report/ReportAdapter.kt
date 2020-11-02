@@ -134,11 +134,12 @@ object ReportAdapter {
                         true
                     }
                     yes_button_main?.setOnClickListener {
-                        item.state = item.state xor 1
-                        if (item.state and 4 > 0) {
-                            item.state = item.state xor 4
+                        val newState = if (item.state and 4 > 0) {
+                            item.state xor 4 xor 1
+                        } else {
+                            item.state xor 1
                         }
-                        onStateChanged(item.number, item.state)
+                        onStateChanged(item.number, newState)
                     }
 
                     not_regular_button_main?.setOnLongClickListener {
@@ -146,8 +147,7 @@ object ReportAdapter {
                         true
                     }
                     not_regular_button_main?.setOnClickListener {
-                        item.state = item.state xor 2
-                        onStateChanged(item.number, item.state)
+                        onStateChanged(item.number, item.state xor 2)
                     }
 
                     no_button_main?.setOnLongClickListener {
@@ -155,11 +155,12 @@ object ReportAdapter {
                         true
                     }
                     no_button_main?.setOnClickListener {
-                        item.state = item.state xor 4
-                        if (item.state and 1 > 0) {
-                            item.state = item.state xor 1
+                        val newState = if (item.state and 1 > 0) {
+                            item.state xor 1 xor 4
+                        }else{
+                            item.state xor 4
                         }
-                        onStateChanged(item.number, item.state)
+                        onStateChanged(item.number, newState)
                     }
 
                     broken_button_main?.setOnLongClickListener {
@@ -167,8 +168,7 @@ object ReportAdapter {
                         true
                     }
                     broken_button_main?.setOnClickListener {
-                        item.state = item.state xor 8
-                        onStateChanged(item.number, item.state)
+                        onStateChanged(item.number, item.state xor 8)
                     }
 
                     yes_button_main?.setSelectButtonActive(item.state and 1 > 0)
@@ -212,11 +212,12 @@ object ReportAdapter {
                         true
                     }
                     yes_button_addition?.setOnClickListener {
-                        item.state = item.state xor 16
-                        if (item.state and 32 > 0) {
-                            item.state = item.state xor 32
+                        val newState = if (item.state and 32 > 0) {
+                            item.state xor 32 xor 16
+                        }else{
+                            item.state xor 16
                         }
-                        onStateChanged(item.number, item.state)
+                        onStateChanged(item.number, newState)
                     }
 
                     no_button_addition?.setOnLongClickListener {
@@ -224,11 +225,12 @@ object ReportAdapter {
                         true
                     }
                     no_button_addition?.setOnClickListener {
-                        item.state = item.state xor 32
-                        if (item.state and 16 > 0) {
-                            item.state = item.state xor 16
+                        val newState = if (item.state and 16 > 0) {
+                            item.state xor 16 xor 32
+                        }else{
+                            item.state xor 32
                         }
-                        onStateChanged(item.number, item.state)
+                        onStateChanged(item.number, newState)
                     }
 
                     broken_button_addition?.setOnLongClickListener {
@@ -236,8 +238,7 @@ object ReportAdapter {
                         true
                     }
                     broken_button_addition?.setOnClickListener {
-                        item.state = item.state xor 8
-                        onStateChanged(item.number, item.state)
+                        onStateChanged(item.number, item.state xor 8)
                     }
 
                     broken_button_addition?.setSelectButtonActive(item.state and 8 > 0)

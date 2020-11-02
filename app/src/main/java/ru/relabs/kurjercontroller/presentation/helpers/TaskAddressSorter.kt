@@ -87,8 +87,4 @@ object TaskAddressSorter {
 
         return internalSortTaskItemsAlphabetic(new) + internalSortTaskItemsAlphabetic(old)
     }
-
-    const val STANDART = 1
-    const val ALPHABETIC = 2
-    const val CLOSE_TIME = 3
 }

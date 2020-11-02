@@ -29,8 +29,8 @@ const val ENTRANCE_NUMBER_TASK_ITEM = -1
 sealed class ReportApartmentItem {
     data class Apartment(
         val number: Int,
-        var buttonGroup: ReportApartmentButtonsMode,
-        var state: Int,
+        val buttonGroup: ReportApartmentButtonsMode,
+        val state: Int,
         val colored: Boolean,
         val required: Boolean
     ) : ReportApartmentItem()

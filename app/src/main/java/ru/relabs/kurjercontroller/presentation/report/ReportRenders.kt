@@ -203,7 +203,12 @@ object ReportRenders {
     )
 
     fun renderEntranceClosed(button: Button): ReportRender = renderT(
-        { (it.entrance?.state == EntranceState.CLOSED) ?: it.saved?.entranceClosed ?: false },
+        { (it.entrance?.state == EntranceState.CLOSED) || (it.saved?.entranceClosed ?: false) },
         { button.setSelectButtonActive(it) }
+    )
+
+    fun renderFloors(view: EditText, watcher: TextWatcher): ReportRender = renderT(
+        { it.saved?.floors?.toString() ?: it.entrance?.floors?.toString() ?: "" },
+        { view.renderText(it, watcher) }
     )
 }

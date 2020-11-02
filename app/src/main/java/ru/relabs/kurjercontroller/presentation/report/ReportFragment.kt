@@ -15,7 +15,6 @@ import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.synthetic.main.fragment_report.view.*
-import kotlinx.android.synthetic.main.fragment_tasks.view.loading
 import kotlinx.android.synthetic.main.include_hint_container.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -121,7 +120,12 @@ class ReportFragment : BaseFragment() {
                 { number, state -> uiScope.sendMessage(controller, ReportMessages.msgAllApartmentStateChanged(number, state)) },
                 { number -> uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionClicked(number)) }
             ),
-            ReportAdapter.entrance { state -> uiScope.sendMessage(controller, ReportMessages.msgApartmentStateChanged(-1, state)) },
+            ReportAdapter.entrance { state ->
+                uiScope.sendMessage(
+                    controller,
+                    ReportMessages.msgApartmentStateChanged(-1, state)
+                )
+            },
             ReportAdapter.lookout { state -> uiScope.sendMessage(controller, ReportMessages.msgApartmentStateChanged(-2, state)) }
         )
         view.appartaments_list.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.VERTICAL, false)
@@ -141,6 +145,10 @@ class ReportFragment : BaseFragment() {
             uiScope.sendMessage(controller, ReportMessages.msgCodeChanged(it))
         }
         view.entrance_code.addTextChangedListener(codeTextListener)
+        val floorsTextListener = TextChangeListener {
+            it.toIntOrNull()?.let { uiScope.sendMessage(controller, ReportMessages.msgFloorsChanged(it)) }
+        }
+        view.floors.addTextChangedListener(floorsTextListener)
 
         bindControls(view)
 
@@ -160,7 +168,8 @@ class ReportFragment : BaseFragment() {
                 ReportRenders.renderLayoutError(view.layout_error_button),
                 ReportRenders.renderLookout(view.lookout),
                 ReportRenders.renderMailboxType(view.mailbox_euro, view.mailbox_gap),
-                ReportRenders.renderEntranceClosed(view.entrance_closed)
+                ReportRenders.renderEntranceClosed(view.entrance_closed),
+                ReportRenders.renderFloors(view.floors, floorsTextListener)
             )
             launch { controller.stateFlow().collect(rendersCollector(renders)) }
             launch { controller.stateFlow().collect(debugCollector { debug(it) }) }
@@ -232,7 +241,13 @@ class ReportFragment : BaseFragment() {
             (data.extras?.get("data") as? Bitmap)?.let {
                 uiScope.sendMessage(
                     controller,
-                    ReportMessages.msgPhotoCaptured(photoData.entrance, photoData.multiplePhoto, it, photoData.targetFile, photoData.uuid)
+                    ReportMessages.msgPhotoCaptured(
+                        photoData.entrance,
+                        photoData.multiplePhoto,
+                        it,
+                        photoData.targetFile,
+                        photoData.uuid
+                    )
                 )
                 return
             }

@@ -120,6 +120,10 @@ object ReportMessages {
         it.copy(saved = it.saved?.copy(code = code))
     }
 
+    fun msgFloorsChanged(floors: Int): ReportMessage = msgUpdateSavedAndSave {
+        it.copy(saved = it.saved?.copy(floors = floors))
+    }
+
     fun msgKeySelected(key: String): ReportMessage = msgUpdateSavedAndSave {
         it.copy(saved = it.saved?.copy(key = key))
     }
@@ -146,28 +150,24 @@ object ReportMessages {
 
     fun msgChangeApartmentButtonGroup(apartment: Int, newButtonGroup: ReportApartmentButtonsMode): ReportMessage = msgState { s ->
         if (s.task != null && s.entrance != null) {
-            s.copy(savedApartments = if (s.savedApartments.firstOrNull { it.apartmentNumber.number == apartment } != null) {
-                s.savedApartments.map {
-                    if (it.apartmentNumber.number == apartment) {
-                        it.copy(buttonGroup = newButtonGroup)
-                    } else {
-                        it
+            s.copy(
+                savedApartments = if (s.savedApartments.firstOrNull { it.apartmentNumber.number == apartment } != null) {
+                    s.savedApartments.map {
+                        if (it.apartmentNumber.number == apartment) {
+                            it.copy(buttonGroup = newButtonGroup)
+                        } else {
+                            it
+                        }
                     }
-                }
-            } else {
-                s.savedApartments + listOf(
-                    ApartmentResult(
-                        ApartmentResultId(0),
-                        s.task.taskItem.taskId,
-                        s.task.taskItem.id,
-                        s.entrance.number,
-                        ApartmentNumber(apartment),
-                        newButtonGroup,
-                        0,
-                        ""
+                } else {
+                    s.savedApartments + listOf(
+                        ApartmentResult.empty(
+                            s.task,
+                            s.entrance,
+                            apartment
+                        ).copy(buttonGroup = newButtonGroup)
                     )
-                )
-            }
+                }
             )
         } else {
             s
@@ -180,5 +180,20 @@ object ReportMessages {
     fun msgNavigateBack(): ReportMessage =
         msgEffect(ReportEffects.effectNavigateBack())
 
-
+    fun msgUpdateApartment(newApartmentResult: ApartmentResult): ReportMessage =
+        msgState { s ->
+            s.copy(
+                savedApartments = if (s.savedApartments.firstOrNull { it.apartmentNumber == newApartmentResult.apartmentNumber } != null) {
+                    s.savedApartments.map {
+                        if (it.apartmentNumber == newApartmentResult.apartmentNumber) {
+                            newApartmentResult
+                        } else {
+                            it
+                        }
+                    }
+                } else {
+                    s.savedApartments + listOf(newApartmentResult)
+                }
+            )
+        }
 }
