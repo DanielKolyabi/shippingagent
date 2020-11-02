@@ -23,12 +23,12 @@ data class ApartmentResult(
     val description: String
 ): Parcelable{
     companion object {
-        fun empty(task: ReportTaskWithItem, entrance: Entrance, apartmentNumber: Int) = ApartmentResult(
+        fun empty(task: ReportTaskWithItem, entrance: Entrance, apartmentNumber: ApartmentNumber) = ApartmentResult(
             ApartmentResultId(0),
             task.taskItem.taskId,
             task.taskItem.id,
             entrance.number,
-            ApartmentNumber(apartmentNumber),
+            apartmentNumber,
             ReportApartmentButtonsMode.Main,
             0,
             ""

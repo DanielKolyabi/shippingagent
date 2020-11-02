@@ -5,7 +5,6 @@ import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffects
-import ru.relabs.kurjercontroller.presentation.base.tea.msgEmpty
 import ru.relabs.kurjercontroller.presentation.base.tea.msgState
 import ru.relabs.kurjercontroller.presentation.reportPager.ReportTaskWithItem
 import java.io.File
@@ -94,14 +93,17 @@ object ReportMessages {
         }
     )
 
-    fun msgApartmentStateChanged(apartmentNumber: Int, newState: Int): ReportMessage =
+    fun msgApartmentStateChanged(apartmentNumber: ApartmentNumber, newState: Int): ReportMessage =
         msgEffect(ReportEffects.effectChangeApartmentState(apartmentNumber, newState))
 
-    fun msgAllApartmentStateChanged(apartmentNumber: Int, newState: Int): ReportMessage =
+    fun msgAllApartmentStateChanged(apartmentNumber: ApartmentNumber, newState: Int): ReportMessage =
         msgEffect(ReportEffects.effectChangeAllApartmentState(apartmentNumber, newState))
 
-    fun msgApartmentDescriptionClicked(entranceNumber: Int): ReportMessage =
-        msgEmpty()
+    fun msgApartmentDescriptionClicked(apartmentNumber: ApartmentNumber): ReportMessage =
+        msgEffect(ReportEffects.effectShowDescriptionInput(apartmentNumber))
+
+    fun msgApartmentDescriptionChanged(apartmentNumber: ApartmentNumber, description: String): ReportMessage =
+        msgEffect(ReportEffects.effectChangeApartmentDescription(apartmentNumber, description))
 
     private fun msgUpdateSavedAndSave(mapper: (ReportState) -> ReportState): ReportMessage = msgEffects(
         { mapper(it) },
@@ -122,6 +124,10 @@ object ReportMessages {
 
     fun msgFloorsChanged(floors: Int): ReportMessage = msgUpdateSavedAndSave {
         it.copy(saved = it.saved?.copy(floors = floors))
+    }
+
+    fun msgDescriptionChanged(description: String): ReportMessage = msgUpdateSavedAndSave {
+        it.copy(saved = it.saved?.copy(description = description))
     }
 
     fun msgKeySelected(key: String): ReportMessage = msgUpdateSavedAndSave {
@@ -148,12 +154,12 @@ object ReportMessages {
         it.copy(saved = it.saved?.copy(entranceClosed = it.saved.entranceClosed?.not()))
     }
 
-    fun msgChangeApartmentButtonGroup(apartment: Int, newButtonGroup: ReportApartmentButtonsMode): ReportMessage = msgState { s ->
+    fun msgChangeApartmentButtonGroup(apartment: ApartmentNumber, newButtonGroup: ReportApartmentButtonsMode): ReportMessage = msgState { s ->
         if (s.task != null && s.entrance != null) {
             s.copy(
-                savedApartments = if (s.savedApartments.firstOrNull { it.apartmentNumber.number == apartment } != null) {
+                savedApartments = if (s.savedApartments.firstOrNull { it.apartmentNumber == apartment } != null) {
                     s.savedApartments.map {
-                        if (it.apartmentNumber.number == apartment) {
+                        if (it.apartmentNumber == apartment) {
                             it.copy(buttonGroup = newButtonGroup)
                         } else {
                             it

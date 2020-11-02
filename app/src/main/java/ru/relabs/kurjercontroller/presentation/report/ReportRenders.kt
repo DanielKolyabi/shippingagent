@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.*
 import androidx.recyclerview.widget.DiffUtil
 import ru.relabs.kurjercontroller.R
+import ru.relabs.kurjercontroller.domain.models.ApartmentNumber
 import ru.relabs.kurjercontroller.domain.models.ApartmentResult
 import ru.relabs.kurjercontroller.domain.models.EntranceState
 import ru.relabs.kurjercontroller.domain.models.TaskItem
@@ -75,11 +76,11 @@ object ReportRenders {
         }
     )
 
-    fun renderApartmentsInterval(apartmentsFrom: EditText, apartmentsTo: EditText): ReportRender = renderT(
+    fun renderApartmentsInterval(apartmentsFrom: EditText, fromWatcher: TextWatcher, apartmentsTo: EditText, toWatcher: TextWatcher): ReportRender = renderT(
         { (it.saved?.apartmentFrom ?: it.entrance?.startApartments) to (it.saved?.apartmentTo ?: it.entrance?.endApartments) },
         { (from, to) ->
-            apartmentsFrom.setText(from?.toString() ?: "")
-            apartmentsTo.setText(to?.toString() ?: "")
+            apartmentsFrom.renderText(from?.toString() ?: "", fromWatcher)
+            apartmentsTo.renderText(to?.toString() ?: "", toWatcher)
         }
     )
 
@@ -107,9 +108,9 @@ object ReportRenders {
             if (startAps != null && endAps != null && taskItem != null) {
                 val requiredApartments = taskItem.getRequiredApartments()
                 val apartments = (startAps..endAps)
-                    .map { apartment -> apartment to requiredApartments.firstOrNull { it.number == apartment } }
+                    .map { apartment -> ApartmentNumber(apartment) to requiredApartments.firstOrNull { it.number == apartment } }
                     .map { (apartmentNumber, requiredData) ->
-                        val saved = savedApartments.firstOrNull { it.apartmentNumber.number == apartmentNumber }
+                        val saved = savedApartments.firstOrNull { it.apartmentNumber == apartmentNumber }
                         ReportApartmentItem.Apartment(
                             number = apartmentNumber,
                             buttonGroup = saved?.buttonGroup
@@ -154,7 +155,7 @@ object ReportRenders {
     )
 
     fun renderApartmentsListBackground(view: ImageView): ReportRender = renderT(
-        { it.savedApartments.firstOrNull()?.buttonGroup ?: it.defaultReportType },
+        { it.savedApartments.firstOrNull { it.apartmentNumber.number > 0 }?.buttonGroup ?: it.defaultReportType },
         {
             view.background = when (it) {
                 ReportApartmentButtonsMode.Main -> view.resources.getDrawable(R.drawable.apartment_list_main_bg, null)
@@ -164,7 +165,7 @@ object ReportRenders {
     )
 
     fun renderApartmentListTypeButton(view: Button): ReportRender = renderT(
-        { it.savedApartments.firstOrNull()?.buttonGroup ?: it.defaultReportType },
+        { it.savedApartments.firstOrNull { it.apartmentNumber.number > 0 }?.buttonGroup ?: it.defaultReportType },
         {
             view.text = when (it) {
                 ReportApartmentButtonsMode.Main -> view.resources.getString(R.string.button_group_main)
@@ -210,5 +211,10 @@ object ReportRenders {
     fun renderFloors(view: EditText, watcher: TextWatcher): ReportRender = renderT(
         { it.saved?.floors?.toString() ?: it.entrance?.floors?.toString() ?: "" },
         { view.renderText(it, watcher) }
+    )
+
+    fun renderLockInputOverlay(view: View): ReportRender = renderT(
+        { it.selectedEntrancePhotos.isEmpty() },
+        { view.visible = it }
     )
 }

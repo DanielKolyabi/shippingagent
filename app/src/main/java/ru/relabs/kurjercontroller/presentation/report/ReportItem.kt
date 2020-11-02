@@ -2,6 +2,7 @@ package ru.relabs.kurjercontroller.presentation.report
 
 import android.net.Uri
 import ru.relabs.kurjercontroller.domain.mappers.MappingException
+import ru.relabs.kurjercontroller.domain.models.ApartmentNumber
 import ru.relabs.kurjercontroller.domain.models.EntrancePhoto
 
 sealed class ReportPhotoItem {
@@ -28,7 +29,7 @@ const val ENTRANCE_NUMBER_TASK_ITEM = -1
 
 sealed class ReportApartmentItem {
     data class Apartment(
-        val number: Int,
+        val number: ApartmentNumber,
         val buttonGroup: ReportApartmentButtonsMode,
         val state: Int,
         val colored: Boolean,

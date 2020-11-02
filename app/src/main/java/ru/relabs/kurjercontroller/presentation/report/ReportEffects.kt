@@ -74,9 +74,25 @@ object ReportEffects {
         }
     }
 
-    fun effectChangeApartmentState(apartmentNumber: Int, newState: Int): ReportEffect = { c, s ->
+    fun effectChangeApartmentDescription(apartmentNumber: ApartmentNumber, description: String): ReportEffect = { c, s ->
         if (s.task != null && s.entrance != null) {
-            val apartment = s.savedApartments.firstOrNull { apartmentNumber == it.apartmentNumber.number }
+            if (apartmentNumber.number == -1) {
+                messages.send(ReportMessages.msgDescriptionChanged(description))
+            } else {
+                val apartment = s.savedApartments.firstOrNull { apartmentNumber == it.apartmentNumber }
+                    ?: ApartmentResult.empty(s.task, s.entrance, apartmentNumber)
+                val apartmentWithNewState = apartment.copy(description = description)
+                messages.send(ReportMessages.msgUpdateApartment(apartmentWithNewState))
+                messages.send(msgEffect(effectSaveApartmentsChanges(apartmentWithNewState)))
+            }
+        } else {
+            FirebaseCrashlytics.getInstance().log("task or entrance is null")
+        }
+    }
+
+    fun effectChangeApartmentState(apartmentNumber: ApartmentNumber, newState: Int): ReportEffect = { c, s ->
+        if (s.task != null && s.entrance != null) {
+            val apartment = s.savedApartments.firstOrNull { apartmentNumber == it.apartmentNumber }
                 ?: ApartmentResult.empty(s.task, s.entrance, apartmentNumber)
             val apartmentWithNewState = apartment.copy(buttonState = newState)
             messages.send(ReportMessages.msgUpdateApartment(apartmentWithNewState))
@@ -86,9 +102,9 @@ object ReportEffects {
         }
     }
 
-    fun effectChangeAllApartmentState(apartmentNumber: Int, newState: Int): ReportEffect = { c, s ->
+    fun effectChangeAllApartmentState(apartmentNumber: ApartmentNumber, newState: Int): ReportEffect = { c, s ->
         if (s.task != null && s.entrance != null) {
-            val targetApartment = s.savedApartments.firstOrNull { apartmentNumber == it.apartmentNumber.number }
+            val targetApartment = s.savedApartments.firstOrNull { apartmentNumber == it.apartmentNumber }
                 ?: ApartmentResult.empty(s.task, s.entrance, apartmentNumber)
             val targetState = (targetApartment.buttonState xor newState) and newState
 
@@ -96,7 +112,7 @@ object ReportEffects {
             val endApartment = s.saved?.apartmentTo ?: s.entrance.endApartments
             (startApartment..endApartment).forEach {
                 val apartment = s.savedApartments.firstOrNull { a -> it == a.apartmentNumber.number }
-                    ?: ApartmentResult.empty(s.task, s.entrance, it)
+                    ?: ApartmentResult.empty(s.task, s.entrance, ApartmentNumber(it))
 
                 val apartmentWithNewState = if (apartment.buttonState and newState != targetState) {
                     when {
@@ -173,7 +189,7 @@ object ReportEffects {
             val startApartment = s.saved?.apartmentFrom ?: s.entrance?.startApartments ?: 0
             val endApartment = s.saved?.apartmentTo ?: s.entrance?.endApartments ?: 0
             (startApartment..endApartment).forEach {
-                messages.send(ReportMessages.msgChangeApartmentButtonGroup(it, newButtonGroup))
+                messages.send(ReportMessages.msgChangeApartmentButtonGroup(ApartmentNumber(it), newButtonGroup))
             }
 
             messages.send(msgEffect(effectSaveAllChanges()))
@@ -185,5 +201,19 @@ object ReportEffects {
         bitmap.recycle()
         ImageUtils.saveImage(resized, targetFile)
         targetFile
+    }
+
+    fun effectShowDescriptionInput(entranceNumber: ApartmentNumber): ReportEffect = { c, s ->
+        val currentDescription = if (entranceNumber.number == ENTRANCE_NUMBER_TASK_ITEM) {
+            s.saved?.description ?: ""
+        } else {
+            s.savedApartments.firstOrNull { it.apartmentNumber == entranceNumber }?.description ?: ""
+        }
+        withContext(Dispatchers.Main) {
+            c.showDescriptionInputDialog(
+                entranceNumber,
+                currentDescription
+            )
+        }
     }
 }

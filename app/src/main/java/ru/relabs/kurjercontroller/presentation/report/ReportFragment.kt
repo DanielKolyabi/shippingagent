@@ -5,12 +5,15 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -22,10 +25,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.domain.models.Entrance
-import ru.relabs.kurjercontroller.domain.models.EntranceNumber
-import ru.relabs.kurjercontroller.domain.models.Task
-import ru.relabs.kurjercontroller.domain.models.TaskItem
+import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.TextChangeListener
 import ru.relabs.kurjercontroller.presentation.base.fragment.BaseFragment
 import ru.relabs.kurjercontroller.presentation.base.recycler.DelegateAdapter
@@ -123,10 +123,10 @@ class ReportFragment : BaseFragment() {
             ReportAdapter.entrance { state ->
                 uiScope.sendMessage(
                     controller,
-                    ReportMessages.msgApartmentStateChanged(-1, state)
+                    ReportMessages.msgApartmentStateChanged(ApartmentNumber(-1), state)
                 )
             },
-            ReportAdapter.lookout { state -> uiScope.sendMessage(controller, ReportMessages.msgApartmentStateChanged(-2, state)) }
+            ReportAdapter.lookout { state -> uiScope.sendMessage(controller, ReportMessages.msgApartmentStateChanged(ApartmentNumber(-1), state)) }
         )
         view.appartaments_list.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.VERTICAL, false)
         view.appartaments_list.adapter = apartmentsAdapter
@@ -159,7 +159,7 @@ class ReportFragment : BaseFragment() {
                 ReportRenders.renderEntranceEuroKeys(view.entrance_euro_key, entranceEuroKeysAdapter),
                 ReportRenders.renderPhotos(photosAdapter),
                 ReportRenders.renderNotes(view.hint_text),
-                ReportRenders.renderApartmentsInterval(view.appartaments_from, view.appartaments_to),
+                ReportRenders.renderApartmentsInterval(view.appartaments_from, apartmentsFromTextListener, view.appartaments_to, apartmentsToTextListener),
                 ReportRenders.renderApartments(apartmentsAdapter),
                 ReportRenders.renderApartmentsListBackground(view.list_background),
                 ReportRenders.renderApartmentListTypeButton(view.list_type_button),
@@ -169,7 +169,8 @@ class ReportFragment : BaseFragment() {
                 ReportRenders.renderLookout(view.lookout),
                 ReportRenders.renderMailboxType(view.mailbox_euro, view.mailbox_gap),
                 ReportRenders.renderEntranceClosed(view.entrance_closed),
-                ReportRenders.renderFloors(view.floors, floorsTextListener)
+                ReportRenders.renderFloors(view.floors, floorsTextListener),
+                ReportRenders.renderLockInputOverlay(view.lock_input_overlay)
             )
             launch { controller.stateFlow().collect(rendersCollector(renders)) }
             launch { controller.stateFlow().collect(debugCollector { debug(it) }) }
@@ -178,6 +179,23 @@ class ReportFragment : BaseFragment() {
 
         controller.context.showError = ::showFatalError
         controller.context.requestPhoto = ::requestPhoto
+        controller.context.showDescriptionInputDialog = ::showDescriptionInputDialog
+    }
+
+    private fun showDescriptionInputDialog(apartmentNumber: ApartmentNumber, description: String){
+        val input = EditText(requireContext()).apply {
+            inputType = InputType.TYPE_CLASS_TEXT
+            setText(description)
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Описание")
+            .setView(input)
+            .setPositiveButton("Ок") { _, _ ->
+                uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionChanged(apartmentNumber, input.text.toString()))
+            }
+            .setNegativeButton("Отмена") { _, _ -> }
+            .show()
     }
 
     private suspend fun showFatalError(code: String, isFatal: Boolean) = withContext(Dispatchers.Main) {
@@ -290,6 +308,12 @@ class ReportFragment : BaseFragment() {
         view.list_type_button.setOnClickListener {
             uiScope.sendMessage(controller, ReportMessages.msgListTypeChanged())
         }
+        view.lock_input_overlay.setOnClickListener {
+            uiScope.sendMessage(controller, ReportMessages.msgPhotoClicked())
+        }
+        view.user_explanation_input.setOnClickListener{
+            uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionClicked(ApartmentNumber(-1)))
+        }
     }
 
     override fun onDestroyView() {
@@ -298,6 +322,7 @@ class ReportFragment : BaseFragment() {
         controller.context.errorContext.detach()
         controller.context.showError = { _, _ -> }
         controller.context.requestPhoto = { _, _, _, _ -> }
+        controller.context.showDescriptionInputDialog = { _, _ -> }
     }
 
     override fun interceptBackPressed(): Boolean {

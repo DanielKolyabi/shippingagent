@@ -8,6 +8,7 @@ import kotlinx.android.synthetic.main.holder_report_appartament_button_group_add
 import kotlinx.android.synthetic.main.holder_report_appartament_button_group_main.view.*
 import kotlinx.android.synthetic.main.holder_report_photo.view.*
 import ru.relabs.kurjercontroller.R
+import ru.relabs.kurjercontroller.domain.models.ApartmentNumber
 import ru.relabs.kurjercontroller.domain.models.EntrancePhoto
 import ru.relabs.kurjercontroller.presentation.base.recycler.IAdapterDelegate
 import ru.relabs.kurjercontroller.presentation.base.recycler.delegateDefine
@@ -104,9 +105,9 @@ object ReportAdapter {
     )
 
     fun apartmentMain(
-        onStateChanged: (apartmentNumber: Int, state: Int) -> Unit,
-        onLongStateChanged: (apartmentNumber: Int, change: Int) -> Unit,
-        onDescriptionClicked: (apartmentNumber: Int) -> Unit
+        onStateChanged: (apartmentNumber: ApartmentNumber, state: Int) -> Unit,
+        onLongStateChanged: (apartmentNumber: ApartmentNumber, change: Int) -> Unit,
+        onDescriptionClicked: (apartmentNumber: ApartmentNumber) -> Unit
     ): IAdapterDelegate<ReportApartmentItem> = delegateDefine(
         { it is ReportApartmentItem.Apartment && it.buttonGroup == ReportApartmentButtonsMode.Main },
         { p ->
@@ -127,7 +128,7 @@ object ReportAdapter {
                     description_button?.setOnClickListener {
                         onDescriptionClicked(item.number)
                     }
-                    appartament_number?.text = item.number.toString()
+                    appartament_number?.text = item.number.number.toString()
 
                     yes_button_main?.setOnLongClickListener {
                         onLongStateChanged(item.number, 1)
@@ -181,9 +182,9 @@ object ReportAdapter {
     )
 
     fun apartmentAdditional(
-        onStateChanged: (apartmentNumber: Int, state: Int) -> Unit,
-        onLongStateChanged: (apartmentNumber: Int, change: Int) -> Unit,
-        onDescriptionClicked: (apartmentNumber: Int) -> Unit
+        onStateChanged: (apartmentNumber: ApartmentNumber, state: Int) -> Unit,
+        onLongStateChanged: (apartmentNumber: ApartmentNumber, change: Int) -> Unit,
+        onDescriptionClicked: (apartmentNumber: ApartmentNumber) -> Unit
     ): IAdapterDelegate<ReportApartmentItem> = delegateDefine(
         { it is ReportApartmentItem.Apartment && it.buttonGroup == ReportApartmentButtonsMode.Additional },
         { p ->
@@ -205,7 +206,7 @@ object ReportAdapter {
                     description_button?.setOnClickListener {
                         onDescriptionClicked(item.number)
                     }
-                    appartament_number?.text = item.number.toString()
+                    appartament_number?.text = item.number.number.toString()
 
                     yes_button_addition?.setOnLongClickListener {
                         onLongStateChanged(item.number, 16)

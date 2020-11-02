@@ -4,10 +4,7 @@ import android.net.Uri
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
-import ru.relabs.kurjercontroller.domain.models.ApartmentResult
-import ru.relabs.kurjercontroller.domain.models.Entrance
-import ru.relabs.kurjercontroller.domain.models.EntranceNumber
-import ru.relabs.kurjercontroller.domain.models.EntrancePhoto
+import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.domain.providers.LocationProvider
 import ru.relabs.kurjercontroller.domain.providers.PathsProvider
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
@@ -51,6 +48,7 @@ class ReportContext(val errorContext: ErrorContextImpl = ErrorContextImpl()) :
 
     var showError: suspend (code: String, isFatal: Boolean) -> Unit = { _, _ -> }
     var requestPhoto: (entrance: EntranceNumber, multiplePhoto: Boolean, targetFile: File, uuid: UUID) -> Unit = { _, _, _, _ -> }
+    var showDescriptionInputDialog: (ApartmentNumber, String) -> Unit = { _, _ -> }
 }
 
 typealias ReportMessage = ElmMessage<ReportContext, ReportState>
