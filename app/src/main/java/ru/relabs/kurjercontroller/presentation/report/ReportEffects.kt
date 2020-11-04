@@ -21,7 +21,7 @@ import java.util.*
  */
 object ReportEffects {
 
-    fun effectLoadSavedData(task: Task, taskItem: TaskItem, entrance: Entrance): ReportEffect = { c, s ->
+    fun effectLoadSavedData(taskItem: TaskItem, entrance: Entrance): ReportEffect = { c, s ->
         messages.send(ReportMessages.msgAddLoaders(1))
         val savedEntrance = c.databaseRepository.getEntranceResult(taskItem, entrance)
             ?: EntranceResultEntity.fromEntrance(taskItem, entrance)
@@ -57,8 +57,29 @@ object ReportEffects {
         c.databaseRepository.saveApartmentResult(apartment)
     }
 
-    fun effectSaveEntranceChanges(entrance: EntranceResultEntity): ReportEffect = { c, s ->
+    fun effectSaveEntranceChanges(
+        entrance: EntranceResultEntity
+    ): ReportEffect = { c, s ->
         c.databaseRepository.saveEntranceResult(entrance)
+    }
+
+    fun effectSaveEntranceChangesExternal(
+        mapper: (ReportState) -> ReportState
+    ): ReportEffect = { c, s ->
+        if (s.taskItem != null && s.entrance != null && s.saved != null) {
+            s.allTaskItemsIds.forEach {
+                if (it.taskId == s.taskItem.taskId && it.taskItemId == s.taskItem.id) return@forEach
+                val savedResult = c.databaseRepository.getEntranceResult(it.taskId, it.taskItemId, s.entrance.number)
+                val entrance = c.databaseRepository.getEntrance(it.taskId, it.taskItemId, s.entrance.number)
+                if (savedResult != null && entrance != null) {
+                    val fakeState = s.copy(saved = savedResult, entrance = entrance)
+                    val mappedFakeState = mapper(fakeState)
+                    mappedFakeState.saved?.let {
+                        messages.send(msgEffect(effectSaveEntranceChanges(it)))
+                    }
+                }
+            }
+        }
     }
 
     fun effectSaveAllChanges(): ReportEffect = { c, s ->
@@ -75,12 +96,12 @@ object ReportEffects {
     }
 
     fun effectChangeApartmentDescription(apartmentNumber: ApartmentNumber, description: String): ReportEffect = { c, s ->
-        if (s.task != null && s.entrance != null) {
+        if (s.taskItem != null && s.entrance != null) {
             if (apartmentNumber.number == -1) {
                 messages.send(ReportMessages.msgDescriptionChanged(description))
             } else {
                 val apartment = s.savedApartments.firstOrNull { apartmentNumber == it.apartmentNumber }
-                    ?: ApartmentResult.empty(s.task, s.entrance, apartmentNumber)
+                    ?: ApartmentResult.empty(s.taskItem, s.entrance, apartmentNumber)
                 val apartmentWithNewState = apartment.copy(description = description)
                 messages.send(ReportMessages.msgUpdateApartment(apartmentWithNewState))
                 messages.send(msgEffect(effectSaveApartmentsChanges(apartmentWithNewState)))
@@ -91,9 +112,9 @@ object ReportEffects {
     }
 
     fun effectChangeApartmentState(apartmentNumber: ApartmentNumber, newState: Int): ReportEffect = { c, s ->
-        if (s.task != null && s.entrance != null) {
+        if (s.taskItem != null && s.entrance != null) {
             val apartment = s.savedApartments.firstOrNull { apartmentNumber == it.apartmentNumber }
-                ?: ApartmentResult.empty(s.task, s.entrance, apartmentNumber)
+                ?: ApartmentResult.empty(s.taskItem, s.entrance, apartmentNumber)
             val apartmentWithNewState = apartment.copy(buttonState = newState)
             messages.send(ReportMessages.msgUpdateApartment(apartmentWithNewState))
             messages.send(msgEffect(effectSaveApartmentsChanges(apartmentWithNewState)))
@@ -103,16 +124,16 @@ object ReportEffects {
     }
 
     fun effectChangeAllApartmentState(apartmentNumber: ApartmentNumber, newState: Int): ReportEffect = { c, s ->
-        if (s.task != null && s.entrance != null) {
+        if (s.taskItem != null && s.entrance != null) {
             val targetApartment = s.savedApartments.firstOrNull { apartmentNumber == it.apartmentNumber }
-                ?: ApartmentResult.empty(s.task, s.entrance, apartmentNumber)
+                ?: ApartmentResult.empty(s.taskItem, s.entrance, apartmentNumber)
             val targetState = (targetApartment.buttonState xor newState) and newState
 
             val startApartment = s.saved?.apartmentFrom ?: s.entrance.startApartments
             val endApartment = s.saved?.apartmentTo ?: s.entrance.endApartments
             (startApartment..endApartment).forEach {
                 val apartment = s.savedApartments.firstOrNull { a -> it == a.apartmentNumber.number }
-                    ?: ApartmentResult.empty(s.task, s.entrance, ApartmentNumber(it))
+                    ?: ApartmentResult.empty(s.taskItem, s.entrance, ApartmentNumber(it))
 
                 val apartmentWithNewState = if (apartment.buttonState and newState != targetState) {
                     when {
@@ -136,11 +157,11 @@ object ReportEffects {
     }
 
     fun effectCreatePhoto(multiplePhotos: Boolean): ReportEffect = { c, s ->
-        if (s.task == null || s.entrance == null) {
+        if (s.taskItem == null || s.entrance == null) {
             c.showError("re:100", true)
         } else {
             val photoUUID = UUID.randomUUID()
-            val photoFile = c.pathsProvider.getEntrancePhotoFile(s.task.taskItem, s.entrance, photoUUID)
+            val photoFile = c.pathsProvider.getEntrancePhotoFile(s.taskItem, s.entrance, photoUUID)
             withContext(Dispatchers.Main) {
                 c.requestPhoto(s.entrance.number, multiplePhotos, photoFile, photoUUID)
             }
@@ -162,15 +183,15 @@ object ReportEffects {
 
     fun effectSavePhotoFromBitmap(entrance: EntranceNumber, bitmap: Bitmap, targetFile: File, uuid: UUID): ReportEffect =
         { c, s ->
-            when (val task = s.task) {
+            when (val task = s.taskItem) {
                 null -> c.showError("re:102", true)
                 else -> {
                     when (savePhotoFromBitmapToFile(bitmap, targetFile)) {
                         is Left -> messages.send(ReportMessages.msgPhotoError(6))
                         is Right -> {
                             val location = c.locationProvider.lastReceivedLocation()
-                            val photo = c.databaseRepository.savePhoto(entrance, task.taskItem, uuid, location)
-                            val path = c.pathsProvider.getEntrancePhotoFileByID(task.taskItem.id, entrance, uuid.toString())
+                            val photo = c.databaseRepository.savePhoto(entrance, task, uuid, location)
+                            val path = c.pathsProvider.getEntrancePhotoFileByID(task.id, entrance, uuid.toString())
                             messages.send(ReportMessages.msgNewPhoto(PhotoWithUri(photo, path.toUri())))
                         }
                     }

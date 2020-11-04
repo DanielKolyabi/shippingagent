@@ -19,26 +19,28 @@ class ReportPagerAdapter(
     val getAllTaskItems: () -> List<TaskItem>,
     fm: FragmentManager
 ) : FragmentStatePagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
-    private var taskWithItemInternal: ReportTaskWithItem? = null
+    private var taskItemInternal: TaskItem? = null
+    private var allTaskItems: List<TaskItem> = emptyList()
     private val fragments: MutableMap<Int, WeakReference<ReportFragment>> = mutableMapOf()
 
-    fun setTaskWithItem(taskWithItem: ReportTaskWithItem?){
-        taskWithItemInternal = taskWithItem
+    fun setTaskWithItem(taskWithItem: TaskItem?, allTaskItems: List<TaskItem>) {
+        taskItemInternal = taskWithItem
+        this.allTaskItems = allTaskItems
         notifyDataSetChanged()
     }
 
-    private fun openedEntrances(): List<Entrance> = taskWithItemInternal?.taskItem
+    private fun openedEntrances(): List<Entrance> = taskItemInternal
         ?.entrances
         ?.sortedBy { it.state == EntranceState.CLOSED }
         ?: emptyList()
 
     override fun getItem(position: Int): Fragment {
-        val ctxTask = taskWithItemInternal ?: return LoadingFragment()
+        val ctxTask = taskItemInternal ?: return LoadingFragment()
 
         val fragment = ReportFragment.newInstance(
-            ctxTask.task,
-            ctxTask.taskItem,
-            openedEntrances()[position]
+            ctxTask,
+            openedEntrances()[position],
+            allTaskItems.map { TaskItemWithTaskIds(it.taskId, it.id) }
         )
         fragments[position] = WeakReference(fragment)
 

@@ -25,7 +25,10 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.domain.models.*
+import ru.relabs.kurjercontroller.domain.models.ApartmentNumber
+import ru.relabs.kurjercontroller.domain.models.Entrance
+import ru.relabs.kurjercontroller.domain.models.EntranceNumber
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.presentation.base.TextChangeListener
 import ru.relabs.kurjercontroller.presentation.base.fragment.BaseFragment
 import ru.relabs.kurjercontroller.presentation.base.recycler.DelegateAdapter
@@ -34,10 +37,12 @@ import ru.relabs.kurjercontroller.presentation.base.tea.defaultController
 import ru.relabs.kurjercontroller.presentation.base.tea.rendersCollector
 import ru.relabs.kurjercontroller.presentation.base.tea.sendMessage
 import ru.relabs.kurjercontroller.presentation.helpers.HintHelper
+import ru.relabs.kurjercontroller.presentation.reportPager.TaskItemWithTaskIds
 import ru.relabs.kurjercontroller.utils.debug
 import ru.relabs.kurjercontroller.utils.extensions.showDialog
 import java.io.File
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 /**
@@ -52,14 +57,14 @@ class ReportFragment : BaseFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val task = arguments?.getParcelable<Task>(ARG_TASK)
         val taskItem = arguments?.getParcelable<TaskItem>(ARG_TASK_ITEM)
+        val allTaskItems = arguments?.getParcelableArrayList<TaskItemWithTaskIds>(ARG_TASK_ITEMS_ALL)
         val entrance = arguments?.getParcelable<Entrance>(ARG_ENTRANCES)
-        if (task == null || taskItem == null || entrance == null) {
+        if (taskItem == null || entrance == null || allTaskItems == null) {
             //TODO: Show error
             return
         }
-        controller.start(ReportMessages.msgInit(task, taskItem, entrance))
+        controller.start(ReportMessages.msgInit(taskItem, entrance, allTaskItems.toList()))
     }
 
     override fun onDestroy() {
@@ -126,7 +131,12 @@ class ReportFragment : BaseFragment() {
                     ReportMessages.msgApartmentStateChanged(ApartmentNumber(-1), state)
                 )
             },
-            ReportAdapter.lookout { state -> uiScope.sendMessage(controller, ReportMessages.msgApartmentStateChanged(ApartmentNumber(-1), state)) }
+            ReportAdapter.lookout { state ->
+                uiScope.sendMessage(
+                    controller,
+                    ReportMessages.msgApartmentStateChanged(ApartmentNumber(-1), state)
+                )
+            }
         )
         view.appartaments_list.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.VERTICAL, false)
         view.appartaments_list.adapter = apartmentsAdapter
@@ -159,7 +169,12 @@ class ReportFragment : BaseFragment() {
                 ReportRenders.renderEntranceEuroKeys(view.entrance_euro_key, entranceEuroKeysAdapter),
                 ReportRenders.renderPhotos(photosAdapter),
                 ReportRenders.renderNotes(view.hint_text),
-                ReportRenders.renderApartmentsInterval(view.appartaments_from, apartmentsFromTextListener, view.appartaments_to, apartmentsToTextListener),
+                ReportRenders.renderApartmentsInterval(
+                    view.appartaments_from,
+                    apartmentsFromTextListener,
+                    view.appartaments_to,
+                    apartmentsToTextListener
+                ),
                 ReportRenders.renderApartments(apartmentsAdapter),
                 ReportRenders.renderApartmentsListBackground(view.list_background),
                 ReportRenders.renderApartmentListTypeButton(view.list_type_button),
@@ -182,7 +197,7 @@ class ReportFragment : BaseFragment() {
         controller.context.showDescriptionInputDialog = ::showDescriptionInputDialog
     }
 
-    private fun showDescriptionInputDialog(apartmentNumber: ApartmentNumber, description: String){
+    private fun showDescriptionInputDialog(apartmentNumber: ApartmentNumber, description: String) {
         val input = EditText(requireContext()).apply {
             inputType = InputType.TYPE_CLASS_TEXT
             setText(description)
@@ -192,7 +207,10 @@ class ReportFragment : BaseFragment() {
             .setTitle("Описание")
             .setView(input)
             .setPositiveButton("Ок") { _, _ ->
-                uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionChanged(apartmentNumber, input.text.toString()))
+                uiScope.sendMessage(
+                    controller,
+                    ReportMessages.msgApartmentDescriptionChanged(apartmentNumber, input.text.toString())
+                )
             }
             .setNegativeButton("Отмена") { _, _ -> }
             .show()
@@ -311,7 +329,7 @@ class ReportFragment : BaseFragment() {
         view.lock_input_overlay.setOnClickListener {
             uiScope.sendMessage(controller, ReportMessages.msgPhotoClicked())
         }
-        view.user_explanation_input.setOnClickListener{
+        view.user_explanation_input.setOnClickListener {
             uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionClicked(ApartmentNumber(-1)))
         }
     }
@@ -330,18 +348,19 @@ class ReportFragment : BaseFragment() {
     }
 
     companion object {
-        const val ARG_TASK = "task"
         const val ARG_TASK_ITEM = "taskItem"
+        const val ARG_TASK_ITEMS_ALL = "allTaskItems"
         const val ARG_ENTRANCES = "entrances"
         const val REQUEST_PHOTO_CODE = 501
 
-        fun newInstance(task: Task, taskItem: TaskItem, entrance: Entrance) = ReportFragment().apply {
-            arguments = Bundle().apply {
-                putParcelable(ARG_TASK, task)
-                putParcelable(ARG_TASK_ITEM, taskItem)
-                putParcelable(ARG_ENTRANCES, entrance)
+        fun newInstance(taskItem: TaskItem, entrance: Entrance, otherTaskItemWithTaskIds: List<TaskItemWithTaskIds>) =
+            ReportFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(ARG_TASK_ITEM, taskItem)
+                    putParcelable(ARG_ENTRANCES, entrance)
+                    putParcelableArrayList(ARG_TASK_ITEMS_ALL, ArrayList(otherTaskItemWithTaskIds))
+                }
             }
-        }
     }
 
     private data class ReportPhotoData(

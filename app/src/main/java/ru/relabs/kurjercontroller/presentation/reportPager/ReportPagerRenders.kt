@@ -30,7 +30,7 @@ object ReportPagerRenders {
         {it.tasks to (it.selectedTask ?: it.tasks.firstOrNull())},
         {(tasks, selectedTask) ->
             if(selectedTask != null){
-                adapter.setTaskWithItem(selectedTask)
+                adapter.setTaskWithItem(selectedTask.taskItem)
             }else{
                 adapter.setTaskWithItem(null)
             }

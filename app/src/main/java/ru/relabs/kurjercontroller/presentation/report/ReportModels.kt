@@ -11,6 +11,7 @@ import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.presentation.base.tea.*
 import ru.relabs.kurjercontroller.presentation.reportPager.ReportTaskWithItem
+import ru.relabs.kurjercontroller.presentation.reportPager.TaskItemWithTaskIds
 import java.io.File
 import java.util.*
 
@@ -21,7 +22,7 @@ import java.util.*
 data class PhotoWithUri(val photo: EntrancePhoto, val uri: Uri)
 
 data class ReportState(
-    val task: ReportTaskWithItem? = null,
+    val taskItem: TaskItem? = null,
     val entrance: Entrance? = null,
     val defaultReportType: ReportApartmentButtonsMode = ReportApartmentButtonsMode.Main,
     val saved: EntranceResultEntity? = null,
@@ -30,6 +31,7 @@ data class ReportState(
     val selectedEuroKey: String? = null,
     val entranceKeys: List<String> = emptyList(),
     val selectedKey: String? = null,
+    val allTaskItemsIds: List<TaskItemWithTaskIds> = emptyList(),
 
     val selectedEntrancePhotos: List<PhotoWithUri> = emptyList(),
 

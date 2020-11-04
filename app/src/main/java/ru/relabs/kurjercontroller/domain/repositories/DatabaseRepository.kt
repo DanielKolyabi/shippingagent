@@ -439,7 +439,24 @@ class DatabaseRepository(
         taskItem: TaskItem,
         entrance: Entrance
     ): EntranceResultEntity? = withContext(Dispatchers.IO) {
-        db.entranceResultDao().getByEntrance(taskItem.taskId.id, taskItem.id.id, entrance.number.number)
+        getEntranceResult(taskItem.taskId, taskItem.id, entrance.number)
+    }
+
+    suspend fun getEntranceResult(
+        taskId: TaskId,
+        taskItemId: TaskItemId,
+        entrance: EntranceNumber
+    ): EntranceResultEntity? = withContext(Dispatchers.IO) {
+        db.entranceResultDao().getByEntrance(taskId.id, taskItemId.id, entrance.number)
+    }
+
+    suspend fun getEntrance(
+        taskId: TaskId,
+        taskItemId: TaskItemId,
+        entrance: EntranceNumber
+    ): Entrance? = withContext(Dispatchers.IO) {
+        db.entranceDao().getByNumber(taskId.id, taskItemId.id, entrance.number)
+            ?.let { DatabaseEntranceMapper.fromEntity(it) }
     }
 
     suspend fun getEntranceApartments(

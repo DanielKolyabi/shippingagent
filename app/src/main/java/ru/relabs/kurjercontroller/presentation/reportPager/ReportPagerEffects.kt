@@ -25,7 +25,7 @@ object ReportPagerEffects {
             }
         }
         val selectedTask = taskWithItems.firstOrNull {
-            it.task.id == selectedTaskId?.taskId && it.taskItem.id == selectedTaskId?.taskItemId
+            it.taskItem.taskId == selectedTaskId?.taskId && it.taskItem.id == selectedTaskId.taskItemId
         } ?: taskWithItems.first()
 
         messages.send(ReportPagerMessages.msgTasksLoaded(taskWithItems, selectedTask))

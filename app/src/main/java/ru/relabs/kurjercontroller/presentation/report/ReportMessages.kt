@@ -6,7 +6,7 @@ import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffects
 import ru.relabs.kurjercontroller.presentation.base.tea.msgState
-import ru.relabs.kurjercontroller.presentation.reportPager.ReportTaskWithItem
+import ru.relabs.kurjercontroller.presentation.reportPager.TaskItemWithTaskIds
 import java.io.File
 import java.util.*
 
@@ -16,18 +16,19 @@ import java.util.*
 
 object ReportMessages {
     fun msgInit(
-        task: Task,
         taskItem: TaskItem,
-        entrance: Entrance
+        entrance: Entrance,
+        allTaskItems: List<TaskItemWithTaskIds>
     ): ReportMessage = msgEffects(
         {
             it.copy(
-                task = ReportTaskWithItem(task, taskItem),
+                taskItem = taskItem,
                 entrance = entrance,
-                defaultReportType = taskItem.defaultReportType
+                defaultReportType = taskItem.defaultReportType,
+                allTaskItemsIds = allTaskItems
             )
         },
-        { listOf(ReportEffects.effectLoadSavedData(task, taskItem, entrance)) }
+        { listOf(ReportEffects.effectLoadSavedData(taskItem, entrance)) }
     )
 
     fun msgAddLoaders(i: Int): ReportMessage =
@@ -105,17 +106,41 @@ object ReportMessages {
     fun msgApartmentDescriptionChanged(apartmentNumber: ApartmentNumber, description: String): ReportMessage =
         msgEffect(ReportEffects.effectChangeApartmentDescription(apartmentNumber, description))
 
-    private fun msgUpdateSavedAndSave(mapper: (ReportState) -> ReportState): ReportMessage = msgEffects(
-        { mapper(it) },
-        { listOfNotNull(mapper(it).saved?.let { ReportEffects.effectSaveEntranceChanges(it) }) }
-    )
+    private fun msgUpdateSavedAndSave(
+        saveForSameEntrances: Boolean = false,
+        mapper: (ReportState) -> ReportState
+    ): ReportMessage =
+        msgEffects(
+            { mapper(it) },
+            {
+                listOfNotNull(
+                    if(saveForSameEntrances){
+                        mapper(it).saved?.let { ReportEffects.effectSaveEntranceChanges(it) }
+                    }else{
+                        ReportEffects.effectSaveEntranceChangesExternal(mapper)
+                    }
+                )
+            }
+        )
 
-    fun msgApartmentsFromChanged(startApartment: Int?): ReportMessage = msgUpdateSavedAndSave {
-        it.copy(saved = it.saved?.copy(apartmentFrom = startApartment ?: it.saved.apartmentFrom))
+    fun msgApartmentsFromChanged(startApartment: Int?): ReportMessage = msgUpdateSavedAndSave(true) { s ->
+        s.copy(
+            saved = s.saved?.copy(
+                apartmentFrom = startApartment
+                    ?.takeIf { it > (s.saved.apartmentFrom ?: s.entrance?.startApartments ?: 0) }
+                    ?: s.saved.apartmentFrom
+            )
+        )
     }
 
-    fun msgApartmentsToChanged(endApartment: Int?): ReportMessage = msgUpdateSavedAndSave {
-        it.copy(saved = it.saved?.copy(apartmentTo = endApartment ?: it.saved.apartmentTo))
+    fun msgApartmentsToChanged(endApartment: Int?): ReportMessage = msgUpdateSavedAndSave(true) { s ->
+        s.copy(
+            saved = s.saved?.copy(
+                apartmentTo = endApartment
+                    ?.takeIf { it > (s.saved.apartmentTo ?: s.entrance?.endApartments ?: 0) }
+                    ?: s.saved.apartmentTo
+            )
+        )
     }
 
     fun msgCodeChanged(code: String): ReportMessage = msgUpdateSavedAndSave {
@@ -154,31 +179,32 @@ object ReportMessages {
         it.copy(saved = it.saved?.copy(entranceClosed = it.saved.entranceClosed?.not()))
     }
 
-    fun msgChangeApartmentButtonGroup(apartment: ApartmentNumber, newButtonGroup: ReportApartmentButtonsMode): ReportMessage = msgState { s ->
-        if (s.task != null && s.entrance != null) {
-            s.copy(
-                savedApartments = if (s.savedApartments.firstOrNull { it.apartmentNumber == apartment } != null) {
-                    s.savedApartments.map {
-                        if (it.apartmentNumber == apartment) {
-                            it.copy(buttonGroup = newButtonGroup)
-                        } else {
-                            it
+    fun msgChangeApartmentButtonGroup(apartment: ApartmentNumber, newButtonGroup: ReportApartmentButtonsMode): ReportMessage =
+        msgState { s ->
+            if (s.taskItem != null && s.entrance != null) {
+                s.copy(
+                    savedApartments = if (s.savedApartments.firstOrNull { it.apartmentNumber == apartment } != null) {
+                        s.savedApartments.map {
+                            if (it.apartmentNumber == apartment) {
+                                it.copy(buttonGroup = newButtonGroup)
+                            } else {
+                                it
+                            }
                         }
+                    } else {
+                        s.savedApartments + listOf(
+                            ApartmentResult.empty(
+                                s.taskItem,
+                                s.entrance,
+                                apartment
+                            ).copy(buttonGroup = newButtonGroup)
+                        )
                     }
-                } else {
-                    s.savedApartments + listOf(
-                        ApartmentResult.empty(
-                            s.task,
-                            s.entrance,
-                            apartment
-                        ).copy(buttonGroup = newButtonGroup)
-                    )
-                }
-            )
-        } else {
-            s
+                )
+            } else {
+                s
+            }
         }
-    }
 
     fun msgListTypeChanged(): ReportMessage =
         msgEffect(ReportEffects.effectChangeButtonGroup())

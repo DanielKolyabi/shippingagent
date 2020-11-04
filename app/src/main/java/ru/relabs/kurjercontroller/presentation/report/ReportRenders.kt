@@ -70,7 +70,7 @@ object ReportRenders {
     )
 
     fun renderNotes(hintText: TextView): ReportRender = renderT(
-        { it.task?.taskItem?.notes.orEmpty() },
+        { it.taskItem?.notes.orEmpty() },
         { notes ->
             hintText.text = Html.fromHtml((3 downTo 1).joinToString("<br/>") { notes.getOrElse(it - 1) { "" } })
         }
@@ -97,7 +97,7 @@ object ReportRenders {
             RenderApartmentsData(
                 (it.saved?.apartmentFrom ?: it.entrance?.startApartments) to (it.saved?.apartmentTo
                     ?: it.entrance?.endApartments),
-                it.task?.taskItem,
+                it.taskItem,
                 it.defaultReportType,
                 it.savedApartments,
                 it.saved?.hasLookupPost ?: it.entrance?.hasLookout ?: false
