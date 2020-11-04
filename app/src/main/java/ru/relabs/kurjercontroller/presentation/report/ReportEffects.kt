@@ -9,10 +9,7 @@ import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
-import ru.relabs.kurjercontroller.utils.Either
-import ru.relabs.kurjercontroller.utils.ImageUtils
-import ru.relabs.kurjercontroller.utils.Left
-import ru.relabs.kurjercontroller.utils.Right
+import ru.relabs.kurjercontroller.utils.*
 import java.io.File
 import java.util.*
 
@@ -74,6 +71,12 @@ object ReportEffects {
                 if (savedResult != null && entrance != null) {
                     val fakeState = s.copy(saved = savedResult, entrance = entrance)
                     val mappedFakeState = mapper(fakeState)
+                    debug(
+                        """fake from: ${fakeState.saved?.apartmentFrom}
+                        fake to: ${fakeState.saved?.apartmentTo}
+                        mapped fake from: ${mappedFakeState.saved?.apartmentFrom}
+                        mapped fake to: ${mappedFakeState.saved?.apartmentTo} 
+                    """.trimIndent())
                     mappedFakeState.saved?.let {
                         messages.send(msgEffect(effectSaveEntranceChanges(it)))
                     }

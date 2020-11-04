@@ -7,6 +7,7 @@ import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffects
 import ru.relabs.kurjercontroller.presentation.base.tea.msgState
 import ru.relabs.kurjercontroller.presentation.reportPager.TaskItemWithTaskIds
+import ru.relabs.kurjercontroller.utils.debug
 import java.io.File
 import java.util.*
 
@@ -135,17 +136,22 @@ object ReportMessages {
         s.copy(
             saved = s.saved?.copy(
                 apartmentFrom = startApartment
-                    ?.takeIf { it > (s.saved.apartmentFrom ?: s.entrance?.startApartments ?: 0) }
+                    ?.takeIf { it < (s.saved.apartmentTo ?: s.entrance?.endApartments ?: 0) }
                     ?: s.saved.apartmentFrom
             )
         )
     }
 
     fun msgApartmentsToChanged(endApartment: Int?): ReportMessage = msgUpdateSavedAndSave(true) { s ->
+        debug("""mapper to: 
+            |endApartment = ${endApartment}
+            |(s.saved.apartmentTo ?: s.entrance?.endApartments ?: 0) = ${(s.saved?.apartmentTo ?: s.entrance?.endApartments ?: 0)}
+            |s.saved.apartmentTo = ${s.saved?.apartmentTo}
+        """.trimMargin())
         s.copy(
             saved = s.saved?.copy(
                 apartmentTo = endApartment
-                    ?.takeIf { it > (s.saved.apartmentTo ?: s.entrance?.endApartments ?: 0) }
+                    ?.takeIf { it > (s.saved.apartmentFrom ?: s.entrance?.startApartments ?: 0) }
                     ?: s.saved.apartmentTo
             )
         )
