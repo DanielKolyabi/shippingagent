@@ -1,4 +1,4 @@
-package ru.relabs.kurjercontroller.presentation.fragmentsOld.report.adapters
+package ru.relabs.kurjercontroller.presentation.report
 
 import android.content.Context
 import android.view.LayoutInflater

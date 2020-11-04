@@ -46,9 +46,15 @@ object ReportMessages {
                 saved = savedEntrance,
                 savedApartments = savedApartments,
                 entranceKeys = entranceKeys,
-                selectedKey = savedEntrance?.key ?: entranceKeys.firstOrNull() ?: "",
+                selectedKey = savedEntrance.key?.takeIf { it.isNotBlank() }
+                    ?: entranceKeys.firstOrNull { it == "Нет" }
+                    ?: entranceKeys.firstOrNull()
+                    ?: "",
                 entranceEuroKeys = entranceEuroKeys,
-                selectedEuroKey = savedEntrance?.euroKey ?: entranceEuroKeys.firstOrNull() ?: "",
+                selectedEuroKey = savedEntrance.euroKey?.takeIf { it.isNotBlank() }
+                    ?: entranceEuroKeys.firstOrNull { it == "Нет" }
+                    ?: entranceEuroKeys.firstOrNull()
+                    ?: "",
                 selectedEntrancePhotos = photos
             )
         }

@@ -13,7 +13,6 @@ import ru.relabs.kurjercontroller.domain.models.EntrancePhoto
 import ru.relabs.kurjercontroller.presentation.base.recycler.IAdapterDelegate
 import ru.relabs.kurjercontroller.presentation.base.recycler.delegateDefine
 import ru.relabs.kurjercontroller.presentation.base.recycler.holderDefine
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.report.adapters.ApartmentButtonsPagerAdapter
 import ru.relabs.kurjercontroller.utils.extensions.setSelectButtonActive
 import ru.relabs.kurjercontroller.utils.extensions.setVisible
 
