@@ -576,6 +576,20 @@ class DatabaseRepository(
     suspend fun saveEntranceResult(entrance: EntranceResultEntity) = withContext(Dispatchers.IO) {
         db.entranceResultDao().insert(entrance)
     }
+
+    suspend fun closeEntrance(taskId: TaskId, taskItemId: TaskItemId, number: EntranceNumber) = withContext(Dispatchers.IO) {
+        db.entranceDao()
+            .getByNumber(taskId.id, taskItemId.id, number.number)
+            ?.copy(state = EntranceState.CLOSED.toInt())
+            ?.let { db.entranceDao().update(it) }
+    }
+
+    suspend fun closeTaskItem(task: TaskId, taskItem: TaskItemId) = withContext(Dispatchers.IO) {
+        db.taskItemDao()
+            .getByTaskItemId(task.id, taskItem.id)
+            ?.copy(closeTime = DateTime.now())
+            ?.let { db.taskItemDao().update(it) }
+    }
 }
 
 sealed class SendQueryData {

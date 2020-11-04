@@ -3,7 +3,6 @@ package ru.relabs.kurjercontroller.domain.models
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 import ru.relabs.kurjercontroller.presentation.report.ReportApartmentButtonsMode
-import ru.relabs.kurjercontroller.presentation.reportPager.ReportTaskWithItem
 
 @Parcelize
 data class ApartmentResultId(val id: Int): Parcelable

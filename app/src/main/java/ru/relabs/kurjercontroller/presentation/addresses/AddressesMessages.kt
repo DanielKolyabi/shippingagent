@@ -4,7 +4,6 @@ import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffects
-import ru.relabs.kurjercontroller.presentation.base.tea.msgEmpty
 import ru.relabs.kurjercontroller.presentation.base.tea.msgState
 import ru.relabs.kurjercontroller.utils.SearchUtils
 
@@ -55,12 +54,12 @@ object AddressesMessages {
     fun msgSearch(searchText: String): AddressesMessage =
         msgState { it.copy(searchFilter = searchText) }
 
-    fun msgTaskItemClosed(taskItemId: TaskItemId): AddressesMessage = msgEffects(
+    fun msgTaskItemClosed(taskId: TaskId, taskItemId: TaskItemId): AddressesMessage = msgEffects(
         { s ->
             val newTasks = s.tasks.map { t ->
                 t.copy(
                     taskItems = t.taskItems.map { ti ->
-                        if (ti.id == taskItemId) {
+                        if (ti.id == taskItemId && ti.taskId == taskId) {
                             ti.copy(closeTime = DateTime.now())
                         } else {
                             ti
@@ -85,6 +84,7 @@ object AddressesMessages {
         },
         {
             listOf(
+                AddressesEffects.effectLoadTasks(it.tasks.map { it.id }),
                 AddressesEffects.effectValidateTasks()
             )
         }

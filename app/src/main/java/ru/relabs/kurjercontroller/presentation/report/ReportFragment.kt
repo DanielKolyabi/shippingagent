@@ -211,6 +211,8 @@ class ReportFragment : BaseFragment() {
         controller.context.errorContext.attach(view)
 
         controller.context.showError = ::showFatalError
+        controller.context.showErrorMessage = ::showErrorMessage
+        controller.context.showCloseEntranceDialog = ::showCloseEntranceDialog
         controller.context.requestPhoto = ::requestPhoto
         controller.context.showDescriptionInputDialog = ::showDescriptionInputDialog
     }
@@ -233,6 +235,27 @@ class ReportFragment : BaseFragment() {
             }
             .setNegativeButton("Отмена") { _, _ -> }
             .show()
+    }
+
+    private suspend fun showErrorMessage(messageId: Int) = withContext(Dispatchers.Main) {
+        showDialog(
+            getString(messageId),
+            R.string.ok to {}
+        )
+
+        Unit
+    }
+
+    private suspend fun showCloseEntranceDialog() = withContext(Dispatchers.Main) {
+        showDialog(
+            getString(R.string.close_entrance_dialog_message),
+            R.string.ok to {
+                uiScope.sendMessage(controller, ReportMessages.msgCloseEntrance())
+            },
+            R.string.no to {}
+        )
+
+        Unit
     }
 
     private suspend fun showFatalError(code: String, isFatal: Boolean) = withContext(Dispatchers.Main) {
@@ -351,6 +374,9 @@ class ReportFragment : BaseFragment() {
         view.user_explanation_input.setOnClickListener {
             uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionClicked(ApartmentNumber(-1)))
         }
+        view.close_button.setOnClickListener {
+            uiScope.sendMessage(controller, ReportMessages.msgCloseEntranceClick())
+        }
     }
 
     override fun onDestroyView() {
@@ -358,6 +384,8 @@ class ReportFragment : BaseFragment() {
         renderJob?.cancel()
         controller.context.errorContext.detach()
         controller.context.showError = { _, _ -> }
+        controller.context.showCloseEntranceDialog = {}
+        controller.context.showErrorMessage = {}
         controller.context.requestPhoto = { _, _, _, _ -> }
         controller.context.showDescriptionInputDialog = { _, _, _ -> }
     }

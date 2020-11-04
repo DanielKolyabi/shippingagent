@@ -15,8 +15,6 @@ import java.lang.ref.WeakReference
  */
 
 class ReportPagerAdapter(
-    val onEntranceClosed: (task: Task, taskItem: TaskItem, entrance: Entrance) -> Unit,
-    val getAllTaskItems: () -> List<TaskItem>,
     fm: FragmentManager
 ) : FragmentStatePagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
     private var taskItemInternal: TaskItem? = null
@@ -43,23 +41,6 @@ class ReportPagerAdapter(
             allTaskItems.map { TaskItemWithTaskIds(it.taskId, it.id) }
         )
         fragments[position] = WeakReference(fragment)
-
-        //TODO: Refactor?
-//        fragment.callback = object : ReportFragment.Callback {
-//            override fun getAllTaskItems(): List<TaskItem> =
-//                this@ReportPagerAdapter.getAllTaskItems()
-//
-//
-//            override fun onEntranceClosed(task: Task, taskItem: TaskItem, entrance: Entrance) {
-//                this@ReportPagerAdapter.onEntranceClosed(task, taskItem, entrance)
-//            }
-//
-//            override fun onEntranceChanged(entrance: Entrance) {
-//                fragments.forEach { ref ->
-//                    ref.value.get()?.onChanged(entrance)
-//                }
-//            }
-//        }
 
         return fragment
     }

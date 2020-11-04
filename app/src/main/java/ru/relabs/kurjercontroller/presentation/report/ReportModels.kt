@@ -9,6 +9,7 @@ import ru.relabs.kurjercontroller.domain.providers.LocationProvider
 import ru.relabs.kurjercontroller.domain.providers.PathsProvider
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
+import ru.relabs.kurjercontroller.domain.useCases.ReportUseCase
 import ru.relabs.kurjercontroller.presentation.base.tea.*
 import ru.relabs.kurjercontroller.presentation.reportPager.TaskItemWithTaskIds
 import java.io.File
@@ -46,8 +47,11 @@ class ReportContext(val errorContext: ErrorContextImpl = ErrorContextImpl()) :
     val databaseRepository: DatabaseRepository by inject()
     val controlRepository: ControlRepository by inject()
     val pathsProvider: PathsProvider by inject()
+    val reportUseCase: ReportUseCase by inject()
 
     var showError: suspend (code: String, isFatal: Boolean) -> Unit = { _, _ -> }
+    var showErrorMessage: suspend (messageId: Int) -> Unit = { }
+    var showCloseEntranceDialog: suspend () -> Unit = { }
     var requestPhoto: (entrance: EntranceNumber, multiplePhoto: Boolean, targetFile: File, uuid: UUID) -> Unit = { _, _, _, _ -> }
     var showDescriptionInputDialog: (ApartmentNumber, String, Boolean) -> Unit = { _, _, _ -> }
 }

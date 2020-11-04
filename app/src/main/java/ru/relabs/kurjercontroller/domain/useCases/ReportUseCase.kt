@@ -20,7 +20,7 @@ class ReportUseCase(
     private val taskEventController: TaskEventController
 ) {
 
-    suspend fun createReport(taskItem: TaskItem, entrance: Entrance, publisher: TaskPublisher, location: GPSCoordinatesModel) {
+    suspend fun createReport(taskItem: TaskItem, entrance: Entrance, location: Location) {
         val entranceResult = databaseRepository.getEntranceResult(taskItem, entrance)
         val apartmentResults = databaseRepository.getEntranceApartments(taskItem, entrance)
 
@@ -52,21 +52,17 @@ class ReportUseCase(
                 )
             },
             DateTime.now(),
-            publisher.id.id,
+            taskItem.publisherId.id,
             entranceResult?.mailboxType ?: entrance.mailboxType,
-            location.lat,
-            location.long,
-            location.time,
+            location.latitude,
+            location.longitude,
+            DateTime(location.time),
             entranceResult?.entranceClosed ?: false
         )
 
         databaseRepository.createEntranceReport(report)
+        databaseRepository.closeEntrance(taskItem.taskId, taskItem.id, entrance.number)
 
         taskEventController.send(TaskEvent.EntranceClosed(taskItem.taskId, taskItem.id, entrance.number))
-    }
-
-    private fun getReportLocation(location: Location?) = when (location) {
-        null -> GPSCoordinatesModel(0.0, 0.0, DateTime(0))
-        else -> GPSCoordinatesModel(location.latitude, location.longitude, DateTime(location.time))
     }
 }

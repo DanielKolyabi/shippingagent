@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_report_pager.view.*
-import kotlinx.android.synthetic.main.fragment_report_pager.view.loading
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -73,13 +72,7 @@ class ReportPagerFragment : BaseFragment() {
         view.tasks_list.layoutManager = layoutManager
         view.tasks_list.adapter = taskButtonsAdapter
 
-        val pagerAdapter = ReportPagerAdapter(
-            { task, taskItem, entrance ->
-                uiScope.sendMessage(controller, ReportPagerMessages.msgEntranceClosed(task, taskItem, entrance))
-            },
-            { emptyList() },
-            requireFragmentManager()
-        )
+        val pagerAdapter = ReportPagerAdapter(requireFragmentManager())
         view.view_pager.adapter = pagerAdapter
 
         bindControls(view)

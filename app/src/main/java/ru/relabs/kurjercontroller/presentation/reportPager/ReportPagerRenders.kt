@@ -29,15 +29,15 @@ object ReportPagerRenders {
         { it.tasks to (it.selectedTask ?: it.tasks.firstOrNull()) },
         { (tasks, selectedTask) ->
             if (selectedTask != null) {
-                adapter.setTaskWithItem(selectedTask.taskItem, tasks.map { it.taskItem })
+                adapter.setTaskWithItem(selectedTask, tasks)
             } else {
-                adapter.setTaskWithItem(null, tasks.map { it.taskItem })
+                adapter.setTaskWithItem(null, tasks)
             }
         }
     )
 
     fun renderTitle(view: TextView): ReportPagerRender = renderT(
-        { it.tasks.firstOrNull()?.taskItem?.address?.name ?: view.resources.getString(R.string.loading) },
+        { it.tasks.firstOrNull()?.address?.name ?: view.resources.getString(R.string.loading) },
         { view.text = it }
     )
 }

@@ -7,7 +7,6 @@ import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffects
 import ru.relabs.kurjercontroller.presentation.base.tea.msgState
 import ru.relabs.kurjercontroller.presentation.reportPager.TaskItemWithTaskIds
-import ru.relabs.kurjercontroller.utils.debug
 import java.io.File
 import java.util.*
 
@@ -143,11 +142,6 @@ object ReportMessages {
     }
 
     fun msgApartmentsToChanged(endApartment: Int?): ReportMessage = msgUpdateSavedAndSave(true) { s ->
-        debug("""mapper to: 
-            |endApartment = ${endApartment}
-            |(s.saved.apartmentTo ?: s.entrance?.endApartments ?: 0) = ${(s.saved?.apartmentTo ?: s.entrance?.endApartments ?: 0)}
-            |s.saved.apartmentTo = ${s.saved?.apartmentTo}
-        """.trimMargin())
         s.copy(
             saved = s.saved?.copy(
                 apartmentTo = endApartment
@@ -242,4 +236,26 @@ object ReportMessages {
                 }
             )
         }
+
+    fun msgCloseEntranceClick(): ReportMessage = msgEffects(
+        { it },
+        { s ->
+            val startApartmentsChanged = s.saved?.apartmentFrom != s.entrance?.startApartments && s.saved?.apartmentFrom != null
+            val endApartmentsChanged = s.saved?.apartmentTo != s.entrance?.endApartments && s.saved?.apartmentTo != null
+            listOf(
+                if ((startApartmentsChanged || endApartmentsChanged) && s.selectedEntrancePhotos.isEmpty()) {
+                    ReportEffects.effectShowPhotoRequiredError()
+                } else {
+                    ReportEffects.effectCloseEntranceClicked()
+                }
+            )
+        }
+    )
+
+    fun msgCloseEntrance(): ReportMessage = msgEffects(
+        { it.copy(entrance = it.entrance?.copy(state = EntranceState.CLOSED)) },
+        {
+            listOf(ReportEffects.effectCloseEntrance())
+        }
+    )
 }
