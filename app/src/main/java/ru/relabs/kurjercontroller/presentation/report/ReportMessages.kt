@@ -57,7 +57,15 @@ object ReportMessages {
         msgEffect(ReportEffects.effectCreatePhoto(false))
 
     fun msgRemovePhotoClicked(removedPhoto: EntrancePhoto): ReportMessage = msgEffects(
-        { state -> state.copy(selectedEntrancePhotos = state.selectedEntrancePhotos.filter { photo -> photo.photo != removedPhoto }) },
+        { s ->
+            s.copy(
+                selectedEntrancePhotos = if (s.entrance?.state == EntranceState.CREATED && s.saved?.entranceClosed != true) {
+                    s.selectedEntrancePhotos.filter { photo -> photo.photo != removedPhoto }
+                } else {
+                    s.selectedEntrancePhotos
+                }
+            )
+        },
         { listOf(ReportEffects.effectRemovePhoto(removedPhoto)) }
     )
 
@@ -114,9 +122,9 @@ object ReportMessages {
             { mapper(it) },
             {
                 listOfNotNull(
-                    if(saveForSameEntrances){
+                    if (saveForSameEntrances) {
                         mapper(it).saved?.let { ReportEffects.effectSaveEntranceChanges(it) }
-                    }else{
+                    } else {
                         ReportEffects.effectSaveEntranceChangesExternal(mapper)
                     }
                 )

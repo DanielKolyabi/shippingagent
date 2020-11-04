@@ -2,7 +2,6 @@ package ru.relabs.kurjercontroller.presentation.reportPager
 
 import android.view.View
 import android.widget.TextView
-import androidx.viewpager.widget.ViewPager
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.presentation.base.recycler.DelegateAdapter
 import ru.relabs.kurjercontroller.presentation.base.tea.renderT
@@ -27,12 +26,12 @@ object ReportPagerRenders {
     )
 
     fun renderPager(adapter: ReportPagerAdapter): ReportPagerRender = renderT(
-        {it.tasks to (it.selectedTask ?: it.tasks.firstOrNull())},
-        {(tasks, selectedTask) ->
-            if(selectedTask != null){
-                adapter.setTaskWithItem(selectedTask.taskItem)
-            }else{
-                adapter.setTaskWithItem(null)
+        { it.tasks to (it.selectedTask ?: it.tasks.firstOrNull()) },
+        { (tasks, selectedTask) ->
+            if (selectedTask != null) {
+                adapter.setTaskWithItem(selectedTask.taskItem, tasks.map { it.taskItem })
+            } else {
+                adapter.setTaskWithItem(null, tasks.map { it.taskItem })
             }
         }
     )

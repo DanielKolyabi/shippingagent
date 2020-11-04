@@ -84,7 +84,7 @@
             app:layout_constraintBottom_toBottomOf="@+id/appartaments_label"
             android:textSize="14sp"/>
 
-    <EditText
+    v<EditText
             android:id="@+id/floors"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

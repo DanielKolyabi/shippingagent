@@ -10,7 +10,6 @@ import ru.relabs.kurjercontroller.domain.providers.PathsProvider
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.presentation.base.tea.*
-import ru.relabs.kurjercontroller.presentation.reportPager.ReportTaskWithItem
 import ru.relabs.kurjercontroller.presentation.reportPager.TaskItemWithTaskIds
 import java.io.File
 import java.util.*
@@ -50,7 +49,7 @@ class ReportContext(val errorContext: ErrorContextImpl = ErrorContextImpl()) :
 
     var showError: suspend (code: String, isFatal: Boolean) -> Unit = { _, _ -> }
     var requestPhoto: (entrance: EntranceNumber, multiplePhoto: Boolean, targetFile: File, uuid: UUID) -> Unit = { _, _, _, _ -> }
-    var showDescriptionInputDialog: (ApartmentNumber, String) -> Unit = { _, _ -> }
+    var showDescriptionInputDialog: (ApartmentNumber, String, Boolean) -> Unit = { _, _, _ -> }
 }
 
 typealias ReportMessage = ElmMessage<ReportContext, ReportState>

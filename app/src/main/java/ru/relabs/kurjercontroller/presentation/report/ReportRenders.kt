@@ -76,7 +76,12 @@ object ReportRenders {
         }
     )
 
-    fun renderApartmentsInterval(apartmentsFrom: EditText, fromWatcher: TextWatcher, apartmentsTo: EditText, toWatcher: TextWatcher): ReportRender = renderT(
+    fun renderApartmentsInterval(
+        apartmentsFrom: EditText,
+        fromWatcher: TextWatcher,
+        apartmentsTo: EditText,
+        toWatcher: TextWatcher
+    ): ReportRender = renderT(
         { (it.saved?.apartmentFrom ?: it.entrance?.startApartments) to (it.saved?.apartmentTo ?: it.entrance?.endApartments) },
         { (from, to) ->
             apartmentsFrom.renderText(from?.toString() ?: "", fromWatcher)
@@ -216,5 +221,15 @@ object ReportRenders {
     fun renderLockInputOverlay(view: View): ReportRender = renderT(
         { it.selectedEntrancePhotos.isEmpty() },
         { view.visible = it }
+    )
+
+    fun renderDisableControlsForClosed(views: List<View>): ReportRender = renderT(
+        { it.entrance?.state == EntranceState.CLOSED || it.saved?.entranceClosed == true },
+        { disabled -> views.forEach { it.isEnabled = !disabled } }
+    )
+
+    fun renderIsClosed(view: View): ReportRender = renderT(
+        { it.entrance?.state == EntranceState.CREATED },
+        { view.isEnabled = it }
     )
 }

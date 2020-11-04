@@ -185,7 +185,25 @@ class ReportFragment : BaseFragment() {
                 ReportRenders.renderMailboxType(view.mailbox_euro, view.mailbox_gap),
                 ReportRenders.renderEntranceClosed(view.entrance_closed),
                 ReportRenders.renderFloors(view.floors, floorsTextListener),
-                ReportRenders.renderLockInputOverlay(view.lock_input_overlay)
+                ReportRenders.renderLockInputOverlay(view.lock_input_overlay),
+                ReportRenders.renderDisableControlsForClosed(
+                    listOf(
+                        view.appartaments_from,
+                        view.appartaments_to,
+                        view.floors,
+                        view.entrance_code,
+                        view.entrance_key,
+                        view.entrance_euro_key,
+                        view.layout_error_button,
+                        view.lookout,
+                        view.mailbox_gap,
+                        view.mailbox_euro,
+                        view.user_explanation_input,
+                        view.list_type_button
+                    )
+                ),
+                ReportRenders.renderIsClosed(view.entrance_closed),
+                ReportRenders.renderIsClosed(view.close_button)
             )
             launch { controller.stateFlow().collect(rendersCollector(renders)) }
             launch { controller.stateFlow().collect(debugCollector { debug(it) }) }
@@ -197,9 +215,10 @@ class ReportFragment : BaseFragment() {
         controller.context.showDescriptionInputDialog = ::showDescriptionInputDialog
     }
 
-    private fun showDescriptionInputDialog(apartmentNumber: ApartmentNumber, description: String) {
+    private fun showDescriptionInputDialog(apartmentNumber: ApartmentNumber, description: String, isEditable: Boolean) {
         val input = EditText(requireContext()).apply {
             inputType = InputType.TYPE_CLASS_TEXT
+            isEnabled = isEditable
             setText(description)
         }
 
@@ -340,7 +359,7 @@ class ReportFragment : BaseFragment() {
         controller.context.errorContext.detach()
         controller.context.showError = { _, _ -> }
         controller.context.requestPhoto = { _, _, _, _ -> }
-        controller.context.showDescriptionInputDialog = { _, _ -> }
+        controller.context.showDescriptionInputDialog = { _, _, _ -> }
     }
 
     override fun interceptBackPressed(): Boolean {

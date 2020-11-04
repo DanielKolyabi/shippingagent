@@ -113,11 +113,13 @@ object ReportEffects {
 
     fun effectChangeApartmentState(apartmentNumber: ApartmentNumber, newState: Int): ReportEffect = { c, s ->
         if (s.taskItem != null && s.entrance != null) {
-            val apartment = s.savedApartments.firstOrNull { apartmentNumber == it.apartmentNumber }
-                ?: ApartmentResult.empty(s.taskItem, s.entrance, apartmentNumber)
-            val apartmentWithNewState = apartment.copy(buttonState = newState)
-            messages.send(ReportMessages.msgUpdateApartment(apartmentWithNewState))
-            messages.send(msgEffect(effectSaveApartmentsChanges(apartmentWithNewState)))
+            if (s.entrance.state == EntranceState.CREATED && s.saved?.entranceClosed != true) {
+                val apartment = s.savedApartments.firstOrNull { apartmentNumber == it.apartmentNumber }
+                    ?: ApartmentResult.empty(s.taskItem, s.entrance, apartmentNumber)
+                val apartmentWithNewState = apartment.copy(buttonState = newState)
+                messages.send(ReportMessages.msgUpdateApartment(apartmentWithNewState))
+                messages.send(msgEffect(effectSaveApartmentsChanges(apartmentWithNewState)))
+            }
         } else {
             FirebaseCrashlytics.getInstance().log("task or entrance is null")
         }
@@ -125,32 +127,34 @@ object ReportEffects {
 
     fun effectChangeAllApartmentState(apartmentNumber: ApartmentNumber, newState: Int): ReportEffect = { c, s ->
         if (s.taskItem != null && s.entrance != null) {
-            val targetApartment = s.savedApartments.firstOrNull { apartmentNumber == it.apartmentNumber }
-                ?: ApartmentResult.empty(s.taskItem, s.entrance, apartmentNumber)
-            val targetState = (targetApartment.buttonState xor newState) and newState
+            if (s.entrance.state == EntranceState.CREATED && s.saved?.entranceClosed != true) {
+                val targetApartment = s.savedApartments.firstOrNull { apartmentNumber == it.apartmentNumber }
+                    ?: ApartmentResult.empty(s.taskItem, s.entrance, apartmentNumber)
+                val targetState = (targetApartment.buttonState xor newState) and newState
 
-            val startApartment = s.saved?.apartmentFrom ?: s.entrance.startApartments
-            val endApartment = s.saved?.apartmentTo ?: s.entrance.endApartments
-            (startApartment..endApartment).forEach {
-                val apartment = s.savedApartments.firstOrNull { a -> it == a.apartmentNumber.number }
-                    ?: ApartmentResult.empty(s.taskItem, s.entrance, ApartmentNumber(it))
+                val startApartment = s.saved?.apartmentFrom ?: s.entrance.startApartments
+                val endApartment = s.saved?.apartmentTo ?: s.entrance.endApartments
+                (startApartment..endApartment).forEach {
+                    val apartment = s.savedApartments.firstOrNull { a -> it == a.apartmentNumber.number }
+                        ?: ApartmentResult.empty(s.taskItem, s.entrance, ApartmentNumber(it))
 
-                val apartmentWithNewState = if (apartment.buttonState and newState != targetState) {
-                    when {
-                        newState == 1 && apartment.buttonState and 4 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 4 xor 1)
-                        newState == 4 && apartment.buttonState and 1 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 1 xor 4)
-                        newState == 16 && apartment.buttonState and 32 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 32 xor 16)
-                        newState == 32 && apartment.buttonState and 16 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 16 xor 32)
-                        else -> apartment.copy(buttonState = apartment.buttonState xor newState)
+                    val apartmentWithNewState = if (apartment.buttonState and newState != targetState) {
+                        when {
+                            newState == 1 && apartment.buttonState and 4 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 4 xor 1)
+                            newState == 4 && apartment.buttonState and 1 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 1 xor 4)
+                            newState == 16 && apartment.buttonState and 32 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 32 xor 16)
+                            newState == 32 && apartment.buttonState and 16 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 16 xor 32)
+                            else -> apartment.copy(buttonState = apartment.buttonState xor newState)
+                        }
+                    } else {
+                        apartment
                     }
-                } else {
-                    apartment
+
+                    messages.send(ReportMessages.msgUpdateApartment(apartmentWithNewState))
                 }
 
-                messages.send(ReportMessages.msgUpdateApartment(apartmentWithNewState))
+                messages.send(msgEffect(effectSaveAllChanges()))
             }
-
-            messages.send(msgEffect(effectSaveAllChanges()))
         } else {
             FirebaseCrashlytics.getInstance().log("task or entrance is null")
         }
@@ -160,16 +164,20 @@ object ReportEffects {
         if (s.taskItem == null || s.entrance == null) {
             c.showError("re:100", true)
         } else {
-            val photoUUID = UUID.randomUUID()
-            val photoFile = c.pathsProvider.getEntrancePhotoFile(s.taskItem, s.entrance, photoUUID)
-            withContext(Dispatchers.Main) {
-                c.requestPhoto(s.entrance.number, multiplePhotos, photoFile, photoUUID)
+            if (s.entrance.state == EntranceState.CREATED && s.saved?.entranceClosed != true) {
+                val photoUUID = UUID.randomUUID()
+                val photoFile = c.pathsProvider.getEntrancePhotoFile(s.taskItem, s.entrance, photoUUID)
+                withContext(Dispatchers.Main) {
+                    c.requestPhoto(s.entrance.number, multiplePhotos, photoFile, photoUUID)
+                }
             }
         }
     }
 
     fun effectRemovePhoto(it: EntrancePhoto): ReportEffect = { c, s ->
-        c.databaseRepository.removePhoto(it)
+        if (s.entrance?.state == EntranceState.CREATED && s.saved?.entranceClosed != true) {
+            c.databaseRepository.removePhoto(it)
+        }
     }
 
     fun effectShowPhotoError(errorCode: Int): ReportEffect = { c, s ->
@@ -233,7 +241,8 @@ object ReportEffects {
         withContext(Dispatchers.Main) {
             c.showDescriptionInputDialog(
                 entranceNumber,
-                currentDescription
+                currentDescription,
+                s.entrance?.state == EntranceState.CREATED && s.saved?.entranceClosed != true
             )
         }
     }
