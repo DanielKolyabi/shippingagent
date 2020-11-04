@@ -119,6 +119,7 @@ object ReportRenders {
                         ReportApartmentItem.Apartment(
                             number = apartmentNumber,
                             buttonGroup = saved?.buttonGroup
+                                ?: savedApartments.firstOrNull { it.apartmentNumber.number > 0 }?.buttonGroup
                                 ?: defaultReportType,
                             state = saved?.buttonState ?: 0,
                             colored = requiredData?.colored ?: false,

@@ -122,10 +122,10 @@ object ReportMessages {
             { mapper(it) },
             {
                 listOfNotNull(
-                    if (saveForSameEntrances) {
-                        mapper(it).saved?.let { ReportEffects.effectSaveEntranceChanges(it) }
+                    if (!saveForSameEntrances) {
+                        it.saved?.let { ReportEffects.effectSaveEntranceChanges(it) }
                     } else {
-                        ReportEffects.effectSaveEntranceChangesExternal(mapper)
+                        ReportEffects.effectSaveEntranceChangesExternal(it, mapper)
                     }
                 )
             }

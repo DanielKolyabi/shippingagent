@@ -51,7 +51,7 @@ data class EntranceResultEntity(
             hasLookupPost = entrance.hasLookout,
             isDeliveryWrong = false,
             description = "",
-            code = entrance.code,
+            code = "",
             apartmentFrom = entrance.startApartments,
             apartmentTo = entrance.endApartments,
             floors = entrance.floors,

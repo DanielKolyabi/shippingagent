@@ -64,11 +64,11 @@ object ReportEffects {
     }
 
     fun effectSaveEntranceChangesExternal(
+        s: ReportState,
         mapper: (ReportState) -> ReportState
-    ): ReportEffect = { c, s ->
+    ): ReportEffect = { c, _ ->
         if (s.taskItem != null && s.entrance != null && s.saved != null) {
             s.allTaskItemsIds.forEach {
-                if (it.taskId == s.taskItem.taskId && it.taskItemId == s.taskItem.id) return@forEach
                 val savedResult = c.databaseRepository.getEntranceResult(it.taskId, it.taskItemId, s.entrance.number)
                 val entrance = c.databaseRepository.getEntrance(it.taskId, it.taskItemId, s.entrance.number)
                 if (savedResult != null && entrance != null) {
