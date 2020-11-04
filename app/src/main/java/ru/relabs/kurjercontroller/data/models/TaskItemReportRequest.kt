@@ -3,6 +3,7 @@ package ru.relabs.kurjercontroller.data.models
 import com.google.gson.annotations.SerializedName
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.data.database.models.ApartmentResult
+import ru.relabs.kurjercontroller.data.models.tasks.ApartmentResultRequest
 import ru.relabs.kurjercontroller.domain.models.GPSCoordinatesModel
 import java.util.*
 
@@ -25,7 +26,7 @@ data class TaskItemReportRequest(
     @SerializedName("is_delivery_wrong") val isDeliveryWrong: Boolean,
     @SerializedName("has_lookup_post") val hasLookupPost: Boolean,
     @SerializedName("token") val token: String,
-    @SerializedName("apartment_results") val apartmentResult: List<ApartmentResult>,
+    @SerializedName("apartment_results") val apartmentResult: List<ApartmentResultRequest>,
     @SerializedName("close_time") val closeTime: DateTime,
     @SerializedName("photos") val photos: Map<String, PhotoReportRequest>,
     @SerializedName("publisher_id") val publisherId: Int,

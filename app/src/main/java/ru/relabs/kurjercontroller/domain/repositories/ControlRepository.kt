@@ -23,6 +23,7 @@ import ru.relabs.kurjercontroller.data.models.common.ApiError
 import ru.relabs.kurjercontroller.data.models.common.ApiErrorContainer
 import ru.relabs.kurjercontroller.data.models.common.DomainException
 import ru.relabs.kurjercontroller.data.models.common.EitherE
+import ru.relabs.kurjercontroller.data.models.tasks.ApartmentResultRequest
 import ru.relabs.kurjercontroller.data.models.tasks.FilterResponse
 import ru.relabs.kurjercontroller.domain.mappers.FilterTypeMapper
 import ru.relabs.kurjercontroller.domain.mappers.UserLocationMapper
@@ -216,12 +217,11 @@ class ControlRepository(
         val reportObject = TaskItemReportRequest(
             item.taskId, item.taskItemId, item.idnd, item.entranceNumber,
             item.startAppartaments, item.endAppartaments, item.floors,
-            item.description, item.code, item.key,
-            item.euroKey, item.isDeliveryWrong, item.hasLookupPost,
-            item.token, item.apartmentResult, item.closeTime,
-            photosMap, item.publisherId, item.mailboxType,
-            item.gpsLat, item.gpsLong, item.gpsTime,
-            item.entranceClosed
+            item.description, item.code, item.key, item.euroKey,
+            item.isDeliveryWrong, item.hasLookupPost, item.token,
+            item.apartmentResult.map { ApartmentResultRequest(it.number.number, it.state, it.buttonGroup, it.description) },
+            item.closeTime, photosMap, item.publisherId, item.mailboxType,
+            item.gpsLat, item.gpsLong, item.gpsTime, item.entranceClosed
         )
 
         api.sendTaskReport(
