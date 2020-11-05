@@ -168,8 +168,11 @@ object TasksEffects {
         }
         when (val r = c.onlineTaskUseCase.createOnlineTask(filters, withPlanned)) {
             is Left -> c.showSnackbar(R.string.unknown_runtime_error)
-            is Right -> withContext(Dispatchers.Main) {
-                c.router.navigateTo(RootScreen.Addresses(listOf(r.value)))
+            is Right -> {
+                messages.send(msgEffect(effectLoadTasks(false, false)))
+                withContext(Dispatchers.Main) {
+                    c.router.navigateTo(RootScreen.Addresses(listOf(r.value)))
+                }
             }
         }
         messages.send(TasksMessages.msgAddLoaders(-1))

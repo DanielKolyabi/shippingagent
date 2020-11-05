@@ -113,7 +113,11 @@ class AddressesFragment : BaseFragment() {
         }
 
         view.btn_close.setOnClickListener {
-            uiScope.sendMessage(controller, AddressesMessages.msgCloseTaskClicked())
+            showDialog(
+                R.string.close_task_confirmation_message,
+                R.string.ok to { uiScope.sendMessage(controller, AddressesMessages.msgCloseTaskClicked()) },
+                R.string.no to {}
+            )
         }
     }
 

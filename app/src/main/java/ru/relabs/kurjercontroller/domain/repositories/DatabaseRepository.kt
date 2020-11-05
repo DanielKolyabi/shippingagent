@@ -173,16 +173,16 @@ class DatabaseRepository(
     private fun mapSendDataToEntity(data: SendQueryData): Either<Exception, SendQueryItemEntity> {
         return when (data) {
             is SendQueryData.TaskAccepted -> getAuthorizedSendQuery(
-                "$baseUrl/api/v1/tasks/${data.taskId.id}/accepted"
+                "$baseUrl/api/v1/controller/tasks/${data.taskId.id}/accepted"
             )
             is SendQueryData.TaskReceived -> getAuthorizedSendQuery(
-                "$baseUrl/api/v1/tasks/${data.taskId.id}/received"
+                "$baseUrl/api/v1/controller/tasks/${data.taskId.id}/received"
             )
             is SendQueryData.TaskExamined -> getAuthorizedSendQuery(
-                "$baseUrl/api/v1/tasks/${data.taskId.id}/examined"
+                "$baseUrl/api/v1/controller/tasks/${data.taskId.id}/examined"
             )
             is SendQueryData.TaskCompleted -> getAuthorizedSendQuery(
-                "$baseUrl/api/v1/tasks/${data.taskId.id}/completed"
+                "$baseUrl/api/v1/controller/tasks/${data.taskId.id}/completed"
             )
         }
     }

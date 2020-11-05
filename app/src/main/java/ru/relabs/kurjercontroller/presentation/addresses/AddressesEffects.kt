@@ -27,8 +27,8 @@ object AddressesEffects {
         messages.send(AddressesMessages.msgAddLoaders(-1))
     }
 
-    fun effectNavigateBack(): AddressesEffect = { c, s ->
-        if (s.exits == 1) {
+    fun effectNavigateBack(exits: Int): AddressesEffect = { c, s ->
+        if (exits == 1) {
             withContext(Dispatchers.Main) {
                 c.router.exit()
             }
@@ -102,7 +102,6 @@ object AddressesEffects {
     }
 
     fun effectCloseCurrentTask(): AddressesEffect = { c, s ->
-        //TODO: Show confirmation dialog
         messages.send(AddressesMessages.msgAddLoaders(1))
         val task = s.tasks.firstOrNull()
         if (task == null || s.tasks.size != 1) {
@@ -111,8 +110,9 @@ object AddressesEffects {
             }
         } else {
             c.databaseRepository.closeTaskById(task.id, !task.isOnline)
+            c.taskEventController.send(TaskEvent.TaskClosed(task.id))
             withContext(Dispatchers.Main) {
-                c.router.exit()
+                messages.send(AddressesMessages.msgNavigateBack())
             }
         }
         messages.send(AddressesMessages.msgAddLoaders(-1))
