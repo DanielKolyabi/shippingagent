@@ -44,13 +44,14 @@ class FiltersEditorFragment : BaseFragment(), KoinComponent {
         val taskId = arguments?.getParcelable<TaskId>(ARG_KEY_TASK_ID)
         val filters = arguments?.getParcelable(ARG_KEY_FILTERS) ?: TaskFilters.blank()
         val withPlanned = arguments?.getBoolean(ARG_KEY_PLANNED) ?: false
+        val withNavBar = arguments?.getBoolean(ARG_WITH_NAV_BAR) ?: false
 
         if (taskId == null) {
             //TODO: Error
             return
         }
 
-        controller.start(FiltersEditorMessages.msgInit(taskId, filters, withPlanned))
+        controller.start(FiltersEditorMessages.msgInit(taskId, filters, withPlanned, withNavBar))
     }
 
     override fun onDestroy() {
@@ -83,7 +84,9 @@ class FiltersEditorFragment : BaseFragment(), KoinComponent {
 
         renderJob = uiScope.launch {
             val renders = filterListRenders + listOf(
-                FiltersEditorRenders.renderPlannedCheck(view.planned_tasks)
+                FiltersEditorRenders.renderPlannedCheck(view.planned_tasks),
+                FiltersEditorRenders.renderStartButton(view.start_button),
+                FiltersEditorRenders.renderNavBar(view.top_app_bar)
             )
             launch { controller.stateFlow().collect(rendersCollector(renders)) }
             launch { controller.stateFlow().collect(debugCollector { debug(it) }) }
@@ -113,6 +116,9 @@ class FiltersEditorFragment : BaseFragment(), KoinComponent {
         view.start_button.setOnClickListener {
             uiScope.sendMessage(controller, FiltersEditorMessages.msgStartClicked())
         }
+        view.iv_menu.setOnClickListener {
+            uiScope.sendMessage(controller, FiltersEditorMessages.msgNavigateBack())
+        }
     }
 
     private fun makeFilterRenders(
@@ -138,13 +144,22 @@ class FiltersEditorFragment : BaseFragment(), KoinComponent {
         val adapter = FilterSearchAdapter(context)
         container.onFilterRemoveClicked = {
             uiScope.sendMessage(controller, FiltersEditorMessages.msgFilterRemoveClicked(it))
+            uiScope.sendMessage(controller, FiltersEditorMessages.msgSearchFilter(textView.text.toString(), type))
         }
 
         textView.setAdapter(adapter)
         textView.threshold = 0
         textView.setOnClickListener {
-            textView.showDropDown()
-            textView.performFiltering()
+            if(!textView.isPopupShowing){
+                uiScope.sendMessage(controller, FiltersEditorMessages.msgSearchFilter(textView.text.toString(), type))
+                textView.showDropDown()
+            }
+        }
+        textView.setOnFocusChangeListener { v, hasFocus ->
+            if(hasFocus){
+                uiScope.sendMessage(controller, FiltersEditorMessages.msgSearchFieldClicked(type))
+                uiScope.sendMessage(controller, FiltersEditorMessages.msgSearchFilter(textView.text.toString(), type))
+            }
         }
         textView.onItemClickListener = object : AdapterView.OnItemClickListener {
             override fun onItemClick(
@@ -183,12 +198,14 @@ class FiltersEditorFragment : BaseFragment(), KoinComponent {
         const val ARG_KEY_FILTERS = "filters"
         const val ARG_KEY_TASK_ID = "taskId"
         const val ARG_KEY_PLANNED = "with_planned"
+        const val ARG_WITH_NAV_BAR = "with_nav_bar"
 
 
         fun <T> newInstance(
             taskId: TaskId,
             filters: TaskFilters?,
             withPlanned: Boolean?,
+            withNavBar: Boolean?,
             targetFragment: T
         ) where T : Fragment, T : IFiltersEditorConsumer = FiltersEditorFragment().apply {
             setTargetFragment(targetFragment, -1)
@@ -196,6 +213,7 @@ class FiltersEditorFragment : BaseFragment(), KoinComponent {
                 putParcelable(ARG_KEY_FILTERS, filters)
                 putParcelable(ARG_KEY_TASK_ID, taskId)
                 putBoolean(ARG_KEY_PLANNED, withPlanned ?: false)
+                putBoolean(ARG_WITH_NAV_BAR, withNavBar ?: false)
             }
         }
     }

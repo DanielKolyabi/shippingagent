@@ -13,7 +13,7 @@ import ru.relabs.kurjercontroller.domain.models.TaskFilter
  * Created by ProOrange on 22.03.2019.
  */
 class FilterSearchAdapter(context: Context) : ArrayAdapter<TaskFilter>(context, 0), Filterable {
-    private var results: List<TaskFilter> = emptyList()
+    val results: MutableList<TaskFilter> = mutableListOf()
 
     override fun getView(pos: Int, convertView: View?, parent: ViewGroup): View {
         val view = LayoutInflater.from(context).inflate(android.R.layout.simple_dropdown_item_1line, parent, false)

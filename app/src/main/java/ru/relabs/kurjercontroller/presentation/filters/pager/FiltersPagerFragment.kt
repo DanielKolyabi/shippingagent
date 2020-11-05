@@ -36,7 +36,6 @@ class FiltersPagerFragment : BaseFragment(),
     private val router: Router by inject()
     private var pagerAdapter: FiltersPagerAdapter<FiltersPagerFragment>? = null
     private var tasks: List<Task> = emptyList()
-    var onAllFiltersApplied: (() -> Unit)? = null
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

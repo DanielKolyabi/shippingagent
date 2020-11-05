@@ -19,7 +19,7 @@ object TasksRenders {
         { Triple(it.tasks, it.selectedTasks, it.loaders) to it.searchFilter },
         { (data, filter) ->
             val (tasks, selectedTasks, loaders) = data
-            val intersections = searchIntersections(tasks, selectedTasks)
+            val intersections = searchIntersections(tasks, tasks.filter { selectedTasks.contains(it.id) })
             val newItems = if (tasks.isEmpty() && loaders > 0) {
                 listOf(TasksItem.Loader(""))
             } else {
@@ -37,7 +37,10 @@ object TasksRenders {
                         val groupTitle =
                             date.dayOfWeek().getAsText(Locale("ru", "RU")).capitalize() + ", " + date.toString("dd.MM.yyyy")
                         listOf(TasksItem.Header(groupTitle)) + it.value.map { task ->
-                            TasksItem.TaskItem(task, intersections.getOrElse(task) { false }, selectedTasks.contains(task))
+                            TasksItem.TaskItem(
+                                task,
+                                intersections.getOrElse(task) { false },
+                                selectedTasks.any { it == task.id })
                         }
                     }
 

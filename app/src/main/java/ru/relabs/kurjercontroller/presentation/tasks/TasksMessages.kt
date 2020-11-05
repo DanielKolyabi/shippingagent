@@ -27,7 +27,7 @@ object TasksMessages {
         { it },
         {
             listOf(
-                if (it.selectedTasks.contains(task)) {
+                if (it.selectedTasks.any { task.id == it }) {
                     TasksEffects.effectTaskUnselected(task)
                 } else {
                     TasksEffects.effectTaskSelected(task)
@@ -40,10 +40,10 @@ object TasksMessages {
         msgEffect(TasksEffects.effectNavigateTaskInfo(task))
 
     fun msgTaskSelected(task: Task): TasksMessage =
-        msgState { it.copy(selectedTasks = (it.selectedTasks + listOf(task)).distinct()) }
+        msgState { it.copy(selectedTasks = it.selectedTasks + listOf(task.id)) }
 
     fun msgTaskUnselected(task: Task): TasksMessage =
-        msgState { it.copy(selectedTasks = it.selectedTasks.filter { it != task }) }
+        msgState { it.copy(selectedTasks = it.selectedTasks.filter { it != task.id }) }
 
     fun msgStartClicked(): TasksMessage =
         msgEffect(TasksEffects.effectNavigateAddresses(true))
@@ -61,7 +61,11 @@ object TasksMessages {
         msgState {
             it.copy(
                 searchFilter = searchText,
-                selectedTasks = it.selectedTasks.filter { t -> SearchUtils.isMatches(t.name, searchText) }
+                selectedTasks = it.selectedTasks.filter { id ->
+                    it.tasks.firstOrNull { it.id == id }
+                        ?.let { SearchUtils.isMatches(it.name, searchText) }
+                        ?: false
+                }
             )
         }
 
@@ -80,14 +84,17 @@ object TasksMessages {
         msgState { s ->
             s.copy(
                 tasks = s.tasks.filter { it.id != taskId },
-                selectedTasks = s.selectedTasks.filter { it.id != taskId }
+                selectedTasks = s.selectedTasks.filter { it != taskId }
             )
         }
 
     fun msgOnlineClicked(): TasksMessage = msgEffects(
         { s ->
-            if (s.tasks.any { it.isOnline } && s.selectedTasks.none { it.isOnline }) {
-                s.copy(selectedTasks = s.selectedTasks + s.tasks.filter { it.isOnline })
+            if (s.tasks.any { it.isOnline } && s.tasks.none { it.isOnline && s.selectedTasks.contains(it.id) }) {
+                s.copy(
+                    selectedTasks = s.selectedTasks +
+                            s.tasks.filter { it.isOnline }.map { it.id }
+                )
             } else {
                 s
             }
@@ -106,7 +113,7 @@ object TasksMessages {
         msgEffect(TasksEffects.effectReloadFilteredItemsAndStart())
 
     fun msgTasksUnselected(unselected: List<Task>): TasksMessage =
-        msgState { it.copy(selectedTasks = it.selectedTasks.filter { it.id !in unselected.map { it.id } }) }
+        msgState { it.copy(selectedTasks = it.selectedTasks.filter { it !in unselected.map { it.id } }) }
 
     fun msgStartAfterPartialFail(): TasksMessage =
         msgEffect(TasksEffects.effectNavigateAddresses(false))

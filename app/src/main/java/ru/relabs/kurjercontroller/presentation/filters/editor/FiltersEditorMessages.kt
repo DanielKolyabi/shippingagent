@@ -3,7 +3,6 @@ package ru.relabs.kurjercontroller.presentation.filters.editor
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffects
-import ru.relabs.kurjercontroller.presentation.base.tea.msgEmpty
 import ru.relabs.kurjercontroller.presentation.base.tea.msgState
 
 /**
@@ -11,10 +10,11 @@ import ru.relabs.kurjercontroller.presentation.base.tea.msgState
  */
 
 object FiltersEditorMessages {
-    fun msgInit(taskId: TaskId, filters: TaskFilters, withPlanned: Boolean): FiltersEditorMessage = msgEffects(
-        { it.copy(taskId = taskId, filters = filters.all, isPlannedEnabled = withPlanned) },
-        { listOf(FiltersEditorEffects.effectRefreshCounts()) }
-    )
+    fun msgInit(taskId: TaskId, filters: TaskFilters, withPlanned: Boolean, withNavBar: Boolean): FiltersEditorMessage =
+        msgEffects(
+            { it.copy(taskId = taskId, filters = filters.all, isPlannedEnabled = withPlanned, withNavBar = withNavBar) },
+            { listOf(FiltersEditorEffects.effectRefreshCounts()) }
+        )
 
     fun msgFilterRemoveClicked(filter: TaskFilter): FiltersEditorMessage = msgEffects(
         { s ->
@@ -31,10 +31,10 @@ object FiltersEditorMessages {
                     s
                 }
             } else {
-                s.copy(filters = s.filters.filter { it.id != filter.id && it.type != filter.type })
+                s.copy(filters = s.filters.filter { it.id != filter.id || it.type != filter.type })
             }
         },
-        { listOf(FiltersEditorEffects.effectRefreshCounts()) }
+        { s -> listOf(FiltersEditorEffects.effectRefreshCounts()) }
     )
 
     fun msgSearchFilter(filter: String, type: FilterType): FiltersEditorMessage = msgEffects(
@@ -49,7 +49,7 @@ object FiltersEditorMessages {
         },
         {
             listOf(
-                FiltersEditorEffects.effectSearch(filter, type, (it.searchData[type]?.searchJobNumber ?: 0) + 1)
+                FiltersEditorEffects.effectSearch(filter, type, it.searchData[type]?.searchJobNumber ?: 0)
             )
         }
     )
@@ -86,7 +86,7 @@ object FiltersEditorMessages {
         { s ->
             val updatedSearchState = s.copy(searchData = s.searchData.mapValues {
                 if (it.key == type) {
-                    it.value.copy(query = "", filters = emptyList())
+                    it.value.copy(query = "", filters = emptyList(), searchJobNumber = it.value.searchJobNumber + 1)
                 } else {
                     it.value
                 }
@@ -98,6 +98,17 @@ object FiltersEditorMessages {
                 updatedSearchState.copy(filters = updatedSearchState.filters + listOf(item))
             }
         },
-        { listOf(FiltersEditorEffects.effectRefreshCounts()) }
+        {
+            listOf(
+                FiltersEditorEffects.effectRefreshCounts(),
+                FiltersEditorEffects.effectSearch("", type, it.searchData[type]?.searchJobNumber ?: 0)
+            )
+        }
     )
+
+    fun msgNavigateBack(): FiltersEditorMessage =
+        msgEffect(FiltersEditorEffects.effectNavigateBack())
+
+    fun msgSearchFieldClicked(type: FilterType): FiltersEditorMessage =
+        msgState { it.copy(activeSearchField = type) }
 }

@@ -27,7 +27,15 @@ data class FiltersEditorState(
     val closedCount: Int = 0,
 
     val activeSearchField: FilterType? = null,
-    val searchData: Map<FilterType, FilterEditorSearchData> = emptyMap()
+    val searchData: Map<FilterType, FilterEditorSearchData> = mapOf(
+        FilterType.Publisher to FilterEditorSearchData(emptyList(), "", 0),
+        FilterType.Region to FilterEditorSearchData(emptyList(), "", 0),
+        FilterType.District to FilterEditorSearchData(emptyList(), "", 0),
+        FilterType.Brigade to FilterEditorSearchData(emptyList(), "", 0),
+        FilterType.User to FilterEditorSearchData(emptyList(), "", 0)
+    ),
+
+    val withNavBar: Boolean = false
 )
 
 class FiltersEditorContext(val errorContext: ErrorContextImpl = ErrorContextImpl()) :

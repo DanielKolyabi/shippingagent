@@ -32,7 +32,7 @@ object TasksEffects {
         when {
             task.state.state == TaskState.CREATED ->
                 c.showSnackbar(R.string.task_list_not_examined)
-            s.selectedTasks.count { it.filtered } > 3 ->
+            s.tasks.filter { it.filtered && s.selectedTasks.contains(it.id) }.size > 3 ->
                 c.showSnackbar(R.string.task_list_too_many_filtered)
             else ->
                 messages.send(TasksMessages.msgTaskSelected(task))
@@ -44,14 +44,14 @@ object TasksEffects {
     }
 
     fun effectNavigateAddresses(withFilteredTasksReload: Boolean): TasksEffect = { c, s ->
-        val filteredTasks = s.selectedTasks.filter { it.filtered }
+        val filteredTasks = s.tasks.filter { it.filtered && s.selectedTasks.contains(it.id) }
         if (filteredTasks.isNotEmpty() && withFilteredTasksReload) {
             withContext(Dispatchers.Main) {
                 c.router.navigateTo(RootScreen.FiltersScreen(filteredTasks, c.consumer))
             }
         } else {
             withContext(Dispatchers.Main) {
-                c.router.navigateTo(RootScreen.Addresses(s.selectedTasks))
+                c.router.navigateTo(RootScreen.Addresses(s.tasks.filter { s.selectedTasks.contains(it.id) }))
             }
         }
     }
@@ -59,18 +59,20 @@ object TasksEffects {
     fun effectReloadFilteredItemsAndStart(): TasksEffect = { c, s ->
         messages.send(TasksMessages.msgAddLoaders(1))
         effectLoadTasks(false, false)(c, s)
-        messages.send(msgEffect(effectUpdateFilteredItems(s.selectedTasks.filter { it.filtered })))
+        messages.send(msgEffect(effectUpdateFilteredItems()))
         messages.send(TasksMessages.msgAddLoaders(-1))
     }
 
-    private fun effectUpdateFilteredItems(tasks: List<Task>): TasksEffect = { c, s ->
+    private fun effectUpdateFilteredItems(): TasksEffect = { c, s ->
         messages.send(TasksMessages.msgAddLoaders(1))
-        val failed = tasks.mapNotNull {
-            when (val r = c.onlineTaskUseCase.updateFilteredTaskItems(it)) {
-                is Left -> it
-                is Right -> null
+        val failed = s.tasks
+            .filter { it.filtered && s.selectedTasks.contains(it.id) }
+            .mapNotNull {
+                when (val r = c.onlineTaskUseCase.updateFilteredTaskItems(it)) {
+                    is Left -> it
+                    is Right -> null
+                }
             }
-        }
         when {
             failed.isNotEmpty() && failed.size < s.selectedTasks.size -> {
                 messages.send(TasksMessages.msgTasksUnselected(failed))
@@ -79,7 +81,7 @@ object TasksEffects {
                 }
             }
             failed.isNotEmpty() && failed.size == s.selectedTasks.size -> {
-                messages.send(TasksMessages.msgTasksUnselected(s.selectedTasks))
+                messages.send(TasksMessages.msgTasksUnselected(s.tasks.filter { s.selectedTasks.contains(it.id) }))
                 withContext(Dispatchers.Main) {
                     c.showTaskItemsLoadingError()
                 }

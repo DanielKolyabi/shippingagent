@@ -4,6 +4,7 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import ru.relabs.kurjercontroller.domain.controllers.TaskEventController
 import ru.relabs.kurjercontroller.domain.models.Task
+import ru.relabs.kurjercontroller.domain.models.TaskId
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.domain.useCases.OnlineTaskUseCase
@@ -15,7 +16,7 @@ import ru.relabs.kurjercontroller.presentation.base.tea.*
 
 data class TasksState(
     val tasks: List<Task> = emptyList(),
-    val selectedTasks: List<Task> = emptyList(),
+    val selectedTasks: List<TaskId> = emptyList(),
     val loaders: Int = 0,
     val searchFilter: String = ""
 )

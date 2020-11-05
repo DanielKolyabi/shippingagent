@@ -39,6 +39,7 @@ class FiltersPagerAdapter<T>(
             taskData?.id ?: TaskId(-1),
             taskData?.taskFilters ?: TaskFilters.blank(),
             taskData?.withPlanned ?: false,
+            false,
             targetFragment
         )
     }

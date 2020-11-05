@@ -26,12 +26,18 @@ object FiltersEditorEffects {
     }
 
     fun effectStart(): FiltersEditorEffect = { c, s ->
-        if(s.taskId != null){
-            withContext(Dispatchers.Main){
+        if (s.taskId != null) {
+            withContext(Dispatchers.Main) {
                 c.performStart(s.taskId, s.filters, s.isPlannedEnabled)
             }
-        }else{
+        } else {
             //TODO Error
+        }
+    }
+
+    fun effectNavigateBack(): FiltersEditorEffect = { c, s ->
+        withContext(Dispatchers.Main) {
+            c.router.exit()
         }
     }
 }

@@ -2,6 +2,7 @@ package ru.relabs.kurjercontroller.presentation.filters.editor
 
 import android.graphics.Color
 import android.text.TextWatcher
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.EditText
@@ -13,17 +14,18 @@ import ru.relabs.kurjercontroller.domain.models.TaskFilter
 import ru.relabs.kurjercontroller.presentation.base.tea.renderT
 import ru.relabs.kurjercontroller.presentation.сustomView.FilterTagLayout
 import ru.relabs.kurjercontroller.utils.extensions.renderText
+import ru.relabs.kurjercontroller.utils.extensions.visible
 
 /**
  * Created by Daniil Kurchanov on 06.04.2020.
  */
 object FiltersEditorRenders {
-    fun renderFilterResults(adapter: ArrayAdapter<TaskFilter>, type: FilterType): FiltersEditorRender = renderT(
+    fun renderFilterResults(adapter: FilterSearchAdapter, type: FilterType): FiltersEditorRender = renderT(
         { (type == it.activeSearchField) to (it.searchData[type]?.filters?.filter { it.type == type } ?: emptyList()) },
         { (searchActive, searchResults) ->
             if (searchActive) {
-                adapter.clear()
-                adapter.addAll(searchResults)
+                adapter.results.clear()
+                adapter.results.addAll(searchResults)
                 adapter.notifyDataSetChanged()
             }
         }
@@ -69,5 +71,10 @@ object FiltersEditorRenders {
             }
 
         }
+    )
+
+    fun renderNavBar(view: View): FiltersEditorRender = renderT(
+        { it.withNavBar },
+        { view.visible = it }
     )
 }

@@ -45,6 +45,7 @@ sealed class RootScreen(protected val fabric: () -> Fragment) : SupportAppScreen
             TaskId(-1),
             null,
             false,
+            true,
             target
         )
     }) where T : Fragment, T : IFiltersEditorConsumer
