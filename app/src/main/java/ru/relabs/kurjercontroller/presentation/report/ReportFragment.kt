@@ -61,7 +61,7 @@ class ReportFragment : BaseFragment() {
         val allTaskItems = arguments?.getParcelableArrayList<TaskItemWithTaskIds>(ARG_TASK_ITEMS_ALL)
         val entrance = arguments?.getParcelable<Entrance>(ARG_ENTRANCES)
         if (taskItem == null || entrance == null || allTaskItems == null) {
-            //TODO: Show error
+            FirebaseCrashlytics.getInstance().log("ti: ${taskItem} \n e: $entrance \n ati: $allTaskItems")
             return
         }
         controller.start(ReportMessages.msgInit(taskItem, entrance, allTaskItems.toList()))

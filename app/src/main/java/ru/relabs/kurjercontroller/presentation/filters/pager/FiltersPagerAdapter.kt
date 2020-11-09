@@ -4,6 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.PagerAdapter
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.domain.models.TaskFilters
 import ru.relabs.kurjercontroller.domain.models.TaskId
@@ -32,7 +33,7 @@ class FiltersPagerAdapter<T>(
     override fun getItem(position: Int): Fragment {
         val taskData = tasks.getOrNull(position)
         if(taskData == null){
-            //TODO: Crashlytics
+            FirebaseCrashlytics.getInstance().log("taskData is null")
         }
 
         return FiltersEditorFragment.newInstance(

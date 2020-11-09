@@ -1,4 +1,4 @@
-package ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap
+package ru.relabs.kurjercontroller.presentation.yandexMap.iconProviders
 
 import android.content.Context
 import android.graphics.Bitmap

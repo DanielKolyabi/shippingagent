@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_report_pager.view.*
 import kotlinx.coroutines.Job
@@ -38,7 +39,7 @@ class ReportPagerFragment : BaseFragment() {
         val taskIds = arguments?.getParcelableArrayList<TaskItemWithTaskIds>(ARG_TASKS)?.toList()
         val selectedTask = arguments?.getParcelable<TaskItemWithTaskIds>(ARG_SELECTED_TASK)
         if (taskIds == null) {
-            //TODO: Show error
+            FirebaseCrashlytics.getInstance().log("taskIds is null")
             return
         }
         controller.start(ReportPagerMessages.msgInit(taskIds, selectedTask))

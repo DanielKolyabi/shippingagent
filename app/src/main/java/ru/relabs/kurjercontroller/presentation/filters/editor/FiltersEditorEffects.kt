@@ -1,8 +1,10 @@
 package ru.relabs.kurjercontroller.presentation.filters.editor
 
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.domain.models.FilterType
+import ru.relabs.kurjercontroller.presentation.base.tea.CommonMessages
 import ru.relabs.kurjercontroller.utils.Left
 import ru.relabs.kurjercontroller.utils.Right
 
@@ -13,14 +15,14 @@ object FiltersEditorEffects {
 
     fun effectSearch(filter: String, type: FilterType, searchJobNumber: Int): FiltersEditorEffect = { c, s ->
         when (val r = c.controlRepository.searchFilters(type, filter, s.filters, s.isPlannedEnabled)) {
-            is Left -> Unit//TODO
+            is Left -> messages.send(CommonMessages.msgError(r.value))
             is Right -> messages.send(FiltersEditorMessages.msgFiltersFound(searchJobNumber, type, r.value))
         }
     }
 
     fun effectRefreshCounts(): FiltersEditorEffect = { c, s ->
         when (val r = c.controlRepository.countFilteredTasks(s.filters, s.isPlannedEnabled)) {
-            is Left -> Unit //TODO
+            is Left -> messages.send(CommonMessages.msgError(r.value))
             is Right -> messages.send(FiltersEditorMessages.msgCountUpdated(r.value))
         }
     }
@@ -31,7 +33,7 @@ object FiltersEditorEffects {
                 c.performStart(s.taskId, s.filters, s.isPlannedEnabled)
             }
         } else {
-            //TODO Error
+            FirebaseCrashlytics.getInstance().log("taskId is null")
         }
     }
 

@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.EditText
 import androidx.fragment.app.Fragment
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.synthetic.main.fragment_filters.view.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -47,7 +48,7 @@ class FiltersEditorFragment : BaseFragment(), KoinComponent {
         val withNavBar = arguments?.getBoolean(ARG_WITH_NAV_BAR) ?: false
 
         if (taskId == null) {
-            //TODO: Error
+            FirebaseCrashlytics.getInstance().log("taskId is null")
             return
         }
 

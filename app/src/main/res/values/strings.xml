@@ -155,4 +155,8 @@
     <string name="photo_required">Необходимо фото-подтверждение изменённого диапазона квартир</string>
     <string name="close_entrance_dialog_message">Вы действительно хотите закрыть подъезд?</string>
     <string name="close_task_confirmation_message">Вы действительно хотите закрыть задание?</string>
+    <string name="map_button_location">Где я?</string>
+    <string name="map_button_layer_common">Слой: Общий</string>
+    <string name="map_button_layer_predefined">Слой: Предопределённые адреса</string>
+    <string name="map_button_layer_task">Слой: %s</string>
 </resources>

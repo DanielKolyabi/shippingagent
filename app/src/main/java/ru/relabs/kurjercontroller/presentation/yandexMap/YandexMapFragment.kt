@@ -4,15 +4,26 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.map.CameraPosition
+import kotlinx.android.synthetic.main.fragment_yandex_map.*
+import kotlinx.android.synthetic.main.fragment_yandex_map.view.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.relabs.kurjercontroller.R
+import ru.relabs.kurjercontroller.domain.models.TaskStorage
 import ru.relabs.kurjercontroller.presentation.base.fragment.BaseFragment
+import ru.relabs.kurjercontroller.presentation.base.recycler.DelegateAdapter
 import ru.relabs.kurjercontroller.presentation.base.tea.debugCollector
 import ru.relabs.kurjercontroller.presentation.base.tea.defaultController
 import ru.relabs.kurjercontroller.presentation.base.tea.rendersCollector
 import ru.relabs.kurjercontroller.presentation.base.tea.sendMessage
+import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressIdWithColor
+import ru.relabs.kurjercontroller.presentation.yandexMap.models.IAddressClickedConsumer
 import ru.relabs.kurjercontroller.utils.debug
 
 
@@ -27,7 +38,11 @@ class YandexMapFragment : BaseFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        controller.start(YandexMapMessages.msgInit())
+        val addressIds = arguments?.getParcelableArrayList<AddressIdWithColor>("address_ids")?.toList() ?: listOf()
+        val deliverymanIds = arguments?.getIntArray("deliveryman_ids")?.toList().orEmpty()
+        val storages = arguments?.getParcelableArrayList<TaskStorage>("storages")?.toList() ?: listOf()
+
+        controller.start(YandexMapMessages.msgInit(addressIds, deliverymanIds, storages))
     }
 
     override fun onDestroy() {
@@ -41,26 +56,69 @@ class YandexMapFragment : BaseFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_yandex_map2, container, false)
+        return inflater.inflate(R.layout.fragment_yandex_map, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        MapKitFactory.initialize(this.context)
+
+        val adapter = DelegateAdapter(
+            YandexMapAdapter.myPositionAdapter {
+                uiScope.sendMessage(controller, YandexMapMessages.msgMyLocationClicked())
+            },
+            YandexMapAdapter.deliverymansPositionAdapter {
+                uiScope.sendMessage(controller, YandexMapMessages.msgDeliverymansLocationClicked())
+            },
+            YandexMapAdapter.commonLayerDelegate {
+                uiScope.sendMessage(controller, YandexMapMessages.msgCommonLayerClicked())
+            },
+            YandexMapAdapter.predefinedLayerDelegate {
+                uiScope.sendMessage(controller, YandexMapMessages.msgPredefinedLayerClicked())
+            },
+            YandexMapAdapter.taskLayerDelegate {
+                uiScope.sendMessage(controller, YandexMapMessages.msgTaskLayerClicked(it))
+            }
+        )
+
+        view.mapview.map.isRotateGesturesEnabled = false
+        view.mapview.map.userLocationLayer.isEnabled = true
+
+        view.controls_list.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        view.controls_list.adapter = adapter
 
         bindControls(view)
 
         renderJob = uiScope.launch {
-            val renders = emptyList<YandexMapRender>()
+            val renders = listOf(
+                YandexMapRenders.renderAddresses(view.mapview) {
+                    uiScope.sendMessage(controller, YandexMapMessages.msgAddressClicked(it))
+                },
+                YandexMapRenders.renderStorages(view.mapview),
+                YandexMapRenders.renderDeliverymans(view.mapview),
+                YandexMapRenders.renderControls(adapter)
+            )
             launch { controller.stateFlow().collect(rendersCollector(renders)) }
             launch { controller.stateFlow().collect(debugCollector { debug(it) }) }
         }
         controller.context.errorContext.attach(view)
+        controller.context.notifyAddressClicked = { (targetFragment as? IAddressClickedConsumer)?.onAddressClicked(it) }
+        controller.context.moveCameraToUser = ::moveCameraToUser
     }
 
-    private fun bindControls(
-        view: View
-    ) {
+    private fun bindControls(view: View) {
+        view.iv_menu.setOnClickListener {
+            uiScope.sendMessage(controller, YandexMapMessages.msgNavigateBack())
+        }
+    }
 
+    private fun moveCameraToUser(location: Point) {
+        mapview.map.move(
+            mapview.map.userLocationLayer.cameraPosition() ?: CameraPosition(
+                location,
+                14f, 0f, 0f
+            )
+        )
     }
 
     override fun onDestroyView() {
@@ -69,11 +127,40 @@ class YandexMapFragment : BaseFragment() {
         controller.context.errorContext.detach()
     }
 
+    override fun onStop() {
+        super.onStop()
+        MapKitFactory.getInstance().onStop()
+        view?.mapview?.onStop()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        MapKitFactory.getInstance().onStart()
+        view?.mapview?.onStart()
+    }
+
     override fun interceptBackPressed(): Boolean {
         return false
     }
 
     companion object {
-        fun newInstance() = YandexMapFragment()
+        const val ARG_ADDRESSES = "address_ids"
+        const val ARG_STORAGES = "storages"
+        const val ARG_DELIVERYMANS = "deliveryman_ids"
+
+        fun <T> newInstance(
+            addresses: List<AddressIdWithColor>,
+            deliverymanIds: List<Int>,
+            storages: List<TaskStorage>,
+            targetFragment: T
+        ) where T : Fragment, T : IAddressClickedConsumer =
+            YandexMapFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelableArrayList(ARG_ADDRESSES, ArrayList(addresses))
+                    putParcelableArrayList(ARG_STORAGES, ArrayList(storages))
+                    putIntArray(ARG_DELIVERYMANS, deliverymanIds.toIntArray())
+                }
+                setTargetFragment(targetFragment, 0)
+            }
     }
 }

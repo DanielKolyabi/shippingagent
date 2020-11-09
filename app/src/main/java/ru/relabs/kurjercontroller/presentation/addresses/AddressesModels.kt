@@ -9,6 +9,7 @@ import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.domain.providers.PathsProvider
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.presentation.base.tea.*
+import ru.relabs.kurjercontroller.presentation.taskDetails.TaskDetailsFragment
 import java.io.File
 
 /**
@@ -35,6 +36,7 @@ class AddressesContext(val errorContext: ErrorContextImpl = ErrorContextImpl()) 
 
     var showImagePreview: (File) -> Unit = {}
     var showSnackbar: (msgRes: Int) -> Unit = {}
+    var addressClickedConsumer: () -> AddressesFragment? = { null }
 }
 
 typealias AddressesMessage = ElmMessage<AddressesContext, AddressesState>

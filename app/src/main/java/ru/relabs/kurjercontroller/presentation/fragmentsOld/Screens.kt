@@ -2,9 +2,7 @@ package ru.relabs.kurjercontroller.presentation.fragmentsOld
 
 import androidx.fragment.app.Fragment
 import ru.relabs.kurjercontroller.domain.models.*
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.AddressWithColor
-import ru.relabs.kurjercontroller.presentation.reportPager.ReportPagerFragment
-import ru.relabs.kurjercontroller.presentation.reportPager.TaskItemWithTaskIds
+import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressWithColor
 import ru.relabs.kurjercontroller.presentation.tasks.TasksFragment
 import ru.terrakok.cicerone.android.support.SupportAppScreen
 

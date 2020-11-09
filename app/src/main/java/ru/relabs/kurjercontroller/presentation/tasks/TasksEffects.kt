@@ -47,7 +47,7 @@ object TasksEffects {
         val filteredTasks = s.tasks.filter { it.filtered && s.selectedTasks.contains(it.id) }
         if (filteredTasks.isNotEmpty() && withFilteredTasksReload) {
             withContext(Dispatchers.Main) {
-                c.router.navigateTo(RootScreen.FiltersScreen(filteredTasks, c.consumer))
+                c.router.navigateTo(RootScreen.Filters(filteredTasks, c.consumer))
             }
         } else {
             withContext(Dispatchers.Main) {
@@ -154,7 +154,7 @@ object TasksEffects {
             is Right -> when (r.value) {
                 false -> c.showSnackbar(R.string.online_no_access)
                 true -> withContext(Dispatchers.Main) {
-                    c.router.navigateTo(RootScreen.OnlineFiltersScreen(c.consumer))
+                    c.router.navigateTo(RootScreen.OnlineFilters(c.consumer))
                 }
             }
         }

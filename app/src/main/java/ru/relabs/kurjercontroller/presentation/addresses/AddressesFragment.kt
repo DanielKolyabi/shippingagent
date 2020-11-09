@@ -11,10 +11,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.relabs.kurjercontroller.R
+import ru.relabs.kurjercontroller.domain.models.Address
 import ru.relabs.kurjercontroller.domain.models.TaskId
 import ru.relabs.kurjercontroller.presentation.base.fragment.BaseFragment
 import ru.relabs.kurjercontroller.presentation.base.recycler.DelegateAdapter
 import ru.relabs.kurjercontroller.presentation.base.tea.*
+import ru.relabs.kurjercontroller.presentation.yandexMap.models.IAddressClickedConsumer
 import ru.relabs.kurjercontroller.utils.IntentUtils
 import ru.relabs.kurjercontroller.utils.debug
 import ru.relabs.kurjercontroller.utils.extensions.showDialog
@@ -25,7 +27,7 @@ import ru.relabs.kurjercontroller.utils.extensions.showSnackbar
  * Created by Daniil Kurchanov on 02.04.2020.
  */
 
-class AddressesFragment : BaseFragment() {
+class AddressesFragment : BaseFragment(), IAddressClickedConsumer {
 
     private val controller = defaultController(AddressesState(), AddressesContext())
     private var renderJob: Job? = null
@@ -100,6 +102,7 @@ class AddressesFragment : BaseFragment() {
             ContextCompat.startActivity(requireContext(), IntentUtils.getImageViewIntent(it, requireContext()), null)
         }
         controller.context.showSnackbar = { showSnackbar(getString(it)) }
+        controller.context.addressClickedConsumer = { this }
         controller.context.errorContext.attach(view)
     }
 
@@ -125,6 +128,7 @@ class AddressesFragment : BaseFragment() {
         super.onDestroyView()
         controller.context.showSnackbar = {}
         controller.context.showImagePreview = {}
+        controller.context.addressClickedConsumer = { null }
         renderJob?.cancel()
         controller.context.errorContext.detach()
     }
@@ -140,5 +144,9 @@ class AddressesFragment : BaseFragment() {
                 putParcelableArrayList(ARG_TASK_IDS, ArrayList(taskIds))
             }
         }
+    }
+
+    override fun onAddressClicked(address: Address) {
+        TODO("Not yet implemented")
     }
 }

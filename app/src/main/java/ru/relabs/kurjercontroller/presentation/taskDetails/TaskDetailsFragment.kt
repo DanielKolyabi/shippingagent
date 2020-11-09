@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.R
+import ru.relabs.kurjercontroller.domain.models.Address
 import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.presentation.base.fragment.BaseFragment
 import ru.relabs.kurjercontroller.presentation.base.recycler.DelegateAdapter
@@ -21,6 +22,7 @@ import ru.relabs.kurjercontroller.presentation.base.tea.debugCollector
 import ru.relabs.kurjercontroller.presentation.base.tea.defaultController
 import ru.relabs.kurjercontroller.presentation.base.tea.rendersCollector
 import ru.relabs.kurjercontroller.presentation.base.tea.sendMessage
+import ru.relabs.kurjercontroller.presentation.yandexMap.models.IAddressClickedConsumer
 import ru.relabs.kurjercontroller.utils.debug
 import ru.relabs.kurjercontroller.utils.extensions.showDialog
 import ru.relabs.kurjercontroller.utils.extensions.showSnackbar
@@ -30,7 +32,7 @@ import ru.relabs.kurjercontroller.utils.extensions.showSnackbar
  * Created by Daniil Kurchanov on 02.04.2020.
  */
 
-class TaskDetailsFragment : BaseFragment() {
+class TaskDetailsFragment : BaseFragment(), IAddressClickedConsumer {
 
     private val controller = defaultController(TaskDetailsState(), TaskDetailsContext())
     private var renderJob: Job? = null
@@ -65,6 +67,9 @@ class TaskDetailsFragment : BaseFragment() {
     override fun onDestroy() {
         super.onDestroy()
         controller.context.onExamine = {}
+        controller.context.addressClickedConsumer = { null }
+        controller.context.showFatalError = {}
+        controller.context.showSnackbar = {}
         controller.stop()
     }
 
@@ -99,6 +104,7 @@ class TaskDetailsFragment : BaseFragment() {
         }
         controller.context.errorContext.attach(view)
         controller.context.showSnackbar = { withContext(Dispatchers.Main) { showSnackbar(resources.getString(it)) } }
+        controller.context.addressClickedConsumer = { this@TaskDetailsFragment }
     }
 
     override fun onAttach(context: Context) {
@@ -144,5 +150,9 @@ class TaskDetailsFragment : BaseFragment() {
             }
             setTargetFragment(parent, 0)
         }
+    }
+
+    override fun onAddressClicked(address: Address) {
+        TODO("Not yet implemented")
     }
 }

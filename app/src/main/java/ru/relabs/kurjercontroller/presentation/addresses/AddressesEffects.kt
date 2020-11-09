@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.presentation.addresses
 
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import ru.relabs.kurjercontroller.R
@@ -7,10 +8,9 @@ import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.RootScreen
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.AddressYandexMapScreen
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.TasksYandexMapScreen
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.AddressWithColor
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.base.WRONG_METHOD_OUTLINE_COLOR
+import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressWithColor
 import ru.relabs.kurjercontroller.utils.extensions.placemarkColor
 
 /**
@@ -82,22 +82,25 @@ object AddressesEffects {
 
     fun effectOpenYandexMap(taskItems: List<TaskItem>): AddressesEffect = { c, s ->
         val placemarkColor = taskItems.placemarkColor()
-        withContext(Dispatchers.Main) {
-            c.router.navigateTo(
-                AddressYandexMapScreen(
-                    listOf(
-                        AddressWithColor(
-                            taskItems.first().address,
-                            placemarkColor,
-                            if (taskItems.any { it.wrongMethod }) WRONG_METHOD_OUTLINE_COLOR else placemarkColor
-                        )
-                    ),
-                    listOf(taskItems.first().deliverymanId),
-                    s.tasks.firstOrNull { it.id == taskItems.first().taskId }?.storages ?: listOf()
-                ) {
-                    return@AddressYandexMapScreen
-                }
-            )
+        val consumer = c.addressClickedConsumer()
+        when (consumer) {
+            null -> FirebaseCrashlytics.getInstance().log("consumer is null")
+            else -> withContext(Dispatchers.Main) {
+                c.router.navigateTo(
+                    RootScreen.AddressMap(
+                        listOf(
+                            AddressWithColor(
+                                taskItems.first().address,
+                                placemarkColor,
+                                if (taskItems.any { it.wrongMethod }) WRONG_METHOD_OUTLINE_COLOR else placemarkColor
+                            )
+                        ),
+                        listOf(taskItems.first().deliverymanId),
+                        s.tasks.firstOrNull { it.id == taskItems.first().taskId }?.storages ?: listOf(),
+                        consumer
+                    )
+                )
+            }
         }
     }
 
