@@ -590,6 +590,12 @@ class DatabaseRepository(
             ?.copy(closeTime = DateTime.now())
             ?.let { db.taskItemDao().update(it) }
     }
+
+    suspend fun saveTaskItem(taskItem: TaskItem) = withContext(Dispatchers.IO) {
+        db.addressDao().insert(DatabaseAddressMapper.toEntity(taskItem.address))
+        db.taskItemDao().insert(DatabaseTaskItemMapper.toEntity(taskItem))
+        db.entranceDao().insertAll(taskItem.entrances.map { DatabaseEntranceMapper.toEntity(it, taskItem.taskId, taskItem.id) })
+    }
 }
 
 sealed class SendQueryData {

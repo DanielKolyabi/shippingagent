@@ -2,10 +2,14 @@ package ru.relabs.kurjercontroller.presentation.yandexMap
 
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.map.VisibleRegion
 import kotlinx.coroutines.*
 import ru.relabs.kurjercontroller.domain.models.Address
 import ru.relabs.kurjercontroller.domain.models.AddressId
+import ru.relabs.kurjercontroller.domain.models.TaskId
+import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.models.DeliverymanPositionData
+import ru.relabs.kurjercontroller.presentation.yandexMap.YandexMapRenders.isAddressInVisibleRegion
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressIdWithColor
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressWithColor
 import ru.relabs.kurjercontroller.utils.Left
@@ -17,7 +21,10 @@ import java.util.*
  */
 object YandexMapEffects {
 
-    fun effectInit(addressIds: List<AddressIdWithColor>): YandexMapEffect = { c, s ->
+    fun effectInit(
+        addressIds: List<AddressIdWithColor>,
+        taskIds: List<TaskId>
+    ): YandexMapEffect = { c, s ->
         val addresses = addressIds.mapNotNull { awc ->
             c.databaseRepository.getAddress(AddressId(awc.id))?.let { a ->
                 AddressWithColor(
@@ -31,6 +38,45 @@ object YandexMapEffects {
         }
 
         messages.send(YandexMapMessages.msgAddressesLoaded(addresses))
+
+        val tasks = taskIds.mapNotNull {
+            c.databaseRepository.getTask(it)
+        }
+
+        messages.send(YandexMapMessages.msgTasksLoaded(tasks))
+
+        if (tasks.isNotEmpty()) {
+            if (tasks.size > 1) {
+                messages.send(YandexMapMessages.msgCommonLayerClicked())
+            } else {
+                tasks.firstOrNull()?.let { messages.send(YandexMapMessages.msgTaskLayerClicked(it)) }
+            }
+            messages.send(msgEffect(effectLoadNewTaskItems()))
+        }
+    }
+
+    private fun effectLoadNewTaskItems(): YandexMapEffect = { c, s ->
+        val newTaskItems = s.tasks.filter { it.filtered }.flatMap { task ->
+            messages.send(YandexMapMessages.msgTaskLayerLoading(task, true))
+
+            val currentAddresses = task.taskItems.map { it.address.id }
+
+            val taskItems = when (val r = c.controlRepository.getFilteredTaskItems(task.taskFilters.all, task.withPlanned)) {
+                is Right -> r.value
+                    .items
+                    .filter { !currentAddresses.contains(it.address.id) }
+                    .map { it.copy(taskId = task.id) }
+                is Left -> {
+                    FirebaseCrashlytics.getInstance().recordException(r.value)
+                    emptyList()
+                }
+            }
+            messages.send(YandexMapMessages.msgTaskLayerLoading(task, false))
+
+            taskItems
+        }
+
+        messages.send(YandexMapMessages.msgNewTaskItemsLoaded(newTaskItems))
     }
 
     fun effectNotifyAddressClicked(address: Address): YandexMapEffect = { c, s ->
@@ -86,6 +132,19 @@ object YandexMapEffects {
     fun effectNavigateBack(): YandexMapEffect = { c, s ->
         withContext(Dispatchers.Main) {
             c.router.exit()
+        }
+    }
+
+    fun effectAddNewAddresses(visibleRegion: VisibleRegion): YandexMapEffect = { c, s ->
+        if (s.selectedLayer is MapLayer.TaskLayer) {
+            val selectedNewTaskItems = s.newTaskItems
+                .filter { it.taskId == s.selectedLayer.task.id && isAddressInVisibleRegion(it.address, visibleRegion) }
+            selectedNewTaskItems.forEach {
+                c.databaseRepository.saveTaskItem(it)
+            }
+            messages.send(YandexMapMessages.msgNewTaskItemsAdded(selectedNewTaskItems))
+            messages.send(msgEffect(effectInit(emptyList(), s.tasks.map { it.id })))
+            //TODO: Notify parent taskItems added
         }
     }
 }

@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.presentation.yandexMap
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.relabs.kurjercontroller.R
+import ru.relabs.kurjercontroller.domain.models.TaskId
 import ru.relabs.kurjercontroller.domain.models.TaskStorage
 import ru.relabs.kurjercontroller.presentation.base.fragment.BaseFragment
 import ru.relabs.kurjercontroller.presentation.base.recycler.DelegateAdapter
@@ -38,11 +40,12 @@ class YandexMapFragment : BaseFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val addressIds = arguments?.getParcelableArrayList<AddressIdWithColor>("address_ids")?.toList() ?: listOf()
-        val deliverymanIds = arguments?.getIntArray("deliveryman_ids")?.toList().orEmpty()
-        val storages = arguments?.getParcelableArrayList<TaskStorage>("storages")?.toList() ?: listOf()
+        val addressIds = arguments?.getParcelableArrayList<AddressIdWithColor>(ARG_ADDRESSES)?.toList() ?: listOf()
+        val deliverymanIds = arguments?.getIntArray(ARG_DELIVERYMANS)?.toList().orEmpty()
+        val storages = arguments?.getParcelableArrayList<TaskStorage>(ARG_STORAGES)?.toList() ?: listOf()
+        val tasks = arguments?.getParcelableArrayList<TaskId>(ARG_TASKS)?.toList() ?: listOf()
 
-        controller.start(YandexMapMessages.msgInit(addressIds, deliverymanIds, storages))
+        controller.start(YandexMapMessages.msgInit(addressIds, deliverymanIds, storages, tasks))
     }
 
     override fun onDestroy() {
@@ -96,7 +99,8 @@ class YandexMapFragment : BaseFragment() {
                 },
                 YandexMapRenders.renderStorages(view.mapview),
                 YandexMapRenders.renderDeliverymans(view.mapview),
-                YandexMapRenders.renderControls(adapter)
+                YandexMapRenders.renderControls(adapter),
+                YandexMapRenders.renderAddNewAddressesButton(view.add_button, view.mapview)
             )
             launch { controller.stateFlow().collect(rendersCollector(renders)) }
             launch { controller.stateFlow().collect(debugCollector { debug(it) }) }
@@ -109,6 +113,9 @@ class YandexMapFragment : BaseFragment() {
     private fun bindControls(view: View) {
         view.iv_menu.setOnClickListener {
             uiScope.sendMessage(controller, YandexMapMessages.msgNavigateBack())
+        }
+        view.add_button.setOnClickListener {
+            uiScope.sendMessage(controller, YandexMapMessages.msgAddNewAddresses(view.mapview.map.visibleRegion))
         }
     }
 
@@ -144,11 +151,15 @@ class YandexMapFragment : BaseFragment() {
     }
 
     companion object {
+        const val WRONG_METHOD_OUTLINE_COLOR = Color.BLACK
+
         const val ARG_ADDRESSES = "address_ids"
         const val ARG_STORAGES = "storages"
         const val ARG_DELIVERYMANS = "deliveryman_ids"
+        const val ARG_TASKS = "tasks"
 
         fun <T> newInstance(
+            tasks: List<TaskId>,
             addresses: List<AddressIdWithColor>,
             deliverymanIds: List<Int>,
             storages: List<TaskStorage>,
@@ -156,6 +167,7 @@ class YandexMapFragment : BaseFragment() {
         ) where T : Fragment, T : IAddressClickedConsumer =
             YandexMapFragment().apply {
                 arguments = Bundle().apply {
+                    putParcelableArrayList(ARG_TASKS, ArrayList(tasks.map { it }))
                     putParcelableArrayList(ARG_ADDRESSES, ArrayList(addresses))
                     putParcelableArrayList(ARG_STORAGES, ArrayList(storages))
                     putIntArray(ARG_DELIVERYMANS, deliverymanIds.toIntArray())

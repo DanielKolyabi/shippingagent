@@ -147,6 +147,6 @@ class AddressesFragment : BaseFragment(), IAddressClickedConsumer {
     }
 
     override fun onAddressClicked(address: Address) {
-        TODO("Not yet implemented")
+        uiScope.sendMessage(controller, AddressesMessages.msgYandexMapAddressSelected(address))
     }
 }

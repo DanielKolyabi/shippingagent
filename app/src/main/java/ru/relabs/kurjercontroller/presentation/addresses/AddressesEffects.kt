@@ -7,9 +7,7 @@ import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.RootScreen
-import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.TasksYandexMapScreen
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.base.WRONG_METHOD_OUTLINE_COLOR
+import ru.relabs.kurjercontroller.presentation.yandexMap.YandexMapFragment.Companion.WRONG_METHOD_OUTLINE_COLOR
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressWithColor
 import ru.relabs.kurjercontroller.utils.extensions.placemarkColor
 
@@ -121,25 +119,24 @@ object AddressesEffects {
         messages.send(AddressesMessages.msgAddLoaders(-1))
     }
 
-    private fun effectYandexMapAddressSelected(address: Address): AddressesEffect = { c, s ->
+    fun effectYandexMapAddressSelected(address: Address): AddressesEffect = { c, s ->
         messages.send(AddressesMessages.msgSelectedListAddress(address))
         delay(1000)
         messages.send(AddressesMessages.msgSelectedListAddress(null))
     }
 
     fun effectOpenGlobalMap(): AddressesEffect = { c, s ->
-        withContext(Dispatchers.Main) {
-            c.router.navigateTo(
-                TasksYandexMapScreen(
-                    s.tasks,
-                    { address ->
-                        messages.offer(msgEffect(effectYandexMapAddressSelected(address)))
-                    },
-                    {
-                        messages.offer(msgEffect(effectLoadTasks(s.tasks.map { it.id })))
-                    }
+        val consumer = c.addressClickedConsumer()
+        when (consumer) {
+            null -> FirebaseCrashlytics.getInstance().log("consumer is null")
+            else -> withContext(Dispatchers.Main) {
+                c.router.navigateTo(
+                    RootScreen.TasksMap(
+                        s.tasks,
+                        consumer
+                    )
                 )
-            )
+            }
         }
     }
 }

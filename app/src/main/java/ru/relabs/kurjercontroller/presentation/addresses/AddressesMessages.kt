@@ -114,4 +114,7 @@ object AddressesMessages {
 
     fun msgCloseTaskClicked(): AddressesMessage =
         msgEffect(AddressesEffects.effectCloseCurrentTask())
+
+    fun msgYandexMapAddressSelected(address: Address): AddressesMessage =
+        msgEffect(AddressesEffects.effectYandexMapAddressSelected(address))
 }

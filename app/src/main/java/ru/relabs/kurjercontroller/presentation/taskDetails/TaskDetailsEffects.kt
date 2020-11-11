@@ -5,7 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.presentation.RootScreen
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.base.WRONG_METHOD_OUTLINE_COLOR
+import ru.relabs.kurjercontroller.presentation.yandexMap.YandexMapFragment.Companion.WRONG_METHOD_OUTLINE_COLOR
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressWithColor
 
 /**

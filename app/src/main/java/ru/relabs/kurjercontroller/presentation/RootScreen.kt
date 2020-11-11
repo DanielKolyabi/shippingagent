@@ -69,9 +69,23 @@ sealed class RootScreen(protected val fabric: () -> Fragment) : SupportAppScreen
         private val target: T
     ) : RootScreen({
         YandexMapFragment.newInstance(
+            emptyList(),
             addresses.map { AddressIdWithColor(it.address.id.id, it.color, it.outlineColor) },
             deliverymanIds,
             storages,
+            target
+        )
+    }) where T : Fragment, T : IAddressClickedConsumer
+
+    class TasksMap<T>(
+        private val tasks: List<Task>,
+        private val target: T
+    ) : RootScreen({
+        YandexMapFragment.newInstance(
+            tasks.map { it.id },
+            emptyList(),
+            emptyList(),
+            emptyList(),
             target
         )
     }) where T : Fragment, T : IAddressClickedConsumer

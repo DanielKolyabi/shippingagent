@@ -3,9 +3,7 @@ package ru.relabs.kurjercontroller.presentation.yandexMap
 import com.yandex.mapkit.geometry.Point
 import org.koin.core.KoinComponent
 import org.koin.core.inject
-import ru.relabs.kurjercontroller.domain.models.Address
-import ru.relabs.kurjercontroller.domain.models.Task
-import ru.relabs.kurjercontroller.domain.models.TaskStorage
+import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.domain.providers.LocationProvider
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
@@ -28,6 +26,9 @@ data class YandexMapState(
     val deliverymanIds: List<Int> = emptyList(),
     val deliverymans: List<DeliverymanPositionData> = emptyList(),
     val storages: List<TaskStorage> = emptyList(),
+    val tasks: List<Task> = emptyList(),
+    val taskLoadings: Map<TaskId, Boolean> = mapOf(),
+    val newTaskItems: List<TaskItem> = emptyList(),
 
     val selectedLayer: MapLayer = MapLayer.Common,
     val deliverymansLoading: Boolean = false
