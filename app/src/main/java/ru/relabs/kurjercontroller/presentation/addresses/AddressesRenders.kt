@@ -152,7 +152,7 @@ object AddressesRenders {
         }
 
         val groups = sortedItems
-            .groupBy { it.second.address.id }
+            .groupBy { it.second.address.idnd }
             .map {
                 listOf(AddressesItem.GroupHeader(it.value.map { it.second }, tasks.size == 1)) +
                         it.value.map { AddressesItem.AddressItem(it.second, it.first) }
