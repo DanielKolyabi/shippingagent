@@ -1,13 +1,16 @@
 package ru.relabs.kurjercontroller.presentation.yandexMap
 
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.yandex.mapkit.geometry.BoundingBox
 import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.VisibleRegion
 import kotlinx.coroutines.*
 import ru.relabs.kurjercontroller.domain.models.Address
 import ru.relabs.kurjercontroller.domain.models.AddressId
 import ru.relabs.kurjercontroller.domain.models.TaskId
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
+import ru.relabs.kurjercontroller.presentation.base.tea.msgState
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.models.DeliverymanPositionData
 import ru.relabs.kurjercontroller.presentation.yandexMap.YandexMapRenders.isAddressInVisibleRegion
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressIdWithColor
@@ -23,7 +26,8 @@ object YandexMapEffects {
 
     fun effectInit(
         addressIds: List<AddressIdWithColor>,
-        taskIds: List<TaskId>
+        taskIds: List<TaskId>,
+        firstInit: Boolean
     ): YandexMapEffect = { c, s ->
         val addresses = addressIds.mapNotNull { awc ->
             c.databaseRepository.getAddress(AddressId(awc.id))?.let { a ->
@@ -46,14 +50,71 @@ object YandexMapEffects {
         messages.send(YandexMapMessages.msgTasksLoaded(tasks))
 
         if (tasks.isNotEmpty()) {
-            if (tasks.size > 1) {
-                messages.send(YandexMapMessages.msgCommonLayerClicked())
-            } else {
-                tasks.firstOrNull()?.let { messages.send(YandexMapMessages.msgTaskLayerClicked(it)) }
+            if (firstInit) {
+                if (tasks.size > 1) {
+                    messages.send(YandexMapMessages.msgCommonLayerClicked())
+                } else {
+                    tasks.firstOrNull()?.let { messages.send(YandexMapMessages.msgTaskLayerClicked(it)) }
+                }
             }
             messages.send(msgEffect(effectLoadNewTaskItems()))
         }
+        if (firstInit) {
+            messages.send(msgEffect(effectFocusCamera()))
+        }
     }
+
+    private fun effectFocusCamera(): YandexMapEffect = { c, s ->
+        val addresses = s.addresses.map { it.address }
+        val addressPosition = when {
+            addresses.isEmpty() -> null
+
+            addresses.size == 1 -> {
+                val a = addresses.firstOrNull()
+                a?.let { Pair(a.lat, a.long) }
+            }
+
+            else -> {
+                val filtered = addresses.filter { it.lat != 0.0 && it.long != 0.0 }
+                val minLat = filtered.minBy { it.lat }?.lat
+                val maxLat = filtered.maxBy { it.lat }?.lat
+                val minLong = filtered.minBy { it.long }?.long
+                val maxLong = filtered.maxBy { it.long }?.long
+                if (minLat == null || maxLat == null || minLong == null || maxLong == null) {
+                    val a = addresses.firstOrNull()
+                    a?.let { Pair(a.lat, a.long) }
+                } else {
+                    c.getCameraPositionFromBound(BoundingBox(Point(minLat, minLong), Point(maxLat, maxLong)))
+                        ?: run {
+                            val a = addresses.firstOrNull()
+                            a?.let { Pair(a.lat, a.long) }
+                        }
+                }
+            }
+        }
+        val cameraPosition = c.mapCameraStorage.getCameraPosition()
+            ?: addressPosition
+            ?: c.locationProvider.lastReceivedLocation()?.let { Pair(it.latitude, it.longitude) }
+            ?: c.locationProvider.updatesChannel().let {
+                val coord = it.receive()
+                it.cancel()
+                coord.let { Pair(it.latitude, it.longitude) }
+            }
+
+        messages.send(
+            YandexMapMessages.msgCameraChanged(
+                CameraPosition(
+                    Point(cameraPosition.first, cameraPosition.second),
+                    c.mapCameraStorage.getCameraZoom() ?: 14f,
+                    0f, 0f
+                )
+            )
+        )
+        messages.send(msgState { it.copy(cameraUpdateRequired = true) })
+        delay(1000)
+        messages.send(msgState { it.copy(cameraUpdateRequired = false) })
+    }
+
 
     private fun effectLoadNewTaskItems(): YandexMapEffect = { c, s ->
         val newTaskItems = s.tasks.filter { it.filtered }.flatMap { task ->
@@ -143,8 +204,16 @@ object YandexMapEffects {
                 c.databaseRepository.saveTaskItem(it)
             }
             messages.send(YandexMapMessages.msgNewTaskItemsAdded(selectedNewTaskItems))
-            messages.send(msgEffect(effectInit(emptyList(), s.tasks.map { it.id })))
-            //TODO: Notify parent taskItems added
+            messages.send(msgEffect(effectInit(emptyList(), s.tasks.map { it.id }, false)))
+            withContext(Dispatchers.Main) {
+                c.notifyItemsAdded(selectedNewTaskItems)
+            }
+        }
+    }
+
+    fun effectSaveCameraPosition(): YandexMapEffect = { c, s ->
+        if (s.cameraPosition != null) {
+            c.mapCameraStorage.saveCameraSettings(s.cameraPosition, s.cameraZoom)
         }
     }
 }

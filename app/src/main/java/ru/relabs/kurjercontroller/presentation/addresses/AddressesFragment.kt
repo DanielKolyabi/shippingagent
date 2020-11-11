@@ -13,10 +13,12 @@ import kotlinx.coroutines.launch
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.domain.models.Address
 import ru.relabs.kurjercontroller.domain.models.TaskId
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.presentation.base.fragment.BaseFragment
 import ru.relabs.kurjercontroller.presentation.base.recycler.DelegateAdapter
 import ru.relabs.kurjercontroller.presentation.base.tea.*
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.IAddressClickedConsumer
+import ru.relabs.kurjercontroller.presentation.yandexMap.models.INewItemsAddedConsumer
 import ru.relabs.kurjercontroller.utils.IntentUtils
 import ru.relabs.kurjercontroller.utils.debug
 import ru.relabs.kurjercontroller.utils.extensions.showDialog
@@ -27,7 +29,7 @@ import ru.relabs.kurjercontroller.utils.extensions.showSnackbar
  * Created by Daniil Kurchanov on 02.04.2020.
  */
 
-class AddressesFragment : BaseFragment(), IAddressClickedConsumer {
+class AddressesFragment : BaseFragment(), IAddressClickedConsumer, INewItemsAddedConsumer {
 
     private val controller = defaultController(AddressesState(), AddressesContext())
     private var renderJob: Job? = null
@@ -148,5 +150,9 @@ class AddressesFragment : BaseFragment(), IAddressClickedConsumer {
 
     override fun onAddressClicked(address: Address) {
         uiScope.sendMessage(controller, AddressesMessages.msgYandexMapAddressSelected(address))
+    }
+
+    override fun onItemsAdded(taskItems: List<TaskItem>) {
+        uiScope.sendMessage(controller, AddressesMessages.msgTaskItemsAdded())
     }
 }

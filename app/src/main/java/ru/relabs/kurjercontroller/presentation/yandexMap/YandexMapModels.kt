@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.presentation.yandexMap
 
+import com.yandex.mapkit.geometry.BoundingBox
 import com.yandex.mapkit.geometry.Point
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -7,6 +8,7 @@ import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.domain.providers.LocationProvider
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
+import ru.relabs.kurjercontroller.domain.storage.MapCameraStorage
 import ru.relabs.kurjercontroller.presentation.base.tea.*
 import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.models.DeliverymanPositionData
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressWithColor
@@ -29,7 +31,9 @@ data class YandexMapState(
     val tasks: List<Task> = emptyList(),
     val taskLoadings: Map<TaskId, Boolean> = mapOf(),
     val newTaskItems: List<TaskItem> = emptyList(),
-
+    val cameraPosition: Pair<Double, Double>? = null,
+    val cameraZoom: Float = 14f,
+    val cameraUpdateRequired: Boolean = false,
     val selectedLayer: MapLayer = MapLayer.Common,
     val deliverymansLoading: Boolean = false
 )
@@ -42,9 +46,12 @@ class YandexMapContext(val errorContext: ErrorContextImpl = ErrorContextImpl()) 
     val databaseRepository: DatabaseRepository by inject()
     val controlRepository: ControlRepository by inject()
     val locationProvider: LocationProvider by inject()
+    val mapCameraStorage: MapCameraStorage by inject()
 
     var notifyAddressClicked: (address: Address) -> Unit = {}
+    var notifyItemsAdded: (items: List<TaskItem>) -> Unit = {}
     var moveCameraToUser: (location: Point) -> Unit = {}
+    var getCameraPositionFromBound: (BoundingBox) -> Pair<Double, Double>? = { null }
 }
 
 typealias YandexMapMessage = ElmMessage<YandexMapContext, YandexMapState>

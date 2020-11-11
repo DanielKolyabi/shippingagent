@@ -19,6 +19,7 @@ import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.domain.storage.AppPreferences
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
 import ru.relabs.kurjercontroller.domain.storage.CurrentUserStorage
+import ru.relabs.kurjercontroller.domain.storage.MapCameraStorage
 import ru.relabs.kurjercontroller.domain.useCases.AppUpdateUseCase
 import ru.relabs.kurjercontroller.domain.useCases.LoginUseCase
 import ru.relabs.kurjercontroller.domain.useCases.OnlineTaskUseCase
@@ -61,6 +62,7 @@ val storagesModule = module {
     single<AppPreferences> { AppPreferences(get<SharedPreferences>()) }
     single<AuthTokenStorage> { AuthTokenStorage(get<AppPreferences>()) }
     single<CurrentUserStorage> { CurrentUserStorage(get<AppPreferences>()) }
+    single<MapCameraStorage> { MapCameraStorage() }
 
     single<DeviceUUIDProvider> {
         DeviceUUIDProvider(

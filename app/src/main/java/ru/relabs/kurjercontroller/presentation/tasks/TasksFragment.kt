@@ -63,7 +63,7 @@ class TasksFragment : BaseFragment(),
 
     override fun onResume() {
         super.onResume()
-//        BaseYandexMapFragment.savedCameraPosition = null //TODO: Remove after yandex map refactor
+        uiScope.sendMessage(controller, TasksMessages.msgRestoreMapCamera())
         if (shouldShowUpdateRequiredOnResume) {
             showUpdateRequiredOnVisible()
         }

@@ -177,4 +177,8 @@ object TasksEffects {
         }
         messages.send(TasksMessages.msgAddLoaders(-1))
     }
+
+    fun effectRestoreMapCamera(): TasksEffect = { c, s ->
+        c.mapCameraStorage.resetCameraSettings()
+    }
 }

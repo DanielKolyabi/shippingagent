@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.synthetic.main.fragment_task_details.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -16,6 +17,7 @@ import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.domain.models.Address
 import ru.relabs.kurjercontroller.domain.models.Task
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.presentation.base.fragment.BaseFragment
 import ru.relabs.kurjercontroller.presentation.base.recycler.DelegateAdapter
 import ru.relabs.kurjercontroller.presentation.base.tea.debugCollector
@@ -23,6 +25,7 @@ import ru.relabs.kurjercontroller.presentation.base.tea.defaultController
 import ru.relabs.kurjercontroller.presentation.base.tea.rendersCollector
 import ru.relabs.kurjercontroller.presentation.base.tea.sendMessage
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.IAddressClickedConsumer
+import ru.relabs.kurjercontroller.presentation.yandexMap.models.INewItemsAddedConsumer
 import ru.relabs.kurjercontroller.utils.debug
 import ru.relabs.kurjercontroller.utils.extensions.showDialog
 import ru.relabs.kurjercontroller.utils.extensions.showSnackbar
@@ -32,7 +35,7 @@ import ru.relabs.kurjercontroller.utils.extensions.showSnackbar
  * Created by Daniil Kurchanov on 02.04.2020.
  */
 
-class TaskDetailsFragment : BaseFragment(), IAddressClickedConsumer {
+class TaskDetailsFragment : BaseFragment(), IAddressClickedConsumer, INewItemsAddedConsumer {
 
     private val controller = defaultController(TaskDetailsState(), TaskDetailsContext())
     private var renderJob: Job? = null
@@ -152,7 +155,9 @@ class TaskDetailsFragment : BaseFragment(), IAddressClickedConsumer {
         }
     }
 
-    override fun onAddressClicked(address: Address) {
-        TODO("Not yet implemented")
+    override fun onAddressClicked(address: Address) {}
+
+    override fun onItemsAdded(taskItems: List<TaskItem>) {
+        FirebaseCrashlytics.getInstance().log("Shouldn't happens")
     }
 }

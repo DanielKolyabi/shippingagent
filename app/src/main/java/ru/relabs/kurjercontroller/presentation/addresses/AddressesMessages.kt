@@ -117,4 +117,7 @@ object AddressesMessages {
 
     fun msgYandexMapAddressSelected(address: Address): AddressesMessage =
         msgEffect(AddressesEffects.effectYandexMapAddressSelected(address))
+
+    fun msgTaskItemsAdded(): AddressesMessage =
+        msgEffects({ it }, { listOf(AddressesEffects.effectLoadTasks(it.tasks.map { it.id })) })
 }

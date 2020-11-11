@@ -117,4 +117,7 @@ object TasksMessages {
 
     fun msgStartAfterPartialFail(): TasksMessage =
         msgEffect(TasksEffects.effectNavigateAddresses(false))
+
+    fun msgRestoreMapCamera(): TasksMessage =
+        msgEffect(TasksEffects.effectRestoreMapCamera())
 }

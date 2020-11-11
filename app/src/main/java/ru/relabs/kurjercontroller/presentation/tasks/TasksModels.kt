@@ -7,6 +7,7 @@ import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.domain.models.TaskId
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
+import ru.relabs.kurjercontroller.domain.storage.MapCameraStorage
 import ru.relabs.kurjercontroller.domain.useCases.OnlineTaskUseCase
 import ru.relabs.kurjercontroller.presentation.base.tea.*
 
@@ -30,6 +31,7 @@ class TasksContext(val consumer: TasksFragment, val errorContext: ErrorContextIm
     val databaseRepository: DatabaseRepository by inject()
     val taskEventController: TaskEventController by inject()
     val onlineTaskUseCase: OnlineTaskUseCase by inject()
+    val mapCameraStorage: MapCameraStorage by inject()
 
     var showSnackbar: suspend (Int) -> Unit = {}
     var showUpdateRequiredOnVisible: () -> Unit = {}

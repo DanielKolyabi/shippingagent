@@ -1,6 +1,7 @@
 package ru.relabs.kurjercontroller.presentation.yandexMap
 
 import android.graphics.Color
+import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.VisibleRegion
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
@@ -29,7 +30,7 @@ object YandexMapMessages {
                 storages = storages
             )
         },
-        { listOf(YandexMapEffects.effectInit(addressIds, tasks)) }
+        { listOf(YandexMapEffects.effectInit(addressIds, tasks, true)) }
     )
 
     fun msgAddressesLoaded(addresses: List<AddressWithColor>): YandexMapMessage =
@@ -136,4 +137,15 @@ object YandexMapMessages {
 
     fun msgNewTaskItemsAdded(selectedNewTaskItems: List<TaskItem>): YandexMapMessage =
         msgState { it.copy(newTaskItems = it.newTaskItems.filter { !selectedNewTaskItems.contains(it) }) }
+
+    fun msgCameraChanged(cameraPosition: CameraPosition): YandexMapMessage =
+        msgState {
+            it.copy(
+                cameraPosition = Pair(cameraPosition.target.latitude, cameraPosition.target.longitude),
+                cameraZoom = cameraPosition.zoom
+            )
+        }
+
+    fun msgSaveCameraPosition(): YandexMapMessage =
+        msgEffect(YandexMapEffects.effectSaveCameraPosition())
 }

@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.geometry.BoundingBox
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
 import kotlinx.android.synthetic.main.fragment_yandex_map.*
@@ -26,6 +27,7 @@ import ru.relabs.kurjercontroller.presentation.base.tea.rendersCollector
 import ru.relabs.kurjercontroller.presentation.base.tea.sendMessage
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressIdWithColor
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.IAddressClickedConsumer
+import ru.relabs.kurjercontroller.presentation.yandexMap.models.INewItemsAddedConsumer
 import ru.relabs.kurjercontroller.utils.debug
 
 
@@ -50,9 +52,14 @@ class YandexMapFragment : BaseFragment() {
 
     override fun onDestroy() {
         super.onDestroy()
+        controller.context.moveCameraToUser = {}
         controller.stop()
     }
 
+    override fun onPause() {
+        super.onPause()
+        uiScope.sendMessage(controller, YandexMapMessages.msgSaveCameraPosition())
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -100,13 +107,15 @@ class YandexMapFragment : BaseFragment() {
                 YandexMapRenders.renderStorages(view.mapview),
                 YandexMapRenders.renderDeliverymans(view.mapview),
                 YandexMapRenders.renderControls(adapter),
-                YandexMapRenders.renderAddNewAddressesButton(view.add_button, view.mapview)
+                YandexMapRenders.renderAddNewAddressesButton(view.add_button, view.mapview),
+                YandexMapRenders.renderCamera(view.mapview)
             )
             launch { controller.stateFlow().collect(rendersCollector(renders)) }
             launch { controller.stateFlow().collect(debugCollector { debug(it) }) }
         }
         controller.context.errorContext.attach(view)
         controller.context.notifyAddressClicked = { (targetFragment as? IAddressClickedConsumer)?.onAddressClicked(it) }
+        controller.context.notifyItemsAdded = { (targetFragment as? INewItemsAddedConsumer)?.onItemsAdded(it) }
         controller.context.moveCameraToUser = ::moveCameraToUser
     }
 
@@ -116,6 +125,11 @@ class YandexMapFragment : BaseFragment() {
         }
         view.add_button.setOnClickListener {
             uiScope.sendMessage(controller, YandexMapMessages.msgAddNewAddresses(view.mapview.map.visibleRegion))
+        }
+        view.mapview.map.addCameraListener { map, cameraPosition, cameraUpdateSource, finished ->
+            if(finished){
+                uiScope.sendMessage(controller, YandexMapMessages.msgCameraChanged(cameraPosition))
+            }
         }
     }
 
@@ -164,7 +178,7 @@ class YandexMapFragment : BaseFragment() {
             deliverymanIds: List<Int>,
             storages: List<TaskStorage>,
             targetFragment: T
-        ) where T : Fragment, T : IAddressClickedConsumer =
+        ) where T : Fragment, T : IAddressClickedConsumer, T : INewItemsAddedConsumer =
             YandexMapFragment().apply {
                 arguments = Bundle().apply {
                     putParcelableArrayList(ARG_TASKS, ArrayList(tasks.map { it }))

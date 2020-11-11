@@ -18,6 +18,7 @@ import ru.relabs.kurjercontroller.presentation.yandexMap.YandexMapFragment
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressIdWithColor
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressWithColor
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.IAddressClickedConsumer
+import ru.relabs.kurjercontroller.presentation.yandexMap.models.INewItemsAddedConsumer
 import ru.terrakok.cicerone.android.support.SupportAppScreen
 
 
@@ -75,7 +76,7 @@ sealed class RootScreen(protected val fabric: () -> Fragment) : SupportAppScreen
             storages,
             target
         )
-    }) where T : Fragment, T : IAddressClickedConsumer
+    }) where T : Fragment, T : IAddressClickedConsumer, T : INewItemsAddedConsumer
 
     class TasksMap<T>(
         private val tasks: List<Task>,
@@ -88,5 +89,5 @@ sealed class RootScreen(protected val fabric: () -> Fragment) : SupportAppScreen
             emptyList(),
             target
         )
-    }) where T : Fragment, T : IAddressClickedConsumer
+    }) where T : Fragment, T : IAddressClickedConsumer, T : INewItemsAddedConsumer
 }

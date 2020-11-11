@@ -141,8 +141,8 @@ object YandexMapRenders {
     )
 
     fun renderAddNewAddressesButton(btn: Button, map: MapView): YandexMapRender = renderT(
-        { it.newTaskItems to it.selectedLayer },
-        { (newTaskItems, selectedLayer) ->
+        { Triple(it.newTaskItems, it.selectedLayer, it.cameraPosition to it.cameraZoom) },
+        { (newTaskItems, selectedLayer, _) ->
             if (selectedLayer is MapLayer.TaskLayer) {
                 val visibleRegion = map.map.visibleRegion
 
@@ -166,6 +166,17 @@ object YandexMapRenders {
         return address.lat > region.bottomLeft.latitude && address.long < region.topRight.longitude &&
                 address.long > region.bottomLeft.longitude && address.long < region.topRight.longitude
     }
+
+    fun renderCamera(mapview: MapView): YandexMapRender = renderT(
+        { Triple(it.cameraPosition, it.cameraZoom, it.cameraUpdateRequired) },
+        { (position, zoom, required) ->
+            if(required){
+                position?.let {
+                    mapview.map.move(CameraPosition(Point(position.first, position.second), zoom, 0f, 0f))
+                }
+            }
+        }
+    )
 
     private enum class MapObjectType {
         Address, Storage, DeliveryMan
