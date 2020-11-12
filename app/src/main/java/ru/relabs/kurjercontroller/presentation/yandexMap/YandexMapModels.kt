@@ -10,8 +10,8 @@ import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.domain.storage.MapCameraStorage
 import ru.relabs.kurjercontroller.presentation.base.tea.*
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.models.DeliverymanPositionData
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressWithColor
+import ru.relabs.kurjercontroller.presentation.yandexMap.models.DeliverymanPositionData
 
 /**
  * Created by Daniil Kurchanov on 02.04.2020.

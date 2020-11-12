@@ -1,4 +1,4 @@
-package ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.models
+package ru.relabs.kurjercontroller.presentation.yandexMap.models
 
 /**
  * Created by ProOrange on 26.06.2019.

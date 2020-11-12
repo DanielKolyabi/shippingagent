@@ -11,10 +11,10 @@ import ru.relabs.kurjercontroller.domain.models.AddressId
 import ru.relabs.kurjercontroller.domain.models.TaskId
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.base.tea.msgState
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.models.DeliverymanPositionData
 import ru.relabs.kurjercontroller.presentation.yandexMap.YandexMapRenders.isAddressInVisibleRegion
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressIdWithColor
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressWithColor
+import ru.relabs.kurjercontroller.presentation.yandexMap.models.DeliverymanPositionData
 import ru.relabs.kurjercontroller.utils.Left
 import ru.relabs.kurjercontroller.utils.Right
 import java.util.*
@@ -179,7 +179,12 @@ object YandexMapEffects {
                 .map { pair ->
                     pair.second.mapNotNull {
                         if (Date().time - it.time.millis < 6 * 60 * 1000)
-                            DeliverymanPositionData(pair.first, it.name, it.lat, it.long)
+                            DeliverymanPositionData(
+                                pair.first,
+                                it.name,
+                                it.lat,
+                                it.long
+                            )
                         else
                             null
 

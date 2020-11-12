@@ -7,10 +7,10 @@ import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffects
 import ru.relabs.kurjercontroller.presentation.base.tea.msgState
-import ru.relabs.kurjercontroller.presentation.fragmentsOld.yandexMap.models.DeliverymanPositionData
 import ru.relabs.kurjercontroller.presentation.yandexMap.YandexMapFragment.Companion.WRONG_METHOD_OUTLINE_COLOR
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressIdWithColor
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressWithColor
+import ru.relabs.kurjercontroller.presentation.yandexMap.models.DeliverymanPositionData
 import ru.relabs.kurjercontroller.utils.extensions.placemarkColor
 
 /**
