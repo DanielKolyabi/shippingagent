@@ -29,6 +29,17 @@ object ReportAdapter {
         }
     )
 
+    fun photoMultiple(onPhotoClicked: () -> Unit): IAdapterDelegate<ReportPhotoItem> = delegateDefine(
+        { it is ReportPhotoItem.Multiple },
+        { p ->
+            holderDefine(p, R.layout.holder_report_photo_blank_multi, { it as ReportPhotoItem.Multiple }) {
+                itemView.setOnClickListener {
+                    onPhotoClicked()
+                }
+            }
+        }
+    )
+
     fun photo(onRemoveClicked: (EntrancePhoto) -> Unit): IAdapterDelegate<ReportPhotoItem> = delegateDefine(
         { it is ReportPhotoItem.Photo },
         { p ->

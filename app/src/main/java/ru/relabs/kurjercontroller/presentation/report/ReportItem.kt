@@ -7,6 +7,7 @@ import ru.relabs.kurjercontroller.domain.models.EntrancePhoto
 
 sealed class ReportPhotoItem {
     object Single : ReportPhotoItem()
+    object Multiple : ReportPhotoItem()
     data class Photo(val photo: EntrancePhoto, val photoUri: Uri) : ReportPhotoItem()
 }
 

@@ -59,7 +59,7 @@ object ReportRenders {
         { it.selectedEntrancePhotos },
         { photos ->
             val newItems =
-                listOf(ReportPhotoItem.Single) + photos.map { ReportPhotoItem.Photo(it.photo, it.uri) }
+                listOf(ReportPhotoItem.Single, ReportPhotoItem.Multiple) + photos.map { ReportPhotoItem.Photo(it.photo, it.uri) }
 
             val diff = DiffUtil.calculateDiff(DefaultListDiffCallback(adapter.items, newItems))
 

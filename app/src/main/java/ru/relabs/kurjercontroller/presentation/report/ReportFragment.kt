@@ -100,7 +100,10 @@ class ReportFragment : BaseFragment() {
 
         val photosAdapter = DelegateAdapter(
             ReportAdapter.photoSingle {
-                uiScope.sendMessage(controller, ReportMessages.msgPhotoClicked())
+                uiScope.sendMessage(controller, ReportMessages.msgPhotoClicked(false))
+            },
+            ReportAdapter.photoMultiple {
+                uiScope.sendMessage(controller, ReportMessages.msgPhotoClicked(true))
             },
             ReportAdapter.photo {
                 uiScope.sendMessage(controller, ReportMessages.msgRemovePhotoClicked(it))
@@ -369,7 +372,7 @@ class ReportFragment : BaseFragment() {
             uiScope.sendMessage(controller, ReportMessages.msgListTypeChanged())
         }
         view.lock_input_overlay.setOnClickListener {
-            uiScope.sendMessage(controller, ReportMessages.msgPhotoClicked())
+            uiScope.sendMessage(controller, ReportMessages.msgPhotoClicked(false))
         }
         view.user_explanation_input.setOnClickListener {
             uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionClicked(ApartmentNumber(-1)))

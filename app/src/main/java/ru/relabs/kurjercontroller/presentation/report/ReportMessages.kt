@@ -59,8 +59,8 @@ object ReportMessages {
             )
         }
 
-    fun msgPhotoClicked(): ReportMessage =
-        msgEffect(ReportEffects.effectCreatePhoto(false))
+    fun msgPhotoClicked(multiple: Boolean): ReportMessage =
+        msgEffect(ReportEffects.effectCreatePhoto(multiple))
 
     fun msgRemovePhotoClicked(removedPhoto: EntrancePhoto): ReportMessage = msgEffects(
         { s ->
