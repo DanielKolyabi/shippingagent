@@ -10,7 +10,10 @@ import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
-import ru.relabs.kurjercontroller.utils.*
+import ru.relabs.kurjercontroller.utils.Either
+import ru.relabs.kurjercontroller.utils.ImageUtils
+import ru.relabs.kurjercontroller.utils.Left
+import ru.relabs.kurjercontroller.utils.Right
 import java.io.File
 import java.util.*
 
@@ -240,7 +243,11 @@ object ReportEffects {
             c.showDescriptionInputDialog(
                 entranceNumber,
                 currentDescription,
-                s.entrance?.state == EntranceState.CREATED && s.saved?.entranceClosed != true
+                when (entranceNumber.number == ENTRANCE_NUMBER_TASK_ITEM) {
+                    true -> s.entrance?.state == EntranceState.CREATED
+                    else -> s.entrance?.state == EntranceState.CREATED && s.saved?.entranceClosed != true
+                }
+
             )
         }
     }

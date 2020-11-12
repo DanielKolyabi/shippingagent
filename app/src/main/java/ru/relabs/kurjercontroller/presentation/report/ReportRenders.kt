@@ -228,12 +228,29 @@ object ReportRenders {
     )
 
     fun renderDisableControlsForClosed(views: List<View>): ReportRender = renderT(
-        { it.entrance?.state == EntranceState.CLOSED || it.saved?.entranceClosed == true },
+        { it.entrance?.state == EntranceState.CREATED },
+        { enabled -> views.forEach { it.isEnabled = enabled } }
+    )
+
+    fun renderDisableControlsForManualClosed(views: List<View>): ReportRender = renderT(
+        { it.saved?.entranceClosed == true },
         { disabled -> views.forEach { it.isEnabled = !disabled } }
     )
 
     fun renderIsClosed(view: View): ReportRender = renderT(
         { it.entrance?.state == EntranceState.CREATED },
         { view.isEnabled = it }
+    )
+
+    fun renderEuroKeyEnabled(view: Spinner): ReportRender = renderT(
+        {
+            Pair(
+                it.saved?.mailboxType ?: it.entrance?.mailboxType,
+                it.entrance?.state == EntranceState.CLOSED || it.saved?.entranceClosed == true
+            )
+        },
+        { (mailboxType, isEntranceClosed) ->
+            view.isEnabled = mailboxType == 1 && !isEntranceClosed
+        }
     )
 }

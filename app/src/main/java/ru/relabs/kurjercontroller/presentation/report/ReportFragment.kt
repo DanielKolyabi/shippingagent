@@ -212,8 +212,21 @@ class ReportFragment : BaseFragment() {
                         view.list_type_button
                     )
                 ),
+                ReportRenders.renderDisableControlsForManualClosed(
+                    listOf(
+                        view.appartaments_from,
+                        view.appartaments_to,
+                        view.entrance_key,
+                        view.entrance_euro_key,
+                        view.layout_error_button,
+                        view.lookout,
+                        view.mailbox_gap,
+                        view.mailbox_euro
+                    )
+                ),
                 ReportRenders.renderIsClosed(view.entrance_closed),
-                ReportRenders.renderIsClosed(view.close_button)
+                ReportRenders.renderIsClosed(view.close_button),
+                ReportRenders.renderEuroKeyEnabled(view.entrance_euro_key)
             )
             launch { controller.stateFlow().collect(rendersCollector(renders)) }
             launch { controller.stateFlow().collect(debugCollector { debug(it) }) }
