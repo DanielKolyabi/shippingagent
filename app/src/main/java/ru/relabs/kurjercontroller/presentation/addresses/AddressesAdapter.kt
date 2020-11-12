@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
+import androidx.core.graphics.ColorUtils
 import androidx.core.widget.addTextChangedListener
 import kotlinx.android.synthetic.main.holder_address_list_address.view.*
 import kotlinx.android.synthetic.main.holder_address_list_other_addresses.view.*
@@ -57,6 +58,7 @@ object AddressesAdapter {
         { it is AddressesItem.AddressItem },
         { p ->
             holderDefine(p, R.layout.holder_address_list_task, { it as AddressesItem.AddressItem }) { (taskItem, task) ->
+                itemView.setBackgroundColor(ColorUtils.setAlphaComponent(taskItem.placemarkColor, 60))
                 with(itemView) {
                     itemView.iv_new_flare.visible = taskItem.isNew
                     itemView.btn_task.text = (if (task.filtered) "По фильтрам. " else "") +
