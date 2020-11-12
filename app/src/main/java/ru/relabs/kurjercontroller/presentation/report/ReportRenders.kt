@@ -70,9 +70,12 @@ object ReportRenders {
     )
 
     fun renderNotes(hintText: TextView): ReportRender = renderT(
-        { it.taskItem?.notes.orEmpty() },
-        { notes ->
-            hintText.text = Html.fromHtml((3 downTo 1).joinToString("<br/>") { notes.getOrElse(it - 1) { "" } })
+        { it.taskItem?.notes.orEmpty() to it.entrance?.code.orEmpty() },
+        { (notes, code) ->
+            hintText.text = Html.fromHtml("<b>Код: ${code}</b><br/>" + (3 downTo 1).joinToString("<br/>") {
+                "<b>Пр. $it</b><br/>" + notes.getOrElse(it - 1) { "" }
+            })
+
         }
     )
 
