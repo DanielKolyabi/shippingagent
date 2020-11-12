@@ -3,6 +3,7 @@ package ru.relabs.kurjercontroller.presentation.reportPager
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.viewpager.widget.PagerAdapter
 import ru.relabs.kurjercontroller.domain.models.Entrance
 import ru.relabs.kurjercontroller.domain.models.EntranceState
 import ru.relabs.kurjercontroller.domain.models.Task
@@ -51,5 +52,9 @@ class ReportPagerAdapter(
     override fun getPageTitle(position: Int): CharSequence? {
         val entrance = openedEntrances()[position]
         return "Подъезд ${entrance.number.number} из $count"
+    }
+
+    override fun getItemPosition(`object`: Any): Int {
+        return PagerAdapter.POSITION_NONE
     }
 }

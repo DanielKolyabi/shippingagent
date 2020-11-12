@@ -145,21 +145,28 @@ class ReportFragment : BaseFragment() {
         view.appartaments_list.adapter = apartmentsAdapter
         view.appartaments_list.addOnItemTouchListener(listInterceptor)
 
-
         val apartmentsFromTextListener = TextChangeListener {
-            uiScope.sendMessage(controller, ReportMessages.msgApartmentsFromChanged(it.toIntOrNull()))
+            if (view.appartaments_from.hasFocus()) {
+                uiScope.sendMessage(controller, ReportMessages.msgApartmentsFromChanged(it.toIntOrNull()))
+            }
         }
         view.appartaments_from.addTextChangedListener(apartmentsFromTextListener)
         val apartmentsToTextListener = TextChangeListener {
-            uiScope.sendMessage(controller, ReportMessages.msgApartmentsToChanged(it.toIntOrNull()))
+            if (view.appartaments_to.hasFocus()) {
+                uiScope.sendMessage(controller, ReportMessages.msgApartmentsToChanged(it.toIntOrNull()))
+            }
         }
         view.appartaments_to.addTextChangedListener(apartmentsToTextListener)
         val codeTextListener = TextChangeListener {
-            uiScope.sendMessage(controller, ReportMessages.msgCodeChanged(it))
+            if (view.entrance_code.hasFocus()) {
+                uiScope.sendMessage(controller, ReportMessages.msgCodeChanged(it))
+            }
         }
         view.entrance_code.addTextChangedListener(codeTextListener)
         val floorsTextListener = TextChangeListener {
-            it.toIntOrNull()?.let { uiScope.sendMessage(controller, ReportMessages.msgFloorsChanged(it)) }
+            if (view.floors.hasFocus()) {
+                it.toIntOrNull()?.let { uiScope.sendMessage(controller, ReportMessages.msgFloorsChanged(it)) }
+            }
         }
         view.floors.addTextChangedListener(floorsTextListener)
 

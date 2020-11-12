@@ -16,11 +16,12 @@ object ReportPagerRenders {
         { loader.visible = it }
     )
 
-    fun renderTasks(adapter: DelegateAdapter<ReportPagerTaskItem>): ReportPagerRender = renderT(
+    fun renderTasks(adapter: DelegateAdapter<ReportPagerTaskItem>, list: View): ReportPagerRender = renderT(
         { it.tasks to (it.selectedTask ?: it.tasks.firstOrNull()) },
         { (tasks, selectedTask) ->
+            list.visible = tasks.size > 1
             adapter.items.clear()
-            adapter.items.addAll(tasks.map { ReportPagerTaskItem.TaskButton(it, it == selectedTask) })
+            adapter.items.addAll(tasks.map { ReportPagerTaskItem.TaskButton(it, it.id == selectedTask?.id) })
             adapter.notifyDataSetChanged()
         }
     )

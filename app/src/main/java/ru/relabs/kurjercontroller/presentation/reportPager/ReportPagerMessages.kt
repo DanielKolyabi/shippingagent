@@ -39,7 +39,7 @@ object ReportPagerMessages {
         msgEffect(ReportPagerEffects.effectNavigateBack())
 
     fun msgCloseTaskItemEntrance(targetTaskItem: TaskItem, entrance: EntranceNumber): ReportPagerMessage = msgState { s ->
-        s.copy(tasks = s.tasks.map { t ->
+        val newTasks = s.tasks.map { t ->
             if (t.id == targetTaskItem.id && t.taskId == targetTaskItem.taskId) {
                 t.copy(entrances = t.entrances.map { e ->
                     if (e.number == entrance) {
@@ -51,7 +51,8 @@ object ReportPagerMessages {
             } else {
                 t
             }
-        })
+        }
+        s.copy(tasks = newTasks, selectedTask = newTasks.firstOrNull { it.id == s.selectedTask?.id })
     }
 
     fun msgCloseTaskItem(targetTaskItem: TaskItem): ReportPagerMessage = msgState { s ->

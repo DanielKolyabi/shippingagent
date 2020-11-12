@@ -69,7 +69,7 @@ class ReportPagerFragment : BaseFragment() {
         )
 
         val layoutManager =
-            LinearLayoutManager(view.context, LinearLayoutManager.VERTICAL, false)
+            LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
         view.tasks_list.layoutManager = layoutManager
         view.tasks_list.adapter = taskButtonsAdapter
 
@@ -81,7 +81,7 @@ class ReportPagerFragment : BaseFragment() {
         renderJob = uiScope.launch {
             val renders = listOf(
                 ReportPagerRenders.renderLoading(view.loading),
-                ReportPagerRenders.renderTasks(taskButtonsAdapter),
+                ReportPagerRenders.renderTasks(taskButtonsAdapter, view.tasks_list),
                 ReportPagerRenders.renderPager(pagerAdapter),
                 ReportPagerRenders.renderTitle(view.tv_title)
             )
