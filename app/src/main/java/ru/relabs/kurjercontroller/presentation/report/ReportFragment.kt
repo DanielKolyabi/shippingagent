@@ -137,7 +137,7 @@ class ReportFragment : BaseFragment() {
             ReportAdapter.lookout { state ->
                 uiScope.sendMessage(
                     controller,
-                    ReportMessages.msgApartmentStateChanged(ApartmentNumber(-1), state)
+                    ReportMessages.msgApartmentStateChanged(ApartmentNumber(-2), state)
                 )
             }
         )
