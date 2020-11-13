@@ -4,6 +4,7 @@ import android.net.Uri
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
+import ru.relabs.kurjercontroller.domain.controllers.TaskEventController
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.domain.providers.LocationProvider
 import ru.relabs.kurjercontroller.domain.providers.PathsProvider
@@ -24,7 +25,6 @@ data class PhotoWithUri(val photo: EntrancePhoto, val uri: Uri)
 data class ReportState(
     val taskItem: TaskItem? = null,
     val entrance: Entrance? = null,
-    val defaultReportType: ReportApartmentButtonsMode = ReportApartmentButtonsMode.Main,
     val saved: EntranceResultEntity? = null,
     val savedApartments: List<ApartmentResult> = emptyList(),
     val entranceEuroKeys: List<String> = emptyList(),
@@ -48,6 +48,7 @@ class ReportContext(val errorContext: ErrorContextImpl = ErrorContextImpl()) :
     val controlRepository: ControlRepository by inject()
     val pathsProvider: PathsProvider by inject()
     val reportUseCase: ReportUseCase by inject()
+    val eventController: TaskEventController by inject()
 
     var showError: suspend (code: String, isFatal: Boolean) -> Unit = { _, _ -> }
     var showErrorMessage: suspend (messageId: Int) -> Unit = { }

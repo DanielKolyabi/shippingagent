@@ -53,6 +53,8 @@ object ReportPagerEffects {
                     when (it) {
                         is TaskEvent.EntranceClosed ->
                             messages.send(ReportPagerMessages.msgEntranceClosed(it.taskId, it.taskItemId, it.number))
+                        is TaskEvent.TaskItemChanged ->
+                            messages.send(ReportPagerMessages.msgTaskItemChanged(it.taskItem))
                     }
                 }
             }

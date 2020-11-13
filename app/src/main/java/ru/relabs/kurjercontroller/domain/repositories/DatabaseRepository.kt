@@ -16,6 +16,8 @@ import ru.relabs.kurjercontroller.domain.mappers.network.AddressMapper
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.domain.providers.PathsProvider
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
+import ru.relabs.kurjercontroller.presentation.report.ReportApartmentButtonsMode
+import ru.relabs.kurjercontroller.presentation.report.toInt
 import ru.relabs.kurjercontroller.utils.Either
 import ru.relabs.kurjercontroller.utils.Left
 import ru.relabs.kurjercontroller.utils.Right
@@ -596,6 +598,23 @@ class DatabaseRepository(
         db.taskItemDao().insert(DatabaseTaskItemMapper.toEntity(taskItem))
         db.entranceDao().insertAll(taskItem.entrances.map { DatabaseEntranceMapper.toEntity(it, taskItem.taskId, taskItem.id) })
     }
+
+    suspend fun effectChangeButtonGroup(taskItem: TaskItem, newButtonGroup: ReportApartmentButtonsMode) =
+        withContext(Dispatchers.IO) {
+            db.taskItemDao().getByTaskItemId(taskItem.taskId.id, taskItem.id.id)?.let {
+                db.taskItemDao().update(it.copy(defaultReportType = newButtonGroup.toInt()))
+            }
+
+            taskItem.entrances
+                .map { it.number }
+                .forEach { ent ->
+                    db.entranceResultDao().getByEntrance(taskItem.taskId.id, taskItem.id.id, ent.number)?.let{
+                        db.entranceResultDao().update(it.copy())
+                    }
+                    db.apartmentResultDao().getByEntrance(taskItem.taskId.id, taskItem.id.id, ent.number)
+                        .forEach { db.apartmentResultDao().update(it.copy(buttonGroup = newButtonGroup.toInt())) }
+                }
+        }
 }
 
 sealed class SendQueryData {

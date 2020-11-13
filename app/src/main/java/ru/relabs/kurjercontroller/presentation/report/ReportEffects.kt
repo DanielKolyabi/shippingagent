@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
+import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.utils.Either
@@ -210,8 +211,9 @@ object ReportEffects {
 
     fun effectChangeButtonGroup(): ReportEffect = { c, s ->
         if (s.saved != null || s.entrance != null) {
-            val currentButtonGroup =
-                s.savedApartments.firstOrNull { it.apartmentNumber.number > 0 }?.buttonGroup ?: s.defaultReportType
+            val currentButtonGroup = s.savedApartments.firstOrNull { it.apartmentNumber.number > 0 }?.buttonGroup
+                ?: s.taskItem?.defaultReportType
+                ?: ReportApartmentButtonsMode.Main
             val newButtonGroup = when (currentButtonGroup) {
                 ReportApartmentButtonsMode.Main -> ReportApartmentButtonsMode.Additional
                 ReportApartmentButtonsMode.Additional -> ReportApartmentButtonsMode.Main
@@ -222,7 +224,10 @@ object ReportEffects {
                 messages.send(ReportMessages.msgChangeApartmentButtonGroup(ApartmentNumber(it), newButtonGroup))
             }
 
-            messages.send(msgEffect(effectSaveAllChanges()))
+            s.taskItem?.let {
+                c.databaseRepository.effectChangeButtonGroup(it, newButtonGroup)
+                c.eventController.send(TaskEvent.TaskItemChanged(s.taskItem.copy(defaultReportType = newButtonGroup)))
+            }
         }
     }
 

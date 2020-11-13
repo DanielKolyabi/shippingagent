@@ -95,7 +95,6 @@ object ReportRenders {
     private data class RenderApartmentsData(
         val apartmentsInterval: Pair<Int?, Int?>,
         val taskItem: TaskItem?,
-        val defaultReportType: ReportApartmentButtonsMode,
         val savedApartments: List<ApartmentResult>,
         val hasLookout: Boolean
     )
@@ -106,12 +105,11 @@ object ReportRenders {
                 (it.saved?.apartmentFrom ?: it.entrance?.startApartments) to (it.saved?.apartmentTo
                     ?: it.entrance?.endApartments),
                 it.taskItem,
-                it.defaultReportType,
                 it.savedApartments,
                 it.saved?.hasLookupPost ?: it.entrance?.hasLookout ?: false
             )
         },
-        { (apartmentInterval, taskItem, defaultReportType, savedApartments, hasLookout) ->
+        { (apartmentInterval, taskItem, savedApartments, hasLookout) ->
             val (startAps, endAps) = apartmentInterval
             if (startAps != null && endAps != null && taskItem != null) {
                 val requiredApartments = taskItem.getRequiredApartments()
@@ -123,7 +121,7 @@ object ReportRenders {
                             number = apartmentNumber,
                             buttonGroup = saved?.buttonGroup
                                 ?: savedApartments.firstOrNull { it.apartmentNumber.number > 0 }?.buttonGroup
-                                ?: defaultReportType,
+                                ?: taskItem.defaultReportType,
                             state = saved?.buttonState ?: 0,
                             colored = requiredData?.colored ?: false,
                             required = requiredData != null
@@ -164,7 +162,11 @@ object ReportRenders {
     )
 
     fun renderApartmentsListBackground(view: ImageView): ReportRender = renderT(
-        { it.savedApartments.firstOrNull { it.apartmentNumber.number > 0 }?.buttonGroup ?: it.defaultReportType },
+        {
+            it.savedApartments.firstOrNull { it.apartmentNumber.number > 0 }?.buttonGroup
+                ?: it.taskItem?.defaultReportType
+                ?: ReportApartmentButtonsMode.Main
+        },
         {
             view.background = when (it) {
                 ReportApartmentButtonsMode.Main -> view.resources.getDrawable(R.drawable.apartment_list_main_bg, null)
@@ -174,7 +176,11 @@ object ReportRenders {
     )
 
     fun renderApartmentListTypeButton(view: Button): ReportRender = renderT(
-        { it.savedApartments.firstOrNull { it.apartmentNumber.number > 0 }?.buttonGroup ?: it.defaultReportType },
+        {
+            it.savedApartments.firstOrNull { it.apartmentNumber.number > 0 }?.buttonGroup
+                ?: it.taskItem?.defaultReportType
+                ?: ReportApartmentButtonsMode.Main
+        },
         {
             view.text = when (it) {
                 ReportApartmentButtonsMode.Main -> view.resources.getString(R.string.button_group_main)

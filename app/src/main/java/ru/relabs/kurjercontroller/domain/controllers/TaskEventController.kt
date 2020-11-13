@@ -1,8 +1,6 @@
 package ru.relabs.kurjercontroller.domain.controllers
 
-import ru.relabs.kurjercontroller.domain.models.EntranceNumber
-import ru.relabs.kurjercontroller.domain.models.TaskId
-import ru.relabs.kurjercontroller.domain.models.TaskItemId
+import ru.relabs.kurjercontroller.domain.models.*
 
 class TaskEventController : BaseEventController<TaskEvent>()
 
@@ -11,4 +9,5 @@ sealed class TaskEvent {
     data class TaskItemClosed(val taskId: TaskId, val taskItemId: TaskItemId) : TaskEvent()
     data class TasksUpdateRequired(val showDialogInTasks: Boolean = false) : TaskEvent()
     data class EntranceClosed(val taskId: TaskId, val taskItemId: TaskItemId, val number: EntranceNumber) : TaskEvent()
+    data class TaskItemChanged(val taskItem: TaskItem) : TaskEvent()
 }

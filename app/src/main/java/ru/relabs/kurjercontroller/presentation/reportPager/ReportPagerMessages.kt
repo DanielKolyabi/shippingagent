@@ -64,6 +64,23 @@ object ReportPagerMessages {
             }
         })
     }
+
+    fun msgTaskItemChanged(taskItem: TaskItem): ReportPagerMessage = msgState { s ->
+        if (s.tasks.any { it.id == taskItem.id && it.taskId == taskItem.taskId }) {
+            s.copy(
+                tasks = s.tasks.map {
+                    if (it.id == taskItem.id && it.taskId == taskItem.taskId) {
+                        taskItem
+                    } else {
+                        it
+                    }
+                },
+                selectedTask = taskItem.takeIf { it.id == taskItem.id && it.taskId == taskItem.taskId } ?: s.selectedTask
+            )
+        } else {
+            s
+        }
+    }
 }
 
 

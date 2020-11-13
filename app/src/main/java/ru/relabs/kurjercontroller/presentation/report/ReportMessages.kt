@@ -24,7 +24,6 @@ object ReportMessages {
             it.copy(
                 taskItem = taskItem,
                 entrance = entrance,
-                defaultReportType = taskItem.defaultReportType,
                 allTaskItemsIds = allTaskItems
             )
         },
@@ -264,4 +263,19 @@ object ReportMessages {
             listOf(ReportEffects.effectCloseEntrance())
         }
     )
+
+    fun msgDataReloaded(
+        taskItem: TaskItem?,
+        entrance: EntranceResultEntity?,
+        apartments: List<ApartmentResult>,
+        photos: List<PhotoWithUri>
+    ): ReportMessage =
+        msgState {
+            it.copy(
+                taskItem = taskItem ?: it.taskItem,
+                saved = entrance ?: it.saved,
+                savedApartments = apartments.takeIf { it.isNotEmpty() } ?: it.savedApartments,
+                selectedEntrancePhotos = photos
+            )
+        }
 }
