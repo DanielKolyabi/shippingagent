@@ -606,9 +606,10 @@ class DatabaseRepository(
             }
 
             taskItem.entrances
+                .filter { it.state == EntranceState.CREATED }
                 .map { it.number }
                 .forEach { ent ->
-                    db.entranceResultDao().getByEntrance(taskItem.taskId.id, taskItem.id.id, ent.number)?.let{
+                    db.entranceResultDao().getByEntrance(taskItem.taskId.id, taskItem.id.id, ent.number)?.let {
                         db.entranceResultDao().update(it.copy())
                     }
                     db.apartmentResultDao().getByEntrance(taskItem.taskId.id, taskItem.id.id, ent.number)
