@@ -19,10 +19,11 @@ object FiltersEditorMessages {
     fun msgFilterRemoveClicked(filter: TaskFilter): FiltersEditorMessage = msgEffects(
         { s ->
             if (filter.fixed) {
-                if (filter.active || s.filters.any { it.id != filter.id && it.type == filter.type && it.isActive() }) {
+                val containsEnabledFilter = s.filters.any { it.id != filter.id && it.type == filter.type && it.isActive() }
+                if (!filter.active || containsEnabledFilter) {
                     s.copy(filters = s.filters.map {
                         if (it.id == filter.id && it.type == filter.type) {
-                            it.copy(active = filter.active)
+                            it.copy(active = !filter.active)
                         } else {
                             it
                         }

@@ -45,7 +45,7 @@ class DatabaseRepository(
     suspend fun getTasks(): List<Task> = withContext(Dispatchers.IO) {
         db.taskDao().allOpened
             .map { DatabaseTaskMapper.fromEntity(it, db) }
-            .filter { it.taskItems.isNotEmpty() }
+            .filter { it.taskItems.isNotEmpty() || it.filtered }
     }
 
     suspend fun removeReport(report: EntranceReportEntity) = withContext(Dispatchers.IO) {
