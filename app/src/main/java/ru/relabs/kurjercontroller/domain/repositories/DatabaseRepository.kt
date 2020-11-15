@@ -584,6 +584,12 @@ class DatabaseRepository(
             .getByNumber(taskId.id, taskItemId.id, number.number)
             ?.copy(state = EntranceState.CLOSED.toInt())
             ?.let { db.entranceDao().update(it) }
+
+        val task = db.taskDao().getById(taskId.id)
+        if (task?.state?.toTaskState() == TaskState.EXAMINED) {
+            putSendQuery(SendQueryData.TaskAccepted(taskId))
+            db.taskDao().update(task.copy(state = TaskState.STARTED.toInt()))
+        }
     }
 
     suspend fun closeTaskItem(task: TaskId, taskItem: TaskItemId) = withContext(Dispatchers.IO) {
