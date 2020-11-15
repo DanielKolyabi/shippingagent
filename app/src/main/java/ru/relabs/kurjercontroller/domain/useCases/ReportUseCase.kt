@@ -38,7 +38,7 @@ class ReportUseCase(
             entranceResult?.key ?: entrance.key,
             entranceResult?.euroKey ?: entrance.euroKey,
             entranceResult?.isDeliveryWrong ?: false,
-            entranceResult?.hasLookupPost ?: entrance.hasLookout ?: false,
+            entranceResult?.hasLookupPost ?: entrance.hasLookout,
             tokenStorage.getToken() ?: "",
             apartmentResults.map {
                 ApartmentResult(

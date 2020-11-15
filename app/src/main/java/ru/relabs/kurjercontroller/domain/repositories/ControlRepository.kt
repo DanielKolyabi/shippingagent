@@ -31,7 +31,6 @@ import ru.relabs.kurjercontroller.domain.mappers.network.*
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.domain.providers.*
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
-import ru.relabs.kurjercontroller.fileHelpers.PathHelper
 import ru.relabs.kurjercontroller.utils.*
 import java.io.FileNotFoundException
 
@@ -237,9 +236,9 @@ class ControlRepository(
         reportEnt: EntranceReportEntity,
         photoEnt: EntrancePhotoEntity
     ): MultipartBody.Part {
-        val photoFile = PathHelper.getEntrancePhotoFileByID(
-            reportEnt.taskItemId,
-            photoEnt.entranceNumber,
+        val photoFile = pathsProvider.getEntrancePhotoFileByID(
+            TaskItemId(reportEnt.taskItemId),
+            EntranceNumber(reportEnt.entranceNumber),
             photoEnt.UUID
         )
         if (!photoFile.exists()) {

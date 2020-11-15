@@ -2,7 +2,6 @@ package ru.relabs.kurjercontroller.domain.models
 
 import android.net.Uri
 import ru.relabs.kurjercontroller.data.database.entities.EntrancePhotoEntity
-import ru.relabs.kurjercontroller.fileHelpers.PathHelper
 import java.util.*
 
 /**
@@ -29,7 +28,4 @@ data class EntrancePhotoModel(
             realPath,
             isEntrancePhoto
         )
-
-    val URI: Uri
-        get() = Uri.fromFile(PathHelper.getEntrancePhotoFile(taskItem, entrance, UUID.fromString(uuid)))
 }

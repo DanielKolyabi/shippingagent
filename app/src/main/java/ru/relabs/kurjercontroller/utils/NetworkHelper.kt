@@ -12,7 +12,6 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.LocationSettingsStatusCodes
-import ru.relabs.kurjercontroller.fileHelpers.PathHelper
 import ru.relabs.kurjercontroller.presentation.host.HostActivity
 import ru.relabs.kurjercontroller.presentation.host.featureCheckers.REQUEST_LOCATION
 import java.io.File
@@ -73,68 +72,7 @@ object NetworkHelper {
         )
     }
 
-    fun loadUpdateFile(url: URL, onDownloadUpdate: (current: Int, total: Int) -> Unit): File {
-        val file = PathHelper.getUpdateFile()
-        val connection = url.openConnection() as HttpURLConnection
-        val stream = url.openStream()
-        val fos = FileOutputStream(file)
-        try {
-            val fileSize = connection.contentLength
-
-
-            val b = ByteArray(2048)
-
-            var read = stream.read(b)
-            var total = read
-            while (read != -1) {
-                fos.write(b, 0, read)
-                read = stream.read(b)
-                total += read
-                Log.d("loader", "$total/$fileSize")
-                onDownloadUpdate(total, fileSize)
-            }
-        } catch (e: Exception) {
-            throw e
-        } finally {
-            stream.close()
-            connection.disconnect()
-            fos.close()
-        }
-
-
-        return file
-    }
-
     fun isGPSEnabled(context: Context?): Boolean{
         return (context?.getSystemService(Context.LOCATION_SERVICE) as? LocationManager)?.isProviderEnabled(GPS_PROVIDER) ?: false
     }
-
-    fun displayLocationSettingsRequest(context: Context, activity: HostActivity) {
-        val googleApiClient = GoogleApiClient.Builder(context)
-            .addApi(LocationServices.API).build()
-        googleApiClient.connect()
-
-        val locationRequest = LocationRequest.create()
-        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        locationRequest.interval = 30000
-        locationRequest.fastestInterval = 15000
-        locationRequest.smallestDisplacement = 10f
-
-        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
-        builder.setAlwaysShow(true)
-
-        val result = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build())
-        result.setResultCallback { result ->
-            val status = result.status
-            when (status.statusCode) {
-                LocationSettingsStatusCodes.SUCCESS -> Log.i("NetworkHelper", "All location settings are satisfied.")
-                LocationSettingsStatusCodes.RESOLUTION_REQUIRED -> {
-                    Log.i("NetworkHelper", "Location settings are not satisfied. Show the user a dialog to upgrade location settings ")
-                    status.startResolutionForResult(activity, REQUEST_LOCATION)
-                }
-                LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> Log.i("NetworkHelper", "Location settings are inadequate, and cannot be fixed here. Dialog not created.")
-            }
-        }
-    }
-
 }
