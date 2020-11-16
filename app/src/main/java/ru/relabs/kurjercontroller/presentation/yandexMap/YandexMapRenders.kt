@@ -15,6 +15,7 @@ import ru.relabs.kurjercontroller.presentation.base.recycler.DelegateAdapter
 import ru.relabs.kurjercontroller.presentation.base.tea.renderT
 import ru.relabs.kurjercontroller.presentation.yandexMap.iconProviders.ColoredIconProvider
 import ru.relabs.kurjercontroller.presentation.yandexMap.iconProviders.DeliverymanIconProvider
+import ru.relabs.kurjercontroller.presentation.yandexMap.models.MapObjectData
 import ru.relabs.kurjercontroller.utils.extensions.visible
 
 /**
@@ -26,7 +27,7 @@ object YandexMapRenders {
         { it.addresses },
         {
             mapview.map.mapObjects.forEach {
-                if (it.userData as? MapObjectType == MapObjectType.Address) {
+                if (it.userData is MapObjectData.TaskItem) {
                     mapview.map.mapObjects.remove(it)
                 }
             }
@@ -38,9 +39,11 @@ object YandexMapRenders {
                     mapview.map.mapObjects
                         .addPlacemark(point, ColoredIconProvider(mapview.context, it.color))
                         .apply {
-                            userData = MapObjectType.Address
-                            addTapListener { _, _ ->
-                                onAddressClicked(address)
+                            userData = MapObjectData.TaskItem(address)
+                            addTapListener { obj, _ ->
+                                (obj.userData as? MapObjectData.TaskItem)?.let {
+                                    onAddressClicked(it.address)
+                                }
                                 return@addTapListener true
                             }
                         }
@@ -49,7 +52,7 @@ object YandexMapRenders {
                     mapview.map.mapObjects.addCircle(
                         Circle(point, 50f), it.outlineColor, 2f, ColorUtils.setAlphaComponent(it.color, 80)
                     ).apply {
-                        userData = MapObjectType.Address
+                        userData = MapObjectData.TaskItem(address)
                     }
                 }
             }
@@ -60,7 +63,7 @@ object YandexMapRenders {
         { it.storages },
         {
             mapview.map.mapObjects.forEach {
-                if (it.userData as? MapObjectType == MapObjectType.Storage) {
+                if (it.userData is MapObjectData.Storage) {
                     mapview.map.mapObjects.remove(it)
                 }
             }
@@ -70,7 +73,7 @@ object YandexMapRenders {
                     Point(it.lat.toDouble(), it.long.toDouble()),
                     ColoredIconProvider(mapview.context, Color.BLACK)
                 ).apply {
-                    userData = MapObjectType.Storage
+                    userData = MapObjectData.Storage
                 }
 
                 mapview.map.mapObjects.addCircle(
@@ -79,7 +82,7 @@ object YandexMapRenders {
                     2f,
                     ColorUtils.setAlphaComponent(Color.BLACK, 80)
                 ).apply {
-                    userData = MapObjectType.Storage
+                    userData = MapObjectData.Storage
                 }
             }
         }
@@ -89,7 +92,7 @@ object YandexMapRenders {
         { it.deliverymans },
         {
             mapview.map.mapObjects.forEach {
-                if (it.userData as? MapObjectType == MapObjectType.DeliveryMan) {
+                if (it.userData is MapObjectData.DeliveryMan) {
                     mapview.map.mapObjects.remove(it)
                 }
             }
@@ -102,7 +105,7 @@ object YandexMapRenders {
                         d.name
                     )
                 ).apply {
-                    userData = MapObjectType.DeliveryMan
+                    userData = MapObjectData.DeliveryMan
                 }
             }
         }
@@ -170,17 +173,13 @@ object YandexMapRenders {
     fun renderCamera(mapview: MapView): YandexMapRender = renderT(
         { Triple(it.cameraPosition, it.cameraZoom, it.cameraUpdateRequired) },
         { (position, zoom, required) ->
-            if(required){
+            if (required) {
                 position?.let {
                     mapview.map.move(CameraPosition(Point(position.first, position.second), zoom, 0f, 0f))
                 }
             }
         }
     )
-
-    private enum class MapObjectType {
-        Address, Storage, DeliveryMan
-    }
 }
 
 inline fun MapObjectCollection.forEach(crossinline block: (MapObject) -> Unit) {
@@ -191,6 +190,6 @@ inline fun MapObjectCollection.forEach(crossinline block: (MapObject) -> Unit) {
         override fun onColoredPolylineVisited(p0: ColoredPolylineMapObject) = block(p0)
         override fun onPlacemarkVisited(p0: PlacemarkMapObject) = block(p0)
         override fun onCollectionVisitEnd(p0: MapObjectCollection) {}
-        override fun onCollectionVisitStart(p0: MapObjectCollection): Boolean = false
+        override fun onCollectionVisitStart(p0: MapObjectCollection): Boolean = true
     })
 }
