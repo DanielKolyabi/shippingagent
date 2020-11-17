@@ -67,7 +67,6 @@ object ReportPagerEffects {
         if (targetTaskItem?.entrances?.any { it.number == entrance && it.state == EntranceState.CREATED } == true) {
             messages.send(ReportPagerMessages.msgCloseTaskItemEntrance(targetTaskItem, entrance))
             if (targetTaskItem.entrances.count { it.state == EntranceState.CREATED } == 1) {
-                c.databaseRepository.closeTaskItem(task, taskItem)
                 messages.send(ReportPagerMessages.msgCloseTaskItem(targetTaskItem))
                 c.taskEventController.send(TaskEvent.TaskItemClosed(task, taskItem))
                 val otherTask = s.tasks.filter { it != targetTaskItem }.firstOrNull()

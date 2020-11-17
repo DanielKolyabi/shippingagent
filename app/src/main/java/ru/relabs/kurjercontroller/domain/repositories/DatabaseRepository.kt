@@ -592,13 +592,6 @@ class DatabaseRepository(
         }
     }
 
-    suspend fun closeTaskItem(task: TaskId, taskItem: TaskItemId) = withContext(Dispatchers.IO) {
-        db.taskItemDao()
-            .getByTaskItemId(task.id, taskItem.id)
-            ?.copy(closeTime = DateTime.now())
-            ?.let { db.taskItemDao().update(it) }
-    }
-
     suspend fun saveTaskItem(taskItem: TaskItem) = withContext(Dispatchers.IO) {
         db.addressDao().insert(DatabaseAddressMapper.toEntity(taskItem.address))
         db.taskItemDao().insert(DatabaseTaskItemMapper.toEntity(taskItem))
