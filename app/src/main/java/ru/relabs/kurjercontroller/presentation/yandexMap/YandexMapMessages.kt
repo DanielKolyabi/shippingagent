@@ -121,13 +121,15 @@ object YandexMapMessages {
     fun msgNavigateBack(): YandexMapMessage =
         msgEffect(YandexMapEffects.effectNavigateBack())
 
-    fun msgTasksLoaded(tasks: List<Task>): YandexMapMessage =
-        msgState {
+    fun msgTasksLoaded(tasks: List<Task>, refreshSelectedLayer: Boolean = false): YandexMapMessage = msgEffects(
+        {
             it.copy(
                 tasks = tasks,
                 deliverymanIds = tasks.flatMap { it.taskItems }.map { it.deliverymanId }.distinct()
             )
-        }
+        },
+        { listOfNotNull(YandexMapEffects.effectRefreshSelectedLayer().takeIf { refreshSelectedLayer }) }
+    )
 
     fun msgTaskLayerLoading(task: Task, b: Boolean): YandexMapMessage =
         msgState { it.copy(taskLoadings = it.taskLoadings + Pair(task.id, b)) }
@@ -138,8 +140,10 @@ object YandexMapMessages {
     fun msgAddNewAddresses(visibleRegion: VisibleRegion): YandexMapMessage =
         msgEffect(YandexMapEffects.effectAddNewAddresses(visibleRegion))
 
-    fun msgNewTaskItemsAdded(selectedNewTaskItems: List<TaskItem>): YandexMapMessage =
-        msgState { it.copy(newTaskItems = it.newTaskItems.filter { !selectedNewTaskItems.contains(it) }) }
+    fun msgNewTaskItemsAdded(selectedNewTaskItems: List<TaskItem>): YandexMapMessage = msgEffects(
+        { it.copy(newTaskItems = it.newTaskItems.filter { !selectedNewTaskItems.contains(it) }) },
+        { listOf(YandexMapEffects.effectReloadTasks()) }
+    )
 
     fun msgCameraChanged(cameraPosition: CameraPosition): YandexMapMessage =
         msgState {

@@ -211,11 +211,16 @@ object YandexMapEffects {
                 c.databaseRepository.saveTaskItem(it)
             }
             messages.send(YandexMapMessages.msgNewTaskItemsAdded(selectedNewTaskItems))
-            messages.send(msgEffect(effectInit(emptyList(), s.tasks.map { it.id }, false)))
             withContext(Dispatchers.Main) {
                 c.notifyItemsAdded(selectedNewTaskItems)
             }
         }
+    }
+
+    fun effectReloadTasks(): YandexMapEffect = { c, s ->
+        val tasks = s.tasks.mapNotNull { c.databaseRepository.getTask(it.id) }
+
+        messages.send(YandexMapMessages.msgTasksLoaded(tasks, true))
     }
 
     fun effectSaveCameraPosition(): YandexMapEffect = { c, s ->
@@ -241,7 +246,9 @@ object YandexMapEffects {
         when (s.selectedLayer) {
             MapLayer.Common -> messages.send(YandexMapMessages.msgCommonLayerClicked())
             MapLayer.Predefined -> messages.send(YandexMapMessages.msgPredefinedLayerClicked())
-            is MapLayer.TaskLayer -> messages.send(YandexMapMessages.msgTaskLayerClicked(s.selectedLayer.task))
+            is MapLayer.TaskLayer -> s.tasks
+                .firstOrNull { it.id == s.selectedLayer.task.id }
+                ?.let { messages.send(YandexMapMessages.msgTaskLayerClicked(it)) }
         }
     }
 }

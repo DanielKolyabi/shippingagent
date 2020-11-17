@@ -154,6 +154,7 @@ object YandexMapRenders {
                     it.taskId == selectedLayer.task.id && isAddressInVisibleRegion(it.address, visibleRegion)
                 }
 
+                btn.visible = selectedNewTaskItems.isNotEmpty()
                 if (selectedNewTaskItems.isNotEmpty()) {
                     btn.text = btn.resources.getString(
                         R.string.yandex_map_add_button,
