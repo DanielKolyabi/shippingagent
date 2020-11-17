@@ -4,6 +4,7 @@ import com.yandex.mapkit.geometry.BoundingBox
 import com.yandex.mapkit.geometry.Point
 import org.koin.core.KoinComponent
 import org.koin.core.inject
+import ru.relabs.kurjercontroller.domain.controllers.TaskEventController
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.domain.providers.LocationProvider
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
@@ -47,6 +48,7 @@ class YandexMapContext(val errorContext: ErrorContextImpl = ErrorContextImpl()) 
     val controlRepository: ControlRepository by inject()
     val locationProvider: LocationProvider by inject()
     val mapCameraStorage: MapCameraStorage by inject()
+    val taskEventController: TaskEventController by inject()
 
     var notifyAddressClicked: (address: Address) -> Unit = {}
     var notifyItemsAdded: (items: List<TaskItem>) -> Unit = {}

@@ -60,6 +60,10 @@ object AddressesEffects {
                             messages.send(AddressesMessages.msgTaskItemClosed(it.taskId, it.taskItemId))
                         is TaskEvent.TaskItemChanged ->
                             messages.send(AddressesMessages.msgTaskItemChanged(it.taskItem))
+                        is TaskEvent.EntranceClosed ->
+                            messages.send(AddressesMessages.msgEntranceClosed(it.taskId, it.taskItemId, it.number))
+                        is TaskEvent.TaskItemClosedByDeliveryMan ->
+                            messages.send(AddressesMessages.msgTaskItemClosedByDeliveryMan(it.taskItemId, it.closeTime))
                     }
                 }
             }

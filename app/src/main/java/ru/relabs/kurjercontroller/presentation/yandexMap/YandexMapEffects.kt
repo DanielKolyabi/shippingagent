@@ -6,6 +6,8 @@ import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.VisibleRegion
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
+import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
 import ru.relabs.kurjercontroller.domain.models.Address
 import ru.relabs.kurjercontroller.domain.models.AddressId
 import ru.relabs.kurjercontroller.domain.models.TaskId
@@ -219,6 +221,27 @@ object YandexMapEffects {
     fun effectSaveCameraPosition(): YandexMapEffect = { c, s ->
         if (s.cameraPosition != null) {
             c.mapCameraStorage.saveCameraSettings(s.cameraPosition, s.cameraZoom)
+        }
+    }
+
+    fun effectLaunchCosumers(): YandexMapEffect = { c, s ->
+        coroutineScope {
+            launch {
+                c.taskEventController.subscribe().collect {
+                    when (it) {
+                        is TaskEvent.TaskItemClosedByDeliveryMan ->
+                            messages.send(YandexMapMessages.msgTaskItemClosedByDeliveryMan(it.taskItemId, it.closeTime))
+                    }
+                }
+            }
+        }
+    }
+
+    fun effectRefreshSelectedLayer(): YandexMapEffect = { c, s ->
+        when (s.selectedLayer) {
+            MapLayer.Common -> messages.send(YandexMapMessages.msgCommonLayerClicked())
+            MapLayer.Predefined -> messages.send(YandexMapMessages.msgPredefinedLayerClicked())
+            is MapLayer.TaskLayer -> messages.send(YandexMapMessages.msgTaskLayerClicked(s.selectedLayer.task))
         }
     }
 }

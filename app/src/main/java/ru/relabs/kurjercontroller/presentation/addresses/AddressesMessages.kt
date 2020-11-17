@@ -142,4 +142,47 @@ object AddressesMessages {
             s
         }
     }
+
+    fun msgEntranceClosed(taskId: TaskId, taskItemId: TaskItemId, number: EntranceNumber): AddressesMessage = msgState { s ->
+        if (s.tasks.any { it.id == taskId }) {
+            s.copy(
+                tasks = s.tasks.map { t ->
+                    if (t.taskItems.any { it.id == taskItemId && it.taskId == taskId }) {
+                        t.copy(taskItems = t.taskItems.map { ti ->
+                            if (ti.id == taskItemId && ti.taskId == taskId) {
+                                ti.copy(entrances = ti.entrances.map { e ->
+                                    if (e.number == number) {
+                                        e.copy(state = EntranceState.CLOSED)
+                                    } else {
+                                        e
+                                    }
+                                })
+                            } else {
+                                ti
+                            }
+                        })
+                    } else {
+                        t
+                    }
+                }
+            )
+        } else {
+            s
+        }
+
+    }
+
+    fun msgTaskItemClosedByDeliveryMan(taskItemId: TaskItemId, closeTime: DateTime): AddressesMessage = msgState { s ->
+        s.copy(tasks = s.tasks.map { t ->
+            t.copy(
+                taskItems = t.taskItems.map { ti ->
+                    if (ti.id == taskItemId) {
+                        ti.copy(isNew = true, closeTime = closeTime)
+                    } else {
+                        ti
+                    }
+                }
+            )
+        })
+    }
 }

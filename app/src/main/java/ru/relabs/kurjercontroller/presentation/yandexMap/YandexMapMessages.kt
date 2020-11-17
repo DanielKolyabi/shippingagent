@@ -3,6 +3,7 @@ package ru.relabs.kurjercontroller.presentation.yandexMap
 import android.graphics.Color
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.VisibleRegion
+import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffects
@@ -30,7 +31,7 @@ object YandexMapMessages {
                 storages = storages
             )
         },
-        { listOf(YandexMapEffects.effectInit(addressIds, tasks, true)) }
+        { listOf(YandexMapEffects.effectInit(addressIds, tasks, true), YandexMapEffects.effectLaunchCosumers()) }
     )
 
     fun msgAddressesLoaded(addresses: List<AddressWithColor>): YandexMapMessage =
@@ -148,4 +149,19 @@ object YandexMapMessages {
 
     fun msgSaveCameraPosition(): YandexMapMessage =
         msgEffect(YandexMapEffects.effectSaveCameraPosition())
+
+    fun msgTaskItemClosedByDeliveryMan(taskItemId: TaskItemId, closeTime: DateTime): YandexMapMessage = msgEffects(
+        { s ->
+            s.copy(tasks = s.tasks.map { t ->
+                t.copy(taskItems = t.taskItems.map { ti ->
+                    if (ti.id == taskItemId) {
+                        ti.copy(isNew = true, closeTime = closeTime)
+                    } else {
+                        ti
+                    }
+                })
+            })
+        },
+        { listOf(YandexMapEffects.effectRefreshSelectedLayer()) }
+    )
 }
