@@ -27,6 +27,7 @@ object ReportPagerEffects {
             if (task != null && taskItem != null) {
                 if (taskItem.isNew) {
                     c.databaseRepository.markAsOld(taskItem)
+                    c.taskEventController.send(TaskEvent.TaskItemChanged(taskItem.copy(isNew = false)))
                 }
                 taskItem
             } else {

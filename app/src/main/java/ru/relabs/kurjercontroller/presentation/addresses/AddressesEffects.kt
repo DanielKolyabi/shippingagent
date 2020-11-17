@@ -58,6 +58,8 @@ object AddressesEffects {
                             messages.send(AddressesMessages.msgRemoveTask(it.taskId))
                         is TaskEvent.TaskItemClosed ->
                             messages.send(AddressesMessages.msgTaskItemClosed(it.taskId, it.taskItemId))
+                        is TaskEvent.TaskItemChanged ->
+                            messages.send(AddressesMessages.msgTaskItemChanged(it.taskItem))
                     }
                 }
             }

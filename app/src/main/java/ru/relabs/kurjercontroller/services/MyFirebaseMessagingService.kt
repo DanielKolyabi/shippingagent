@@ -11,6 +11,7 @@ import org.joda.time.DateTime
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import ru.relabs.kurjercontroller.ControllApplication
+import ru.relabs.kurjercontroller.di.eventControllers
 import ru.relabs.kurjercontroller.domain.models.TaskItemId
 import ru.relabs.kurjercontroller.domain.models.TaskState
 import ru.relabs.kurjercontroller.domain.providers.FirebaseToken
@@ -57,6 +58,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService(), KoinComponent {
         }
         if (data.containsKey("tasks_update")) {
             val taskId = data.getOrElse("task_id", { null })?.toIntOrNull()
+
             val int = Intent().apply {
                 putExtra("tasks_changed", true)
                 putExtra("task_id", taskId)

@@ -120,4 +120,26 @@ object AddressesMessages {
 
     fun msgTaskItemsAdded(): AddressesMessage =
         msgEffects({ it }, { listOf(AddressesEffects.effectLoadTasks(it.tasks.map { it.id })) })
+
+    fun msgTaskItemChanged(item: TaskItem): AddressesMessage = msgState { s ->
+        if (s.tasks.any { it.id == item.taskId }) {
+            s.copy(
+                tasks = s.tasks.map { t ->
+                    if (t.taskItems.any { it.id == item.id && it.taskId == item.taskId }) {
+                        t.copy(taskItems = t.taskItems.map { ti ->
+                            if (ti.id == item.id && ti.taskId == item.taskId) {
+                                item
+                            } else {
+                                ti
+                            }
+                        })
+                    } else {
+                        t
+                    }
+                }
+            )
+        } else {
+            s
+        }
+    }
 }
