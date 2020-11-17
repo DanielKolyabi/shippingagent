@@ -171,6 +171,7 @@ class FiltersEditorFragment : BaseFragment(), KoinComponent {
             ) {
                 val item = adapter?.getItemAtPosition(pos) as? TaskFilter
                 item ?: return
+                textView.setText("")
                 uiScope.sendMessage(controller, FiltersEditorMessages.msgSearchFilterSelected(item, type))
             }
         }
