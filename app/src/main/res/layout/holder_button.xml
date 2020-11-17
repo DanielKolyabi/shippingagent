@@ -3,7 +3,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAllCaps="false"
-        android:backgroundTint="#00ff00"
         android:id="@+id/button">
 
 </Button>
