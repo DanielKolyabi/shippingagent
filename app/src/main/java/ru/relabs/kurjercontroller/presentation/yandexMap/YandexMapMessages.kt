@@ -40,8 +40,10 @@ object YandexMapMessages {
     fun msgMyLocationClicked(): YandexMapMessage =
         msgEffect(YandexMapEffects.effectMoveCameraToUser())
 
-    fun msgDeliverymansLocationClicked(): YandexMapMessage =
-        msgEffect(YandexMapEffects.effectLoadDeliverymans())
+    fun msgDeliverymansLocationClicked(): YandexMapMessage = msgEffects(
+        { it.copy(deliverymansLoading = true) },
+        { listOf(YandexMapEffects.effectLoadDeliverymans()) }
+    )
 
     fun msgCommonLayerClicked(): YandexMapMessage = msgState {
         val items = it.tasks.flatMap { it.taskItems }
@@ -114,7 +116,7 @@ object YandexMapMessages {
         msgEffect(YandexMapEffects.effectNotifyAddressClicked(address))
 
     fun msgDeliverymansLoaded(deliverymanPositions: List<DeliverymanPositionData>): YandexMapMessage =
-        msgState { it.copy(deliverymans = deliverymanPositions) }
+        msgState { it.copy(deliverymans = deliverymanPositions, deliverymansLoading = false) }
 
     fun msgNavigateBack(): YandexMapMessage =
         msgEffect(YandexMapEffects.effectNavigateBack())
