@@ -162,7 +162,7 @@ object ReportEffects {
         }
     }
 
-    fun effectCreatePhoto(multiplePhotos: Boolean): ReportEffect = { c, s ->
+    fun effectCreatePhoto(multiplePhotos: Boolean, isEntrancePhoto: Boolean): ReportEffect = { c, s ->
         if (s.taskItem == null || s.entrance == null) {
             c.showError("re:100", true)
         } else {
@@ -170,7 +170,7 @@ object ReportEffects {
                 val photoUUID = UUID.randomUUID()
                 val photoFile = c.pathsProvider.getEntrancePhotoFile(s.taskItem, s.entrance, photoUUID)
                 withContext(Dispatchers.Main) {
-                    c.requestPhoto(s.entrance.number, multiplePhotos, photoFile, photoUUID)
+                    c.requestPhoto(s.entrance.number, multiplePhotos, photoFile, photoUUID, isEntrancePhoto)
                 }
             }
         }
@@ -186,12 +186,19 @@ object ReportEffects {
         c.showError("Не удалось сделать фотографию: re:photo:$errorCode", false)
     }
 
-    fun effectSavePhotoFromFile(entrance: EntranceNumber, targetFile: File, uuid: UUID): ReportEffect = { c, s ->
-        val bmp = BitmapFactory.decodeFile(targetFile.path)
-        effectSavePhotoFromBitmap(entrance, bmp, targetFile, uuid)(c, s)
-    }
+    fun effectSavePhotoFromFile(entrance: EntranceNumber, targetFile: File, uuid: UUID, isEntrancePhoto: Boolean): ReportEffect =
+        { c, s ->
+            val bmp = BitmapFactory.decodeFile(targetFile.path)
+            effectSavePhotoFromBitmap(entrance, bmp, targetFile, uuid, isEntrancePhoto)(c, s)
+        }
 
-    fun effectSavePhotoFromBitmap(entrance: EntranceNumber, bitmap: Bitmap, targetFile: File, uuid: UUID): ReportEffect =
+    fun effectSavePhotoFromBitmap(
+        entrance: EntranceNumber,
+        bitmap: Bitmap,
+        targetFile: File,
+        uuid: UUID,
+        isEntrancePhoto: Boolean
+    ): ReportEffect =
         { c, s ->
             when (val task = s.taskItem) {
                 null -> c.showError("re:102", true)
@@ -200,7 +207,7 @@ object ReportEffects {
                         is Left -> messages.send(ReportMessages.msgPhotoError(6))
                         is Right -> {
                             val location = c.locationProvider.lastReceivedLocation()
-                            val photo = c.databaseRepository.savePhoto(entrance, task, uuid, location)
+                            val photo = c.databaseRepository.savePhoto(entrance, task, uuid, location, isEntrancePhoto)
                             val path = c.pathsProvider.getEntrancePhotoFileByID(task.id, entrance, uuid.toString())
                             messages.send(ReportMessages.msgNewPhoto(PhotoWithUri(photo, path.toUri())))
                         }

@@ -53,7 +53,8 @@ class ReportContext(val errorContext: ErrorContextImpl = ErrorContextImpl()) :
     var showError: suspend (code: String, isFatal: Boolean) -> Unit = { _, _ -> }
     var showErrorMessage: suspend (messageId: Int) -> Unit = { }
     var showCloseEntranceDialog: suspend () -> Unit = { }
-    var requestPhoto: (entrance: EntranceNumber, multiplePhoto: Boolean, targetFile: File, uuid: UUID) -> Unit = { _, _, _, _ -> }
+    var requestPhoto: (entrance: EntranceNumber, multiplePhoto: Boolean, targetFile: File, uuid: UUID, isEntrancePhoto: Boolean) -> Unit =
+        { _, _, _, _, _ -> }
     var showDescriptionInputDialog: (ApartmentNumber, String, Boolean) -> Unit = { _, _, _ -> }
 }
 

@@ -18,5 +18,5 @@ data class EntrancePhoto(
     var gps: GPSCoordinatesModel,
     var idnd: Int,
     var realPath: String?,
-    var isEntrancePhoto: Boolean //TODO: WTF?
+    var isEntrancePhoto: Boolean
 ) : Parcelable

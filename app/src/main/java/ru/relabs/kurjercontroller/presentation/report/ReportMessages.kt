@@ -58,8 +58,8 @@ object ReportMessages {
             )
         }
 
-    fun msgPhotoClicked(multiple: Boolean): ReportMessage =
-        msgEffect(ReportEffects.effectCreatePhoto(multiple))
+    fun msgPhotoClicked(multiple: Boolean, isEntrancePhoto: Boolean): ReportMessage =
+        msgEffect(ReportEffects.effectCreatePhoto(multiple, isEntrancePhoto))
 
     fun msgRemovePhotoClicked(removedPhoto: EntrancePhoto): ReportMessage = msgEffects(
         { s ->
@@ -80,13 +80,19 @@ object ReportMessages {
     fun msgPhotoError(errorCode: Int): ReportMessage =
         msgEffect(ReportEffects.effectShowPhotoError(errorCode))
 
-    fun msgPhotoCaptured(entrance: EntranceNumber, multiplePhoto: Boolean, targetFile: File, uuid: UUID): ReportMessage =
+    fun msgPhotoCaptured(
+        entrance: EntranceNumber,
+        multiplePhoto: Boolean,
+        targetFile: File,
+        uuid: UUID,
+        isEntrancePhoto: Boolean
+    ): ReportMessage =
         msgEffects(
             { it },
             {
                 listOfNotNull(
-                    ReportEffects.effectSavePhotoFromFile(entrance, targetFile, uuid),
-                    ReportEffects.effectCreatePhoto(multiplePhoto).takeIf { multiplePhoto }
+                    ReportEffects.effectSavePhotoFromFile(entrance, targetFile, uuid, isEntrancePhoto),
+                    ReportEffects.effectCreatePhoto(multiplePhoto, isEntrancePhoto).takeIf { multiplePhoto }
                 )
             }
         )
@@ -96,13 +102,14 @@ object ReportMessages {
         multiplePhoto: Boolean,
         bitmap: Bitmap,
         targetFile: File,
-        uuid: UUID
+        uuid: UUID,
+        isEntrancePhoto: Boolean
     ): ReportMessage = msgEffects(
         { it },
         {
             listOfNotNull(
-                ReportEffects.effectSavePhotoFromBitmap(entrance, bitmap, targetFile, uuid),
-                ReportEffects.effectCreatePhoto(multiplePhoto).takeIf { multiplePhoto }
+                ReportEffects.effectSavePhotoFromBitmap(entrance, bitmap, targetFile, uuid, isEntrancePhoto),
+                ReportEffects.effectCreatePhoto(multiplePhoto, isEntrancePhoto).takeIf { multiplePhoto }
             )
         }
     )
@@ -248,7 +255,7 @@ object ReportMessages {
             val startApartmentsChanged = s.saved?.apartmentFrom != s.entrance?.startApartments && s.saved?.apartmentFrom != null
             val endApartmentsChanged = s.saved?.apartmentTo != s.entrance?.endApartments && s.saved?.apartmentTo != null
             listOf(
-                if ((startApartmentsChanged || endApartmentsChanged) && s.selectedEntrancePhotos.isEmpty()) {
+                if ((startApartmentsChanged || endApartmentsChanged) && s.selectedEntrancePhotos.none { it.photo.isEntrancePhoto }) {
                     ReportEffects.effectShowPhotoRequiredError()
                 } else {
                     ReportEffects.effectCloseEntranceClicked()

@@ -229,7 +229,7 @@ object ReportRenders {
     )
 
     fun renderLockInputOverlay(view: View): ReportRender = renderT(
-        { it.selectedEntrancePhotos.isEmpty() },
+        { it.selectedEntrancePhotos.none { it.photo.isEntrancePhoto } },
         { view.visible = it }
     )
 

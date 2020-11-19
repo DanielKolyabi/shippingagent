@@ -55,7 +55,13 @@ class DatabaseRepository(
             .forEach { removePhoto(it) }
     }
 
-    suspend fun savePhoto(entrance: EntranceNumber, taskItem: TaskItem, uuid: UUID, location: Location?): EntrancePhoto =
+    suspend fun savePhoto(
+        entrance: EntranceNumber,
+        taskItem: TaskItem,
+        uuid: UUID,
+        location: Location?,
+        isEntrancePhoto: Boolean
+    ): EntrancePhoto =
         withContext(Dispatchers.IO) {
             val gps = GPSCoordinatesModel(
                 location?.latitude ?: 0.0,
@@ -63,7 +69,7 @@ class DatabaseRepository(
                 location?.time?.let { DateTime(it) } ?: DateTime()
             )
 
-            //TODO: Watch wtf is RealPath and isEntrancePhoto
+            //TODO: Watch wtf is RealPath
             val photoEntity = EntrancePhotoEntity(
                 0,
                 uuid.toString(),
@@ -73,7 +79,7 @@ class DatabaseRepository(
                 taskItem.address.idnd,
                 entrance.number,
                 null,
-                true
+                isEntrancePhoto
             )
             val id = db.entrancePhotoDao().insert(photoEntity)
             DatabaseEntrancePhotoMapper.fromEntity(photoEntity.copy(id = id.toInt()))

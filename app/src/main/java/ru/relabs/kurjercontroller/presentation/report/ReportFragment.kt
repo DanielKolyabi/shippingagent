@@ -100,10 +100,10 @@ class ReportFragment : BaseFragment() {
 
         val photosAdapter = DelegateAdapter(
             ReportAdapter.photoSingle {
-                uiScope.sendMessage(controller, ReportMessages.msgPhotoClicked(false))
+                uiScope.sendMessage(controller, ReportMessages.msgPhotoClicked(false, false))
             },
             ReportAdapter.photoMultiple {
-                uiScope.sendMessage(controller, ReportMessages.msgPhotoClicked(true))
+                uiScope.sendMessage(controller, ReportMessages.msgPhotoClicked(true, false))
             },
             ReportAdapter.photo {
                 uiScope.sendMessage(controller, ReportMessages.msgRemovePhotoClicked(it))
@@ -295,7 +295,13 @@ class ReportFragment : BaseFragment() {
         Unit
     }
 
-    private fun requestPhoto(entrance: EntranceNumber, multiplePhoto: Boolean, targetFile: File, uuid: UUID) {
+    private fun requestPhoto(
+        entrance: EntranceNumber,
+        multiplePhoto: Boolean,
+        targetFile: File,
+        uuid: UUID,
+        isEntrancePhoto: Boolean
+    ) {
         val photoUri = FileProvider.getUriForFile(
             requireContext(),
             "ru.relabs.kurjercontroller.file_provider",
@@ -305,7 +311,7 @@ class ReportFragment : BaseFragment() {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
         if (intent.resolveActivity(requireContext().packageManager) != null) {
-            nextPhotoData = ReportPhotoData(entrance, multiplePhoto, targetFile, uuid)
+            nextPhotoData = ReportPhotoData(entrance, multiplePhoto, targetFile, uuid, isEntrancePhoto)
             startActivityForResult(intent, REQUEST_PHOTO_CODE)
         } else {
             uiScope.sendMessage(controller, ReportMessages.msgPhotoError(1))
@@ -333,7 +339,13 @@ class ReportFragment : BaseFragment() {
         if (photoData.targetFile.exists()) {
             uiScope.sendMessage(
                 controller,
-                ReportMessages.msgPhotoCaptured(photoData.entrance, photoData.multiplePhoto, photoData.targetFile, photoData.uuid)
+                ReportMessages.msgPhotoCaptured(
+                    photoData.entrance,
+                    photoData.multiplePhoto,
+                    photoData.targetFile,
+                    photoData.uuid,
+                    photoData.isEntrancePhoto
+                )
             )
             return
         }
@@ -347,7 +359,8 @@ class ReportFragment : BaseFragment() {
                         photoData.multiplePhoto,
                         it,
                         photoData.targetFile,
-                        photoData.uuid
+                        photoData.uuid,
+                        photoData.isEntrancePhoto
                     )
                 )
                 return
@@ -392,7 +405,7 @@ class ReportFragment : BaseFragment() {
             uiScope.sendMessage(controller, ReportMessages.msgListTypeChanged())
         }
         view.lock_input_overlay.setOnClickListener {
-            uiScope.sendMessage(controller, ReportMessages.msgPhotoClicked(false))
+            uiScope.sendMessage(controller, ReportMessages.msgPhotoClicked(false, true))
         }
         view.user_explanation_input.setOnClickListener {
             uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionClicked(ApartmentNumber(-1)))
@@ -409,7 +422,7 @@ class ReportFragment : BaseFragment() {
         controller.context.showError = { _, _ -> }
         controller.context.showCloseEntranceDialog = {}
         controller.context.showErrorMessage = {}
-        controller.context.requestPhoto = { _, _, _, _ -> }
+        controller.context.requestPhoto = { _, _, _, _, _ -> }
         controller.context.showDescriptionInputDialog = { _, _, _ -> }
     }
 
@@ -437,6 +450,7 @@ class ReportFragment : BaseFragment() {
         val entrance: EntranceNumber,
         val multiplePhoto: Boolean,
         val targetFile: File,
-        val uuid: UUID
+        val uuid: UUID,
+        val isEntrancePhoto: Boolean
     )
 }
