@@ -53,6 +53,12 @@ object YandexMapRenders {
                         Circle(point, 50f), it.outlineColor, 2f, ColorUtils.setAlphaComponent(it.color, 80)
                     ).apply {
                         userData = MapObjectData.TaskItem(address)
+                        addTapListener { obj, _ ->
+                            (obj.userData as? MapObjectData.TaskItem)?.let {
+                                onAddressClicked(it.address)
+                            }
+                            return@addTapListener true
+                        }
                     }
                 }
             }
