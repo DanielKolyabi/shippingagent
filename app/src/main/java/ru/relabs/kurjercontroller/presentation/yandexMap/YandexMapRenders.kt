@@ -126,9 +126,7 @@ object YandexMapRenders {
                 listOfNotNull(
                     YandexMapListItem.MyPosition(false),
                     YandexMapListItem.LoadDeliverymans(deliverymansLoading, false),
-                    YandexMapListItem.CommonLayer(selectedLayer == MapLayer.Common).takeIf { tasks.size > 1 },
-                    YandexMapListItem.PredefinedAddressesLayer(selectedLayer == MapLayer.Predefined)
-                        .takeIf { tasks.size > 1 && tasks.any { !it.filtered } }
+                    YandexMapListItem.CommonLayer(selectedLayer == MapLayer.Common).takeIf { tasks.size > 1 }
                 ) + tasks
                     .map {
                         YandexMapListItem.TaskLayer(
