@@ -44,20 +44,22 @@ object TaskDetailsEffects {
         if (s.task == null || consumer == null) {
             FirebaseCrashlytics.getInstance().log("task or consmer is null")
         } else {
-            c.router.navigateTo(
-                RootScreen.AddressMap(
-                    s.task.taskItems.map {
-                        AddressWithColor(
-                            it.address,
-                            it.placemarkColor,
-                            if (it.wrongMethod) WRONG_METHOD_OUTLINE_COLOR else it.placemarkColor
-                        )
-                    },
-                    s.task.taskItems.map { it.deliverymanId },
-                    s.task.storages,
-                    consumer
+            withContext(Dispatchers.Main){
+                c.router.navigateTo(
+                    RootScreen.AddressMap(
+                        s.task.taskItems.map {
+                            AddressWithColor(
+                                it.address,
+                                it.placemarkColor,
+                                if (it.wrongMethod) WRONG_METHOD_OUTLINE_COLOR else it.placemarkColor
+                            )
+                        },
+                        s.task.taskItems.map { it.deliverymanId },
+                        s.task.storages,
+                        consumer
+                    )
                 )
-            )
+            }
         }
     }
 }
