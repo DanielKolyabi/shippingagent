@@ -44,7 +44,7 @@ object TasksRenders {
                         }
                     }
 
-                listOf(TasksItem.Search(filter)) + tasksWithGroups + listOfNotNull(TasksItem.Blank.takeIf { selectedTasks.isNotEmpty() })
+                listOf(TasksItem.Search(filter)) + tasksWithGroups + listOfNotNull(TasksItem.Blank, TasksItem.Blank.takeIf { selectedTasks.isNotEmpty() })
             }
 
             val diff = DiffUtil.calculateDiff(DefaultListDiffCallback(adapter.items, newItems) { o, n ->
