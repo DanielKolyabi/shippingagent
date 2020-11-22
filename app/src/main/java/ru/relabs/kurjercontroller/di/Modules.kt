@@ -146,7 +146,8 @@ val useCasesModule = module {
         ReportUseCase(
             get<DatabaseRepository>(),
             get<AuthTokenStorage>(),
-            get<TaskEventController>()
+            get<TaskEventController>(),
+            get<PathsProvider>()
         )
     }
 

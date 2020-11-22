@@ -47,9 +47,7 @@ object ReportEffects {
             }
         }
         val photos = c.databaseRepository.getEntrancePhotos(taskItem, entrance)
-            .map {
-                PhotoWithUri(it, c.pathsProvider.getEntrancePhotoFile(taskItem, entrance, UUID.fromString(it.UUID)).toUri())
-            }
+            .map { PhotoWithUri(it, it.getFile(c.pathsProvider).toUri()) }
 
         messages.send(ReportMessages.msgDataLoaded(savedEntrance, savedApartments, entranceEuroKeys, entranceKeys, photos))
         messages.send(ReportMessages.msgAddLoaders(-1))
@@ -207,8 +205,9 @@ object ReportEffects {
                         is Left -> messages.send(ReportMessages.msgPhotoError(6))
                         is Right -> {
                             val location = c.locationProvider.lastReceivedLocation()
-                            val photo = c.databaseRepository.savePhoto(entrance, task, uuid, location, isEntrancePhoto)
-                            val path = c.pathsProvider.getEntrancePhotoFileByID(task.id, entrance, uuid.toString())
+                            val photo =
+                                c.reportUseCase.savePhoto(entrance, task, uuid, location, isEntrancePhoto, s.allTaskItemsIds)
+                            val path = photo.getFile(c.pathsProvider)
                             messages.send(ReportMessages.msgNewPhoto(PhotoWithUri(photo, path.toUri())))
                         }
                     }

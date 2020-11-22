@@ -1,12 +1,13 @@
 package ru.relabs.kurjercontroller.domain.models
 
 import android.os.Parcelable
-import androidx.room.ColumnInfo
 import kotlinx.android.parcel.Parcelize
+import ru.relabs.kurjercontroller.domain.providers.PathsProvider
+import java.io.File
 
 
 @Parcelize
-data class PhotoId(val id: Int): Parcelable
+data class PhotoId(val id: Int) : Parcelable
 
 @Parcelize
 data class EntrancePhoto(
@@ -20,3 +21,6 @@ data class EntrancePhoto(
     var realPath: String?,
     var isEntrancePhoto: Boolean
 ) : Parcelable
+
+fun EntrancePhoto.getFile(pathsProvider: PathsProvider) =
+    realPath?.let { File(it) } ?: pathsProvider.getEntrancePhotoFileByID(taskItemId, entranceNumber, UUID)

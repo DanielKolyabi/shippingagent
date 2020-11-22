@@ -22,7 +22,6 @@ import ru.relabs.kurjercontroller.utils.Either
 import ru.relabs.kurjercontroller.utils.Left
 import ru.relabs.kurjercontroller.utils.Right
 import ru.relabs.kurjercontroller.utils.deleteIfEmpty
-import java.io.File
 import java.util.*
 
 class DatabaseRepository(
@@ -61,6 +60,19 @@ class DatabaseRepository(
         uuid: UUID,
         location: Location?,
         isEntrancePhoto: Boolean
+    ): EntrancePhoto = withContext(Dispatchers.IO) {
+        savePhoto(entrance, taskItem.taskId, taskItem.id, taskItem.address.idnd, uuid, location, isEntrancePhoto)
+    }
+
+    suspend fun savePhoto(
+        entrance: EntranceNumber,
+        taskId: TaskId,
+        taskItemId: TaskItemId,
+        addressIdnd: Int,
+        uuid: UUID,
+        location: Location?,
+        isEntrancePhoto: Boolean,
+        realPath: String? = null
     ): EntrancePhoto =
         withContext(Dispatchers.IO) {
             val gps = GPSCoordinatesModel(
@@ -69,16 +81,15 @@ class DatabaseRepository(
                 location?.time?.let { DateTime(it) } ?: DateTime()
             )
 
-            //TODO: Watch wtf is RealPath
             val photoEntity = EntrancePhotoEntity(
                 0,
                 uuid.toString(),
                 gps,
-                taskItem.taskId.id,
-                taskItem.id.id,
-                taskItem.address.idnd,
+                taskId.id,
+                taskItemId.id,
+                addressIdnd,
                 entrance.number,
-                null,
+                realPath,
                 isEntrancePhoto
             )
             val id = db.entrancePhotoDao().insert(photoEntity)
@@ -109,7 +120,8 @@ class DatabaseRepository(
         db.taskItemDao().delete(taskItem)
     }
 
-    suspend fun removePhoto(entrancePhoto: EntrancePhoto) = DatabaseEntrancePhotoMapper.toEntity(entrancePhoto)
+    suspend fun removePhoto(entrancePhoto: EntrancePhoto) =
+        removePhoto(DatabaseEntrancePhotoMapper.toEntity(entrancePhoto))
 
     suspend fun removePhoto(entrancePhoto: EntrancePhotoEntity) = withContext(Dispatchers.IO) {
         db.entrancePhotoDao().deleteById(entrancePhoto.id)
@@ -119,19 +131,12 @@ class DatabaseRepository(
     }
 
     suspend fun deletePhotoFile(entrancePhoto: EntrancePhotoEntity) {
-        val file = File(
-            entrancePhoto.realPath
-                ?: pathsProvider.getEntrancePhotoFileByID(
-                    TaskItemId(entrancePhoto.taskItemId),
-                    EntranceNumber(entrancePhoto.entranceNumber),
-                    entrancePhoto.UUID
-                ).path
-        )
+        val file = DatabaseEntrancePhotoMapper.fromEntity(entrancePhoto).getFile(pathsProvider)
         val entranceFolder = file.parentFile
-        val taskItemFolder = entranceFolder.parentFile
+        val taskItemFolder = entranceFolder?.parentFile
         file.delete()
-        entranceFolder.deleteIfEmpty()
-        taskItemFolder.deleteIfEmpty()
+        entranceFolder?.deleteIfEmpty()
+        taskItemFolder?.deleteIfEmpty()
     }
 
     private suspend fun removeTask(taskId: TaskId) = withContext(Dispatchers.IO) {

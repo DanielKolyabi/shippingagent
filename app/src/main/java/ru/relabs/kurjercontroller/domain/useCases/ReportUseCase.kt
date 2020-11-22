@@ -7,17 +7,21 @@ import ru.relabs.kurjercontroller.data.database.models.ApartmentResult
 import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
 import ru.relabs.kurjercontroller.domain.controllers.TaskEventController
 import ru.relabs.kurjercontroller.domain.models.Entrance
-import ru.relabs.kurjercontroller.domain.models.GPSCoordinatesModel
-import ru.relabs.kurjercontroller.domain.models.TaskPublisher
+import ru.relabs.kurjercontroller.domain.models.EntranceNumber
+import ru.relabs.kurjercontroller.domain.models.EntrancePhoto
 import ru.relabs.kurjercontroller.domain.models.TaskItem
+import ru.relabs.kurjercontroller.domain.providers.PathsProvider
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
 import ru.relabs.kurjercontroller.presentation.report.ReportApartmentButtonsMode
+import ru.relabs.kurjercontroller.presentation.reportPager.TaskItemWithTaskIds
+import java.util.*
 
 class ReportUseCase(
     private val databaseRepository: DatabaseRepository,
     private val tokenStorage: AuthTokenStorage,
-    private val taskEventController: TaskEventController
+    private val taskEventController: TaskEventController,
+    private val pathsProvider: PathsProvider
 ) {
 
     suspend fun createReport(taskItem: TaskItem, entrance: Entrance, location: Location) {
@@ -44,7 +48,7 @@ class ReportUseCase(
                 ApartmentResult(
                     it.apartmentNumber,
                     it.buttonState,
-                    when(it.buttonGroup){
+                    when (it.buttonGroup) {
                         ReportApartmentButtonsMode.Main -> 0
                         ReportApartmentButtonsMode.Additional -> 1
                     },
@@ -64,5 +68,33 @@ class ReportUseCase(
         databaseRepository.closeEntrance(taskItem.taskId, taskItem.id, entrance.number)
 
         taskEventController.send(TaskEvent.EntranceClosed(taskItem.taskId, taskItem.id, entrance.number))
+    }
+
+    suspend fun savePhoto(
+        entrance: EntranceNumber,
+        taskItem: TaskItem,
+        uuid: UUID,
+        location: Location?,
+        isEntrancePhoto: Boolean,
+        allTaskItemsIds: List<TaskItemWithTaskIds>
+    ): EntrancePhoto {
+        val photo = databaseRepository.savePhoto(entrance, taskItem, uuid, location, isEntrancePhoto)
+        if (isEntrancePhoto) {
+            allTaskItemsIds.forEach {
+                if (it.taskItemId != taskItem.id) {
+                    databaseRepository.savePhoto(
+                        entrance,
+                        it.taskId,
+                        it.taskItemId,
+                        taskItem.address.idnd,
+                        uuid,
+                        location,
+                        isEntrancePhoto,
+                        pathsProvider.getEntrancePhotoFileByID(taskItem.id, entrance, photo.UUID).path
+                    )
+                }
+            }
+        }
+        return photo
     }
 }

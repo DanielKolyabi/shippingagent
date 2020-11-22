@@ -27,6 +27,7 @@ import ru.relabs.kurjercontroller.data.models.tasks.ApartmentResultRequest
 import ru.relabs.kurjercontroller.data.models.tasks.FilterResponse
 import ru.relabs.kurjercontroller.domain.mappers.FilterTypeMapper
 import ru.relabs.kurjercontroller.domain.mappers.UserLocationMapper
+import ru.relabs.kurjercontroller.domain.mappers.database.DatabaseEntrancePhotoMapper
 import ru.relabs.kurjercontroller.domain.mappers.network.*
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.domain.providers.*
@@ -236,11 +237,7 @@ class ControlRepository(
         reportEnt: EntranceReportEntity,
         photoEnt: EntrancePhotoEntity
     ): MultipartBody.Part {
-        val photoFile = pathsProvider.getEntrancePhotoFileByID(
-            TaskItemId(reportEnt.taskItemId),
-            EntranceNumber(reportEnt.entranceNumber),
-            photoEnt.UUID
-        )
+        val photoFile = DatabaseEntrancePhotoMapper.fromEntity(photoEnt).getFile(pathsProvider)
         if (!photoFile.exists()) {
             throw FileNotFoundException(photoFile.path)
         }
