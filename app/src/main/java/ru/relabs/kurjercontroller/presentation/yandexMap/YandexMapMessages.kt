@@ -134,8 +134,15 @@ object YandexMapMessages {
     fun msgTaskLayerLoading(task: Task, b: Boolean): YandexMapMessage =
         msgState { it.copy(taskLoadings = it.taskLoadings + Pair(task.id, b)) }
 
-    fun msgNewTaskItemsLoaded(newTaskItems: List<TaskItem>): YandexMapMessage =
-        msgState { it.copy(newTaskItems = newTaskItems) }
+    fun msgNewTaskItemsLoaded(newTaskItems: List<TaskItem>): YandexMapMessage = msgEffects(
+        { it.copy(newTaskItems = newTaskItems) },
+        { s ->
+            listOfNotNull(
+                YandexMapEffects.effectRefreshSelectedLayer()
+                    .takeIf { newTaskItems.any { it.taskId == (s.selectedLayer as? MapLayer.TaskLayer)?.task?.id } }
+            )
+        }
+    )
 
     fun msgAddNewAddresses(visibleRegion: VisibleRegion): YandexMapMessage =
         msgEffect(YandexMapEffects.effectAddNewAddresses(visibleRegion))
