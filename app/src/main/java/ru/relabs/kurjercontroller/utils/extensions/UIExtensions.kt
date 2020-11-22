@@ -66,7 +66,7 @@ fun View.performFlash() {
 }
 
 fun Iterable<TaskItem>.placemarkColor(): Int {
-    val minCloseTime = filter { it.closeTime != null && !it.isClosed }.minBy {
+    val minCloseTime = filter { it.closeTime != null && !it.isClosed }.maxBy {
         it.closeTime!!
     }
     //If nothing closed in set
