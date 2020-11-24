@@ -7,6 +7,7 @@ import android.animation.ValueAnimator
 import android.view.View
 import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.domain.models.Task
@@ -17,6 +18,8 @@ import ru.relabs.kurjercontroller.presentation.helpers.TaskAddressSorter
 import ru.relabs.kurjercontroller.utils.SearchUtils
 import ru.relabs.kurjercontroller.utils.extensions.getColorCompat
 import ru.relabs.kurjercontroller.utils.extensions.visible
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Created by Daniil Kurchanov on 06.04.2020.
@@ -80,9 +83,23 @@ object AddressesRenders {
             it?.let { a ->
                 adapter.items
                     .indexOfFirst { item -> item is AddressesItem.AddressItem && item.taskItem.address.id == a.id }
-                    .takeIf { idx -> idx > 0 }
+                    .takeIf { idx -> idx >= 0 }
                     ?.let { idx ->
-                        list.scrollToPosition(idx)
+                        val layoutManager = (list.layoutManager as? LinearLayoutManager)
+                        val firstItemIdx = layoutManager?.findFirstVisibleItemPosition()
+                        val lastItemIdx = layoutManager?.findLastVisibleItemPosition()
+                        val preferredIdx = if (firstItemIdx != null && lastItemIdx != null) {
+                            val itemsOnScreen = lastItemIdx - firstItemIdx
+                            val visibleMiddleIdx = firstItemIdx + itemsOnScreen / 2
+                            when {
+                                idx > visibleMiddleIdx -> min(idx + itemsOnScreen / 2, adapter.itemCount)
+                                idx < visibleMiddleIdx -> max(0, idx - itemsOnScreen / 2)
+                                else -> visibleMiddleIdx
+                            }
+                        } else {
+                            idx
+                        }
+                        list.scrollToPosition(preferredIdx)
                         list.post {
                             list?.findViewHolderForAdapterPosition(idx)?.itemView?.let {
                                 flashSelectedColor(it)
