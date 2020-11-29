@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager.widget.ViewPager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_report_pager.view.*
@@ -83,6 +84,7 @@ class ReportPagerFragment : BaseFragment() {
                 ReportPagerRenders.renderLoading(view.loading),
                 ReportPagerRenders.renderTasks(taskButtonsAdapter, view.tasks_list),
                 ReportPagerRenders.renderPager(pagerAdapter),
+                ReportPagerRenders.renderPagerPosition(view.view_pager),
                 ReportPagerRenders.renderTitle(view.tv_title)
             )
             launch { controller.stateFlow().collect(rendersCollector(renders)) }
@@ -97,6 +99,13 @@ class ReportPagerFragment : BaseFragment() {
         view.iv_menu.setOnClickListener {
             uiScope.sendMessage(controller, ReportPagerMessages.msgNavigateBack())
         }
+        view.view_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            override fun onPageScrollStateChanged(state: Int) {}
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
+            override fun onPageSelected(position: Int) {
+                uiScope.sendMessage(controller, ReportPagerMessages.msgPageSelected(position))
+            }
+        })
     }
 
     override fun onDestroyView() {

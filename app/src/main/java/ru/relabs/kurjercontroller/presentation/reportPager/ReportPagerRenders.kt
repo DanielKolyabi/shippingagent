@@ -2,6 +2,7 @@ package ru.relabs.kurjercontroller.presentation.reportPager
 
 import android.view.View
 import android.widget.TextView
+import androidx.viewpager.widget.ViewPager
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.presentation.base.recycler.DelegateAdapter
 import ru.relabs.kurjercontroller.presentation.base.tea.renderT
@@ -33,6 +34,15 @@ object ReportPagerRenders {
                 adapter.setTaskWithItem(selectedTask, tasks)
             } else {
                 adapter.setTaskWithItem(null, tasks)
+            }
+        }
+    )
+
+    fun renderPagerPosition(pager: ViewPager): ReportPagerRender = renderT(
+        { it.selectedEntrancePosition },
+        {
+            if (pager.currentItem != it) {
+                pager.currentItem = it
             }
         }
     )

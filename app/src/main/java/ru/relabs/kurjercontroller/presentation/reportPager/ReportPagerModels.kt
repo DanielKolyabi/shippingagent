@@ -15,6 +15,7 @@ import ru.relabs.kurjercontroller.presentation.base.tea.*
 data class ReportPagerState(
     val tasks: List<TaskItem> = emptyList(),
     val selectedTask: TaskItem? = null,
+    val selectedEntrancePosition: Int = 0,
     val loaders: Int = 0
 )
 

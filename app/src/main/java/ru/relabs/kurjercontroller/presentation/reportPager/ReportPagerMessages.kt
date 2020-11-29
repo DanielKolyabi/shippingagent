@@ -52,7 +52,14 @@ object ReportPagerMessages {
                 t
             }
         }
-        s.copy(tasks = newTasks, selectedTask = newTasks.firstOrNull { it.id == s.selectedTask?.id })
+        val selectedTask = newTasks.firstOrNull { it.id == s.selectedTask?.id }
+        val entrances = selectedTask?.entrances?.sortedBy { it.state == EntranceState.CLOSED }
+        val newAdapterPosition = if (entrances?.getOrNull(s.selectedEntrancePosition)?.state == EntranceState.CREATED) {
+            s.selectedEntrancePosition
+        } else {
+            0
+        }
+        s.copy(tasks = newTasks, selectedTask = selectedTask, selectedEntrancePosition = newAdapterPosition)
     }
 
     fun msgCloseTaskItem(targetTaskItem: TaskItem): ReportPagerMessage = msgState { s ->
@@ -81,6 +88,9 @@ object ReportPagerMessages {
             s
         }
     }
+
+    fun msgPageSelected(pos: Int): ReportPagerMessage =
+        msgState { it.copy(selectedEntrancePosition = pos) }
 }
 
 
