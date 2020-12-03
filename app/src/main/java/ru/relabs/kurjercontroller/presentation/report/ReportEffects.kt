@@ -2,6 +2,7 @@ package ru.relabs.kurjercontroller.presentation.report
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.core.net.toUri
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.Dispatchers
@@ -11,10 +12,7 @@ import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
-import ru.relabs.kurjercontroller.utils.Either
-import ru.relabs.kurjercontroller.utils.ImageUtils
-import ru.relabs.kurjercontroller.utils.Left
-import ru.relabs.kurjercontroller.utils.Right
+import ru.relabs.kurjercontroller.utils.*
 import java.io.File
 import java.util.*
 
@@ -184,10 +182,26 @@ object ReportEffects {
         c.showError("Не удалось сделать фотографию: re:photo:$errorCode", false)
     }
 
-    fun effectSavePhotoFromFile(entrance: EntranceNumber, targetFile: File, uuid: UUID, isEntrancePhoto: Boolean): ReportEffect =
+    fun effectSavePhotoFromFile(
+        entrance: EntranceNumber,
+        photoUri: Uri,
+        targetFile: File,
+        uuid: UUID,
+        isEntrancePhoto: Boolean
+    ): ReportEffect =
         { c, s ->
-            val bmp = BitmapFactory.decodeFile(targetFile.path)
-            effectSavePhotoFromBitmap(entrance, bmp, targetFile, uuid, isEntrancePhoto)(c, s)
+            val contentResolver = c.contentResolver()
+            if (contentResolver == null) {
+                messages.send(msgEffect(effectShowPhotoError(8)))
+            } else {
+                val bmp = BitmapFactory.decodeStream(contentResolver.openInputStream(photoUri))
+                if (bmp == null) {
+                    CustomLog.writeToFile("Photo creation failed. Uri: ${photoUri}, File: ${targetFile.path}")
+                    messages.send(msgEffect(effectShowPhotoError(7)))
+                } else {
+                    effectSavePhotoFromBitmap(entrance, bmp, targetFile, uuid, isEntrancePhoto)(c, s)
+                }
+            }
         }
 
     fun effectSavePhotoFromBitmap(

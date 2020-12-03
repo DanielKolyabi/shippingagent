@@ -1,6 +1,7 @@
 package ru.relabs.kurjercontroller.presentation.report
 
 import android.graphics.Bitmap
+import android.net.Uri
 import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
@@ -83,6 +84,7 @@ object ReportMessages {
     fun msgPhotoCaptured(
         entrance: EntranceNumber,
         multiplePhoto: Boolean,
+        photoUri: Uri,
         targetFile: File,
         uuid: UUID,
         isEntrancePhoto: Boolean
@@ -91,28 +93,11 @@ object ReportMessages {
             { it },
             {
                 listOfNotNull(
-                    ReportEffects.effectSavePhotoFromFile(entrance, targetFile, uuid, isEntrancePhoto),
+                    ReportEffects.effectSavePhotoFromFile(entrance, photoUri, targetFile, uuid, isEntrancePhoto),
                     ReportEffects.effectCreatePhoto(multiplePhoto, isEntrancePhoto).takeIf { multiplePhoto }
                 )
             }
         )
-
-    fun msgPhotoCaptured(
-        entrance: EntranceNumber,
-        multiplePhoto: Boolean,
-        bitmap: Bitmap,
-        targetFile: File,
-        uuid: UUID,
-        isEntrancePhoto: Boolean
-    ): ReportMessage = msgEffects(
-        { it },
-        {
-            listOfNotNull(
-                ReportEffects.effectSavePhotoFromBitmap(entrance, bitmap, targetFile, uuid, isEntrancePhoto),
-                ReportEffects.effectCreatePhoto(multiplePhoto, isEntrancePhoto).takeIf { multiplePhoto }
-            )
-        }
-    )
 
     fun msgApartmentStateChanged(apartmentNumber: ApartmentNumber, newState: Int): ReportMessage =
         msgEffect(ReportEffects.effectChangeApartmentState(apartmentNumber, newState))

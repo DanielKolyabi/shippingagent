@@ -2,7 +2,7 @@ package ru.relabs.kurjercontroller.presentation.report
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.InputType
@@ -238,6 +238,7 @@ class ReportFragment : BaseFragment() {
         controller.context.showCloseEntranceDialog = ::showCloseEntranceDialog
         controller.context.requestPhoto = ::requestPhoto
         controller.context.showDescriptionInputDialog = ::showDescriptionInputDialog
+        controller.context.contentResolver = { requireContext().contentResolver }
     }
 
     private fun showDescriptionInputDialog(apartmentNumber: ApartmentNumber, description: String, isEditable: Boolean) {
@@ -311,7 +312,7 @@ class ReportFragment : BaseFragment() {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
         if (intent.resolveActivity(requireContext().packageManager) != null) {
-            nextPhotoData = ReportPhotoData(entrance, multiplePhoto, targetFile, uuid, isEntrancePhoto)
+            nextPhotoData = ReportPhotoData(entrance, multiplePhoto, photoUri, targetFile, uuid, isEntrancePhoto)
             startActivityForResult(intent, REQUEST_PHOTO_CODE)
         } else {
             uiScope.sendMessage(controller, ReportMessages.msgPhotoError(1))
@@ -335,38 +336,24 @@ class ReportFragment : BaseFragment() {
             uiScope.sendMessage(controller, ReportMessages.msgPhotoError(3))
             return
         }
-        //Find photo in target file
-        if (photoData.targetFile.exists()) {
-            uiScope.sendMessage(
-                controller,
-                ReportMessages.msgPhotoCaptured(
-                    photoData.entrance,
-                    photoData.multiplePhoto,
-                    photoData.targetFile,
-                    photoData.uuid,
-                    photoData.isEntrancePhoto
-                )
-            )
+
+        val uri = data?.data ?: photoData.photoUri
+        if (requireContext().contentResolver.getType(uri) == null) {
+            uiScope.sendMessage(controller, ReportMessages.msgPhotoError(4))
             return
         }
-        //Find photo in result data
-        if (data != null) {
-            (data.extras?.get("data") as? Bitmap)?.let {
-                uiScope.sendMessage(
-                    controller,
-                    ReportMessages.msgPhotoCaptured(
-                        photoData.entrance,
-                        photoData.multiplePhoto,
-                        it,
-                        photoData.targetFile,
-                        photoData.uuid,
-                        photoData.isEntrancePhoto
-                    )
-                )
-                return
-            }
-        }
-        uiScope.sendMessage(controller, ReportMessages.msgPhotoError(4))
+
+        uiScope.sendMessage(
+            controller,
+            ReportMessages.msgPhotoCaptured(
+                photoData.entrance,
+                photoData.multiplePhoto,
+                photoData.photoUri,
+                photoData.targetFile,
+                photoData.uuid,
+                photoData.isEntrancePhoto
+            )
+        )
     }
 
     private fun bindControls(view: View) {
@@ -424,6 +411,7 @@ class ReportFragment : BaseFragment() {
         controller.context.showErrorMessage = {}
         controller.context.requestPhoto = { _, _, _, _, _ -> }
         controller.context.showDescriptionInputDialog = { _, _, _ -> }
+        controller.context.contentResolver = { null }
     }
 
     override fun interceptBackPressed(): Boolean {
@@ -449,6 +437,7 @@ class ReportFragment : BaseFragment() {
     private data class ReportPhotoData(
         val entrance: EntranceNumber,
         val multiplePhoto: Boolean,
+        val photoUri: Uri,
         val targetFile: File,
         val uuid: UUID,
         val isEntrancePhoto: Boolean

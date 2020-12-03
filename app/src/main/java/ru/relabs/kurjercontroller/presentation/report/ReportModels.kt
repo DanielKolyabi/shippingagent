@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.presentation.report
 
+import android.content.ContentResolver
 import android.net.Uri
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -56,6 +57,7 @@ class ReportContext(val errorContext: ErrorContextImpl = ErrorContextImpl()) :
     var requestPhoto: (entrance: EntranceNumber, multiplePhoto: Boolean, targetFile: File, uuid: UUID, isEntrancePhoto: Boolean) -> Unit =
         { _, _, _, _, _ -> }
     var showDescriptionInputDialog: (ApartmentNumber, String, Boolean) -> Unit = { _, _, _ -> }
+    var contentResolver: () -> ContentResolver? = { null }
 }
 
 typealias ReportMessage = ElmMessage<ReportContext, ReportState>
