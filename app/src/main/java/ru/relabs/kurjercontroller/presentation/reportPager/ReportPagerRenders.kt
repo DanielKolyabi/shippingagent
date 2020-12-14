@@ -14,7 +14,8 @@ import ru.relabs.kurjercontroller.utils.extensions.visible
 object ReportPagerRenders {
     fun renderLoading(loader: View): ReportPagerRender = renderT(
         { it.loaders > 0 },
-        { loader.visible = it }
+        { loader.visible = it },
+        { o, n -> true }
     )
 
     fun renderTasks(adapter: DelegateAdapter<ReportPagerTaskItem>, list: View): ReportPagerRender = renderT(
