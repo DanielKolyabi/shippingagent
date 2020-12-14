@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Parcelable
 import android.provider.MediaStore
 import android.text.InputType
 import android.view.LayoutInflater
@@ -17,6 +18,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_report.view.*
 import kotlinx.android.synthetic.main.include_hint_container.view.*
 import kotlinx.coroutines.Dispatchers
@@ -54,6 +56,16 @@ class ReportFragment : BaseFragment() {
 
     private val controller = defaultController(ReportState(), ReportContext())
     private var renderJob: Job? = null
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putParcelable(SAVED_NEXT_PHOTO_DATA_KEY, nextPhotoData)
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        nextPhotoData = nextPhotoData ?: savedInstanceState?.getParcelable(SAVED_NEXT_PHOTO_DATA_KEY)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -423,6 +435,7 @@ class ReportFragment : BaseFragment() {
         const val ARG_TASK_ITEMS_ALL = "allTaskItems"
         const val ARG_ENTRANCES = "entrances"
         const val REQUEST_PHOTO_CODE = 501
+        const val SAVED_NEXT_PHOTO_DATA_KEY = "photoData"
 
         fun newInstance(taskItem: TaskItem, entrance: Entrance, otherTaskItemWithTaskIds: List<TaskItemWithTaskIds>) =
             ReportFragment().apply {
@@ -434,6 +447,7 @@ class ReportFragment : BaseFragment() {
             }
     }
 
+    @Parcelize
     private data class ReportPhotoData(
         val entrance: EntranceNumber,
         val multiplePhoto: Boolean,
@@ -441,5 +455,5 @@ class ReportFragment : BaseFragment() {
         val targetFile: File,
         val uuid: UUID,
         val isEntrancePhoto: Boolean
-    )
+    ) : Parcelable
 }
