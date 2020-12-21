@@ -4,6 +4,7 @@ import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffects
 import ru.relabs.kurjercontroller.presentation.base.tea.msgState
+import ru.relabs.kurjercontroller.utils.debug
 
 /**
  * Created by Daniil Kurchanov on 02.04.2020.
@@ -89,8 +90,10 @@ object ReportPagerMessages {
         }
     }
 
-    fun msgPageSelected(pos: Int): ReportPagerMessage =
-        msgState { it.copy(selectedEntrancePosition = pos) }
+    fun msgPageSelected(pos: Int): ReportPagerMessage = msgState {
+            debug("Pager page selected: $pos")
+            it.copy(selectedEntrancePosition = pos)
+        }
 }
 
 
