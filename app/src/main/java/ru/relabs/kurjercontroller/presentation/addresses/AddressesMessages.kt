@@ -5,6 +5,7 @@ import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffects
 import ru.relabs.kurjercontroller.presentation.base.tea.msgState
+import ru.relabs.kurjercontroller.utils.CustomLog
 import ru.relabs.kurjercontroller.utils.SearchUtils
 
 /**
@@ -96,6 +97,9 @@ object AddressesMessages {
             s.copy(tasks = newTasks, exits = if (newTasks.isEmpty()) s.exits.inc() else s.exits)
         },
         { s ->
+            if(s.tasks.isEmpty()){
+                CustomLog.writeToFile("Navigate back from addresses, task removed, none tasks left")
+            }
             listOfNotNull(
                 AddressesEffects.effectNavigateBack(s.exits).takeIf { s.tasks.isEmpty() }
             )

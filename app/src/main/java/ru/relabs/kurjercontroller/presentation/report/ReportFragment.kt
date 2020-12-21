@@ -40,6 +40,7 @@ import ru.relabs.kurjercontroller.presentation.base.tea.rendersCollector
 import ru.relabs.kurjercontroller.presentation.base.tea.sendMessage
 import ru.relabs.kurjercontroller.presentation.helpers.HintHelper
 import ru.relabs.kurjercontroller.presentation.reportPager.TaskItemWithTaskIds
+import ru.relabs.kurjercontroller.utils.CustomLog
 import ru.relabs.kurjercontroller.utils.debug
 import ru.relabs.kurjercontroller.utils.extensions.showDialog
 import java.io.File
@@ -300,6 +301,7 @@ class ReportFragment : BaseFragment() {
             getString(R.string.unknown_runtime_error_code, code),
             R.string.ok to {
                 if (isFatal) {
+                    CustomLog.writeToFile("Navigate back from report, error ${code}")
                     uiScope.sendMessage(controller, ReportMessages.msgNavigateBack())
                 }
             }

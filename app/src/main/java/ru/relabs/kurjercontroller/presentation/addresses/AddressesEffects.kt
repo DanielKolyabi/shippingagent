@@ -9,6 +9,7 @@ import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.RootScreen
 import ru.relabs.kurjercontroller.presentation.yandexMap.YandexMapFragment.Companion.WRONG_METHOD_OUTLINE_COLOR
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressWithColor
+import ru.relabs.kurjercontroller.utils.CustomLog
 import ru.relabs.kurjercontroller.utils.extensions.placemarkColor
 
 /**
@@ -118,9 +119,8 @@ object AddressesEffects {
         } else {
             c.databaseRepository.closeTaskById(task.id, !task.isOnline)
             c.taskEventController.send(TaskEvent.TaskClosed(task.id))
-            withContext(Dispatchers.Main) {
-                messages.send(AddressesMessages.msgNavigateBack())
-            }
+            CustomLog.writeToFile("Navigate back from addresses, current task closed")
+            messages.send(AddressesMessages.msgNavigateBack())
         }
         messages.send(AddressesMessages.msgAddLoaders(-1))
     }

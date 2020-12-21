@@ -14,6 +14,7 @@ import ru.relabs.kurjercontroller.domain.repositories.MergeResult
 import ru.relabs.kurjercontroller.presentation.RootScreen
 import ru.relabs.kurjercontroller.presentation.base.tea.CommonMessages
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
+import ru.relabs.kurjercontroller.utils.CustomLog
 import ru.relabs.kurjercontroller.utils.Left
 import ru.relabs.kurjercontroller.utils.Right
 
@@ -164,6 +165,7 @@ object TasksEffects {
     fun effectStartOnline(filters: TaskFilters, withPlanned: Boolean): TasksEffect = { c, s ->
         messages.send(TasksMessages.msgAddLoaders(1))
         withContext(Dispatchers.Main) {
+            CustomLog.writeToFile("Navigate back from tasks, close online")
             c.router.exit() //Exit from filters edit screen
         }
         when (val r = c.onlineTaskUseCase.createOnlineTask(filters, withPlanned)) {

@@ -11,6 +11,7 @@ import ru.relabs.kurjercontroller.domain.models.EntranceState
 import ru.relabs.kurjercontroller.domain.models.TaskId
 import ru.relabs.kurjercontroller.domain.models.TaskItemId
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
+import ru.relabs.kurjercontroller.utils.CustomLog
 
 /**
  * Created by Daniil Kurchanov on 02.04.2020.
@@ -71,6 +72,8 @@ object ReportPagerEffects {
                 c.taskEventController.send(TaskEvent.TaskItemClosed(task, taskItem))
                 val otherTask = s.tasks.filter { it != targetTaskItem }.firstOrNull()
                 if (otherTask == null) {
+                    CustomLog.writeToFile("Navigate back from report, entrance closed tid: ${task.id}, tiid: ${taskItem.id}, entrance: ${entrance.number}")
+                    CustomLog.writeToFile("Current taskItem: tid: ${s.selectedTask?.taskId?.id}, tiid: ${s.selectedTask?.id?.id}")
                     messages.send(msgEffect(effectNavigateBack()))
                 } else if (s.selectedTask == targetTaskItem) {
                     messages.send(ReportPagerMessages.msgTaskClicked(otherTask))
