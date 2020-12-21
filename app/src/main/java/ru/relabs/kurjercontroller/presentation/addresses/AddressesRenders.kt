@@ -82,7 +82,7 @@ object AddressesRenders {
         {
             it?.let { a ->
                 adapter.items
-                    .indexOfFirst { item -> item is AddressesItem.AddressItem && item.taskItem.address.id == a.id }
+                    .indexOfFirst { item -> item is AddressesItem.GroupHeader && item.subItems.firstOrNull()?.address?.id == a.id }
                     .takeIf { idx -> idx >= 0 }
                     ?.let { idx ->
                         val layoutManager = (list.layoutManager as? LinearLayoutManager)
