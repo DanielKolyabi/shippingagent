@@ -60,9 +60,7 @@ object Migrations {
                         storage_id INTEGER NOT NULL,
                         address TEXT NOT NULL,
                         gpsLat REAL NOT NULL,
-                        gpsLong REAL NOT NULL,
-                        
-                        UNIQUE (storage_id, task_id) ON CONFLICT REPLACE
+                        gpsLong REAL NOT NULL
                     )
                 """.trimIndent()
 
@@ -70,6 +68,7 @@ object Migrations {
             database.execSQL("INSERT INTO storages_temp SELECT * FROM task_storages")
             database.execSQL("DROP TABLE task_storages")
             database.execSQL(createTable("task_storages"))
+            database.execSQL("CREATE UNIQUE INDEX `index_task_storages_storage_id_task_id` ON `task_storages`(`storage_id`, `task_id`);")
             database.execSQL("INSERT INTO task_storages SELECT * FROM storages_temp")
             database.execSQL("DROP TABLE storages_temp")
         }
