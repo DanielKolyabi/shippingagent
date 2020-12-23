@@ -13,7 +13,7 @@ import ru.relabs.kurjercontroller.domain.models.TaskStorage
 
 @Entity(
     tableName = "task_storages",
-    indices = [Index(value = ["storage_id"], unique = true)]
+    indices = [Index(value = ["storage_id", "task_id"], unique = true)]
 )
 data class TaskStorageEntity(
     @PrimaryKey(autoGenerate = true)

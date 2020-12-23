@@ -11,7 +11,8 @@ object Migrations {
         migration_39_40,
         migration_40_41,
         migration_42_43,
-        migration_43_44
+        migration_43_44,
+        migration_44_45
     )
 
 
@@ -48,6 +49,29 @@ object Migrations {
     val migration_43_44 = object : Migration(43, 44) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("ALTER TABLE entrance_photos ADD COLUMN is_entrance_photo INTEGER NOT NULL DEFAULT 0")
+        }
+    }
+    val migration_44_45 =object : Migration(44, 45) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            fun createTable(name: String) = """
+                    CREATE TABLE $name(
+                        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        task_id INTEGER NOT NULL,
+                        storage_id INTEGER NOT NULL,
+                        address TEXT NOT NULL,
+                        gpsLat REAL NOT NULL,
+                        gpsLong REAL NOT NULL,
+                        
+                        UNIQUE (storage_id, task_id) ON CONFLICT REPLACE
+                    )
+                """.trimIndent()
+
+            database.execSQL(createTable("storages_temp"))
+            database.execSQL("INSERT INTO storages_temp SELECT * FROM task_storages")
+            database.execSQL("DROP TABLE task_storages")
+            database.execSQL(createTable("task_storages"))
+            database.execSQL("INSERT INTO task_storages SELECT * FROM storages_temp")
+            database.execSQL("DROP TABLE storages_temp")
         }
     }
 }
