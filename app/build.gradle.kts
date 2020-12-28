@@ -76,6 +76,8 @@ androidExtensions {
 }
 
 dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:26.2.0"))
+
     implementation(fileTree(mapOf("dir" to "libs", "include" to "*.jar")))
     implementation("com.google.android.material:material:1.2.0-alpha02")
 
@@ -116,9 +118,10 @@ dependencies {
     implementation("ru.terrakok.cicerone:cicerone:5.1.1")
 
     // Firebase
-    implementation("com.google.firebase:firebase-messaging:20.2.0")
-    implementation("com.google.firebase:firebase-crashlytics-ktx:17.3.0")
-    implementation("com.google.firebase:firebase-analytics-ktx:18.0.0")
+    implementation("com.google.firebase:firebase-messaging-ktx")
+    implementation("com.google.firebase:firebase-crashlytics-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
+
 
     //Various
     implementation("com.yandex.android:mapkit:3.3.1")
