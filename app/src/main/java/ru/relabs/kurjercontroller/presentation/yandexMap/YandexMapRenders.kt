@@ -26,6 +26,13 @@ object YandexMapRenders {
     fun renderAddresses(mapview: MapView, onAddressClicked: (Address) -> Unit): YandexMapRender = renderT(
         { it.addresses },
         {
+            val clickCallback = MapObjectTapListener { obj, _ ->
+                (obj.userData as? MapObjectData.TaskItem)?.let {
+                    onAddressClicked(it.address)
+                }
+                true
+            }
+
             mapview.map.mapObjects.forEach {
                 if (it.userData is MapObjectData.TaskItem) {
                     mapview.map.mapObjects.remove(it)
@@ -40,12 +47,7 @@ object YandexMapRenders {
                         .addPlacemark(point, ColoredIconProvider(mapview.context, it.color))
                         .apply {
                             userData = MapObjectData.TaskItem(address)
-                            addTapListener { obj, _ ->
-                                (obj.userData as? MapObjectData.TaskItem)?.let {
-                                    onAddressClicked(it.address)
-                                }
-                                return@addTapListener true
-                            }
+                            addTapListener(clickCallback)
                         }
 
 
@@ -53,12 +55,7 @@ object YandexMapRenders {
                         Circle(point, 50f), it.outlineColor, 2f, ColorUtils.setAlphaComponent(it.color, 80)
                     ).apply {
                         userData = MapObjectData.TaskItem(address)
-                        addTapListener { obj, _ ->
-                            (obj.userData as? MapObjectData.TaskItem)?.let {
-                                onAddressClicked(it.address)
-                            }
-                            return@addTapListener true
-                        }
+                        addTapListener(clickCallback)
                     }
                 }
             }
