@@ -24,8 +24,8 @@ android {
         applicationId = "ru.relabs.kurjercontroller"
         minSdkVersion(21)
         targetSdkVersion(29)
-        versionCode = 45
-        versionName = "45"
+        versionCode = 46
+        versionName = "46"
 
         buildConfigField("int", "MAX_ADDRESSES_IN_FILTERS", "500")
         buildConfigField("String", "YA_KEY", "\"9be78b32-1265-4157-bf15-999b8d747a5c\"")
