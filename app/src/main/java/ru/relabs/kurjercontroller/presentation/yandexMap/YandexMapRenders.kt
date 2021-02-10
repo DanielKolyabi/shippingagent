@@ -23,15 +23,9 @@ import ru.relabs.kurjercontroller.utils.extensions.visible
  */
 object YandexMapRenders {
 
-    fun renderAddresses(mapview: MapView, onAddressClicked: (Address) -> Unit): YandexMapRender = renderT(
+    fun renderAddresses(mapview: MapView, clickCallback: MapObjectTapListener): YandexMapRender = renderT(
         { it.addresses },
         {
-            val clickCallback = MapObjectTapListener { obj, _ ->
-                (obj.userData as? MapObjectData.TaskItem)?.let {
-                    onAddressClicked(it.address)
-                }
-                true
-            }
 
             mapview.map.mapObjects.forEach {
                 if (it.userData is MapObjectData.TaskItem) {
@@ -42,11 +36,11 @@ object YandexMapRenders {
                 val address = it.address
                 if (address.lat != 0.0 && address.long != 0.0) {
                     val point = Point(address.lat, address.long)
-
+                    val data = MapObjectData.TaskItem(address)
                     mapview.map.mapObjects
                         .addPlacemark(point, ColoredIconProvider(mapview.context, it.color))
                         .apply {
-                            userData = MapObjectData.TaskItem(address)
+                            userData = data
                             addTapListener(clickCallback)
                         }
 
@@ -54,7 +48,7 @@ object YandexMapRenders {
                     mapview.map.mapObjects.addCircle(
                         Circle(point, 50f), it.outlineColor, 2f, ColorUtils.setAlphaComponent(it.color, 80)
                     ).apply {
-                        userData = MapObjectData.TaskItem(address)
+                        userData = data
                         addTapListener(clickCallback)
                     }
                 }

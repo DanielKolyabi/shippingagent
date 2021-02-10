@@ -8,9 +8,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.yandex.mapkit.MapKitFactory
-import com.yandex.mapkit.geometry.BoundingBox
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
+import com.yandex.mapkit.map.MapObjectTapListener
 import kotlinx.android.synthetic.main.fragment_yandex_map.*
 import kotlinx.android.synthetic.main.fragment_yandex_map.view.*
 import kotlinx.coroutines.Job
@@ -28,6 +28,7 @@ import ru.relabs.kurjercontroller.presentation.base.tea.sendMessage
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressIdWithColor
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.IAddressClickedConsumer
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.INewItemsAddedConsumer
+import ru.relabs.kurjercontroller.presentation.yandexMap.models.MapObjectData
 import ru.relabs.kurjercontroller.utils.debug
 
 
@@ -39,6 +40,13 @@ class YandexMapFragment : BaseFragment() {
 
     private val controller = defaultController(YandexMapState(), YandexMapContext())
     private var renderJob: Job? = null
+
+    private val clickCallback = MapObjectTapListener { obj, _ ->
+        (obj.userData as? MapObjectData.TaskItem)?.let {
+            uiScope.sendMessage(controller, YandexMapMessages.msgAddressClicked(it.address))
+        }
+        true
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,9 +109,7 @@ class YandexMapFragment : BaseFragment() {
 
         renderJob = uiScope.launch {
             val renders = listOf(
-                YandexMapRenders.renderAddresses(view.mapview) {
-                    uiScope.sendMessage(controller, YandexMapMessages.msgAddressClicked(it))
-                },
+                YandexMapRenders.renderAddresses(view.mapview, clickCallback),
                 YandexMapRenders.renderStorages(view.mapview),
                 YandexMapRenders.renderDeliverymans(view.mapview),
                 YandexMapRenders.renderControls(adapter),
@@ -127,7 +133,7 @@ class YandexMapFragment : BaseFragment() {
             uiScope.sendMessage(controller, YandexMapMessages.msgAddNewAddresses(view.mapview.map.visibleRegion))
         }
         view.mapview.map.addCameraListener { map, cameraPosition, cameraUpdateSource, finished ->
-            if(finished){
+            if (finished) {
                 uiScope.sendMessage(controller, YandexMapMessages.msgCameraChanged(cameraPosition))
             }
         }
