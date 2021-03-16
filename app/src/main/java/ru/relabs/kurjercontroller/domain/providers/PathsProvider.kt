@@ -18,6 +18,10 @@ class PathsProvider(
         mkdirs()
     }
 
+    fun getCrashLogFile(): File {
+        return File(filesRootDir, "crash.log")
+    }
+
     fun getTaskItemFolderById(taskItemID: Int): File {
         val taskDir = File(photoDir, "$taskItemID")
         if (!taskDir.exists()) taskDir.mkdirs()
