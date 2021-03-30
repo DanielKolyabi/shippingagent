@@ -18,10 +18,7 @@ import ru.relabs.kurjercontroller.domain.providers.PathsProvider
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
 import ru.relabs.kurjercontroller.presentation.report.ReportApartmentButtonsMode
 import ru.relabs.kurjercontroller.presentation.report.toInt
-import ru.relabs.kurjercontroller.utils.Either
-import ru.relabs.kurjercontroller.utils.Left
-import ru.relabs.kurjercontroller.utils.Right
-import ru.relabs.kurjercontroller.utils.deleteIfEmpty
+import ru.relabs.kurjercontroller.utils.*
 import java.util.*
 
 class DatabaseRepository(
@@ -73,28 +70,28 @@ class DatabaseRepository(
         location: Location?,
         isEntrancePhoto: Boolean,
         realPath: String? = null
-    ): EntrancePhoto =
-        withContext(Dispatchers.IO) {
-            val gps = GPSCoordinatesModel(
-                location?.latitude ?: 0.0,
-                location?.longitude ?: 0.0,
-                location?.time?.let { DateTime(it) } ?: DateTime()
-            )
+    ): EntrancePhoto = withContext(Dispatchers.IO) {
+        val gps = GPSCoordinatesModel(
+            location?.latitude ?: 0.0,
+            location?.longitude ?: 0.0,
+            location?.time?.let { DateTime(it) } ?: DateTime()
+        )
 
-            val photoEntity = EntrancePhotoEntity(
-                0,
-                uuid.toString(),
-                gps,
-                taskId.id,
-                taskItemId.id,
-                addressIdnd,
-                entrance.number,
-                realPath,
-                isEntrancePhoto
-            )
-            val id = db.entrancePhotoDao().insert(photoEntity)
-            DatabaseEntrancePhotoMapper.fromEntity(photoEntity.copy(id = id.toInt()))
-        }
+        val photoEntity = EntrancePhotoEntity(
+            0,
+            uuid.toString(),
+            gps,
+            taskId.id,
+            taskItemId.id,
+            addressIdnd,
+            entrance.number,
+            realPath,
+            isEntrancePhoto
+        )
+        val id = db.entrancePhotoDao().insert(photoEntity)
+        CustomLog.writeToFile("[PhotoDebug] Save photo(${id}) for task: ${taskId.id}, taskItem: ${taskItemId.id}")
+        DatabaseEntrancePhotoMapper.fromEntity(photoEntity.copy(id = id.toInt()))
+    }
 
     suspend fun clearTasks() = withContext(Dispatchers.IO) {
         db.taskDao().all.forEach {
@@ -124,6 +121,7 @@ class DatabaseRepository(
         removePhoto(DatabaseEntrancePhotoMapper.toEntity(entrancePhoto))
 
     suspend fun removePhoto(entrancePhoto: EntrancePhotoEntity) = withContext(Dispatchers.IO) {
+        CustomLog.writeToFile("[PhotoDebug] Delete photo (${entrancePhoto.id}) taskId: ${entrancePhoto.taskId} taskItemId: ${entrancePhoto.taskItemId}")
         db.entrancePhotoDao().deleteById(entrancePhoto.id)
         if (db.entrancePhotoDao().getByUUID(entrancePhoto.UUID).isEmpty()) {
             deletePhotoFile(entrancePhoto)

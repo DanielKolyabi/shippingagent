@@ -15,6 +15,7 @@ import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
 import ru.relabs.kurjercontroller.presentation.report.ReportApartmentButtonsMode
 import ru.relabs.kurjercontroller.presentation.reportPager.TaskItemWithTaskIds
+import ru.relabs.kurjercontroller.utils.CustomLog
 import java.util.*
 
 class ReportUseCase(
