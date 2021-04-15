@@ -7,7 +7,7 @@ object DatabaseEntrancePhotoMapper {
     fun fromEntity(photo: EntrancePhotoEntity) = EntrancePhoto(
         id = PhotoId(photo.id),
         UUID = photo.UUID,
-        taskId = TaskId(photo.id),
+        taskId = TaskId(photo.taskId),
         taskItemId = TaskItemId(photo.taskItemId),
         entranceNumber = EntranceNumber(photo.entranceNumber),
         gps = photo.gps,
