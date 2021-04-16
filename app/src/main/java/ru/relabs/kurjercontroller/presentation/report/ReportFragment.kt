@@ -70,6 +70,9 @@ class ReportFragment : BaseFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (nextPhotoData == null) {
+            nextPhotoData = nextPhotoData ?: savedInstanceState?.getParcelable(SAVED_NEXT_PHOTO_DATA_KEY)
+        }
         val taskItem = arguments?.getParcelable<TaskItem>(ARG_TASK_ITEM)
         val allTaskItems = arguments?.getParcelableArrayList<TaskItemWithTaskIds>(ARG_TASK_ITEMS_ALL)
         val entrance = arguments?.getParcelable<Entrance>(ARG_ENTRANCES)
@@ -85,7 +88,6 @@ class ReportFragment : BaseFragment() {
         controller.stop()
     }
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -96,6 +98,9 @@ class ReportFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (nextPhotoData == null) {
+            nextPhotoData = nextPhotoData ?: savedInstanceState?.getParcelable(SAVED_NEXT_PHOTO_DATA_KEY)
+        }
         val hintHelper = HintHelper(view.hint_container, "", false, requireActivity())
         view.hint_container.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {

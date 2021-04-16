@@ -41,7 +41,8 @@
 
         <activity
                 android:name=".presentation.host.HostActivity"
-                android:screenOrientation="portrait" />
+                android:screenOrientation="portrait"
+                android:configChanges="keyboardHidden|orientation|screenSize"/>
 
         <provider
                 android:name="androidx.core.content.FileProvider"
