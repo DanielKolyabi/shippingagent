@@ -137,25 +137,25 @@ class ReportFragment : BaseFragment() {
         val apartmentsAdapter = DelegateAdapter(
             ReportAdapter.apartmentDivider(),
             ReportAdapter.apartmentMain(
-                { number, state -> uiScope.sendMessage(controller, ReportMessages.msgApartmentStateChanged(number, state)) },
-                { number, state -> uiScope.sendMessage(controller, ReportMessages.msgAllApartmentStateChanged(number, state)) },
+                { number, state -> uiScope.sendMessage(controller, ReportMessages.msgApartmentStateChanged(number, state, ReportApartmentButtonsMode.Main)) },
+                { number, state -> uiScope.sendMessage(controller, ReportMessages.msgAllApartmentStateChanged(number, state, ReportApartmentButtonsMode.Main)) },
                 { number -> uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionClicked(number)) }
             ),
             ReportAdapter.apartmentAdditional(
-                { number, state -> uiScope.sendMessage(controller, ReportMessages.msgApartmentStateChanged(number, state)) },
-                { number, state -> uiScope.sendMessage(controller, ReportMessages.msgAllApartmentStateChanged(number, state)) },
+                { number, state -> uiScope.sendMessage(controller, ReportMessages.msgApartmentStateChanged(number, state, ReportApartmentButtonsMode.Additional)) },
+                { number, state -> uiScope.sendMessage(controller, ReportMessages.msgAllApartmentStateChanged(number, state, ReportApartmentButtonsMode.Additional)) },
                 { number -> uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionClicked(number)) }
             ),
             ReportAdapter.entrance { state ->
                 uiScope.sendMessage(
                     controller,
-                    ReportMessages.msgApartmentStateChanged(ApartmentNumber(-1), state)
+                    ReportMessages.msgApartmentStateChanged(ApartmentNumber(-1), state, ReportApartmentButtonsMode.Additional)
                 )
             },
             ReportAdapter.lookout { state ->
                 uiScope.sendMessage(
                     controller,
-                    ReportMessages.msgApartmentStateChanged(ApartmentNumber(-2), state)
+                    ReportMessages.msgApartmentStateChanged(ApartmentNumber(-2), state, ReportApartmentButtonsMode.Main)
                 )
             }
         )

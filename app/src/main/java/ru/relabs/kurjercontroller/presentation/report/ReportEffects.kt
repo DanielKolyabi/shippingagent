@@ -109,12 +109,16 @@ object ReportEffects {
         }
     }
 
-    fun effectChangeApartmentState(apartmentNumber: ApartmentNumber, newState: Int): ReportEffect = { c, s ->
+    fun effectChangeApartmentState(
+        apartmentNumber: ApartmentNumber,
+        newState: Int,
+        buttonsMode: ReportApartmentButtonsMode
+    ): ReportEffect = { c, s ->
         if (s.taskItem != null && s.entrance != null) {
             if (s.entrance.state == EntranceState.CREATED && s.saved?.entranceClosed != true) {
                 val apartment = s.savedApartments.firstOrNull { apartmentNumber == it.apartmentNumber }
                     ?: ApartmentResult.empty(s.taskItem, s.entrance, apartmentNumber)
-                val apartmentWithNewState = apartment.copy(buttonState = newState)
+                val apartmentWithNewState = apartment.copy(buttonState = newState, buttonGroup = buttonsMode)
                 messages.send(ReportMessages.msgUpdateApartment(apartmentWithNewState))
                 messages.send(msgEffect(effectSaveApartmentsChanges(apartmentWithNewState)))
             }
@@ -123,7 +127,11 @@ object ReportEffects {
         }
     }
 
-    fun effectChangeAllApartmentState(apartmentNumber: ApartmentNumber, newState: Int): ReportEffect = { c, s ->
+    fun effectChangeAllApartmentState(
+        apartmentNumber: ApartmentNumber,
+        newState: Int,
+        buttonsMode: ReportApartmentButtonsMode
+    ): ReportEffect = { c, s ->
         if (s.taskItem != null && s.entrance != null) {
             if (s.entrance.state == EntranceState.CREATED && s.saved?.entranceClosed != true) {
                 val targetApartment = s.savedApartments.firstOrNull { apartmentNumber == it.apartmentNumber }
@@ -134,7 +142,7 @@ object ReportEffects {
                 val endApartment = s.saved?.apartmentTo ?: s.entrance.endApartments
                 (startApartment..endApartment).forEach {
                     val apartment = s.savedApartments.firstOrNull { a -> it == a.apartmentNumber.number }
-                        ?: ApartmentResult.empty(s.taskItem, s.entrance, ApartmentNumber(it))
+                        ?: ApartmentResult.empty(s.taskItem, s.entrance, ApartmentNumber(it)).copy(buttonGroup = buttonsMode)
 
                     val apartmentWithNewState = if (apartment.buttonState and newState != targetState) {
                         when {

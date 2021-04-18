@@ -99,11 +99,11 @@ object ReportMessages {
             }
         )
 
-    fun msgApartmentStateChanged(apartmentNumber: ApartmentNumber, newState: Int): ReportMessage =
-        msgEffect(ReportEffects.effectChangeApartmentState(apartmentNumber, newState))
+    fun msgApartmentStateChanged(apartmentNumber: ApartmentNumber, newState: Int, buttonsMode: ReportApartmentButtonsMode): ReportMessage =
+        msgEffect(ReportEffects.effectChangeApartmentState(apartmentNumber, newState, buttonsMode))
 
-    fun msgAllApartmentStateChanged(apartmentNumber: ApartmentNumber, newState: Int): ReportMessage =
-        msgEffect(ReportEffects.effectChangeAllApartmentState(apartmentNumber, newState))
+    fun msgAllApartmentStateChanged(apartmentNumber: ApartmentNumber, newState: Int, buttonsMode: ReportApartmentButtonsMode): ReportMessage =
+        msgEffect(ReportEffects.effectChangeAllApartmentState(apartmentNumber, newState, buttonsMode))
 
     fun msgApartmentDescriptionClicked(apartmentNumber: ApartmentNumber): ReportMessage =
         msgEffect(ReportEffects.effectShowDescriptionInput(apartmentNumber))
