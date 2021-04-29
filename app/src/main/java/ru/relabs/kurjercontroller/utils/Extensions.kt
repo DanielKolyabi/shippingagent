@@ -4,9 +4,11 @@ import androidx.fragment.app.Fragment
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.selects.select
+import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.ControllApplication
 import ru.relabs.kurjercontroller.presentation.host.HostActivity
 import java.io.File
+import java.util.*
 
 
 /**
@@ -58,4 +60,8 @@ fun File.deleteIfEmpty() {
     if (this.isDirectory && this.listFiles().isEmpty()) {
         this.deleteRecursively()
     }
+}
+
+fun Date.formatedWithSecs(): String {
+    return DateTime(this).toString("dd.MM.yyyy HH:mm:ss")
 }
