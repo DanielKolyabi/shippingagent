@@ -18,6 +18,7 @@ import ru.relabs.kurjercontroller.domain.controllers.TaskEventController
 import ru.relabs.kurjercontroller.domain.providers.*
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
+import ru.relabs.kurjercontroller.domain.repositories.SettingsRepository
 import ru.relabs.kurjercontroller.domain.storage.AppPreferences
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
 import ru.relabs.kurjercontroller.domain.storage.CurrentUserStorage
@@ -125,6 +126,12 @@ val repositoryModule = module {
             get<PathsProvider>()
         )
     }
+    single<SettingsRepository> {
+        SettingsRepository(
+            get<ControlRepository>(),
+            get<SharedPreferences>()
+        )
+    }
 }
 val useCasesModule = module {
     single<LoginUseCase> {
@@ -133,7 +140,8 @@ val useCasesModule = module {
             get<CurrentUserStorage>(),
             get<DatabaseRepository>(),
             get<AuthTokenStorage>(),
-            get<AppPreferences>()
+            get<AppPreferences>(),
+            get<SettingsRepository>()
         )
     }
 
@@ -149,7 +157,8 @@ val useCasesModule = module {
             get<DatabaseRepository>(),
             get<AuthTokenStorage>(),
             get<TaskEventController>(),
-            get<PathsProvider>()
+            get<PathsProvider>(),
+            get<SettingsRepository>()
         )
     }
 

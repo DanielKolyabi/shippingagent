@@ -46,9 +46,11 @@ class DatabaseRepository(
 
     suspend fun removeReport(report: EntranceReportEntity) = withContext(Dispatchers.IO) {
         db.entranceReportDao().delete(report)
-        db.entrancePhotoDao()
-            .getEntrancePhoto(report.taskId, report.taskItemId, report.entranceNumber)
-            .forEach { removePhoto(it) }
+        if (report.removeAfterSend) {
+            db.entrancePhotoDao()
+                .getEntrancePhoto(report.taskId, report.taskItemId, report.entranceNumber)
+                .forEach { removePhoto(it) }
+        }
     }
 
     suspend fun savePhoto(

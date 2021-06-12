@@ -34,7 +34,10 @@ data class TaskItemReportRequest(
     @SerializedName("lat") val lat: Double,
     @SerializedName("long") val long: Double,
     @SerializedName("gps_time") val gpsTime: DateTime,
-    @SerializedName("entrance_closed") val entranceClosed: Boolean
+    @SerializedName("entrance_closed") val entranceClosed: Boolean,
+    @SerializedName("close_distance") val closeDistance: Int,
+    @SerializedName("allowed_distance") val allowedDistance: Int,
+    @SerializedName("radius_required") val radiusRequired: Boolean
 )
 
 data class PhotoReportRequest(

@@ -5,14 +5,14 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.core.net.toUri
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.utils.*
+import ru.relabs.kurjercontroller.utils.extensions.isLocationExpired
 import java.io.File
 import java.util.*
 
@@ -297,19 +297,99 @@ object ReportEffects {
         }
     }
 
-    fun effectCloseEntrance(): ReportEffect = { c, s ->
+    fun effectCloseEntrance(withRemove: Boolean): ReportEffect = { c, s ->
         if (s.taskItem == null || s.entrance == null) {
             c.showError("re:101", false)
         } else {
             messages.send(ReportMessages.msgAddLoaders(1))
             val coordinates = c.locationProvider.lastReceivedLocation()
-                ?: c.locationProvider.updatesChannel().let {
-                    val c = it.receive()
-                    it.cancel()
-                    c
-                }
-            c.reportUseCase.createReport(s.taskItem, s.entrance, coordinates)
+            c.reportUseCase.createReport(s.taskItem, s.entrance, coordinates, withRemove)
             messages.send(ReportMessages.msgAddLoaders(-1))
         }
+    }
+
+    fun effectCloseCheck(withLocationLoading: Boolean): ReportEffect = { c, s ->
+        messages.send(ReportMessages.msgAddLoaders(1))
+        when (val selected = s.saved) {
+            null -> c.showError("re:106", true)
+            else -> {
+                val startApartmentsChanged = selected.apartmentFrom != s.entrance?.startApartments && selected.apartmentFrom != null
+                val endApartmentsChanged = selected.apartmentTo != s.entrance?.endApartments && selected.apartmentTo != null
+                val photoRequired = (startApartmentsChanged || endApartmentsChanged) && s.selectedEntrancePhotos.none { it.photo.isEntrancePhoto }
+
+                val location = c.locationProvider.lastReceivedLocation()
+                CustomLog.writeToFile("GPS LOG: Close check with location(${location?.latitude}, ${location?.longitude}, ${Date(location?.time ?: 0).formatedWithSecs()})")
+
+                 if (photoRequired) {
+                     messages.send(msgEffect(effectShowPhotoRequiredError()))
+                } else if (withLocationLoading && (location == null || Date(location.time).isLocationExpired())) {
+                    coroutineScope {
+                        messages.send(ReportMessages.msgAddLoaders(1))
+                        messages.send(ReportMessages.msgGPSLoading(true))
+                        val delayJob = async { delay(c.settingsRepository.closeGpsUpdateTime.close * 1000L) }
+                        val gpsJob = async(Dispatchers.Default) {
+                            c.locationProvider.updatesChannel().apply {
+                                receive()
+                                CustomLog.writeToFile("GPS LOG: Received new location")
+                                cancel()
+                            }
+                        }
+                        listOf(delayJob, gpsJob).awaitFirst()
+                        delayJob.cancel()
+                        gpsJob.cancel()
+                        CustomLog.writeToFile("GPS LOG: Got force coordinates")
+                        messages.send(ReportMessages.msgGPSLoading(false))
+                        messages.send(ReportMessages.msgAddLoaders(-1))
+                        messages.send(msgEffect(effectCloseCheck(false)))
+                    }
+                } else {
+                    val distance = location?.let {
+                        calculateDistance(
+                            location.latitude,
+                            location.longitude,
+                            (s.taskItem?.address?.lat ?: 0).toDouble(),
+                            (s.taskItem?.address?.long ?: 0).toDouble()
+                        )
+                    } ?: Int.MAX_VALUE.toDouble()
+
+                    val shadowClose: Boolean = withContext(Dispatchers.Main) {
+                        when (val radius = c.settingsRepository.allowedCloseRadius) {
+                            is AllowedCloseRadius.Required -> when {
+                                location == null -> {
+                                    c.showCloseError(R.string.report_close_location_null_error, false)
+                                    true
+                                }
+                                distance > radius.distance -> {
+                                    c.showCloseError(R.string.report_close_location_far_error, false)
+                                    true
+                                }
+                                else -> {
+                                    messages.send(msgEffect(effectCloseEntranceClicked()))
+                                    false
+                                }
+                            }
+                            is AllowedCloseRadius.NotRequired -> when {
+                                location == null -> {
+                                    c.showCloseError(R.string.report_close_location_null_warning, true)
+                                    false
+                                }
+                                distance > radius.distance -> {
+                                    c.showCloseError(R.string.report_close_location_far_warning, true)
+                                    false
+                                }
+                                else -> {
+                                    messages.send(msgEffect(effectCloseEntranceClicked()))
+                                    false
+                                }
+                            }
+                        }
+                    }
+                    if (shadowClose) {
+                        effectCloseEntrance(false)(c, s)
+                    }
+                }
+            }
+        }
+        messages.send(ReportMessages.msgAddLoaders(-1))
     }
 }

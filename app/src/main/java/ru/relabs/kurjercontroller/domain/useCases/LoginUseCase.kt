@@ -7,6 +7,7 @@ import ru.relabs.kurjercontroller.data.models.common.EitherE
 import ru.relabs.kurjercontroller.domain.models.User
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
+import ru.relabs.kurjercontroller.domain.repositories.SettingsRepository
 import ru.relabs.kurjercontroller.domain.storage.AppPreferences
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
 import ru.relabs.kurjercontroller.domain.storage.CurrentUserStorage
@@ -18,7 +19,8 @@ class LoginUseCase(
     private val currentUserStorage: CurrentUserStorage,
     private val databaseRepository: DatabaseRepository,
     private val authTokenStorage: AuthTokenStorage,
-    private val appPreferences: AppPreferences
+    private val appPreferences: AppPreferences,
+    private val settingsRepository: SettingsRepository
 ){
 
     fun isAutologinEnabled() = appPreferences.getUserAutologinEnabled()
@@ -50,7 +52,9 @@ class LoginUseCase(
         val lastUserLogin = currentUserStorage.getCurrentUserLogin()
         if (lastUserLogin != login) {
             databaseRepository.clearTasks()
+            settingsRepository.resetData()
         }
+        settingsRepository.startRemoteUpdating()
         authTokenStorage.saveToken(token)
         currentUserStorage.saveCurrentUserLogin(login)
         controlRepository.updatePushToken()

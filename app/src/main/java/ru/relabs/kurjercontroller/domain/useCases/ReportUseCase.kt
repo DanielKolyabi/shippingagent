@@ -6,28 +6,36 @@ import ru.relabs.kurjercontroller.data.database.entities.EntranceReportEntity
 import ru.relabs.kurjercontroller.data.database.models.ApartmentResult
 import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
 import ru.relabs.kurjercontroller.domain.controllers.TaskEventController
-import ru.relabs.kurjercontroller.domain.models.Entrance
-import ru.relabs.kurjercontroller.domain.models.EntranceNumber
-import ru.relabs.kurjercontroller.domain.models.EntrancePhoto
-import ru.relabs.kurjercontroller.domain.models.TaskItem
+import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.domain.providers.PathsProvider
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
+import ru.relabs.kurjercontroller.domain.repositories.SettingsRepository
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
 import ru.relabs.kurjercontroller.presentation.report.ReportApartmentButtonsMode
 import ru.relabs.kurjercontroller.presentation.reportPager.TaskItemWithTaskIds
-import ru.relabs.kurjercontroller.utils.CustomLog
+import ru.relabs.kurjercontroller.utils.calculateDistance
 import java.util.*
 
 class ReportUseCase(
     private val databaseRepository: DatabaseRepository,
     private val tokenStorage: AuthTokenStorage,
     private val taskEventController: TaskEventController,
-    private val pathsProvider: PathsProvider
+    private val pathsProvider: PathsProvider,
+    private val settingsRepository: SettingsRepository
 ) {
 
-    suspend fun createReport(taskItem: TaskItem, entrance: Entrance, location: Location) {
+    suspend fun createReport(taskItem: TaskItem, entrance: Entrance, location: Location?, withRemove: Boolean) {
         val entranceResult = databaseRepository.getEntranceResult(taskItem, entrance)
         val apartmentResults = databaseRepository.getEntranceApartments(taskItem, entrance)
+
+        val distance = location?.let {
+            calculateDistance(
+                location.latitude,
+                location.longitude,
+                taskItem.address.lat,
+                taskItem.address.long
+            )
+        } ?: Int.MAX_VALUE.toDouble()
 
         val report = EntranceReportEntity(
             0,
@@ -59,16 +67,21 @@ class ReportUseCase(
             DateTime.now(),
             taskItem.publisherId.id,
             entranceResult?.mailboxType ?: entrance.mailboxType,
-            location.latitude,
-            location.longitude,
-            DateTime(location.time),
-            entranceResult?.entranceClosed ?: false
+            location?.latitude ?: 0.0,
+            location?.longitude ?: 0.0,
+            DateTime(location?.time ?: 0),
+            entranceResult?.entranceClosed ?: false,
+            withRemove,
+            distance.toInt(),
+            (settingsRepository.allowedCloseRadius as? AllowedCloseRadius.Required)?.distance ?: 0,
+            settingsRepository.allowedCloseRadius is AllowedCloseRadius.Required
         )
 
         databaseRepository.createEntranceReport(report)
-        databaseRepository.closeEntrance(taskItem.taskId, taskItem.id, entrance.number)
-
-        taskEventController.send(TaskEvent.EntranceClosed(taskItem.taskId, taskItem.id, entrance.number))
+        if (withRemove) {
+            databaseRepository.closeEntrance(taskItem.taskId, taskItem.id, entrance.number)
+            taskEventController.send(TaskEvent.EntranceClosed(taskItem.taskId, taskItem.id, entrance.number))
+        }
     }
 
     suspend fun savePhoto(

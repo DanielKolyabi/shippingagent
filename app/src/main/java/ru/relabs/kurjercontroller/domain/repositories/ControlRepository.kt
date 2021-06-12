@@ -26,6 +26,7 @@ import ru.relabs.kurjercontroller.data.models.common.EitherE
 import ru.relabs.kurjercontroller.data.models.tasks.ApartmentResultRequest
 import ru.relabs.kurjercontroller.data.models.tasks.FilterResponse
 import ru.relabs.kurjercontroller.domain.mappers.FilterTypeMapper
+import ru.relabs.kurjercontroller.domain.mappers.SettingsMapper
 import ru.relabs.kurjercontroller.domain.mappers.UserLocationMapper
 import ru.relabs.kurjercontroller.domain.mappers.database.DatabaseEntrancePhotoMapper
 import ru.relabs.kurjercontroller.domain.mappers.network.*
@@ -83,6 +84,10 @@ class ControlRepository(
         val updates = UpdatesMapper.fromRaw(api.getUpdateInfo())
 
         updates
+    }
+
+    suspend fun getAppSettings(): EitherE<AppSettings> = authenticatedRequest { token ->
+        SettingsMapper.fromRaw(api.getSettings(token))
     }
 
     suspend fun updatePushToken(): EitherE<Boolean> = authenticatedRequest { token ->
@@ -221,7 +226,8 @@ class ControlRepository(
             item.isDeliveryWrong, item.hasLookupPost, item.token,
             item.apartmentResult.map { ApartmentResultRequest(it.number.number, it.state, it.buttonGroup, it.description) },
             item.closeTime, photosMap, item.publisherId, item.mailboxType,
-            item.gpsLat, item.gpsLong, item.gpsTime, item.entranceClosed
+            item.gpsLat, item.gpsLong, item.gpsTime, item.entranceClosed,
+            item.closeDistance, item.allowedDistance, item.radiusRequired
         )
 
         api.sendTaskReport(

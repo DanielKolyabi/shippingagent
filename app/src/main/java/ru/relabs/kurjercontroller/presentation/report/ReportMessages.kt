@@ -234,7 +234,10 @@ object ReportMessages {
             )
         }
 
-    fun msgCloseEntranceClick(): ReportMessage = msgEffects(
+    fun msgCloseEntranceClicked(): ReportMessage =
+        msgEffect(ReportEffects.effectCloseCheck(true))
+
+    fun msgCloseEntranceClickOld(): ReportMessage = msgEffects(
         { it },
         { s ->
             val startApartmentsChanged = s.saved?.apartmentFrom != s.entrance?.startApartments && s.saved?.apartmentFrom != null
@@ -270,4 +273,8 @@ object ReportMessages {
                 selectedEntrancePhotos = photos
             )
         }
+
+
+    fun msgGPSLoading(enabled: Boolean): ReportMessage =
+        msgState { it.copy(isGPSLoading = enabled) }
 }

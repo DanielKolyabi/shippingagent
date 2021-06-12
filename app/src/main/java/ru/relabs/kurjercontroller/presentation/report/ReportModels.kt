@@ -1,6 +1,7 @@
 package ru.relabs.kurjercontroller.presentation.report
 
 import android.content.ContentResolver
+import android.location.Location
 import android.net.Uri
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -11,6 +12,7 @@ import ru.relabs.kurjercontroller.domain.providers.LocationProvider
 import ru.relabs.kurjercontroller.domain.providers.PathsProvider
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
+import ru.relabs.kurjercontroller.domain.repositories.SettingsRepository
 import ru.relabs.kurjercontroller.domain.useCases.ReportUseCase
 import ru.relabs.kurjercontroller.presentation.base.tea.*
 import ru.relabs.kurjercontroller.presentation.reportPager.TaskItemWithTaskIds
@@ -36,7 +38,8 @@ data class ReportState(
 
     val selectedEntrancePhotos: List<PhotoWithUri> = emptyList(),
 
-    val loaders: Int = 0
+    val loaders: Int = 0,
+    val isGPSLoading: Boolean = false
 )
 
 class ReportContext(val errorContext: ErrorContextImpl = ErrorContextImpl()) :
@@ -50,6 +53,7 @@ class ReportContext(val errorContext: ErrorContextImpl = ErrorContextImpl()) :
     val pathsProvider: PathsProvider by inject()
     val reportUseCase: ReportUseCase by inject()
     val eventController: TaskEventController by inject()
+    val settingsRepository: SettingsRepository by inject()
 
     var showError: suspend (code: String, isFatal: Boolean) -> Unit = { _, _ -> }
     var showErrorMessage: suspend (messageId: Int) -> Unit = { }
@@ -58,6 +62,7 @@ class ReportContext(val errorContext: ErrorContextImpl = ErrorContextImpl()) :
         { _, _, _, _, _ -> }
     var showDescriptionInputDialog: (ApartmentNumber, String, Boolean) -> Unit = { _, _, _ -> }
     var contentResolver: () -> ContentResolver? = { null }
+    var showCloseError: suspend (msgRes: Int, withPreClose: Boolean) -> Unit = { _, _ -> }
 }
 
 typealias ReportMessage = ElmMessage<ReportContext, ReportState>

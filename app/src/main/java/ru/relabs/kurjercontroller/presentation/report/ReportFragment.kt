@@ -2,6 +2,7 @@ package ru.relabs.kurjercontroller.presentation.report
 
 import android.app.Activity
 import android.content.Intent
+import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
@@ -137,13 +138,33 @@ class ReportFragment : BaseFragment() {
         val apartmentsAdapter = DelegateAdapter(
             ReportAdapter.apartmentDivider(),
             ReportAdapter.apartmentMain(
-                { number, state -> uiScope.sendMessage(controller, ReportMessages.msgApartmentStateChanged(number, state, ReportApartmentButtonsMode.Main)) },
-                { number, state -> uiScope.sendMessage(controller, ReportMessages.msgAllApartmentStateChanged(number, state, ReportApartmentButtonsMode.Main)) },
+                { number, state ->
+                    uiScope.sendMessage(
+                        controller,
+                        ReportMessages.msgApartmentStateChanged(number, state, ReportApartmentButtonsMode.Main)
+                    )
+                },
+                { number, state ->
+                    uiScope.sendMessage(
+                        controller,
+                        ReportMessages.msgAllApartmentStateChanged(number, state, ReportApartmentButtonsMode.Main)
+                    )
+                },
                 { number -> uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionClicked(number)) }
             ),
             ReportAdapter.apartmentAdditional(
-                { number, state -> uiScope.sendMessage(controller, ReportMessages.msgApartmentStateChanged(number, state, ReportApartmentButtonsMode.Additional)) },
-                { number, state -> uiScope.sendMessage(controller, ReportMessages.msgAllApartmentStateChanged(number, state, ReportApartmentButtonsMode.Additional)) },
+                { number, state ->
+                    uiScope.sendMessage(
+                        controller,
+                        ReportMessages.msgApartmentStateChanged(number, state, ReportApartmentButtonsMode.Additional)
+                    )
+                },
+                { number, state ->
+                    uiScope.sendMessage(
+                        controller,
+                        ReportMessages.msgAllApartmentStateChanged(number, state, ReportApartmentButtonsMode.Additional)
+                    )
+                },
                 { number -> uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionClicked(number)) }
             ),
             ReportAdapter.entrance { state ->
@@ -192,7 +213,7 @@ class ReportFragment : BaseFragment() {
 
         renderJob = uiScope.launch {
             val renders = listOf(
-                ReportRenders.renderLoading(view.loading),
+                ReportRenders.renderLoading(view.loading, view.tv_gps_loading),
                 ReportRenders.renderEntranceKeys(view.entrance_key, entranceKeysAdapter),
                 ReportRenders.renderEntranceEuroKeys(view.entrance_euro_key, entranceEuroKeysAdapter),
                 ReportRenders.renderPhotos(photosAdapter),
@@ -255,9 +276,25 @@ class ReportFragment : BaseFragment() {
         controller.context.showErrorMessage = ::showErrorMessage
         controller.context.showCloseEntranceDialog = ::showCloseEntranceDialog
         controller.context.requestPhoto = ::requestPhoto
+        controller.context.showCloseError = ::showCloseError
         controller.context.showDescriptionInputDialog = ::showDescriptionInputDialog
         controller.context.contentResolver = { requireContext().contentResolver }
     }
+
+    private suspend fun showCloseError(msgRes: Int, withPreClose: Boolean) =
+        withContext(Dispatchers.Main) {
+            showDialog(
+                msgRes,
+                R.string.ok to {
+                    if (withPreClose) {
+                        uiScope.launch {
+                            showCloseEntranceDialog()
+                        }
+                    }
+                }
+            )
+            Unit
+        }
 
     private fun showDescriptionInputDialog(apartmentNumber: ApartmentNumber, description: String, isEditable: Boolean) {
         val input = EditText(requireContext()).apply {
@@ -417,7 +454,7 @@ class ReportFragment : BaseFragment() {
             uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionClicked(ApartmentNumber(-1)))
         }
         view.close_button.setOnClickListener {
-            uiScope.sendMessage(controller, ReportMessages.msgCloseEntranceClick())
+            uiScope.sendMessage(controller, ReportMessages.msgCloseEntranceClickOld())
         }
     }
 
@@ -429,6 +466,7 @@ class ReportFragment : BaseFragment() {
         controller.context.showCloseEntranceDialog = {}
         controller.context.showErrorMessage = {}
         controller.context.requestPhoto = { _, _, _, _, _ -> }
+        controller.context.showCloseError = { _, _ -> }
         controller.context.showDescriptionInputDialog = { _, _, _ -> }
         controller.context.contentResolver = { null }
     }

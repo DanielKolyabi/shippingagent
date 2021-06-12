@@ -7,6 +7,7 @@ import ru.relabs.kurjercontroller.data.models.SearchFiltersRequest
 import ru.relabs.kurjercontroller.data.models.TaskItemReportRequest
 import ru.relabs.kurjercontroller.data.models.UpdatesResponse
 import ru.relabs.kurjercontroller.data.models.auth.AuthResponse
+import ru.relabs.kurjercontroller.data.models.common.SettingsResponse
 import ru.relabs.kurjercontroller.data.models.common.StatusResponse
 import ru.relabs.kurjercontroller.data.models.tasks.*
 
@@ -42,6 +43,9 @@ interface ControlApi {
 
     @GET("api/v1/controller/update")
     suspend fun getUpdateInfo(): UpdatesResponse
+
+    @GET("api/v1/controller/settings")
+    suspend fun getSettings(@Header("X-TOKEN") token: String): SettingsResponse
 
     @GET("api/v1/request_coords")
     suspend fun requestUserPosition(@Query("user_id") id: Int): UserLocationsResponse
