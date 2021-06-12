@@ -454,7 +454,7 @@ class ReportFragment : BaseFragment() {
             uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionClicked(ApartmentNumber(-1)))
         }
         view.close_button.setOnClickListener {
-            uiScope.sendMessage(controller, ReportMessages.msgCloseEntranceClickOld())
+            uiScope.sendMessage(controller, ReportMessages.msgCloseEntranceClicked())
         }
     }
 

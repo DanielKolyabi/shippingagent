@@ -237,25 +237,10 @@ object ReportMessages {
     fun msgCloseEntranceClicked(): ReportMessage =
         msgEffect(ReportEffects.effectCloseCheck(true))
 
-    fun msgCloseEntranceClickOld(): ReportMessage = msgEffects(
-        { it },
-        { s ->
-            val startApartmentsChanged = s.saved?.apartmentFrom != s.entrance?.startApartments && s.saved?.apartmentFrom != null
-            val endApartmentsChanged = s.saved?.apartmentTo != s.entrance?.endApartments && s.saved?.apartmentTo != null
-            listOf(
-                if ((startApartmentsChanged || endApartmentsChanged) && s.selectedEntrancePhotos.none { it.photo.isEntrancePhoto }) {
-                    ReportEffects.effectShowPhotoRequiredError()
-                } else {
-                    ReportEffects.effectCloseEntranceClicked()
-                }
-            )
-        }
-    )
-
     fun msgCloseEntrance(): ReportMessage = msgEffects(
         { it.copy(entrance = it.entrance?.copy(state = EntranceState.CLOSED)) },
         {
-            listOf(ReportEffects.effectCloseEntrance())
+            listOf(ReportEffects.effectCloseEntrance(true))
         }
     )
 
