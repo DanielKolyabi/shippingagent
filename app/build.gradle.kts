@@ -24,8 +24,8 @@ android {
         applicationId = "ru.relabs.kurjercontroller"
         minSdkVersion(21)
         targetSdkVersion(29)
-        versionCode = 54
-        versionName = "54"
+        versionCode = 55
+        versionName = "55"
 
         buildConfigField("Boolean", "FEATURE_PHOTO_RADIUS", "false")
         buildConfigField("int", "MAX_ADDRESSES_IN_FILTERS", "500")
