@@ -1,7 +1,7 @@
 package ru.relabs.kurjercontroller.presentation.report
 
-import android.graphics.Bitmap
 import android.net.Uri
+import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
@@ -59,8 +59,18 @@ object ReportMessages {
             )
         }
 
-    fun msgPhotoClicked(multiple: Boolean, isEntrancePhoto: Boolean): ReportMessage =
-        msgEffect(ReportEffects.effectCreatePhoto(multiple, isEntrancePhoto))
+    fun msgPhotoClicked(multiple: Boolean, isEntrancePhoto: Boolean): ReportMessage = when (BuildConfig.FEATURE_PHOTO_RADIUS) {
+        true ->
+            msgEffect(
+                ReportEffects.effectValidateRadiusAndRequestPhoto(
+                    multiple, isEntrancePhoto
+                )
+            )
+        false ->
+            msgEffect(ReportEffects.effectCreatePhoto(multiple, isEntrancePhoto))
+    }
+
+    //msgEffect(ReportEffects.effectCreatePhoto(multiple, isEntrancePhoto))
 
     fun msgRemovePhotoClicked(removedPhoto: EntrancePhoto): ReportMessage = msgEffects(
         { s ->
@@ -92,17 +102,28 @@ object ReportMessages {
         msgEffects(
             { it },
             {
-                listOfNotNull(
-                    ReportEffects.effectSavePhotoFromFile(entrance, photoUri, targetFile, uuid, isEntrancePhoto),
-                    ReportEffects.effectCreatePhoto(multiplePhoto, isEntrancePhoto).takeIf { multiplePhoto }
-                )
+                when (BuildConfig.FEATURE_PHOTO_RADIUS) {
+                    true -> listOf(ReportEffects.effectValidateRadiusAndSavePhoto(entrance, photoUri, targetFile, uuid, isEntrancePhoto, multiplePhoto))
+                    false -> listOfNotNull(
+                        ReportEffects.effectSavePhotoFromFile(entrance, photoUri, targetFile, uuid, isEntrancePhoto),
+                        ReportEffects.effectCreatePhoto(multiplePhoto, isEntrancePhoto).takeIf { multiplePhoto }
+                    )
+                }
             }
         )
 
-    fun msgApartmentStateChanged(apartmentNumber: ApartmentNumber, newState: Int, buttonsMode: ReportApartmentButtonsMode): ReportMessage =
+    fun msgApartmentStateChanged(
+        apartmentNumber: ApartmentNumber,
+        newState: Int,
+        buttonsMode: ReportApartmentButtonsMode
+    ): ReportMessage =
         msgEffect(ReportEffects.effectChangeApartmentState(apartmentNumber, newState, buttonsMode))
 
-    fun msgAllApartmentStateChanged(apartmentNumber: ApartmentNumber, newState: Int, buttonsMode: ReportApartmentButtonsMode): ReportMessage =
+    fun msgAllApartmentStateChanged(
+        apartmentNumber: ApartmentNumber,
+        newState: Int,
+        buttonsMode: ReportApartmentButtonsMode
+    ): ReportMessage =
         msgEffect(ReportEffects.effectChangeAllApartmentState(apartmentNumber, newState, buttonsMode))
 
     fun msgApartmentDescriptionClicked(apartmentNumber: ApartmentNumber): ReportMessage =

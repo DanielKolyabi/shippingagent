@@ -12,7 +12,8 @@ object Migrations {
         migration_40_41,
         migration_42_43,
         migration_43_44,
-        migration_44_45
+        migration_44_45,
+        migration_45_46
     )
 
 
@@ -71,6 +72,15 @@ object Migrations {
             database.execSQL("CREATE UNIQUE INDEX `index_task_storages_storage_id_task_id` ON `task_storages`(`storage_id`, `task_id`);")
             database.execSQL("INSERT INTO task_storages SELECT * FROM storages_temp")
             database.execSQL("DROP TABLE storages_temp")
+        }
+    }
+
+    val migration_45_46 = object : Migration(45, 46) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE entrance_reports ADD COLUMN remove_after_send INTEGER NOT NULL DEFAULT 1")
+            database.execSQL("ALTER TABLE entrance_reports ADD COLUMN close_distance INTEGER NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE entrance_reports ADD COLUMN allowed_distance INTEGER NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE entrance_reports ADD COLUMN radius_required INTEGER NOT NULL DEFAULT 0")
         }
     }
 }

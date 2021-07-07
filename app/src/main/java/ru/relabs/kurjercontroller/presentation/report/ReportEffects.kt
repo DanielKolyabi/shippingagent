@@ -11,6 +11,7 @@ import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
+import ru.relabs.kurjercontroller.presentation.base.tea.msgEffects
 import ru.relabs.kurjercontroller.utils.*
 import ru.relabs.kurjercontroller.utils.extensions.isLocationExpired
 import java.io.File
@@ -313,15 +314,23 @@ object ReportEffects {
         when (val selected = s.saved) {
             null -> c.showError("re:106", true)
             else -> {
-                val startApartmentsChanged = selected.apartmentFrom != s.entrance?.startApartments && selected.apartmentFrom != null
+                val startApartmentsChanged =
+                    selected.apartmentFrom != s.entrance?.startApartments && selected.apartmentFrom != null
                 val endApartmentsChanged = selected.apartmentTo != s.entrance?.endApartments && selected.apartmentTo != null
-                val photoRequired = (startApartmentsChanged || endApartmentsChanged) && s.selectedEntrancePhotos.none { it.photo.isEntrancePhoto }
+                val photoRequired =
+                    (startApartmentsChanged || endApartmentsChanged) && s.selectedEntrancePhotos.none { it.photo.isEntrancePhoto }
 
                 val location = c.locationProvider.lastReceivedLocation()
-                CustomLog.writeToFile("GPS LOG: Close check with location(${location?.latitude}, ${location?.longitude}, ${Date(location?.time ?: 0).formatedWithSecs()})")
+                CustomLog.writeToFile(
+                    "GPS LOG: Close check with location(${location?.latitude}, ${location?.longitude}, ${
+                        Date(
+                            location?.time ?: 0
+                        ).formatedWithSecs()
+                    })"
+                )
 
-                 if (photoRequired) {
-                     messages.send(msgEffect(effectShowPhotoRequiredError()))
+                if (photoRequired) {
+                    messages.send(msgEffect(effectShowPhotoRequiredError()))
                 } else if (withLocationLoading && (location == null || Date(location.time).isLocationExpired())) {
                     coroutineScope {
                         messages.send(ReportMessages.msgAddLoaders(1))
@@ -386,6 +395,111 @@ object ReportEffects {
                     }
                     if (shadowClose) {
                         effectCloseEntrance(false)(c, s)
+                    }
+                }
+            }
+        }
+        messages.send(ReportMessages.msgAddLoaders(-1))
+    }
+
+    fun effectValidateRadiusAndRequestPhoto(multiple: Boolean, entrancePhoto: Boolean): ReportEffect = { c, s ->
+        effectValidatePhotoRadiusAnd({ msgEffect(effectCreatePhoto(multiple, entrancePhoto)) }, false)(c, s)
+    }
+
+    fun effectValidateRadiusAndSavePhoto(
+        entrance: EntranceNumber,
+        photoUri: Uri,
+        targetFile: File,
+        uuid: UUID,
+        isEntrancePhoto: Boolean,
+        multiplePhoto: Boolean
+    ): ReportEffect = { c, s ->
+        effectValidatePhotoRadiusAnd(
+            {
+                msgEffects(
+                    { it },
+                    {
+                        listOfNotNull(
+                            effectSavePhotoFromFile(entrance, photoUri, targetFile, uuid, isEntrancePhoto),
+                            effectCreatePhoto(multiplePhoto, isEntrancePhoto).takeIf { multiplePhoto }
+                        )
+                    }
+                )
+            },
+            withAnyRadiusWarning = true
+        )(c,s)
+    }
+
+    private fun effectValidatePhotoRadiusAnd(
+        msgFactory: () -> ReportMessage,
+        withAnyRadiusWarning: Boolean,
+        withLocationLoading: Boolean = true
+    ): ReportEffect = { c, s ->
+        messages.send(ReportMessages.msgAddLoaders(1))
+        when (val selected = s.taskItem) {
+            null -> c.showError("re:106", true)
+            else -> {
+                val location = c.locationProvider.lastReceivedLocation()
+                val distance = location?.let {
+                    calculateDistance(
+                        location.latitude,
+                        location.longitude,
+                        selected.address.lat,
+                        selected.address.long
+                    )
+                } ?: Int.MAX_VALUE.toDouble()
+
+                val locationNotValid = location == null || Date(location.time).isLocationExpired(60 * 1000)
+                CustomLog.writeToFile(
+                    "Validate photo radius (valid: ${!locationNotValid}): " +
+                            "${location?.latitude}, ${location?.longitude}, ${location?.time}, " +
+                            "photoAnyDistance: ${c.settingsRepository.allowedCloseRadius.photoAnyDistance}, " +
+                            "allowedDistance: ${c.settingsRepository.allowedCloseRadius.distance}, " +
+                            "distance: $distance, " +
+                            "targetTaskItem: ${selected.id}"
+                )
+
+                if (locationNotValid && withLocationLoading) {
+                    coroutineScope {
+                        messages.send(ReportMessages.msgAddLoaders(1))
+                        messages.send(ReportMessages.msgGPSLoading(true))
+                        val delayJob = async { delay(c.settingsRepository.closeGpsUpdateTime.photo * 1000L) }
+                        val gpsJob = async(Dispatchers.Default) {
+                            c.locationProvider.updatesChannel().apply {
+                                receive()
+                                cancel()
+                            }
+                        }
+                        listOf(delayJob, gpsJob).awaitFirst()
+                        listOf(delayJob, gpsJob).forEach {
+                            if (it.isActive) {
+                                it.cancel()
+                            }
+                        }
+                        messages.send(ReportMessages.msgGPSLoading(false))
+                        messages.send(ReportMessages.msgAddLoaders(-1))
+                        messages.send(msgEffect(effectValidatePhotoRadiusAnd(msgFactory, withAnyRadiusWarning, false)))
+                    }
+                } else {
+                    if (c.settingsRepository.allowedCloseRadius.photoAnyDistance) {
+                        if (distance > c.settingsRepository.allowedCloseRadius.distance && withAnyRadiusWarning) {
+                            withContext(Dispatchers.Main) {
+                                c.showCloseError(R.string.report_close_location_far_warning, false)
+                            }
+                        }
+                        messages.send(msgFactory())
+                    } else {
+                        when {
+                            locationNotValid -> withContext(Dispatchers.Main) {
+                                c.showCloseError(R.string.report_close_location_null_error, false)
+                            }
+                            distance > c.settingsRepository.allowedCloseRadius.distance -> withContext(Dispatchers.Main) {
+                                c.showCloseError(R.string.report_close_location_far_error, false)
+                            }
+                            else ->
+                                messages.send(msgFactory())
+
+                        }
                     }
                 }
             }
