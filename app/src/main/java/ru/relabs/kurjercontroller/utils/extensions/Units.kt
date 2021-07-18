@@ -39,4 +39,4 @@ fun View.dip(dp: Number): Float {
 }
 
 fun Date.isLocationExpired(timeout: Long = 3*60*1000) =
-    (time - Date().time) > timeout
+    (Date().time - time) > timeout
