@@ -106,6 +106,11 @@ class ControlRepository(
         UserLocationMapper.fromRaw(api.requestUserPosition(id))
     }
 
+    suspend fun updateDeviceIMEI(): EitherE<Boolean> = authenticatedRequest { token ->
+        api.sendDeviceImei(token, deviceUniqueIdProvider.get().id)
+        true
+    }
+
     suspend fun updatePushToken(firebaseToken: FirebaseToken): EitherE<Boolean> = authenticatedRequest { token ->
         firebaseTokenProvider.set(firebaseToken)
         api.sendPushToken(token, firebaseToken.token)

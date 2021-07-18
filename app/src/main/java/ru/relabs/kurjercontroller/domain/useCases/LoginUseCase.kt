@@ -57,6 +57,7 @@ class LoginUseCase(
         settingsRepository.startRemoteUpdating()
         authTokenStorage.saveToken(token)
         currentUserStorage.saveCurrentUserLogin(login)
+        controlRepository.updateDeviceIMEI()
         controlRepository.updatePushToken()
     }
 

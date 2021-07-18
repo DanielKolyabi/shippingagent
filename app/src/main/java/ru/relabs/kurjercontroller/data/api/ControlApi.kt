@@ -38,6 +38,13 @@ interface ControlApi {
 //        @GET("api/v1/update")
 //        suspend fun getUpdateInfo(): Deferred<UpdateInfoResponse>
 //
+
+    @POST("api/v1/device_imei")
+    suspend fun sendDeviceImei(
+        @Header("X-TOKEN") token: String,
+        @Query("device_imei") imei: String
+    )
+
     @POST("api/v1/push_token")
     suspend fun sendPushToken(@Query("token") token: String, @Query("push_token") pushToken: String)
 
