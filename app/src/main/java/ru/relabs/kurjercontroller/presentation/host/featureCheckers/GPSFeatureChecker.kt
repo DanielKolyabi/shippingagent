@@ -6,6 +6,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.LocationSettingsStatusCodes
+import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.utils.NetworkHelper
 import ru.relabs.kurjercontroller.utils.debug
 
@@ -15,7 +16,7 @@ class GPSFeatureChecker(a: Activity) : FeatureChecker(a) {
     private var requestShowed = false
 
     override fun isFeatureEnabled(): Boolean {
-        return NetworkHelper.isGPSEnabled(activity)
+        return BuildConfig.DISABLE_GPS_NETWORK_CHECK || NetworkHelper.isGPSEnabled(activity)
     }
 
     override fun requestFeature() {

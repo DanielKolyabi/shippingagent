@@ -28,6 +28,7 @@ android {
         versionName = "56"
 
         buildConfigField("Boolean", "FEATURE_PHOTO_RADIUS", "false")
+        buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "false")
         buildConfigField("int", "MAX_ADDRESSES_IN_FILTERS", "500")
         buildConfigField("String", "YA_KEY", "\"9be78b32-1265-4157-bf15-999b8d747a5c\"")
         signingConfig = signingConfigs.getByName("config")
@@ -35,12 +36,15 @@ android {
     flavorDimensions("server")
     productFlavors {
         create("productServer") {
+            buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "false")
             buildConfigField("String", "API_URL", "\"https://courrmobileapi.courdm.ru\"")
         }
         create("debugServer") {
+            buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "true")
             buildConfigField("String", "API_URL", "\"http://warp.courdm.ru:8084\"")
         }
         create("localServer") {
+            buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "true")
             buildConfigField("String", "API_URL", "\"http://192.168.31.18:8090\"")
         }
     }
