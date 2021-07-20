@@ -135,6 +135,13 @@ object ReportAdapter {
                         appartament_number?.setTextColor(Color.parseColor("#000000"))
                         appartament_number?.setTypeface(null, Typeface.NORMAL)
                     }
+
+                    if(item.hasDescription){
+                        description_button.setTextColor(Color.GREEN)
+                    }else{
+                        description_button.setTextColor(Color.BLACK)
+                    }
+
                     description_button?.setOnClickListener {
                         onDescriptionClicked(item.number)
                     }
@@ -213,6 +220,12 @@ object ReportAdapter {
                         appartament_number?.setTypeface(null, Typeface.NORMAL)
                     }
 
+
+                    if(item.hasDescription){
+                        description_button.setTextColor(Color.GREEN)
+                    }else{
+                        description_button.setTextColor(Color.BLACK)
+                    }
                     description_button?.setOnClickListener {
                         onDescriptionClicked(item.number)
                     }

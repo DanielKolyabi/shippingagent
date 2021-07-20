@@ -127,7 +127,8 @@ object ReportRenders {
                                 ?: taskItem.defaultReportType,
                             state = saved?.buttonState ?: 0,
                             colored = requiredData?.colored ?: false,
-                            required = requiredData != null
+                            required = requiredData != null,
+                            hasDescription = !saved?.description.isNullOrEmpty()
                         )
                     }
 

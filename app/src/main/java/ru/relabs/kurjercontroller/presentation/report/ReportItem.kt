@@ -34,7 +34,8 @@ sealed class ReportApartmentItem {
         val buttonGroup: ReportApartmentButtonsMode,
         val state: Int,
         val colored: Boolean,
-        val required: Boolean
+        val required: Boolean,
+        val hasDescription: Boolean
     ) : ReportApartmentItem()
     data class Lookout(var state: Int) : ReportApartmentItem()
     data class Entrance(var state: Int) : ReportApartmentItem()
