@@ -12,6 +12,7 @@ import ru.relabs.kurjercontroller.domain.storage.AppPreferences
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
 import ru.relabs.kurjercontroller.domain.storage.CurrentUserStorage
 import ru.relabs.kurjercontroller.services.ReportService
+import ru.relabs.kurjercontroller.utils.CustomLog
 import ru.relabs.kurjercontroller.utils.fmap
 
 class LoginUseCase(
@@ -57,6 +58,7 @@ class LoginUseCase(
         settingsRepository.startRemoteUpdating()
         authTokenStorage.saveToken(token)
         currentUserStorage.saveCurrentUserLogin(login)
+        CustomLog.writeToFile("[IMEI] Update after login")
         controlRepository.updateDeviceIMEI()
         controlRepository.updatePushToken()
     }
