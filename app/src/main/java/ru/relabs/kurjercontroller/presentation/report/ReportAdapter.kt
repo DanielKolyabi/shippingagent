@@ -4,7 +4,13 @@ import android.graphics.Color
 import android.graphics.Typeface
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.holder_report_appartament.view.*
+import kotlinx.android.synthetic.main.holder_report_appartament.view.appartament_number
+import kotlinx.android.synthetic.main.holder_report_appartament.view.description_button
+import kotlinx.android.synthetic.main.holder_report_appartament_addition.view.*
 import kotlinx.android.synthetic.main.holder_report_appartament_button_group_addition.view.*
+import kotlinx.android.synthetic.main.holder_report_appartament_button_group_addition.view.broken_button_addition
+import kotlinx.android.synthetic.main.holder_report_appartament_button_group_addition.view.no_button_addition
+import kotlinx.android.synthetic.main.holder_report_appartament_button_group_addition.view.yes_button_addition
 import kotlinx.android.synthetic.main.holder_report_appartament_button_group_main.view.*
 import kotlinx.android.synthetic.main.holder_report_photo.view.*
 import ru.relabs.kurjercontroller.R
@@ -136,9 +142,9 @@ object ReportAdapter {
                         appartament_number?.setTypeface(null, Typeface.NORMAL)
                     }
 
-                    if(item.hasDescription){
+                    if (item.hasDescription) {
                         description_button.setTextColor(Color.GREEN)
-                    }else{
+                    } else {
                         description_button.setTextColor(Color.BLACK)
                     }
 
@@ -175,7 +181,7 @@ object ReportAdapter {
                     no_button_main?.setOnClickListener {
                         val newState = if (item.state and 1 > 0) {
                             item.state xor 1 xor 4
-                        }else{
+                        } else {
                             item.state xor 4
                         }
                         onStateChanged(item.number, newState)
@@ -221,9 +227,9 @@ object ReportAdapter {
                     }
 
 
-                    if(item.hasDescription){
+                    if (item.hasDescription) {
                         description_button.setTextColor(Color.GREEN)
-                    }else{
+                    } else {
                         description_button.setTextColor(Color.BLACK)
                     }
                     description_button?.setOnClickListener {
@@ -238,7 +244,7 @@ object ReportAdapter {
                     yes_button_addition?.setOnClickListener {
                         val newState = if (item.state and 32 > 0) {
                             item.state xor 32 xor 16
-                        }else{
+                        } else {
                             item.state xor 16
                         }
                         onStateChanged(item.number, newState)
@@ -251,10 +257,18 @@ object ReportAdapter {
                     no_button_addition?.setOnClickListener {
                         val newState = if (item.state and 16 > 0) {
                             item.state xor 16 xor 32
-                        }else{
+                        } else {
                             item.state xor 32
                         }
                         onStateChanged(item.number, newState)
+                    }
+
+                    undefined_button_addition?.setOnLongClickListener {
+                        onLongStateChanged(item.number, 64)
+                        true
+                    }
+                    undefined_button_addition?.setOnClickListener {
+                        onStateChanged(item.number, item.state xor 64)
                     }
 
                     broken_button_addition?.setOnLongClickListener {
@@ -268,6 +282,11 @@ object ReportAdapter {
                     broken_button_addition?.setSelectButtonActive(item.state and 8 > 0)
                     yes_button_addition?.setSelectButtonActive(item.state and 16 > 0)
                     no_button_addition?.setSelectButtonActive(item.state and 32 > 0)
+
+                    undefined_button_addition?.setSelectButtonActive(
+                        item.isAnyApartmentUndefined || item.state and 64 > 0,
+                        item.state and 64 == 0
+                    )
                 }
             }
         }

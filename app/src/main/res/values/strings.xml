@@ -159,4 +159,5 @@
     <string name="map_button_layer_common">Слой: Общий</string>
     <string name="map_button_layer_predefined">Слой: Предопределённые адреса</string>
     <string name="map_button_layer_task">Слой: %s</string>
+    <string name="undefined">НО</string>
 </resources>

@@ -317,8 +317,9 @@ object ReportEffects {
                 val startApartmentsChanged =
                     selected.apartmentFrom != s.entrance?.startApartments && selected.apartmentFrom != null
                 val endApartmentsChanged = selected.apartmentTo != s.entrance?.endApartments && selected.apartmentTo != null
+                val isAnyApartmentUndefined = s.savedApartments.any { it.buttonState and 64 > 0 }
                 val photoRequired =
-                    (startApartmentsChanged || endApartmentsChanged) && s.selectedEntrancePhotos.none { it.photo.isEntrancePhoto }
+                    (startApartmentsChanged || endApartmentsChanged || isAnyApartmentUndefined) && s.selectedEntrancePhotos.none { it.photo.isEntrancePhoto }
 
                 val location = c.locationProvider.lastReceivedLocation()
                 CustomLog.writeToFile(

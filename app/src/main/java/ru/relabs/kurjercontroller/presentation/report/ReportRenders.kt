@@ -116,6 +116,7 @@ object ReportRenders {
             val (startAps, endAps) = apartmentInterval
             if (startAps != null && endAps != null && taskItem != null) {
                 val requiredApartments = taskItem.getRequiredApartments()
+                val isAnyApartmentUndefined = savedApartments.any { it.buttonState and 64 > 0 }
                 val apartments = (startAps..endAps)
                     .map { apartment -> ApartmentNumber(apartment) to requiredApartments.firstOrNull { it.number == apartment } }
                     .map { (apartmentNumber, requiredData) ->
@@ -128,7 +129,8 @@ object ReportRenders {
                             state = saved?.buttonState ?: 0,
                             colored = requiredData?.colored ?: false,
                             required = requiredData != null,
-                            hasDescription = !saved?.description.isNullOrEmpty()
+                            hasDescription = !saved?.description.isNullOrEmpty(),
+                            isAnyApartmentUndefined = isAnyApartmentUndefined
                         )
                     }
 

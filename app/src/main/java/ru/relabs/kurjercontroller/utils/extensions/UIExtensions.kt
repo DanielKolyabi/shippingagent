@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.View
 import android.widget.Button
@@ -21,13 +22,19 @@ fun View.setVisible(visible: Boolean) {
     this.visibility = if (visible) View.VISIBLE else View.GONE
 }
 
-fun Button.setSelectButtonActive(active: Boolean) {
+fun Button.setSelectButtonActive(active: Boolean, isAdditional: Boolean = false) {
     if (active) {
         this.setBackgroundResource(R.drawable.abc_btn_colored_material)
     } else {
         this.setBackgroundResource(R.drawable.abc_btn_default_mtrl_shape)
     }
+    backgroundTintList = if (active && isAdditional) {
+        ColorStateList.valueOf(resources.getColorCompat(R.color.colorFuchsiaBright))
+    } else {
+        null
+    }
 }
+
 
 private fun getValueAnimator(from: Int, to: Int, view: View?, duration: Int = 250): ValueAnimator {
     return ValueAnimator.ofObject(ArgbEvaluator(), from, to).apply {
@@ -76,7 +83,7 @@ fun Iterable<TaskItem>.placemarkColor(): Int {
         } else {
             Color.GRAY
         }
-    //If something closed - choose color based on min close time
+        //If something closed - choose color based on min close time
     } else {
         val diff = Seconds.secondsBetween(minCloseTime.closeTime, DateTime()).seconds
         when {
