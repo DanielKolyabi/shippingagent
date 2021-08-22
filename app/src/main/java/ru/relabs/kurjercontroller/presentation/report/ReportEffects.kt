@@ -286,8 +286,12 @@ object ReportEffects {
         }
     }
 
-    fun effectShowPhotoRequiredError(): ReportEffect = { c, s ->
-        c.showErrorMessage(R.string.photo_required)
+    fun effectShowAppsChangedPhotoRequiredError(): ReportEffect = { c, s ->
+        c.showErrorMessage(R.string.app_changed_photo_required)
+    }
+
+    fun effectShowNotDeterminedPhotoRequiredError(): ReportEffect = { c, s ->
+        c.showErrorMessage(R.string.not_determine_photo_required)
     }
 
     fun effectCloseEntranceClicked(): ReportEffect = { c, s ->
@@ -317,9 +321,10 @@ object ReportEffects {
                 val startApartmentsChanged =
                     selected.apartmentFrom != s.entrance?.startApartments && selected.apartmentFrom != null
                 val endApartmentsChanged = selected.apartmentTo != s.entrance?.endApartments && selected.apartmentTo != null
-                val isAnyApartmentUndefined = s.savedApartments.any { it.buttonState and 64 > 0 }
+                val isAnyApartmentUndetermined = s.savedApartments.any { it.buttonState and 64 > 0 }
+                val isAnyAppsChanged = startApartmentsChanged || endApartmentsChanged
                 val photoRequired =
-                    (startApartmentsChanged || endApartmentsChanged || isAnyApartmentUndefined) && s.selectedEntrancePhotos.none { it.photo.isEntrancePhoto }
+                    (isAnyAppsChanged || isAnyApartmentUndetermined) && s.selectedEntrancePhotos.none { it.photo.isEntrancePhoto }
 
                 val location = c.locationProvider.lastReceivedLocation()
                 CustomLog.writeToFile(
@@ -331,7 +336,15 @@ object ReportEffects {
                 )
 
                 if (photoRequired) {
-                    messages.send(msgEffect(effectShowPhotoRequiredError()))
+                    messages.send(
+                        msgEffect(
+                            if (isAnyAppsChanged) {
+                                effectShowAppsChangedPhotoRequiredError()
+                            } else {
+                                effectShowNotDeterminedPhotoRequiredError()
+                            }
+                        )
+                    )
                 } else if (withLocationLoading && (location == null || Date(location.time).isLocationExpired())) {
                     coroutineScope {
                         messages.send(ReportMessages.msgAddLoaders(1))
@@ -428,7 +441,7 @@ object ReportEffects {
                 )
             },
             withAnyRadiusWarning = true
-        )(c,s)
+        )(c, s)
     }
 
     private fun effectValidatePhotoRadiusAnd(

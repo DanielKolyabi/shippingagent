@@ -152,6 +152,8 @@
     <string name="loading">Загрузка</string>
     <string name="button_group_main">Опрос</string>
     <string name="button_group_addition">БезОп</string>
+    <string name="app_changed_photo_required">Необходимо фото-подтверждение изменённого диапазона квартир</string>
+    <string name="not_determine_photo_required">Необходимо фото-подтверждение статуса НО (не определено)</string>
     <string name="photo_required">Необходимо фото-подтверждение изменённого диапазона квартир</string>
     <string name="close_entrance_dialog_message">Вы действительно хотите закрыть подъезд?</string>
     <string name="close_task_confirmation_message">Вы действительно хотите закрыть задание?</string>
