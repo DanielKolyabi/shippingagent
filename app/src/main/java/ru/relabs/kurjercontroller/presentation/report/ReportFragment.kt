@@ -21,6 +21,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_report.view.*
+import kotlinx.android.synthetic.main.fragment_report.view.loading
+import kotlinx.android.synthetic.main.fragment_tasks.view.*
 import kotlinx.android.synthetic.main.include_hint_container.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -224,7 +226,7 @@ class ReportFragment : BaseFragment() {
                     view.appartaments_to,
                     apartmentsToTextListener
                 ),
-                ReportRenders.renderApartments(apartmentsAdapter),
+                ReportRenders.renderApartments(apartmentsAdapter, view.appartaments_list),
                 ReportRenders.renderApartmentsListBackground(view.list_background),
                 ReportRenders.renderApartmentListTypeButton(view.list_type_button),
                 ReportRenders.renderEntranceCode(view.entrance_code, codeTextListener),

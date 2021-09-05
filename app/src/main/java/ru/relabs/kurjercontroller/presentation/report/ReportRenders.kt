@@ -5,6 +5,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.*
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.domain.models.ApartmentNumber
 import ru.relabs.kurjercontroller.domain.models.ApartmentResult
@@ -13,7 +14,6 @@ import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.presentation.base.DefaultListDiffCallback
 import ru.relabs.kurjercontroller.presentation.base.recycler.DelegateAdapter
 import ru.relabs.kurjercontroller.presentation.base.tea.renderT
-import ru.relabs.kurjercontroller.utils.debug
 import ru.relabs.kurjercontroller.utils.extensions.renderText
 import ru.relabs.kurjercontroller.utils.extensions.setSelectButtonActive
 import ru.relabs.kurjercontroller.utils.extensions.visible
@@ -102,7 +102,7 @@ object ReportRenders {
         val hasLookout: Boolean
     )
 
-    fun renderApartments(apartmentsAdapter: DelegateAdapter<ReportApartmentItem>): ReportRender = renderT(
+    fun renderApartments(apartmentsAdapter: DelegateAdapter<ReportApartmentItem>, list: RecyclerView): ReportRender = renderT(
         {
             RenderApartmentsData(
                 (it.saved?.apartmentFrom ?: it.entrance?.startApartments) to (it.saved?.apartmentTo
@@ -146,20 +146,24 @@ object ReportRenders {
                 } else {
                     null
                 }
-                debug("$buttonGroup $hasLookout")
                 val items =
                     listOfNotNull(headerModeItem) +
                             requiredApartmentsElements +
                             listOfNotNull(ReportApartmentItem.Divider.takeIf { requiredApartments.isNotEmpty() }) +
                             notRequiredApartmentElements
 
-                debug("$items")
+                val shouldScrollToTop =
+                    headerModeItem is ReportApartmentItem.Lookout && apartmentsAdapter.items.firstOrNull() !is ReportApartmentItem.Lookout
+
                 val diff = DiffUtil.calculateDiff(DefaultListDiffCallback(apartmentsAdapter.items, items))
 
                 apartmentsAdapter.items.clear()
                 apartmentsAdapter.items.addAll(items)
                 diff.dispatchUpdatesTo(apartmentsAdapter)
 
+                if (shouldScrollToTop) {
+                    list.scrollToPosition(0)
+                }
             } else {
                 apartmentsAdapter.items.clear()
                 apartmentsAdapter.notifyDataSetChanged()

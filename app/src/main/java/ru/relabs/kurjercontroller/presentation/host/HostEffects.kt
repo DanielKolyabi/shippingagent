@@ -24,8 +24,7 @@ import java.io.File
 object HostEffects {
     fun effectInit(restored: Boolean): HostEffect = { c, _ ->
         if (!restored) {
-            if (c.repository.isAuthenticated() && c.loginUseCase.isAutologinEnabled()) {
-                c.loginUseCase.loginOffline()
+            if (c.repository.isAuthenticated() && c.loginUseCase.isAutologinEnabled() && c.loginUseCase.loginOffline() != null) {
                 withContext(Dispatchers.Main) {
                     c.router.newRootScreen(RootScreen.Tasks(true))
                 }

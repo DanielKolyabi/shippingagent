@@ -14,8 +14,8 @@ object HostMessages {
         { it },
         {
             listOf(
-                HostEffects.effectInit(restored),
-                HostEffects.effectSubscribe()
+                HostEffects.effectSubscribe(),
+                HostEffects.effectInit(restored)
             )
         }
     )
@@ -59,7 +59,7 @@ object HostMessages {
             { state ->
                 listOfNotNull(
                     HostEffects.effectCheckUpdates()
-                        .takeIf { !state.isUpdateDialogShowed && state.updateLoadProgress == null}
+                        .takeIf { !state.isUpdateDialogShowed && state.updateLoadProgress == null }
                 )
             }
         )
