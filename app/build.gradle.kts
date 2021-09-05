@@ -24,8 +24,8 @@ android {
         applicationId = "ru.relabs.kurjercontroller"
         minSdkVersion(21)
         targetSdkVersion(29)
-        versionCode = 61
-        versionName = "61"
+        versionCode = 62
+        versionName = "62"
 
         buildConfigField("Boolean", "FEATURE_PHOTO_RADIUS", "false")
         buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "false")
