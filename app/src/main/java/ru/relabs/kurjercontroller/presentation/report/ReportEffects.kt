@@ -130,14 +130,19 @@ object ReportEffects {
 
     fun effectChangeAllApartmentState(
         apartmentNumber: ApartmentNumber,
-        newState: Int,
-        buttonsMode: ReportApartmentButtonsMode
+        clickedState: Int,
+        buttonsMode: ReportApartmentButtonsMode,
+        disableOnly: Boolean = false
     ): ReportEffect = { c, s ->
         if (s.taskItem != null && s.entrance != null) {
             if (s.entrance.state == EntranceState.CREATED && s.saved?.entranceClosed != true) {
                 val targetApartment = s.savedApartments.firstOrNull { apartmentNumber == it.apartmentNumber }
                     ?: ApartmentResult.empty(s.taskItem, s.entrance, apartmentNumber)
-                val targetState = (targetApartment.buttonState xor newState) and newState
+                val targetState = if(!disableOnly){
+                        (targetApartment.buttonState xor clickedState) and clickedState
+                }else{
+                    targetApartment.buttonState xor clickedState
+                }
 
                 val startApartment = s.saved?.apartmentFrom ?: s.entrance.startApartments
                 val endApartment = s.saved?.apartmentTo ?: s.entrance.endApartments
@@ -145,13 +150,13 @@ object ReportEffects {
                     val apartment = s.savedApartments.firstOrNull { a -> it == a.apartmentNumber.number }
                         ?: ApartmentResult.empty(s.taskItem, s.entrance, ApartmentNumber(it)).copy(buttonGroup = buttonsMode)
 
-                    val apartmentWithNewState = if (apartment.buttonState and newState != targetState) {
+                    val apartmentWithNewState = if (apartment.buttonState and clickedState != targetState) {
                         when {
-                            newState == 1 && apartment.buttonState and 4 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 4 xor 1)
-                            newState == 4 && apartment.buttonState and 1 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 1 xor 4)
-                            newState == 16 && apartment.buttonState and 32 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 32 xor 16)
-                            newState == 32 && apartment.buttonState and 16 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 16 xor 32)
-                            else -> apartment.copy(buttonState = apartment.buttonState xor newState)
+                            clickedState == 1 && apartment.buttonState and 4 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 4 xor 1)
+                            clickedState == 4 && apartment.buttonState and 1 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 1 xor 4)
+                            clickedState == 16 && apartment.buttonState and 32 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 32 xor 16)
+                            clickedState == 32 && apartment.buttonState and 16 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 16 xor 32)
+                            else -> apartment.copy(buttonState = apartment.buttonState xor clickedState)
                         }
                     } else {
                         apartment

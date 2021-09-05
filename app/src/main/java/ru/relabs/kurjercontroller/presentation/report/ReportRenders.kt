@@ -99,7 +99,8 @@ object ReportRenders {
         val apartmentsInterval: Pair<Int?, Int?>,
         val taskItem: TaskItem?,
         val savedApartments: List<ApartmentResult>,
-        val hasLookout: Boolean
+        val hasLookout: Boolean,
+        val hasPhotos: Boolean
     )
 
     fun renderApartments(apartmentsAdapter: DelegateAdapter<ReportApartmentItem>, list: RecyclerView): ReportRender = renderT(
@@ -109,10 +110,11 @@ object ReportRenders {
                     ?: it.entrance?.endApartments),
                 it.taskItem,
                 it.savedApartments,
-                it.saved?.hasLookupPost ?: it.entrance?.hasLookout ?: false
+                it.saved?.hasLookupPost ?: it.entrance?.hasLookout ?: false,
+                it.selectedEntrancePhotos.isNotEmpty()
             )
         },
-        { (apartmentInterval, taskItem, savedApartments, hasLookout) ->
+        { (apartmentInterval, taskItem, savedApartments, hasLookout, hasPhotos) ->
             val (startAps, endAps) = apartmentInterval
             if (startAps != null && endAps != null && taskItem != null) {
                 val requiredApartments = taskItem.getRequiredApartments()
@@ -130,7 +132,8 @@ object ReportRenders {
                             colored = requiredData?.colored ?: false,
                             required = requiredData != null,
                             hasDescription = !saved?.description.isNullOrEmpty(),
-                            isAnyApartmentUndefined = isAnyApartmentUndefined
+                            isAnyApartmentUndefined = isAnyApartmentUndefined,
+                            isUndefinedButtonLocked = hasPhotos
                         )
                     }
 

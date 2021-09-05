@@ -2,16 +2,17 @@ package ru.relabs.kurjercontroller.presentation.report
 
 import android.graphics.Color
 import android.graphics.Typeface
+import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.holder_report_appartament.view.*
 import kotlinx.android.synthetic.main.holder_report_appartament.view.appartament_number
 import kotlinx.android.synthetic.main.holder_report_appartament.view.description_button
-import kotlinx.android.synthetic.main.holder_report_appartament_addition.view.*
 import kotlinx.android.synthetic.main.holder_report_appartament_button_group_addition.view.*
-import kotlinx.android.synthetic.main.holder_report_appartament_button_group_addition.view.broken_button_addition
-import kotlinx.android.synthetic.main.holder_report_appartament_button_group_addition.view.no_button_addition
-import kotlinx.android.synthetic.main.holder_report_appartament_button_group_addition.view.yes_button_addition
-import kotlinx.android.synthetic.main.holder_report_appartament_button_group_main.view.*
+import kotlinx.android.synthetic.main.holder_report_appartament_button_group_main.view.broken_button_main
+import kotlinx.android.synthetic.main.holder_report_appartament_button_group_main.view.no_button_main
+import kotlinx.android.synthetic.main.holder_report_appartament_button_group_main.view.not_regular_button_main
+import kotlinx.android.synthetic.main.holder_report_appartament_button_group_main.view.yes_button_main
+import kotlinx.android.synthetic.main.holder_report_appartament_main.view.*
 import kotlinx.android.synthetic.main.holder_report_photo.view.*
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.domain.models.ApartmentNumber
@@ -123,7 +124,8 @@ object ReportAdapter {
     fun apartmentMain(
         onStateChanged: (apartmentNumber: ApartmentNumber, state: Int) -> Unit,
         onLongStateChanged: (apartmentNumber: ApartmentNumber, change: Int) -> Unit,
-        onDescriptionClicked: (apartmentNumber: ApartmentNumber) -> Unit
+        onDescriptionClicked: (apartmentNumber: ApartmentNumber) -> Unit,
+        onCameraClicked: () -> Unit
     ): IAdapterDelegate<ReportApartmentItem> = delegateDefine(
         { it is ReportApartmentItem.Apartment && it.buttonGroup == ReportApartmentButtonsMode.Main },
         { p ->
@@ -187,6 +189,14 @@ object ReportAdapter {
                         onStateChanged(item.number, newState)
                     }
 
+                    undefined_button_main?.setOnLongClickListener {
+                        onLongStateChanged(item.number, 64)
+                        true
+                    }
+                    undefined_button_main?.setOnClickListener {
+                        onStateChanged(item.number, item.state xor 64)
+                    }
+
                     broken_button_main?.setOnLongClickListener {
                         onLongStateChanged(item.number, 8)
                         true
@@ -199,6 +209,16 @@ object ReportAdapter {
                     not_regular_button_main?.setSelectButtonActive(item.state and 2 > 0)
                     no_button_main?.setSelectButtonActive(item.state and 4 > 0)
                     broken_button_main?.setSelectButtonActive(item.state and 8 > 0)
+
+                    lock_input_overlay?.isVisible = !item.isUndefinedButtonLocked
+                    undefined_button_main?.isEnabled = item.isUndefinedButtonLocked
+                    lock_input_overlay?.setOnClickListener {
+                        onCameraClicked()
+                    }
+                    undefined_button_main?.setSelectButtonActive(
+                        item.isAnyApartmentUndefined || item.state and 64 > 0,
+                        item.state and 64 == 0
+                    )
                 }
             }
         }
@@ -263,14 +283,6 @@ object ReportAdapter {
                         onStateChanged(item.number, newState)
                     }
 
-                    undefined_button_addition?.setOnLongClickListener {
-                        onLongStateChanged(item.number, 64)
-                        true
-                    }
-                    undefined_button_addition?.setOnClickListener {
-                        onStateChanged(item.number, item.state xor 64)
-                    }
-
                     broken_button_addition?.setOnLongClickListener {
                         onLongStateChanged(item.number, 8)
                         true
@@ -282,11 +294,6 @@ object ReportAdapter {
                     broken_button_addition?.setSelectButtonActive(item.state and 8 > 0)
                     yes_button_addition?.setSelectButtonActive(item.state and 16 > 0)
                     no_button_addition?.setSelectButtonActive(item.state and 32 > 0)
-
-                    undefined_button_addition?.setSelectButtonActive(
-                        item.isAnyApartmentUndefined || item.state and 64 > 0,
-                        item.state and 64 == 0
-                    )
                 }
             }
         }

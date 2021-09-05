@@ -2,7 +2,6 @@ package ru.relabs.kurjercontroller.presentation.report
 
 import android.app.Activity
 import android.content.Intent
-import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
@@ -21,8 +20,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_report.view.*
-import kotlinx.android.synthetic.main.fragment_report.view.loading
-import kotlinx.android.synthetic.main.fragment_tasks.view.*
 import kotlinx.android.synthetic.main.include_hint_container.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -48,7 +45,6 @@ import ru.relabs.kurjercontroller.utils.debug
 import ru.relabs.kurjercontroller.utils.extensions.showDialog
 import java.io.File
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 /**
@@ -152,7 +148,8 @@ class ReportFragment : BaseFragment() {
                         ReportMessages.msgAllApartmentStateChanged(number, state, ReportApartmentButtonsMode.Main)
                     )
                 },
-                { number -> uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionClicked(number)) }
+                { number -> uiScope.sendMessage(controller, ReportMessages.msgApartmentDescriptionClicked(number)) },
+                { uiScope.sendMessage(controller, ReportMessages.msgPhotoClicked(false, false)) }
             ),
             ReportAdapter.apartmentAdditional(
                 { number, state ->

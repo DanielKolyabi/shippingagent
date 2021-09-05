@@ -82,7 +82,22 @@ object ReportMessages {
                 }
             )
         },
-        { listOf(ReportEffects.effectRemovePhoto(removedPhoto)) }
+        {
+            val firstApartment = it.savedApartments.firstOrNull()
+            listOfNotNull(
+                ReportEffects.effectRemovePhoto(removedPhoto),
+                if (firstApartment != null && it.selectedEntrancePhotos.isEmpty()) {
+                    ReportEffects.effectChangeAllApartmentState(
+                        firstApartment.apartmentNumber,
+                        64,
+                        firstApartment.buttonGroup,
+                        true
+                    )
+                } else {
+                    null
+                }
+            )
+        }
     )
 
     fun msgNewPhoto(newPhoto: PhotoWithUri): ReportMessage =
@@ -103,7 +118,16 @@ object ReportMessages {
             { it },
             {
                 when (BuildConfig.FEATURE_PHOTO_RADIUS) {
-                    true -> listOf(ReportEffects.effectValidateRadiusAndSavePhoto(entrance, photoUri, targetFile, uuid, isEntrancePhoto, multiplePhoto))
+                    true -> listOf(
+                        ReportEffects.effectValidateRadiusAndSavePhoto(
+                            entrance,
+                            photoUri,
+                            targetFile,
+                            uuid,
+                            isEntrancePhoto,
+                            multiplePhoto
+                        )
+                    )
                     false -> listOfNotNull(
                         ReportEffects.effectSavePhotoFromFile(entrance, photoUri, targetFile, uuid, isEntrancePhoto),
                         ReportEffects.effectCreatePhoto(multiplePhoto, isEntrancePhoto).takeIf { multiplePhoto }
@@ -121,10 +145,11 @@ object ReportMessages {
 
     fun msgAllApartmentStateChanged(
         apartmentNumber: ApartmentNumber,
-        newState: Int,
-        buttonsMode: ReportApartmentButtonsMode
+        clickedState: Int,
+        buttonsMode: ReportApartmentButtonsMode,
+        disableOnly: Boolean = false
     ): ReportMessage =
-        msgEffect(ReportEffects.effectChangeAllApartmentState(apartmentNumber, newState, buttonsMode))
+        msgEffect(ReportEffects.effectChangeAllApartmentState(apartmentNumber, clickedState, buttonsMode))
 
     fun msgApartmentDescriptionClicked(apartmentNumber: ApartmentNumber): ReportMessage =
         msgEffect(ReportEffects.effectShowDescriptionInput(apartmentNumber))
