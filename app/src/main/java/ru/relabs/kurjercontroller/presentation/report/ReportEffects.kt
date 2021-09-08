@@ -141,7 +141,7 @@ object ReportEffects {
                 val targetState = if(!disableOnly){
                         (targetApartment.buttonState xor clickedState) and clickedState
                 }else{
-                    targetApartment.buttonState xor clickedState
+                    targetApartment.buttonState and clickedState.inv()
                 }
 
                 val startApartment = s.saved?.apartmentFrom ?: s.entrance.startApartments

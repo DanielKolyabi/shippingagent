@@ -36,7 +36,6 @@ sealed class ReportApartmentItem {
         val colored: Boolean,
         val required: Boolean,
         val hasDescription: Boolean,
-        val isAnyApartmentUndefined: Boolean,
         val isUndefinedButtonLocked: Boolean
     ) : ReportApartmentItem()
     data class Lookout(var state: Int) : ReportApartmentItem()

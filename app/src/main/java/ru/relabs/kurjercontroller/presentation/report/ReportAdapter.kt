@@ -209,16 +209,12 @@ object ReportAdapter {
                     not_regular_button_main?.setSelectButtonActive(item.state and 2 > 0)
                     no_button_main?.setSelectButtonActive(item.state and 4 > 0)
                     broken_button_main?.setSelectButtonActive(item.state and 8 > 0)
-
+                    undefined_button_main?.setSelectButtonActive(item.state and 64 > 0)
                     lock_input_overlay?.isVisible = !item.isUndefinedButtonLocked
                     undefined_button_main?.isEnabled = item.isUndefinedButtonLocked
                     lock_input_overlay?.setOnClickListener {
                         onCameraClicked()
                     }
-                    undefined_button_main?.setSelectButtonActive(
-                        item.isAnyApartmentUndefined || item.state and 64 > 0,
-                        item.state and 64 == 0
-                    )
                 }
             }
         }
