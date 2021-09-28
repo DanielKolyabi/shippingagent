@@ -152,10 +152,11 @@ object ReportEffects {
 
                     val apartmentWithNewState = if (apartment.buttonState and clickedState != targetState) {
                         when {
-                            clickedState == 1 && apartment.buttonState and 4 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 4 xor 1)
-                            clickedState == 4 && apartment.buttonState and 1 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 1 xor 4)
+                            clickedState == 1 -> apartment.copy(buttonState = (apartment.buttonState and (4 or 64).inv()) xor 1)
+                            clickedState == 4 -> apartment.copy(buttonState = (apartment.buttonState and (1 or 64).inv()) xor 4)
                             clickedState == 16 && apartment.buttonState and 32 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 32 xor 16)
                             clickedState == 32 && apartment.buttonState and 16 > 0 -> apartment.copy(buttonState = apartment.buttonState xor 16 xor 32)
+                            clickedState == 64 -> apartment.copy(buttonState = (apartment.buttonState and (1 or 4).inv()) xor 64)
                             else -> apartment.copy(buttonState = apartment.buttonState xor clickedState)
                         }
                     } else {

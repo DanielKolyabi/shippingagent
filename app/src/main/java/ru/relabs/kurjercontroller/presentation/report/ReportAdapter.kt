@@ -160,11 +160,7 @@ object ReportAdapter {
                         true
                     }
                     yes_button_main?.setOnClickListener {
-                        val newState = if (item.state and 4 > 0) {
-                            item.state xor 4 xor 1
-                        } else {
-                            item.state xor 1
-                        }
+                        val newState = (item.state and (4 or 64).inv()) xor 1
                         onStateChanged(item.number, newState)
                     }
 
@@ -181,11 +177,7 @@ object ReportAdapter {
                         true
                     }
                     no_button_main?.setOnClickListener {
-                        val newState = if (item.state and 1 > 0) {
-                            item.state xor 1 xor 4
-                        } else {
-                            item.state xor 4
-                        }
+                        val newState = (item.state and (1 or 64).inv()) xor 4
                         onStateChanged(item.number, newState)
                     }
 
@@ -194,7 +186,8 @@ object ReportAdapter {
                         true
                     }
                     undefined_button_main?.setOnClickListener {
-                        onStateChanged(item.number, item.state xor 64)
+                        val newState = (item.state and (1 or 4).inv()) xor 64
+                        onStateChanged(item.number, newState)
                     }
 
                     broken_button_main?.setOnLongClickListener {
