@@ -138,9 +138,9 @@ object ReportEffects {
             if (s.entrance.state == EntranceState.CREATED && s.saved?.entranceClosed != true) {
                 val targetApartment = s.savedApartments.firstOrNull { apartmentNumber == it.apartmentNumber }
                     ?: ApartmentResult.empty(s.taskItem, s.entrance, apartmentNumber)
-                val targetState = if(!disableOnly){
-                        (targetApartment.buttonState xor clickedState) and clickedState
-                }else{
+                val targetState = if (!disableOnly) {
+                    (targetApartment.buttonState xor clickedState) and clickedState
+                } else {
                     targetApartment.buttonState and clickedState.inv()
                 }
 
@@ -329,28 +329,19 @@ object ReportEffects {
                 val endApartmentsChanged = selected.apartmentTo != s.entrance?.endApartments && selected.apartmentTo != null
                 val isAnyApartmentUndetermined = s.savedApartments.any { it.buttonState and 64 > 0 }
                 val isAnyAppsChanged = startApartmentsChanged || endApartmentsChanged
-                val photoRequired =
-                    (isAnyAppsChanged || isAnyApartmentUndetermined) && s.selectedEntrancePhotos.none { it.photo.isEntrancePhoto }
+                val appsIntervalPhotoRequired = isAnyAppsChanged && s.selectedEntrancePhotos.none { it.photo.isEntrancePhoto }
+                val undeterminedAppPhotoRequired = isAnyApartmentUndetermined && s.selectedEntrancePhotos.isEmpty()
 
                 val location = c.locationProvider.lastReceivedLocation()
                 CustomLog.writeToFile(
-                    "GPS LOG: Close check with location(${location?.latitude}, ${location?.longitude}, ${
-                        Date(
-                            location?.time ?: 0
-                        ).formatedWithSecs()
-                    })"
+                    "GPS LOG: Close check with location(${location?.latitude}, ${location?.longitude}, " +
+                            "${Date(location?.time ?: 0).formatedWithSecs()})"
                 )
 
-                if (photoRequired) {
-                    messages.send(
-                        msgEffect(
-                            if (isAnyAppsChanged) {
-                                effectShowAppsChangedPhotoRequiredError()
-                            } else {
-                                effectShowNotDeterminedPhotoRequiredError()
-                            }
-                        )
-                    )
+                if (appsIntervalPhotoRequired) {
+                    messages.send(msgEffect(effectShowAppsChangedPhotoRequiredError()))
+                } else if (undeterminedAppPhotoRequired) {
+                    messages.send(msgEffect(effectShowNotDeterminedPhotoRequiredError()))
                 } else if (withLocationLoading && (location == null || Date(location.time).isLocationExpired())) {
                     coroutineScope {
                         messages.send(ReportMessages.msgAddLoaders(1))
