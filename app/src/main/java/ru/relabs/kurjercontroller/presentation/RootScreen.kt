@@ -1,6 +1,8 @@
 package ru.relabs.kurjercontroller.presentation
 
 import androidx.fragment.app.Fragment
+import com.github.terrakok.cicerone.androidx.Creator
+import com.github.terrakok.cicerone.androidx.FragmentScreen
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.addresses.AddressesFragment
 import ru.relabs.kurjercontroller.presentation.filters.editor.FiltersEditorFragment
@@ -19,30 +21,32 @@ import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressIdWithCol
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.AddressWithColor
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.IAddressClickedConsumer
 import ru.relabs.kurjercontroller.presentation.yandexMap.models.INewItemsAddedConsumer
-import ru.terrakok.cicerone.android.support.SupportAppScreen
 
 
-sealed class RootScreen(protected val fabric: () -> Fragment) : SupportAppScreen() {
+object RootScreen {
 
-    override fun getFragment(): Fragment = fabric()
+    fun Login() =
+        KurjerFragmentScreen { LoginFragment.newInstance() }
 
-    object Login : RootScreen({ LoginFragment.newInstance() })
+    fun Tasks(withRefresh: Boolean) =
+        KurjerFragmentScreen { TasksFragment.newInstance(withRefresh) }
 
-    class Tasks(withRefresh: Boolean) : RootScreen({ TasksFragment.newInstance(withRefresh) })
+    fun <F> TaskInfo(task: Task, parent: F) where F : Fragment, F : IExaminedConsumer =
+        KurjerFragmentScreen { TaskDetailsFragment.newInstance(task, parent) }
 
-    class TaskInfo<F>(task: Task, parent: F) :
-        RootScreen({ TaskDetailsFragment.newInstance(task, parent) }) where F : Fragment, F : IExaminedConsumer
+    fun TaskItemDetails(taskItem: TaskItem) =
+        KurjerFragmentScreen { TaskItemExplanationFragment.newInstance(taskItem) }
 
-    class TaskItemDetails(taskItem: TaskItem) : RootScreen({ TaskItemExplanationFragment.newInstance(taskItem) })
+    fun Addresses(tasks: List<Task>) =
+        KurjerFragmentScreen { AddressesFragment.newInstance(tasks.map { it.id }) }
 
-    class Addresses(tasks: List<Task>) : RootScreen({ AddressesFragment.newInstance(tasks.map { it.id }) })
+    fun <T> Filters(
+        tasks: List<Task>,
+        target: T
+    ) where T : Fragment, T : IFiltersConsumer =
+        KurjerFragmentScreen { FiltersPagerFragment.newInstance(tasks, target) }
 
-    class Filters<T>(
-        private val tasks: List<Task>,
-        private val target: T
-    ) : RootScreen({ FiltersPagerFragment.newInstance(tasks, target) }) where T : Fragment, T : IFiltersConsumer
-
-    class OnlineFilters<T>(private val target: T) : RootScreen({
+    fun <T> OnlineFilters(target: T) where T : Fragment, T : IFiltersEditorConsumer = KurjerFragmentScreen {
         FiltersEditorFragment.newInstance(
             TaskId(-1),
             null,
@@ -50,25 +54,25 @@ sealed class RootScreen(protected val fabric: () -> Fragment) : SupportAppScreen
             true,
             target
         )
-    }) where T : Fragment, T : IFiltersEditorConsumer
+    }
 
-    class Report(
-        private val taskItems: List<TaskItem>,
-        private val selectedTaskId: TaskId,
-        private val selectedTaskItemId: TaskItemId
-    ) : RootScreen({
+    fun Report(
+        taskItems: List<TaskItem>,
+        selectedTaskId: TaskId,
+        selectedTaskItemId: TaskItemId
+    ) = KurjerFragmentScreen {
         ReportPagerFragment.newInstance(
             taskItems.map { TaskItemWithTaskIds(it.taskId, it.id) },
             TaskItemWithTaskIds(selectedTaskId, selectedTaskItemId)
         )
-    })
+    }
 
-    class AddressMap<T>(
-        private val addresses: List<AddressWithColor>,
-        private val deliverymanIds: List<Int>,
-        private val storages: List<TaskStorage>,
-        private val target: T
-    ) : RootScreen({
+    fun <T> AddressMap(
+        addresses: List<AddressWithColor>,
+        deliverymanIds: List<Int>,
+        storages: List<TaskStorage>,
+        target: T
+    ) where T : Fragment, T : IAddressClickedConsumer, T : INewItemsAddedConsumer = KurjerFragmentScreen {
         YandexMapFragment.newInstance(
             emptyList(),
             addresses.map { AddressIdWithColor(it.address.id.id, it.color, it.outlineColor) },
@@ -76,12 +80,12 @@ sealed class RootScreen(protected val fabric: () -> Fragment) : SupportAppScreen
             storages,
             target
         )
-    }) where T : Fragment, T : IAddressClickedConsumer, T : INewItemsAddedConsumer
+    }
 
-    class TasksMap<T>(
-        private val tasks: List<Task>,
-        private val target: T
-    ) : RootScreen({
+    fun <T> TasksMap(
+        tasks: List<Task>,
+        target: T
+    ) where T : Fragment, T : IAddressClickedConsumer, T : INewItemsAddedConsumer = KurjerFragmentScreen {
         YandexMapFragment.newInstance(
             tasks.map { it.id },
             emptyList(),
@@ -89,5 +93,9 @@ sealed class RootScreen(protected val fabric: () -> Fragment) : SupportAppScreen
             emptyList(),
             target
         )
-    }) where T : Fragment, T : IAddressClickedConsumer, T : INewItemsAddedConsumer
+    }
+
+
+    inline fun <reified F : Fragment> KurjerFragmentScreen(crossinline fragmentCreator: () -> F) =
+        FragmentScreen(F::class.java.simpleName, fragmentCreator = Creator { fragmentCreator() })
 }

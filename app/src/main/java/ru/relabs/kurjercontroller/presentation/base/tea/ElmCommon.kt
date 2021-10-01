@@ -1,6 +1,7 @@
 package ru.relabs.kurjercontroller.presentation.base.tea
 
 import android.view.View
+import com.github.terrakok.cicerone.Router
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.KoinComponent
@@ -12,7 +13,6 @@ import ru.relabs.kurjercontroller.domain.storage.CurrentUserStorage
 import ru.relabs.kurjercontroller.domain.useCases.LoginUseCase
 import ru.relabs.kurjercontroller.presentation.RootScreen
 import ru.relabs.kurjercontroller.utils.extensions.showSnackbar
-import ru.terrakok.cicerone.Router
 
 interface ErrorContext {
     var handleError: (DomainException) -> Unit
@@ -59,7 +59,7 @@ object CommonMessages {
                 401 -> msgEffect { c, _ ->
                     c.loginUseCase.logout()
                     withContext(Dispatchers.Main) {
-                        c.router.newRootScreen(RootScreen.Login)
+                        c.router.newRootScreen(RootScreen.Login())
                     }
                 }
                 else -> msgEffect { c, _ -> c.handleError(error) }

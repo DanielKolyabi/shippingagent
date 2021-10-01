@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.github.terrakok.cicerone.Router
 import kotlinx.android.synthetic.main.fragment_filters_pager.view.*
 import kotlinx.android.synthetic.main.fragment_report_pager.*
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +21,6 @@ import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.presentation.base.fragment.BaseFragment
 import ru.relabs.kurjercontroller.presentation.filters.editor.IFiltersEditorConsumer
 import ru.relabs.kurjercontroller.utils.extensions.setVisible
-import ru.terrakok.cicerone.Router
 import java.util.*
 
 /**

@@ -36,7 +36,7 @@ object HostEffects {
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    c.router.newRootScreen(RootScreen.Login)
+                    c.router.newRootScreen(RootScreen.Login())
                 }
             }
         }
@@ -45,7 +45,7 @@ object HostEffects {
     fun effectLogout(): HostEffect = { c, s ->
         c.loginUseCase.logout()
         withContext(Dispatchers.Main) {
-            c.router.newRootScreen(RootScreen.Login)
+            c.router.newRootScreen(RootScreen.Login())
         }
     }
 

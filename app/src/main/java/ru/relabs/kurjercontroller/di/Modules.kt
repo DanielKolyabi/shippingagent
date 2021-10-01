@@ -3,6 +3,8 @@ package ru.relabs.kurjercontroller.di
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.room.Room
+import com.github.terrakok.cicerone.NavigatorHolder
+import com.github.terrakok.cicerone.Router
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.koin.android.ext.koin.androidApplication
@@ -27,8 +29,6 @@ import ru.relabs.kurjercontroller.domain.useCases.AppUpdateUseCase
 import ru.relabs.kurjercontroller.domain.useCases.LoginUseCase
 import ru.relabs.kurjercontroller.domain.useCases.OnlineTaskUseCase
 import ru.relabs.kurjercontroller.domain.useCases.ReportUseCase
-import ru.terrakok.cicerone.NavigatorHolder
-import ru.terrakok.cicerone.Router
 import java.io.File
 
 object Modules {

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.github.terrakok.cicerone.Router
 import kotlinx.android.synthetic.main.fragment_task_item_explanation.*
 import kotlinx.android.synthetic.main.fragment_task_item_explanation.view.*
 import kotlinx.android.synthetic.main.fragment_tasks.view.*
@@ -16,7 +17,6 @@ import ru.relabs.kurjercontroller.utils.CustomLog
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.utils.extensions.showDialog
-import ru.terrakok.cicerone.Router
 
 /**
  * Created by ProOrange on 18.03.2019.

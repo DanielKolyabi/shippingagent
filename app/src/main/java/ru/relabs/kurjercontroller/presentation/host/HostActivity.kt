@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import com.github.terrakok.cicerone.NavigatorHolder
 import com.mikepenz.materialdrawer.Drawer
 import com.mikepenz.materialdrawer.DrawerBuilder
 import com.mikepenz.materialdrawer.holder.DimenHolder
@@ -41,8 +42,6 @@ import ru.relabs.kurjercontroller.utils.*
 import ru.relabs.kurjercontroller.utils.extensions.hideKeyboard
 import ru.relabs.kurjercontroller.utils.extensions.showDialog
 import ru.relabs.kurjercontroller.utils.extensions.showSnackbar
-import ru.terrakok.cicerone.NavigatorHolder
-import ru.terrakok.cicerone.Router
 import java.io.File
 import java.io.FileNotFoundException
 
@@ -54,7 +53,6 @@ class HostActivity : AppCompatActivity(), IFragmentHolder {
     private val controller = defaultController(HostState(), HostContext())
 
     private val navigationHolder: NavigatorHolder by inject()
-    private val router: Router by inject()
     private lateinit var navigationDrawer: Drawer
 
     private val navigator = CiceroneNavigator(this)
@@ -252,8 +250,6 @@ class HostActivity : AppCompatActivity(), IFragmentHolder {
 
     private fun prepareNavigation() {
         navigationHolder.setNavigator(navigator)
-        bindBackstackListener()
-
         navigationDrawer = with(DrawerBuilder()) {
             withActivity(this@HostActivity)
 
@@ -311,14 +307,6 @@ class HostActivity : AppCompatActivity(), IFragmentHolder {
         return false
     }
 
-    private fun bindBackstackListener() {
-        supportFragmentManager.addOnBackStackChangedListener {
-            supportFragmentManager.findFragmentById(R.id.fragment_container)?.let {
-                onFragmentChanged(it)
-            }
-        }
-    }
-
     private fun logout(): Boolean {
         uiScope.sendMessage(controller, HostMessages.msgLogout())
         return false
@@ -368,15 +356,17 @@ class HostActivity : AppCompatActivity(), IFragmentHolder {
     override fun onResume() {
         super.onResume()
         systemWatchersContainer.onResume()
-        val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
-        onFragmentChanged(currentFragment)
-        navigationHolder.setNavigator(navigator)
         uiScope.sendMessage(controller, HostMessages.msgResume())
         ReportService.isAppPaused = false
 
         if(!ReportService.isRunning){
             startService(Intent(this, ReportService::class.java))
         }
+    }
+
+    override fun onResumeFragments() {
+        super.onResumeFragments()
+        navigationHolder.setNavigator(navigator)
     }
 
     override fun onPause() {
@@ -399,17 +389,8 @@ class HostActivity : AppCompatActivity(), IFragmentHolder {
         }
     }
 
-
-    fun onFragmentChanged(fragment: Fragment?) {
-        hideKeyboard()
-    }
-
     fun updateAppBar(settings: AppBarSettings) {
         uiScope.sendMessage(controller, HostMessages.msgUpdateAppBar(settings))
-    }
-
-    private fun setDrawerSelectedItem(id: Long) {
-        navigationDrawer.setSelection(id, false)
     }
 
     fun changeNavigationDrawerState() {

@@ -120,7 +120,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.1.0")
 
     // Cicerone
-    implementation("ru.terrakok.cicerone:cicerone:5.1.1")
+    implementation("com.github.terrakok:cicerone:7.1")
 
     // Firebase
     implementation("com.google.firebase:firebase-messaging-ktx")
