@@ -23,7 +23,7 @@ import ru.relabs.kurjercontroller.presentation.base.tea.defaultController
 import ru.relabs.kurjercontroller.presentation.base.tea.rendersCollector
 import ru.relabs.kurjercontroller.presentation.base.tea.sendMessage
 import ru.relabs.kurjercontroller.utils.debug
-import java.util.*
+import ru.relabs.kurjercontroller.utils.extensions.showSnackbar
 
 
 /**
@@ -44,11 +44,13 @@ class ReportPagerFragment : BaseFragment() {
             return
         }
         controller.start(ReportPagerMessages.msgInit(taskIds, selectedTask))
+        controller.context.showSnackbar = { showSnackbar(getString(it)) }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         controller.stop()
+        controller.context.showSnackbar = null
     }
 
 

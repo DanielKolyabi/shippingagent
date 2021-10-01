@@ -162,4 +162,5 @@
     <string name="map_button_layer_predefined">Слой: Предопределённые адреса</string>
     <string name="map_button_layer_task">Слой: %s</string>
     <string name="undefined">НО</string>
+    <string name="error_report_tasks_unavailable">Не удалось получить задание</string>
 </resources>

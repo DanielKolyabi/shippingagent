@@ -5,6 +5,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
 import ru.relabs.kurjercontroller.domain.models.EntranceNumber
 import ru.relabs.kurjercontroller.domain.models.EntranceState
@@ -37,9 +38,16 @@ object ReportPagerEffects {
         }
         val selectedTask = taskWithItems.firstOrNull {
             it.taskId == selectedTaskId?.taskId && it.id == selectedTaskId.taskItemId
-        } ?: taskWithItems.first()
+        } ?: taskWithItems.firstOrNull()
 
-        messages.send(ReportPagerMessages.msgTasksLoaded(taskWithItems, selectedTask))
+        if (selectedTask == null) {
+            withContext(Dispatchers.Main){
+                c.showSnackbar?.invoke(R.string.error_report_tasks_unavailable)
+            }
+            messages.send(ReportPagerMessages.msgNavigateBack())
+        } else {
+            messages.send(ReportPagerMessages.msgTasksLoaded(taskWithItems, selectedTask))
+        }
     }
 
     fun effectNavigateBack(): ReportPagerEffect = { c, s ->
