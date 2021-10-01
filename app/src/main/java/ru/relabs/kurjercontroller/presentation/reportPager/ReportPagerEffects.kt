@@ -44,6 +44,7 @@ object ReportPagerEffects {
             withContext(Dispatchers.Main){
                 c.showSnackbar?.invoke(R.string.error_report_tasks_unavailable)
             }
+            CustomLog.writeToFile("Navigate user from report, because tasks is empty; (ids size: ${taskIds.size})")
             messages.send(ReportPagerMessages.msgNavigateBack())
         } else {
             messages.send(ReportPagerMessages.msgTasksLoaded(taskWithItems, selectedTask))
