@@ -290,22 +290,6 @@ object ReportMessages {
         }
     )
 
-    fun msgDataReloaded(
-        taskItem: TaskItem?,
-        entrance: EntranceResultEntity?,
-        apartments: List<ApartmentResult>,
-        photos: List<PhotoWithUri>
-    ): ReportMessage =
-        msgState {
-            it.copy(
-                taskItem = taskItem ?: it.taskItem,
-                saved = entrance ?: it.saved,
-                savedApartments = apartments.takeIf { it.isNotEmpty() } ?: it.savedApartments,
-                selectedEntrancePhotos = photos
-            )
-        }
-
-
     fun msgGPSLoading(enabled: Boolean): ReportMessage =
         msgState { it.copy(isGPSLoading = enabled) }
 }

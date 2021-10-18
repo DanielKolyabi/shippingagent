@@ -11,7 +11,6 @@ import ru.relabs.kurjercontroller.domain.models.EntranceNumber
 import ru.relabs.kurjercontroller.domain.models.EntranceState
 import ru.relabs.kurjercontroller.domain.models.TaskId
 import ru.relabs.kurjercontroller.domain.models.TaskItemId
-import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.utils.CustomLog
 
 /**
@@ -41,7 +40,7 @@ object ReportPagerEffects {
         } ?: taskWithItems.firstOrNull()
 
         if (selectedTask == null) {
-            withContext(Dispatchers.Main){
+            withContext(Dispatchers.Main) {
                 c.showSnackbar?.invoke(R.string.error_report_tasks_unavailable)
             }
             CustomLog.writeToFile("Navigate user from report, because tasks is empty; (ids size: ${taskIds.size})")
@@ -72,21 +71,16 @@ object ReportPagerEffects {
         }
     }
 
-    fun effectCloseEntrance(task: TaskId, taskItem: TaskItemId, entrance: EntranceNumber): ReportPagerEffect = { c, s ->
-        val targetTaskItem = s.tasks.firstOrNull { it.id == taskItem && it.taskId == task }
-        if (targetTaskItem?.entrances?.any { it.number == entrance && it.state == EntranceState.CREATED } == true) {
+    fun effectCloseEntrance(taskId: TaskId, taskItemId: TaskItemId, entrance: EntranceNumber): ReportPagerEffect = { c, s ->
+        val targetTaskItem = s.tasks.firstOrNull { it.id == taskItemId && it.taskId == taskId }
+        val isEntranceExists = targetTaskItem?.entrances?.any { it.number == entrance && it.state == EntranceState.CREATED }
+        val isLatestEntrance = targetTaskItem?.entrances?.count { it.state == EntranceState.CREATED } == 1
+
+        if (isEntranceExists == true) {
             messages.send(ReportPagerMessages.msgCloseTaskItemEntrance(targetTaskItem, entrance))
-            if (targetTaskItem.entrances.count { it.state == EntranceState.CREATED } == 1) {
+            if (isLatestEntrance) {
                 messages.send(ReportPagerMessages.msgCloseTaskItem(targetTaskItem))
-                c.taskEventController.send(TaskEvent.TaskItemClosed(task, taskItem))
-                val otherTask = s.tasks.filter { it != targetTaskItem }.firstOrNull()
-                if (otherTask == null) {
-                    CustomLog.writeToFile("Navigate back from report, entrance closed tid: ${task.id}, tiid: ${taskItem.id}, entrance: ${entrance.number}")
-                    CustomLog.writeToFile("Current taskItem: tid: ${s.selectedTask?.taskId?.id}, tiid: ${s.selectedTask?.id?.id}")
-                    messages.send(msgEffect(effectNavigateBack()))
-                } else if (s.selectedTask == targetTaskItem) {
-                    messages.send(ReportPagerMessages.msgTaskClicked(otherTask))
-                }
+                c.taskEventController.send(TaskEvent.TaskItemClosed(taskId, taskItemId))
             }
         }
     }

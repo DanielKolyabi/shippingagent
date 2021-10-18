@@ -11,11 +11,19 @@ import ru.relabs.kurjercontroller.presentation.base.tea.*
  * Created by Daniil Kurchanov on 02.04.2020.
  */
 
+data class NextAppCalculationData(
+    val direction: Int = 1,
+    val isSettledUp: Boolean = false
+)
+
 data class ReportPagerState(
     val tasks: List<TaskItem> = emptyList(),
     val selectedTask: TaskItem? = null,
     val selectedEntrancePosition: Int = 0,
-    val loaders: Int = 0
+    val loaders: Int = 0,
+    val initialTask: TaskItem? = null,
+
+    val nextAppData: NextAppCalculationData = NextAppCalculationData()
 )
 
 class ReportPagerContext(val errorContext: ErrorContextImpl = ErrorContextImpl()) :
