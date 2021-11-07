@@ -4,6 +4,8 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import kotlinx.coroutines.*
 import ru.relabs.kurjercontroller.domain.models.AllowedCloseRadius
+import ru.relabs.kurjercontroller.domain.models.EntrancesMonitoring
+import ru.relabs.kurjercontroller.domain.models.EntrancesMonitoringMode
 import ru.relabs.kurjercontroller.domain.models.GpsRefreshTimes
 import ru.relabs.kurjercontroller.utils.Right
 
@@ -17,18 +19,22 @@ class SettingsRepository(
     val scope = CoroutineScope(Dispatchers.Main)
     var allowedCloseRadius: AllowedCloseRadius = loadSavedRadius()
     var closeGpsUpdateTime: GpsRefreshTimes = loadSavedGPSRefreshTimes()
+    var entrancesMonitoring: EntrancesMonitoring = loadEntrancesMonitoring()
 
     private var updateJob: Job? = null
 
     fun resetData() {
         closeGpsUpdateTime = GpsRefreshTimes(40, 40)
         allowedCloseRadius = AllowedCloseRadius.Required(DEFAULT_REQUIRED_RADIUS, false)
+        entrancesMonitoring = EntrancesMonitoring(false, false, EntrancesMonitoringMode.DeliveryControl)
         sharedPreferences.edit {
             remove(RADIUS_REQUIRED_KEY)
             remove(RADIUS_KEY)
             remove(PHOTO_REQUIRED_KEY)
             remove(PHOTO_GPS_KEY)
             remove(CLOSE_GPS_KEY)
+            remove(MONITORING_COUNTER_KEY)
+            remove(MONITORING_MODE_KEY)
         }
     }
 
@@ -47,9 +53,18 @@ class SettingsRepository(
             is Right -> {
                 allowedCloseRadius = r.value.radius
                 closeGpsUpdateTime = r.value.gpsRefreshTimes
+                entrancesMonitoring = r.value.entrancesMonitoring
                 saveRadius(allowedCloseRadius)
                 saveGPSRefreshTime(closeGpsUpdateTime)
+                saveEntrancesMonitoring(r.value.entrancesMonitoring)
             }
+        }
+    }
+
+    private fun saveEntrancesMonitoring(entrancesMonitoring: EntrancesMonitoring) {
+        sharedPreferences.edit {
+            putInt(MONITORING_MODE_KEY, entrancesMonitoring.mode.ordinal)
+            putBoolean(MONITORING_COUNTER_KEY, entrancesMonitoring.isCounterEnabled)
         }
     }
 
@@ -64,6 +79,16 @@ class SettingsRepository(
         val photo = sharedPreferences.getInt(PHOTO_GPS_KEY, 40)
         val close = sharedPreferences.getInt(CLOSE_GPS_KEY, 40)
         return GpsRefreshTimes(close = close, photo = photo)
+    }
+
+    private fun loadEntrancesMonitoring(): EntrancesMonitoring {
+        val mode = EntrancesMonitoringMode.values().getOrNull(sharedPreferences.getInt(MONITORING_MODE_KEY, -1))
+        val counterEnabled = sharedPreferences.getBoolean(MONITORING_MODE_KEY, false)
+        return if (mode != null) {
+            EntrancesMonitoring(true, counterEnabled, mode)
+        } else {
+            EntrancesMonitoring(false, counterEnabled, EntrancesMonitoringMode.DeliveryControl)
+        }
     }
 
 
@@ -101,6 +126,8 @@ class SettingsRepository(
         const val CLOSE_GPS_KEY = "close_gps"
         const val PHOTO_GPS_KEY = "photo_gps"
         const val RADIUS_KEY = "radius"
+        const val MONITORING_COUNTER_KEY = "monitoring_counter"
+        const val MONITORING_MODE_KEY = "monitoring_mode"
         const val DEFAULT_REQUIRED_RADIUS = 50
     }
 }

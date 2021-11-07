@@ -16,6 +16,8 @@ android {
             keyPassword = "relabs"
             storeFile = file("H:\\BackupsWindowsReinstall\\work\\DeliveryManProject\\android_deliveryman_controller\\key.jks")
             storePassword = "relabs"
+            isV1SigningEnabled = true
+            isV2SigningEnabled = true
         }
     }
 

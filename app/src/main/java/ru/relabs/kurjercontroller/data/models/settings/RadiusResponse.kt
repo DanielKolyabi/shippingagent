@@ -1,4 +1,4 @@
-package ru.relabs.kurjercontroller.data.models.radius
+package ru.relabs.kurjercontroller.data.models.settings
 
 import com.google.gson.annotations.SerializedName
 

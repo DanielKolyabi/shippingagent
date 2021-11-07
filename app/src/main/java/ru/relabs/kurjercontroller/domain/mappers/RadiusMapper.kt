@@ -1,6 +1,6 @@
 package ru.relabs.kurjercontroller.domain.mappers
 
-import ru.relabs.kurjercontroller.data.models.radius.RadiusResponse
+import ru.relabs.kurjercontroller.data.models.settings.RadiusResponse
 import ru.relabs.kurjercontroller.domain.models.AllowedCloseRadius
 
 object RadiusMapper {
