@@ -13,7 +13,8 @@ object Migrations {
         migration_42_43,
         migration_43_44,
         migration_44_45,
-        migration_45_46
+        migration_45_46,
+        migration_46_47
     )
 
 
@@ -52,7 +53,7 @@ object Migrations {
             database.execSQL("ALTER TABLE entrance_photos ADD COLUMN is_entrance_photo INTEGER NOT NULL DEFAULT 0")
         }
     }
-    val migration_44_45 =object : Migration(44, 45) {
+    val migration_44_45 = object : Migration(44, 45) {
         override fun migrate(database: SupportSQLiteDatabase) {
             fun createTable(name: String) = """
                     CREATE TABLE $name(
@@ -81,6 +82,20 @@ object Migrations {
             database.execSQL("ALTER TABLE entrance_reports ADD COLUMN close_distance INTEGER NOT NULL DEFAULT 0")
             database.execSQL("ALTER TABLE entrance_reports ADD COLUMN allowed_distance INTEGER NOT NULL DEFAULT 0")
             database.execSQL("ALTER TABLE entrance_reports ADD COLUMN radius_required INTEGER NOT NULL DEFAULT 0")
+        }
+    }
+    val migration_46_47 = object : Migration(46, 47) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL(
+                """
+                    CREATE TABLE closed_addresses(
+                        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        address_id INTEGER NOT NULL,
+                        entrance_number INTEGER NOT NULL,
+                        user_id TEXT NOT NULL
+                    )
+                """.trimIndent()
+            )
         }
     }
 }

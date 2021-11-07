@@ -7,6 +7,7 @@ import ru.relabs.kurjercontroller.data.models.common.EitherE
 import ru.relabs.kurjercontroller.domain.models.User
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
+import ru.relabs.kurjercontroller.domain.repositories.EntranceMonitoringRepository
 import ru.relabs.kurjercontroller.domain.repositories.SettingsRepository
 import ru.relabs.kurjercontroller.domain.storage.AppPreferences
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
@@ -21,7 +22,8 @@ class LoginUseCase(
     private val databaseRepository: DatabaseRepository,
     private val authTokenStorage: AuthTokenStorage,
     private val appPreferences: AppPreferences,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val entranceMonitoringRepository: EntranceMonitoringRepository
 ){
 
     fun isAutologinEnabled() = appPreferences.getUserAutologinEnabled()
@@ -61,6 +63,7 @@ class LoginUseCase(
         CustomLog.writeToFile("[IMEI] Update after login")
         controlRepository.updateDeviceIMEI()
         controlRepository.updatePushToken()
+        entranceMonitoringRepository.getClosedEntrancesCount()
     }
 
     fun logout() {
