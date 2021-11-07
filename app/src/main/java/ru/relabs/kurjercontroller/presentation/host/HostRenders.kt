@@ -31,15 +31,20 @@ object HostRenders {
                 true -> {
                     window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-                        window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+                        window.attributes.layoutInDisplayCutoutMode =
+                            WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+                        window.setFlags(
+                            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                        )
                     }
                 }
                 false -> {
                     window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
                     window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
+                        window.attributes.layoutInDisplayCutoutMode =
+                            WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
                     }
                 }
             }
@@ -82,6 +87,25 @@ object HostRenders {
                     )
                 )
             )
+        }
+    )
+
+    fun renderEntrancesInfo(item: MenuDrawerItem, resources: Resources, navDrawer: Drawer): HostRender = renderT(
+        { Triple(it.closedEntrances, it.requiredEntrances, it.isClosedCounterEnabled) },
+        { (closed, required, isCounterEnabled) ->
+            val text = resources.getString(
+                R.string.menu_entrances_required,
+                required
+            ) + if (isCounterEnabled) {
+                "\n" + resources.getString(
+                    R.string.menu_entrances_closed,
+                    closed
+                )
+            } else {
+                ""
+            }
+
+            navDrawer.updateItem(item.withName(text))
         }
     )
 }

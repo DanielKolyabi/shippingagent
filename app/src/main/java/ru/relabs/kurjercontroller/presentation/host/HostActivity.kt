@@ -1,7 +1,6 @@
 package ru.relabs.kurjercontroller.presentation.host
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -10,7 +9,6 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
@@ -39,7 +37,6 @@ import ru.relabs.kurjercontroller.presentation.host.systemWatchers.SystemWatcher
 import ru.relabs.kurjercontroller.presentation.сustomView.drawable.NavDrawerBackgroundDrawable
 import ru.relabs.kurjercontroller.services.ReportService
 import ru.relabs.kurjercontroller.utils.*
-import ru.relabs.kurjercontroller.utils.extensions.hideKeyboard
 import ru.relabs.kurjercontroller.utils.extensions.showDialog
 import ru.relabs.kurjercontroller.utils.extensions.showSnackbar
 import java.io.File
@@ -58,7 +55,8 @@ class HostActivity : AppCompatActivity(), IFragmentHolder {
     private val navigator = CiceroneNavigator(this)
 
     private val featureCheckersContainer = FeatureCheckersContainer(this)
-    private val systemWatchersContainer = SystemWatchersContainer(this, featureCheckersContainer.network, featureCheckersContainer.gps)
+    private val systemWatchersContainer =
+        SystemWatchersContainer(this, featureCheckersContainer.network, featureCheckersContainer.gps)
 
     private var taskUpdateRequiredDialogShowed: Boolean = false
     private var isUpdateAppDialogShowed: Boolean = false
@@ -89,7 +87,10 @@ class HostActivity : AppCompatActivity(), IFragmentHolder {
                 HostRenders.renderUpdateLoading(loading_overlay, pb_loading, tv_loader),
                 (navigationDrawer.drawerItems.first { it.identifier == NAVIGATION_INFO } as? MenuDrawerItem)?.let {
                     HostRenders.renderAppInfo(it, resources, navigationDrawer)
-                }
+                },
+                (navigationDrawer.drawerItems.first { it.identifier == NAVIGATION_ENTRANCES_INFO } as? MenuDrawerItem)?.let {
+                    HostRenders.renderEntrancesInfo(it, resources, navigationDrawer)
+                },
             )
             launch { controller.stateFlow().collect(rendersCollector(renders)) }
             //launch { controller.stateFlow().collect(debugCollector { debug(it) }) }
@@ -133,7 +134,14 @@ class HostActivity : AppCompatActivity(), IFragmentHolder {
                 uiScope.sendMessage(controller, HostMessages.msgRequestUpdates())
             } else {
                 startActivityForResult(
-                    Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).setData(Uri.parse(String.format("package:%s", packageName))),
+                    Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).setData(
+                        Uri.parse(
+                            String.format(
+                                "package:%s",
+                                packageName
+                            )
+                        )
+                    ),
                     REQUEST_CODE_INSTALL_PACKAGE
                 )
             }
@@ -196,7 +204,14 @@ class HostActivity : AppCompatActivity(), IFragmentHolder {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (!packageManager.canRequestPackageInstalls()) {
                 startActivityForResult(
-                    Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).setData(Uri.parse(String.format("package:%s", packageName))),
+                    Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).setData(
+                        Uri.parse(
+                            String.format(
+                                "package:%s",
+                                packageName
+                            )
+                        )
+                    ),
                     REQUEST_CODE_INSTALL_PACKAGE
                 )
             } else {
@@ -321,6 +336,11 @@ class HostActivity : AppCompatActivity(), IFragmentHolder {
     private fun buildDrawerItems(): Array<IDrawerItem<*>> {
         return arrayOf(
             buildDrawerItem(
+                NAVIGATION_ENTRANCES_INFO,
+                resources.getString(R.string.menu_entrances_required, 0),
+                false
+            ),
+            buildDrawerItem(
                 NAVIGATION_CRASH,
                 R.string.menu_info
             ),
@@ -359,7 +379,7 @@ class HostActivity : AppCompatActivity(), IFragmentHolder {
         uiScope.sendMessage(controller, HostMessages.msgResume())
         ReportService.isAppPaused = false
 
-        if(!ReportService.isRunning){
+        if (!ReportService.isRunning) {
             startService(Intent(this, ReportService::class.java))
         }
     }
@@ -408,6 +428,7 @@ class HostActivity : AppCompatActivity(), IFragmentHolder {
         const val NAVIGATION_UUID = 3L
         const val NAVIGATION_LOGOUT = 4L
         const val NAVIGATION_INFO = 999L
+        const val NAVIGATION_ENTRANCES_INFO = 998L
 
         fun getIntent(parentContext: Context) = Intent(parentContext, HostActivity::class.java)
     }

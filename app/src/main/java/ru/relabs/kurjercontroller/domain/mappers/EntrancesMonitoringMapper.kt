@@ -15,7 +15,7 @@ object EntrancesMonitoringMapper {
                 FirebaseCrashlytics.getInstance().recordException(RuntimeException("Unknown entrance monitoring mode"))
                 EntrancesMonitoringMode.DeliveryControl
             }
-        }
+        },
+        enabled = true
     )
-
 }

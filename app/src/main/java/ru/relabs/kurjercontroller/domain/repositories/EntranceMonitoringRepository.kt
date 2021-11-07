@@ -3,7 +3,9 @@ package ru.relabs.kurjercontroller.domain.repositories
 import android.content.SharedPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.data.database.AppDatabase
@@ -14,11 +16,12 @@ import ru.relabs.kurjercontroller.domain.storage.CurrentUserStorage
 
 class EntranceMonitoringRepository(
     private val database: AppDatabase,
+    private val databaseRepository: DatabaseRepository,
     private val sharedPreferences: SharedPreferences,
     private val currentUserStorage: CurrentUserStorage
 ) {
-    private val _closedCountFlow = MutableSharedFlow<Int>()
-    val closedCountFlow: SharedFlow<Int> = _closedCountFlow
+    private val _closedCountFlow = MutableStateFlow<Int>(0)
+    val closedCountFlow: StateFlow<Int> = _closedCountFlow
 
     suspend fun trackEntrance(taskItem: TaskItem, entrance: Entrance) = withContext(Dispatchers.Main) {
         val currentUserLogin = currentUserStorage.getCurrentUserLogin()?.login ?: return@withContext
@@ -37,6 +40,15 @@ class EntranceMonitoringRepository(
         database.closedAddressesDao().getClosedCount(currentUserLogin).also {
             _closedCountFlow.tryEmit(it)
         }
+    }
+
+    suspend fun getRequiredEntrancesCount(): Int = withContext(Dispatchers.IO) {
+        val now = DateTime.now()
+        databaseRepository.getTasks()
+            .filter { now > it.startControlDate && it.endControlDate.plusHours(1) < now.withTimeAtStartOfDay() } //Tasks for current date
+            .flatMap { it.taskItems } //Item with task
+            .distinctBy { it.address.idnd } //Unique addresses
+            .sumOf { it.entrances.count() }
     }
 
     private suspend fun cleanDailyCloses() = withContext(Dispatchers.IO) {

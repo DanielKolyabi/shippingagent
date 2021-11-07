@@ -82,6 +82,22 @@ object HostMessages {
     fun msgRequiredUpdateLater(): HostMessage =
         msgEffect(HostEffects.effectNotifyUpdateRequiredOnTasksOpen())
 
-    fun msgUserLoaded(user: UserLogin?): HostMessage =
-        msgState { it.copy(userLogin = user) }
+    fun msgUserLoaded(user: UserLogin?): HostMessage = msgEffects(
+        { it.copy(userLogin = user) },
+        {
+            listOf(HostEffects.effectRefreshEntranceMonitoringData())
+        }
+    )
+
+    fun entranceMonitoringDataLoaded(counterEnabled: Boolean, requiredEntrances: Int, closedEntrances: Int): HostMessage =
+        msgState {
+            it.copy(
+                isClosedCounterEnabled = counterEnabled,
+                requiredEntrances = requiredEntrances,
+                closedEntrances = closedEntrances
+            )
+        }
+
+    fun msgClosedEntrancesCountUpdated(count: Int): HostMessage =
+        msgState { it.copy(closedEntrances = count) }
 }

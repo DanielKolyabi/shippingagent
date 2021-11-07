@@ -202,6 +202,11 @@ object HostEffects {
                     }
                 }
             }
+            launch {
+                c.entranceMonitoringRepository.closedCountFlow.collect {
+                    messages.send(HostMessages.msgClosedEntrancesCountUpdated(it))
+                }
+            }
         }
     }
 
@@ -213,5 +218,13 @@ object HostEffects {
 
     fun effectNotifyUpdateRequiredOnTasksOpen(): HostEffect = { c, s ->
         c.taskEventController.send(TaskEvent.TasksUpdateRequired(true))
+    }
+
+    fun effectRefreshEntranceMonitoringData(): HostEffect = {c,s ->
+        val isCounterEnabled = c.settingsRepository.entrancesMonitoring.isCounterEnabled
+        val requiredEntrances = c.entranceMonitoringRepository.getRequiredEntrancesCount()
+        val closedEntrances = c.entranceMonitoringRepository.closedCountFlow.value
+
+        messages.send(HostMessages.entranceMonitoringDataLoaded(isCounterEnabled, requiredEntrances, closedEntrances))
     }
 }

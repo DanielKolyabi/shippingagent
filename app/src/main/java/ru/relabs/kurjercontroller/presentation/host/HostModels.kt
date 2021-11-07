@@ -10,6 +10,8 @@ import ru.relabs.kurjercontroller.domain.models.AppUpdatesInfo
 import ru.relabs.kurjercontroller.domain.providers.DeviceUUIDProvider
 import ru.relabs.kurjercontroller.domain.providers.LocationProvider
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
+import ru.relabs.kurjercontroller.domain.repositories.EntranceMonitoringRepository
+import ru.relabs.kurjercontroller.domain.repositories.SettingsRepository
 import ru.relabs.kurjercontroller.domain.storage.CurrentUserStorage
 import ru.relabs.kurjercontroller.domain.useCases.AppUpdateUseCase
 import ru.relabs.kurjercontroller.presentation.base.fragment.AppBarSettings
@@ -29,7 +31,11 @@ data class HostState(
     val appUpdates: AppUpdatesInfo? = null,
     val isUpdateLoadingFailed: Boolean = false,
     val updateFile: File? = null,
-    val isUpdateDialogShowed: Boolean = false
+    val isUpdateDialogShowed: Boolean = false,
+
+    val closedEntrances: Int = 0,
+    val requiredEntrances: Int = 0,
+    val isClosedCounterEnabled: Boolean = false
 )
 
 class HostContext(
@@ -45,6 +51,8 @@ class HostContext(
     val taskEventController: TaskEventController by inject()
     val serviceEventController: ServiceEventController by inject()
     val userRepository: CurrentUserStorage by inject()
+    val entranceMonitoringRepository: EntranceMonitoringRepository by inject()
+    val settingsRepository: SettingsRepository by inject()
 
     var copyToClipboard: (String) -> Unit = {}
     var showUpdateDialog: (AppUpdate) -> Boolean = { false }

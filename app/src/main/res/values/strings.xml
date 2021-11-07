@@ -140,6 +140,8 @@
     <string name="task_update_required">Необходимо обновить список заданий</string>
     <string name="later">Позже</string>
     <string name="menu_bottom_info">"Версия: %d | Пользователь: %s "</string>
+    <string name="menu_entrances_required">Запланировано подъездов: %d</string>
+    <string name="menu_entrances_closed">Закрыто подъездов: %d</string>
     <string name="details_description_column">Прим.</string>
     <string name="details_address_column">Адрес</string>
     <string name="details_filter_column">Фильтр</string>
