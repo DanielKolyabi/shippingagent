@@ -112,7 +112,8 @@ val repositoryModule = module {
             get<AppDatabase>(),
             get<AuthTokenStorage>(),
             get<String>(Modules.DELIVERY_URL),
-            get<PathsProvider>()
+            get<PathsProvider>(),
+            get<TaskEventController>()
         )
     }
     single<ControlRepository> {

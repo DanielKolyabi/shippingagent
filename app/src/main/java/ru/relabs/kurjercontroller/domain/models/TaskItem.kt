@@ -32,7 +32,8 @@ data class TaskItem(
     val wrongMethod: Boolean,
     val buttonName: String,
     val requiredApartments: String,
-    val publisherId: PublisherId
+    val publisherId: PublisherId,
+    val entrancesMonitoringMode: EntrancesMonitoringMode
 ) : Parcelable {
     fun getRequiredApartments(): List<RequiredApartment> {
         return requiredApartments.split(",").mapNotNull {

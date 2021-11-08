@@ -1,9 +1,7 @@
 package ru.relabs.kurjercontroller.domain.models
 
 data class EntrancesMonitoring(
-    val enabled: Boolean,
-    val isCounterEnabled: Boolean,
-    val mode: EntrancesMonitoringMode
+    val isCounterEnabled: Boolean
 )
 
 enum class EntrancesMonitoringMode {

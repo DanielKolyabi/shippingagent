@@ -89,7 +89,7 @@ object HostMessages {
         }
     )
 
-    fun entranceMonitoringDataLoaded(counterEnabled: Boolean, requiredEntrances: Int, closedEntrances: Int): HostMessage =
+    fun msgEntranceMonitoringDataLoaded(counterEnabled: Boolean, requiredEntrances: Int, closedEntrances: Int): HostMessage =
         msgState {
             it.copy(
                 isClosedCounterEnabled = counterEnabled,

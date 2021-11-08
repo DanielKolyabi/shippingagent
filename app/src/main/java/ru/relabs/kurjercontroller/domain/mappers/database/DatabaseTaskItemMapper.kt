@@ -25,7 +25,8 @@ object DatabaseTaskItemMapper {
         wrongMethod = entity.wrongMethod,
         buttonName = entity.buttonName,
         requiredApartments = entity.requiredApartments,
-        publisherId = PublisherId(entity.publisherId)
+        publisherId = PublisherId(entity.publisherId),
+        entrancesMonitoringMode = EntrancesMonitoringMode.values()[entity.entrancesMonitoringMode]
     )
 
     fun toEntity(model: TaskItem): TaskItemEntity = TaskItemEntity(
@@ -43,6 +44,7 @@ object DatabaseTaskItemMapper {
         wrongMethod = model.wrongMethod,
         buttonName = model.buttonName,
         requiredApartments = model.requiredApartments,
-        publisherId = model.publisherId.id
+        publisherId = model.publisherId.id,
+        entrancesMonitoringMode = model.entrancesMonitoringMode.ordinal
     )
 }

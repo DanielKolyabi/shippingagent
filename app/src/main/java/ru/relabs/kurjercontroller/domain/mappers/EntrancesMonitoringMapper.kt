@@ -7,15 +7,6 @@ import ru.relabs.kurjercontroller.domain.models.EntrancesMonitoringMode
 
 object EntrancesMonitoringMapper {
     fun fromRaw(raw: EntrancesMonitoringSettingsResponse) = EntrancesMonitoring(
-        isCounterEnabled = raw.isCounterEnabled,
-        mode = when (raw.mode) {
-            0 -> EntrancesMonitoringMode.DeliveryControl
-            1 -> EntrancesMonitoringMode.HousesControl
-            else -> {
-                FirebaseCrashlytics.getInstance().recordException(RuntimeException("Unknown entrance monitoring mode"))
-                EntrancesMonitoringMode.DeliveryControl
-            }
-        },
-        enabled = true
+        isCounterEnabled = raw.isCounterEnabled
     )
 }

@@ -1,10 +1,9 @@
 package ru.relabs.kurjercontroller.domain.repositories
 
 import android.content.SharedPreferences
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
@@ -23,20 +22,25 @@ class EntranceMonitoringRepository(
     private val _closedCountFlow = MutableStateFlow<Int>(0)
     val closedCountFlow: StateFlow<Int> = _closedCountFlow
 
-    suspend fun trackEntrance(taskItem: TaskItem, entrance: Entrance) = withContext(Dispatchers.Main) {
+    suspend fun trackEntrance(taskItem: TaskItem, entrance: Entrance) = withContext(Dispatchers.IO) {
         val currentUserLogin = currentUserStorage.getCurrentUserLogin()?.login ?: return@withContext
+        Log.d("EntranceMonitoring", "PreClean")
         cleanDailyCloses()
-
-        if (database.closedAddressesDao().findEntrance(taskItem.address.idnd, entrance.number.number, currentUserLogin) == null) {
-
+        Log.d("EntranceMonitoring", "PostClean")
+        val sameClosedEntrances = database.closedAddressesDao().findEntrance(taskItem.address.idnd, entrance.number.number, currentUserLogin)
+        Log.d("EntranceMonitoring", "Track, sameEntrances: $sameClosedEntrances")
+        if (sameClosedEntrances.isEmpty()) {
             database.closedAddressesDao()
                 .insert(ClosedAddressEntity(0, taskItem.address.idnd, entrance.number.number, currentUserLogin))
             _closedCountFlow.tryEmit(getClosedEntrancesCount())
         }
     }
 
-    suspend fun getClosedEntrancesCount(): Int = withContext(Dispatchers.IO) {
+    suspend fun getClosedEntrancesCount(withCleanup: Boolean = true): Int = withContext(Dispatchers.IO) {
         val currentUserLogin = currentUserStorage.getCurrentUserLogin()?.login ?: return@withContext 0
+        if(withCleanup){
+            cleanDailyCloses()
+        }
         database.closedAddressesDao().getClosedCount(currentUserLogin).also {
             _closedCountFlow.tryEmit(it)
         }
@@ -44,8 +48,9 @@ class EntranceMonitoringRepository(
 
     suspend fun getRequiredEntrancesCount(): Int = withContext(Dispatchers.IO) {
         val now = DateTime.now()
-        databaseRepository.getTasks()
-            .filter { now > it.startControlDate && it.endControlDate.plusHours(1) < now.withTimeAtStartOfDay() } //Tasks for current date
+        val tasks = databaseRepository.getTasks()
+        tasks
+            .filter { now > it.startControlDate && now.withTimeAtStartOfDay() < it.endControlDate } //Tasks for current date
             .flatMap { it.taskItems } //Item with task
             .distinctBy { it.address.idnd } //Unique addresses
             .sumOf { it.entrances.count() }
@@ -63,7 +68,7 @@ class EntranceMonitoringRepository(
         }
         if (latestTrackingDay.dayOfYear < today.dayOfYear || latestTrackingDay.year < today.year) {
             database.closedAddressesDao().cleanForUser(currentUserLogin)
-            _closedCountFlow.tryEmit(getClosedEntrancesCount())
+            _closedCountFlow.tryEmit(getClosedEntrancesCount(false))
             sharedPreferences.edit().putString(LATEST_TRACKING_DAY_KEY, today.toString()).apply()
         }
     }

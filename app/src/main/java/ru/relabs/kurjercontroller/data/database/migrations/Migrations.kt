@@ -14,7 +14,8 @@ object Migrations {
         migration_43_44,
         migration_44_45,
         migration_45_46,
-        migration_46_47
+        migration_46_47,
+        migration_47_48
     )
 
 
@@ -96,6 +97,11 @@ object Migrations {
                     )
                 """.trimIndent()
             )
+        }
+    }
+    val migration_47_48 = object : Migration(47, 48) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE task_items ADD COLUMN entrances_monitoring_mode INTEGER NOT NULL DEFAULT 0")
         }
     }
 }

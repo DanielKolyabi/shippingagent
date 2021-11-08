@@ -13,7 +13,7 @@ import ru.relabs.kurjercontroller.data.database.entities.ClosedAddressEntity
 interface ClosedAddressesDao {
 
     @Query("SELECT * FROM closed_addresses WHERE address_id = :idnd AND entrance_number = :entranceNumber AND user_id = :userLogin")
-    fun findEntrance(idnd: Int, entranceNumber: Int, userLogin: String): ClosedAddressEntity?
+    fun findEntrance(idnd: Int, entranceNumber: Int, userLogin: String): List<ClosedAddressEntity>
 
     @Query("SELECT COUNT(*) FROM closed_addresses WHERE user_id = :userLogin")
     fun getClosedCount(userLogin: String): Int

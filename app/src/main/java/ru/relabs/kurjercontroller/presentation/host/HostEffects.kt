@@ -4,7 +4,6 @@ import android.net.Uri
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.iid.FirebaseInstanceId
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
@@ -165,15 +164,17 @@ object HostEffects {
     }
 
     private fun isUpdateRequired(state: HostState): Boolean =
-        state.appUpdates == null || ((state.appUpdates.required?.version ?: 0) > BuildConfig.VERSION_CODE && !state.isUpdateLoadingFailed)
+        state.appUpdates == null || ((state.appUpdates.required?.version
+            ?: 0) > BuildConfig.VERSION_CODE && !state.isUpdateLoadingFailed)
 
     fun effectSubscribe(): HostEffect = { c, s ->
         coroutineScope {
             launch {
                 c.taskEventController.subscribe().collect {
+                    messages.send(msgEffect(effectRefreshEntranceMonitoringData()))
                     when (it) {
                         is TaskEvent.TasksUpdateRequired -> withContext(Dispatchers.Main) {
-                            if(!it.showDialogInTasks){
+                            if (!it.showDialogInTasks) {
                                 c.showTaskUpdateRequired()
                             }
                         }
@@ -186,17 +187,17 @@ object HostEffects {
                 }
             }
             launch {
-                while(isActive){
+                while (isActive) {
                     delay(5000)
-                    if(!c.updatesUseCase.isAppUpdated){
+                    if (!c.updatesUseCase.isAppUpdated) {
                         messages.send(HostMessages.msgRequestUpdates())
                     }
                 }
             }
             launch {
                 c.serviceEventController.subscribe().collect {
-                    if(it == ServiceEvent.Stop){
-                        withContext(Dispatchers.Main){
+                    if (it == ServiceEvent.Stop) {
+                        withContext(Dispatchers.Main) {
                             c.finishApp()
                         }
                     }
@@ -220,11 +221,11 @@ object HostEffects {
         c.taskEventController.send(TaskEvent.TasksUpdateRequired(true))
     }
 
-    fun effectRefreshEntranceMonitoringData(): HostEffect = {c,s ->
+    fun effectRefreshEntranceMonitoringData(): HostEffect = { c, s ->
         val isCounterEnabled = c.settingsRepository.entrancesMonitoring.isCounterEnabled
         val requiredEntrances = c.entranceMonitoringRepository.getRequiredEntrancesCount()
         val closedEntrances = c.entranceMonitoringRepository.closedCountFlow.value
 
-        messages.send(HostMessages.entranceMonitoringDataLoaded(isCounterEnabled, requiredEntrances, closedEntrances))
+        messages.send(HostMessages.msgEntranceMonitoringDataLoaded(isCounterEnabled, requiredEntrances, closedEntrances))
     }
 }

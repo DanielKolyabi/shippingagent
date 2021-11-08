@@ -27,7 +27,12 @@ class ReportUseCase(
     private val entranceMonitoringRepository: EntranceMonitoringRepository
 ) {
 
-    suspend fun createReport(taskItem: TaskItem, entrance: Entrance, location: Location?, withRemove: Boolean) {
+    suspend fun createReport(
+        taskItem: TaskItem,
+        entrance: Entrance,
+        location: Location?,
+        withRemove: Boolean
+    ) {
         val entranceResult = databaseRepository.getEntranceResult(taskItem, entrance)
         val apartmentResults = databaseRepository.getEntranceApartments(taskItem, entrance).map {
             ApartmentResult(
@@ -90,9 +95,16 @@ class ReportUseCase(
         }
 
         if (
-            settingsRepository.entrancesMonitoring.enabled
-            && withRemove
-            && shouldTrackClosing(distance, isEntranceClosed, apartmentResults, entrance, entranceResult, photos)
+            withRemove
+            && shouldTrackClosing(
+                distance,
+                isEntranceClosed,
+                apartmentResults,
+                entrance,
+                entranceResult,
+                photos,
+                taskItem.entrancesMonitoringMode
+            )
         ) {
             entranceMonitoringRepository.trackEntrance(taskItem, entrance)
         }
@@ -104,14 +116,15 @@ class ReportUseCase(
         apartmentResults: List<ApartmentResult>,
         entrance: Entrance,
         entranceResult: EntranceResultEntity?,
-        photos: List<EntrancePhoto>
+        photos: List<EntrancePhoto>,
+        entranceMonitoringMode: EntrancesMonitoringMode
     ): Boolean {
         val radiusAllowed = when (val r = settingsRepository.allowedCloseRadius) {
             is AllowedCloseRadius.NotRequired -> true
             is AllowedCloseRadius.Required -> distance <= r.distance
         }
 
-        val modeAllowed = when (settingsRepository.entrancesMonitoring.mode) {
+        val modeAllowed = when (entranceMonitoringMode) {
             EntrancesMonitoringMode.DeliveryControl -> apartmentResults.any {
                 it.state and 1 != 0 ||
                         it.state and 2 != 0 ||

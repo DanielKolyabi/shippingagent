@@ -26,7 +26,7 @@ class SettingsRepository(
     fun resetData() {
         closeGpsUpdateTime = GpsRefreshTimes(40, 40)
         allowedCloseRadius = AllowedCloseRadius.Required(DEFAULT_REQUIRED_RADIUS, false)
-        entrancesMonitoring = EntrancesMonitoring(false, false, EntrancesMonitoringMode.DeliveryControl)
+        entrancesMonitoring = EntrancesMonitoring(false)
         sharedPreferences.edit {
             remove(RADIUS_REQUIRED_KEY)
             remove(RADIUS_KEY)
@@ -34,7 +34,6 @@ class SettingsRepository(
             remove(PHOTO_GPS_KEY)
             remove(CLOSE_GPS_KEY)
             remove(MONITORING_COUNTER_KEY)
-            remove(MONITORING_MODE_KEY)
         }
     }
 
@@ -63,7 +62,6 @@ class SettingsRepository(
 
     private fun saveEntrancesMonitoring(entrancesMonitoring: EntrancesMonitoring) {
         sharedPreferences.edit {
-            putInt(MONITORING_MODE_KEY, entrancesMonitoring.mode.ordinal)
             putBoolean(MONITORING_COUNTER_KEY, entrancesMonitoring.isCounterEnabled)
         }
     }
@@ -82,13 +80,8 @@ class SettingsRepository(
     }
 
     private fun loadEntrancesMonitoring(): EntrancesMonitoring {
-        val mode = EntrancesMonitoringMode.values().getOrNull(sharedPreferences.getInt(MONITORING_MODE_KEY, -1))
-        val counterEnabled = sharedPreferences.getBoolean(MONITORING_MODE_KEY, false)
-        return if (mode != null) {
-            EntrancesMonitoring(true, counterEnabled, mode)
-        } else {
-            EntrancesMonitoring(false, counterEnabled, EntrancesMonitoringMode.DeliveryControl)
-        }
+        val counterEnabled = sharedPreferences.getBoolean(MONITORING_COUNTER_KEY, false)
+        return EntrancesMonitoring(counterEnabled)
     }
 
 
@@ -127,7 +120,6 @@ class SettingsRepository(
         const val PHOTO_GPS_KEY = "photo_gps"
         const val RADIUS_KEY = "radius"
         const val MONITORING_COUNTER_KEY = "monitoring_counter"
-        const val MONITORING_MODE_KEY = "monitoring_mode"
         const val DEFAULT_REQUIRED_RADIUS = 50
     }
 }

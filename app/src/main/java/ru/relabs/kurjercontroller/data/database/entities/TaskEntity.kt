@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import org.joda.time.DateTime
+import ru.relabs.kurjercontroller.domain.models.EntrancesMonitoringMode
 
 /**
  * Created by ProOrange on 19.03.2019.
@@ -32,5 +33,5 @@ data class TaskEntity(
     @ColumnInfo(name = "with_planned")
     val withPlanned: Boolean = false,
     @ColumnInfo(name = "by_other_user")
-    val byOtherUser: Boolean = false //TODO: Need migration
+    val byOtherUser: Boolean = false
 )

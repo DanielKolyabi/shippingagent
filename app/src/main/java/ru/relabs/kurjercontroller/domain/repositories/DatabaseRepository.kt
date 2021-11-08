@@ -10,6 +10,8 @@ import kotlinx.coroutines.withContext
 import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.data.database.AppDatabase
 import ru.relabs.kurjercontroller.data.database.entities.*
+import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
+import ru.relabs.kurjercontroller.domain.controllers.TaskEventController
 import ru.relabs.kurjercontroller.domain.mappers.FilterTypeMapper
 import ru.relabs.kurjercontroller.domain.mappers.database.*
 import ru.relabs.kurjercontroller.domain.mappers.network.AddressMapper
@@ -25,7 +27,8 @@ class DatabaseRepository(
     val db: AppDatabase,
     private val authTokenStorage: AuthTokenStorage,
     private val baseUrl: String,
-    private val pathsProvider: PathsProvider
+    private val pathsProvider: PathsProvider,
+    private val taskEventController: TaskEventController
 ) {
 
     suspend fun getAddress(id: AddressId): Address? = withContext(Dispatchers.IO) {
@@ -486,6 +489,7 @@ class DatabaseRepository(
             val currentTime = DateTime()
             if (it.endControlDate.plusHours(1) < currentTime.withTimeAtStartOfDay()) {
                 closeTaskById(it.id.id, false)
+                taskEventController.send(TaskEvent.OnlineTaskUpdated)
             }
         }
     }
@@ -540,7 +544,7 @@ class DatabaseRepository(
                 type = FilterTypeMapper.toInt(it.type)
             )
         })
-
+        taskEventController.send(TaskEvent.OnlineTaskUpdated)
         DatabaseTaskMapper.fromEntity(entity, db)
     }
 
@@ -570,6 +574,7 @@ class DatabaseRepository(
                     .map { DatabaseEntranceMapper.toEntity(it, taskItem.taskId, taskItem.id) }
             )
         }
+        taskEventController.send(TaskEvent.OnlineTaskUpdated)
     }
 
     suspend fun markAsOld(taskItem: TaskItem) = withContext(Dispatchers.IO) {

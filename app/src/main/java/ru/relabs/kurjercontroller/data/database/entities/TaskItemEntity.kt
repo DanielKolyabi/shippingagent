@@ -42,5 +42,7 @@ data class TaskItemEntity(
     @ColumnInfo(name = "required_apartments")
     val requiredApartments: String,
     @ColumnInfo(name = "order_id")
-    val publisherId: Int
+    val publisherId: Int,
+    @ColumnInfo(name = "entrances_monitoring_mode")
+    val entrancesMonitoringMode: Int = 0
 )

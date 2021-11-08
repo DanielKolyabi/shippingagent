@@ -15,4 +15,5 @@ sealed class TaskEvent {
     data class EntranceClosed(val taskId: TaskId, val taskItemId: TaskItemId, val number: EntranceNumber) : TaskEvent()
     data class TaskItemChanged(val taskItem: TaskItem) : TaskEvent()
     data class TaskItemClosedByDeliveryMan(val taskItemId: TaskItemId, val closeTime: DateTime) : TaskEvent()
+    object OnlineTaskUpdated: TaskEvent()
 }

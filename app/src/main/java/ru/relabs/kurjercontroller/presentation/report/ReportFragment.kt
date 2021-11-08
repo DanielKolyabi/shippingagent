@@ -27,10 +27,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.R
-import ru.relabs.kurjercontroller.domain.models.ApartmentNumber
-import ru.relabs.kurjercontroller.domain.models.Entrance
-import ru.relabs.kurjercontroller.domain.models.EntranceNumber
-import ru.relabs.kurjercontroller.domain.models.TaskItem
+import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.presentation.base.TextChangeListener
 import ru.relabs.kurjercontroller.presentation.base.fragment.BaseFragment
 import ru.relabs.kurjercontroller.presentation.base.recycler.DelegateAdapter
@@ -75,6 +72,7 @@ class ReportFragment : BaseFragment() {
         val taskItem = arguments?.getParcelable<TaskItem>(ARG_TASK_ITEM)
         val allTaskItems = arguments?.getParcelableArrayList<TaskItemWithTaskIds>(ARG_TASK_ITEMS_ALL)
         val entrance = arguments?.getParcelable<Entrance>(ARG_ENTRANCES)
+
         if (taskItem == null || entrance == null || allTaskItems == null) {
             FirebaseCrashlytics.getInstance().log("ti: ${taskItem} \n e: $entrance \n ati: $allTaskItems")
             return
@@ -481,14 +479,17 @@ class ReportFragment : BaseFragment() {
         const val REQUEST_PHOTO_CODE = 501
         const val SAVED_NEXT_PHOTO_DATA_KEY = "photoData"
 
-        fun newInstance(taskItem: TaskItem, entrance: Entrance, otherTaskItemWithTaskIds: List<TaskItemWithTaskIds>) =
-            ReportFragment().apply {
-                arguments = Bundle().apply {
-                    putParcelable(ARG_TASK_ITEM, taskItem)
-                    putParcelable(ARG_ENTRANCES, entrance)
-                    putParcelableArrayList(ARG_TASK_ITEMS_ALL, ArrayList(otherTaskItemWithTaskIds))
-                }
+        fun newInstance(
+            taskItem: TaskItem,
+            entrance: Entrance,
+            otherTaskItemWithTaskIds: List<TaskItemWithTaskIds>
+        ) = ReportFragment().apply {
+            arguments = Bundle().apply {
+                putParcelable(ARG_TASK_ITEM, taskItem)
+                putParcelable(ARG_ENTRANCES, entrance)
+                putParcelableArrayList(ARG_TASK_ITEMS_ALL, ArrayList(otherTaskItemWithTaskIds))
             }
+        }
     }
 
     @Parcelize

@@ -1,8 +1,8 @@
 package ru.relabs.kurjercontroller.domain.mappers.database
 
-import org.joda.time.DateTime
 import ru.relabs.kurjercontroller.data.database.AppDatabase
 import ru.relabs.kurjercontroller.data.database.entities.TaskEntity
+import ru.relabs.kurjercontroller.domain.models.EntrancesMonitoringMode
 import ru.relabs.kurjercontroller.domain.models.Task
 import ru.relabs.kurjercontroller.domain.models.TaskId
 import ru.relabs.kurjercontroller.domain.models.toTaskState
@@ -16,13 +16,13 @@ object DatabaseTaskMapper {
         startControlDate = taskEntity.startControlDate,
         endControlDate = taskEntity.endControlDate,
         description = taskEntity.description,
-        storages = db.taskStorageDao().getByTaskId(taskEntity.id).map{
+        storages = db.taskStorageDao().getByTaskId(taskEntity.id).map {
             DatabaseStorageMapper.fromEntity(it)
         },
-        publishers = db.taskPublisherDao().getByTaskId(taskEntity.id).map{
+        publishers = db.taskPublisherDao().getByTaskId(taskEntity.id).map {
             DatabasePublisherMapper.fromEntity(it)
         },
-        taskItems = db.taskItemDao().getByTaskId(taskEntity.id).map{
+        taskItems = db.taskItemDao().getByTaskId(taskEntity.id).map {
             DatabaseTaskItemMapper.fromEntity(it, db)
         },
         taskFilters = DatabaseFilterMapper.fromEntities(db.filtersDao().getByTaskId(taskEntity.id)),
