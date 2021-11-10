@@ -3,9 +3,10 @@ package ru.relabs.kurjercontroller.domain.repositories
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import ru.relabs.kurjercontroller.domain.models.AllowedCloseRadius
 import ru.relabs.kurjercontroller.domain.models.EntrancesMonitoring
-import ru.relabs.kurjercontroller.domain.models.EntrancesMonitoringMode
 import ru.relabs.kurjercontroller.domain.models.GpsRefreshTimes
 import ru.relabs.kurjercontroller.utils.Right
 
@@ -19,7 +20,13 @@ class SettingsRepository(
     val scope = CoroutineScope(Dispatchers.Main)
     var allowedCloseRadius: AllowedCloseRadius = loadSavedRadius()
     var closeGpsUpdateTime: GpsRefreshTimes = loadSavedGPSRefreshTimes()
-    var entrancesMonitoring: EntrancesMonitoring = loadEntrancesMonitoring()
+    private var entrancesMonitoring: EntrancesMonitoring = loadEntrancesMonitoring()
+        set(value) {
+            _entranceMonitoringFlow.tryEmit(value)
+            field = value
+        }
+    private val _entranceMonitoringFlow = MutableStateFlow(entrancesMonitoring)
+    val entranceMonitoringFlow: StateFlow<EntrancesMonitoring> = _entranceMonitoringFlow
 
     private var updateJob: Job? = null
 

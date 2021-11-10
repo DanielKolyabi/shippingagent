@@ -337,7 +337,7 @@ class HostActivity : AppCompatActivity(), IFragmentHolder {
         return arrayOf(
             buildDrawerItem(
                 NAVIGATION_ENTRANCES_INFO,
-                resources.getString(R.string.menu_entrances_required, 0),
+                "",
                 false
             ),
             buildDrawerItem(

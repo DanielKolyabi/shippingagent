@@ -93,19 +93,20 @@ object HostRenders {
     fun renderEntrancesInfo(item: MenuDrawerItem, resources: Resources, navDrawer: Drawer): HostRender = renderT(
         { Triple(it.closedEntrances, it.requiredEntrances, it.isClosedCounterEnabled) },
         { (closed, required, isCounterEnabled) ->
-            val text = resources.getString(
-                R.string.menu_entrances_required,
-                required
-            ) + if (isCounterEnabled) {
-                "\n" + resources.getString(
-                    R.string.menu_entrances_closed,
-                    closed
-                )
+            val text = if (isCounterEnabled) {
+                resources.getString(R.string.menu_entrances, required, closed)
             } else {
                 ""
             }
+            val newItem = item.withName(text)
 
-            navDrawer.updateItem(item.withName(text))
+            if(text.isEmpty() && navDrawer.getDrawerItem(newItem.identifier) != null){
+                navDrawer.removeItem(newItem.identifier)
+            }else if(text.isNotEmpty() && navDrawer.getDrawerItem(newItem.identifier) == null){
+                navDrawer.addItemAtPosition(newItem.withName(text), 1)
+            }else{
+                navDrawer.updateItem(newItem.withName(text))
+            }
         }
     )
 }

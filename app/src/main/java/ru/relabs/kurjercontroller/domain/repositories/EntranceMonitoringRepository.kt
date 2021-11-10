@@ -19,15 +19,18 @@ class EntranceMonitoringRepository(
     private val sharedPreferences: SharedPreferences,
     private val currentUserStorage: CurrentUserStorage
 ) {
-    private val _closedCountFlow = MutableStateFlow<Int>(0)
+    private val _closedCountFlow = MutableStateFlow(0)
     val closedCountFlow: StateFlow<Int> = _closedCountFlow
+    private val _requiredCountFlow = MutableStateFlow(0)
+    val requiredCountFlow: StateFlow<Int> = _requiredCountFlow
 
     suspend fun trackEntrance(taskItem: TaskItem, entrance: Entrance) = withContext(Dispatchers.IO) {
         val currentUserLogin = currentUserStorage.getCurrentUserLogin()?.login ?: return@withContext
         Log.d("EntranceMonitoring", "PreClean")
         cleanDailyCloses()
         Log.d("EntranceMonitoring", "PostClean")
-        val sameClosedEntrances = database.closedAddressesDao().findEntrance(taskItem.address.idnd, entrance.number.number, currentUserLogin)
+        val sameClosedEntrances =
+            database.closedAddressesDao().findEntrance(taskItem.address.idnd, entrance.number.number, currentUserLogin)
         Log.d("EntranceMonitoring", "Track, sameEntrances: $sameClosedEntrances")
         if (sameClosedEntrances.isEmpty()) {
             database.closedAddressesDao()
@@ -38,15 +41,15 @@ class EntranceMonitoringRepository(
 
     suspend fun getClosedEntrancesCount(withCleanup: Boolean = true): Int = withContext(Dispatchers.IO) {
         val currentUserLogin = currentUserStorage.getCurrentUserLogin()?.login ?: return@withContext 0
-        if(withCleanup){
+        if (withCleanup) {
             cleanDailyCloses()
         }
-        database.closedAddressesDao().getClosedCount(currentUserLogin).also {
-            _closedCountFlow.tryEmit(it)
-        }
+        database.closedAddressesDao()
+            .getClosedCount(currentUserLogin)
+            .also { _closedCountFlow.tryEmit(it) }
     }
 
-    suspend fun getRequiredEntrancesCount(): Int = withContext(Dispatchers.IO) {
+    suspend fun getRequiredEntrancesCount() = withContext(Dispatchers.IO) {
         val now = DateTime.now()
         val tasks = databaseRepository.getTasks()
         tasks
@@ -54,6 +57,7 @@ class EntranceMonitoringRepository(
             .flatMap { it.taskItems } //Item with task
             .distinctBy { it.address.idnd } //Unique addresses
             .sumOf { it.entrances.count() }
+            .also { _requiredCountFlow.tryEmit(it) }
     }
 
     private suspend fun cleanDailyCloses() = withContext(Dispatchers.IO) {

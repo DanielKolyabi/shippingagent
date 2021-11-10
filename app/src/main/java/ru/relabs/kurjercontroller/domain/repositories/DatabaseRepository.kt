@@ -352,6 +352,8 @@ class DatabaseRepository(
                 emit(MergeResult.TaskUpdated(task))
             }
         }
+
+        taskEventController.send(TaskEvent.TaskUpdated)
     }.flowOn(Dispatchers.IO)
 
     suspend fun saveFilters(
@@ -489,7 +491,7 @@ class DatabaseRepository(
             val currentTime = DateTime()
             if (it.endControlDate.plusHours(1) < currentTime.withTimeAtStartOfDay()) {
                 closeTaskById(it.id.id, false)
-                taskEventController.send(TaskEvent.OnlineTaskUpdated)
+                taskEventController.send(TaskEvent.TaskUpdated)
             }
         }
     }
@@ -544,7 +546,7 @@ class DatabaseRepository(
                 type = FilterTypeMapper.toInt(it.type)
             )
         })
-        taskEventController.send(TaskEvent.OnlineTaskUpdated)
+        taskEventController.send(TaskEvent.TaskUpdated)
         DatabaseTaskMapper.fromEntity(entity, db)
     }
 
@@ -574,7 +576,7 @@ class DatabaseRepository(
                     .map { DatabaseEntranceMapper.toEntity(it, taskItem.taskId, taskItem.id) }
             )
         }
-        taskEventController.send(TaskEvent.OnlineTaskUpdated)
+        taskEventController.send(TaskEvent.TaskUpdated)
     }
 
     suspend fun markAsOld(taskItem: TaskItem) = withContext(Dispatchers.IO) {

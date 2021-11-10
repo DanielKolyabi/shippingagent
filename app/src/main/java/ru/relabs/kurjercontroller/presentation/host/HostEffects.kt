@@ -5,6 +5,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.iid.FirebaseInstanceId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.domain.controllers.ServiceEvent
@@ -182,9 +183,9 @@ object HostEffects {
                 }
             }
             launch {
-                for (user in c.userRepository.currentUser.openSubscription()) {
-                    messages.send(HostMessages.msgUserLoaded(user))
-                }
+                c.userRepository.currentUser
+                    .distinctUntilChanged { o, n -> o != n }
+                    .collect { messages.send(HostMessages.msgUserLoaded(it)) }
             }
             launch {
                 while (isActive) {
@@ -208,6 +209,16 @@ object HostEffects {
                     messages.send(HostMessages.msgClosedEntrancesCountUpdated(it))
                 }
             }
+            launch {
+                c.entranceMonitoringRepository.requiredCountFlow.collect {
+                    messages.send(HostMessages.msgRequiredEntrancesCountUpdated(it))
+                }
+            }
+            launch {
+                c.settingsRepository.entranceMonitoringFlow.collect {
+                    messages.send(HostMessages.msgEntranceCounterEnabledUpdated(it.isCounterEnabled))
+                }
+            }
         }
     }
 
@@ -222,10 +233,12 @@ object HostEffects {
     }
 
     fun effectRefreshEntranceMonitoringData(): HostEffect = { c, s ->
-        val isCounterEnabled = c.settingsRepository.entrancesMonitoring.isCounterEnabled
+        val isCounterEnabled = c.settingsRepository.entranceMonitoringFlow.value.isCounterEnabled
         val requiredEntrances = c.entranceMonitoringRepository.getRequiredEntrancesCount()
-        val closedEntrances = c.entranceMonitoringRepository.closedCountFlow.value
+        val closedEntrances = c.entranceMonitoringRepository.getClosedEntrancesCount()
 
-        messages.send(HostMessages.msgEntranceMonitoringDataLoaded(isCounterEnabled, requiredEntrances, closedEntrances))
+        messages.send(HostMessages.msgClosedEntrancesCountUpdated(closedEntrances))
+        messages.send(HostMessages.msgRequiredEntrancesCountUpdated(requiredEntrances))
+        messages.send(HostMessages.msgEntranceCounterEnabledUpdated(isCounterEnabled))
     }
 }
