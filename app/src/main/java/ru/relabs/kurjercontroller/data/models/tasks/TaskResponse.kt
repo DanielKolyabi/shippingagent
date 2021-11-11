@@ -22,5 +22,5 @@ data class TaskResponse(
     @SerializedName("storages") val storages: List<StorageResponse>,
     @SerializedName("filters") val filters: FiltersResponse,
     @SerializedName("filtered") val filtered: Boolean,
-    @SerializedName("entrance_monitoring_mode") val entranceMonitoringMode: Int
+    @SerializedName("close_tracking_mode") val entranceMonitoringMode: Int
 )
