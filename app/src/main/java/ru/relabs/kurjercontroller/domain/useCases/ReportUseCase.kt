@@ -2,6 +2,7 @@ package ru.relabs.kurjercontroller.domain.useCases
 
 import android.location.Location
 import org.joda.time.DateTime
+import ru.relabs.kurjercontroller.AppConst.NO_KEY
 import ru.relabs.kurjercontroller.data.database.entities.EntranceReportEntity
 import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.data.database.models.ApartmentResult
@@ -136,9 +137,9 @@ class ReportUseCase(
             EntrancesMonitoringMode.HousesControl -> entranceResult != null && (
                     entrance.startApartments != entranceResult.apartmentFrom ?: entrance.startApartments ||
                             entrance.endApartments != entranceResult.apartmentTo ?: entrance.endApartments ||
-                            entrance.code != entranceResult.code ?: entrance.code ||
-                            entrance.key != entranceResult.key ?: entrance.key ||
-                            entrance.euroKey != entranceResult.euroKey ?: entrance.euroKey ||
+                            !entranceResult.code.isNullOrEmpty() ||
+                            (entrance.key != entranceResult.key ?: entrance.key && entranceResult.key != NO_KEY) ||
+                            (entrance.euroKey != entranceResult.euroKey ?: entrance.euroKey && entranceResult.euroKey != NO_KEY) ||
                             entrance.mailboxType != entranceResult.mailboxType ?: entrance.mailboxType ||
                             entranceResult.description?.isNotEmpty() == true ||
                             photos.isNotEmpty()

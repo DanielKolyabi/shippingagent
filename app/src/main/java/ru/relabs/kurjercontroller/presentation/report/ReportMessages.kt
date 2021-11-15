@@ -1,6 +1,7 @@
 package ru.relabs.kurjercontroller.presentation.report
 
 import android.net.Uri
+import ru.relabs.kurjercontroller.AppConst.NO_KEY
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.domain.models.*
@@ -47,12 +48,12 @@ object ReportMessages {
                 savedApartments = savedApartments,
                 entranceKeys = entranceKeys,
                 selectedKey = savedEntrance.key?.takeIf { it.isNotBlank() }
-                    ?: entranceKeys.firstOrNull { it == "Нет" }
+                    ?: entranceKeys.firstOrNull { it == NO_KEY }
                     ?: entranceKeys.firstOrNull()
                     ?: "",
                 entranceEuroKeys = entranceEuroKeys,
                 selectedEuroKey = savedEntrance.euroKey?.takeIf { it.isNotBlank() }
-                    ?: entranceEuroKeys.firstOrNull { it == "Нет" }
+                    ?: entranceEuroKeys.firstOrNull { it == NO_KEY }
                     ?: entranceEuroKeys.firstOrNull()
                     ?: "",
                 selectedEntrancePhotos = photos
