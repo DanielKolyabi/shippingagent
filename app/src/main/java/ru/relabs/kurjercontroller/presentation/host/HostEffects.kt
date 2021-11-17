@@ -25,6 +25,9 @@ object HostEffects {
     fun effectInit(restored: Boolean): HostEffect = { c, _ ->
         if (!restored) {
             if (c.repository.isAuthenticated() && c.loginUseCase.isAutologinEnabled() && c.loginUseCase.loginOffline() != null) {
+                c.userRepository.currentUser.value?.let {
+                    messages.send(HostMessages.msgUserLoaded(it))
+                }
                 withContext(Dispatchers.Main) {
                     c.router.newRootScreen(RootScreen.Tasks(true))
                 }
