@@ -11,6 +11,8 @@ import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.MapObjectTapListener
+import com.yandex.mapkit.map.MapType
+import com.yandex.mapkit.user_location.UserLocationLayer
 import kotlinx.android.synthetic.main.fragment_yandex_map.*
 import kotlinx.android.synthetic.main.fragment_yandex_map.view.*
 import kotlinx.coroutines.Job
@@ -100,7 +102,10 @@ class YandexMapFragment : BaseFragment() {
         )
 
         view.mapview.map.isRotateGesturesEnabled = false
-        view.mapview.map.userLocationLayer.isEnabled = true
+        view.mapview.map.mapType = MapType.MAP
+        val userLayer = MapKitFactory.getInstance().createUserLocationLayer(view.mapview.mapWindow).apply {
+            isVisible = true
+        }
 
         view.controls_list.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         view.controls_list.adapter = adapter
@@ -122,7 +127,9 @@ class YandexMapFragment : BaseFragment() {
         controller.context.errorContext.attach(view)
         controller.context.notifyAddressClicked = { (targetFragment as? IAddressClickedConsumer)?.onAddressClicked(it) }
         controller.context.notifyItemsAdded = { (targetFragment as? INewItemsAddedConsumer)?.onItemsAdded(it) }
-        controller.context.moveCameraToUser = ::moveCameraToUser
+        controller.context.moveCameraToUser = {
+            moveCameraToUser(userLayer, it)
+        }
     }
 
     private fun bindControls(view: View) {
@@ -139,9 +146,9 @@ class YandexMapFragment : BaseFragment() {
         }
     }
 
-    private fun moveCameraToUser(location: Point) {
+    private fun moveCameraToUser(userLayer: UserLocationLayer, location: Point) {
         mapview.map.move(
-            mapview.map.userLocationLayer.cameraPosition() ?: CameraPosition(
+            userLayer.cameraPosition() ?: CameraPosition(
                 location,
                 14f, 0f, 0f
             )

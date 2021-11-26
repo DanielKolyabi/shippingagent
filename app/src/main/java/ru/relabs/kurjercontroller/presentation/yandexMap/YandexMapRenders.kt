@@ -188,5 +188,7 @@ inline fun MapObjectCollection.forEach(crossinline block: (MapObject) -> Unit) {
         override fun onPlacemarkVisited(p0: PlacemarkMapObject) = block(p0)
         override fun onCollectionVisitEnd(p0: MapObjectCollection) {}
         override fun onCollectionVisitStart(p0: MapObjectCollection): Boolean = true
+        override fun onClusterizedCollectionVisitStart(p0: ClusterizedPlacemarkCollection): Boolean = true
+        override fun onClusterizedCollectionVisitEnd(p0: ClusterizedPlacemarkCollection) {}
     })
 }

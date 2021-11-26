@@ -26,8 +26,8 @@ android {
         applicationId = "ru.relabs.kurjercontroller"
         minSdkVersion(21)
         targetSdkVersion(29)
-        versionCode = 73
-        versionName = "73"
+        versionCode = 74
+        versionName = "74"
 
         buildConfigField("Boolean", "FEATURE_PHOTO_RADIUS", "false")
         buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "false")
@@ -131,7 +131,7 @@ dependencies {
 
 
     //Various
-    implementation("com.yandex.android:mapkit:3.3.1")
+    implementation("com.yandex.android:maps.mobile:4.0.0-lite")
     implementation("com.google.android.gms:play-services-location:17.0.0")
     implementation("com.github.instacart.truetime-android:library:3.4")
     implementation("joda-time:joda-time:2.10.1")
