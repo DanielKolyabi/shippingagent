@@ -83,7 +83,7 @@ object AddressesRenders {
         {
             it?.let { a ->
                 adapter.items
-                    .indexOfFirst { item -> item is AddressesItem.GroupHeader && item.subItems.firstOrNull()?.address?.id == a.id }
+                    .indexOfFirst { item -> item is AddressesItem.GroupHeader && item.subItems.any { subItem -> subItem.address.id == a.id } }
                     .takeIf { idx -> idx >= 0 }
                     ?.let { idx ->
                         val layoutManager = (list.layoutManager as? LinearLayoutManager)
@@ -100,8 +100,8 @@ object AddressesRenders {
                         } else {
                             idx
                         }
-                        list.postDelayed(500) {
-                            list.scrollToPosition(preferredIdx)
+                        list.postDelayed(100) {
+                            list.smoothScrollToPosition(preferredIdx)
                             list.postDelayed(500) {
                                 list?.findViewHolderForAdapterPosition(idx)?.itemView?.let {
                                     flashSelectedColor(it)
