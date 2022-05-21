@@ -321,92 +321,94 @@ object ReportEffects {
 
     fun effectCloseCheck(withLocationLoading: Boolean): ReportEffect = { c, s ->
         messages.send(ReportMessages.msgAddLoaders(1))
-        when (val selected = s.saved) {
-            null -> c.showError("re:106", true)
-            else -> {
-                val startApartmentsChanged =
-                    selected.apartmentFrom != s.entrance?.startApartments && selected.apartmentFrom != null
-                val endApartmentsChanged = selected.apartmentTo != s.entrance?.endApartments && selected.apartmentTo != null
-                val isAnyApartmentUndetermined = s.savedApartments.any { it.buttonState and 64 > 0 }
-                val isAnyAppsChanged = startApartmentsChanged || endApartmentsChanged
-                val appsIntervalPhotoRequired = isAnyAppsChanged && s.selectedEntrancePhotos.none { it.photo.isEntrancePhoto }
-                val undeterminedAppPhotoRequired = isAnyApartmentUndetermined && s.selectedEntrancePhotos.isEmpty()
+        val selected = s.saved
+        val taskItem = s.taskItem
+        if (selected == null || taskItem == null) {
+            c.showError("re:106", true)
+        } else {
+            val startApartmentsChanged =
+                selected.apartmentFrom != s.entrance?.startApartments && selected.apartmentFrom != null
+            val endApartmentsChanged = selected.apartmentTo != s.entrance?.endApartments && selected.apartmentTo != null
+            val isAnyApartmentUndetermined = s.savedApartments.any { it.buttonState and 64 > 0 }
+            val isAnyAppsChanged = startApartmentsChanged || endApartmentsChanged
+            val appsIntervalPhotoRequired = isAnyAppsChanged && s.selectedEntrancePhotos.none { it.photo.isEntrancePhoto }
+            val undeterminedAppPhotoRequired = isAnyApartmentUndetermined && s.selectedEntrancePhotos.isEmpty()
 
-                val location = c.locationProvider.lastReceivedLocation()
-                CustomLog.writeToFile(
-                    "GPS LOG: Close check with location(${location?.latitude}, ${location?.longitude}, " +
-                            "${Date(location?.time ?: 0).formatedWithSecs()})"
-                )
+            val location = c.locationProvider.lastReceivedLocation()
+            CustomLog.writeToFile(
+                "GPS LOG: Close check with location(${location?.latitude}, ${location?.longitude}, " +
+                        "${Date(location?.time ?: 0).formatedWithSecs()})"
+            )
 
-                if (appsIntervalPhotoRequired) {
-                    messages.send(msgEffect(effectShowAppsChangedPhotoRequiredError()))
-                } else if (undeterminedAppPhotoRequired) {
-                    messages.send(msgEffect(effectShowNotDeterminedPhotoRequiredError()))
-                } else if (withLocationLoading && (location == null || Date(location.time).isLocationExpired())) {
-                    coroutineScope {
-                        messages.send(ReportMessages.msgAddLoaders(1))
-                        messages.send(ReportMessages.msgGPSLoading(true))
-                        val delayJob = async { delay(c.settingsRepository.closeGpsUpdateTime.close * 1000L) }
-                        val gpsJob = async(Dispatchers.Default) {
-                            c.locationProvider.updatesChannel().apply {
-                                receive()
-                                CustomLog.writeToFile("GPS LOG: Received new location")
-                                cancel()
-                            }
-                        }
-                        listOf(delayJob, gpsJob).awaitFirst()
-                        delayJob.cancel()
-                        gpsJob.cancel()
-                        CustomLog.writeToFile("GPS LOG: Got force coordinates")
-                        messages.send(ReportMessages.msgGPSLoading(false))
-                        messages.send(ReportMessages.msgAddLoaders(-1))
-                        messages.send(msgEffect(effectCloseCheck(false)))
-                    }
-                } else {
-                    val distance = location?.let {
-                        calculateDistance(
-                            location.latitude,
-                            location.longitude,
-                            (s.taskItem?.address?.lat ?: 0).toDouble(),
-                            (s.taskItem?.address?.long ?: 0).toDouble()
-                        )
-                    } ?: Int.MAX_VALUE.toDouble()
-
-                    val shadowClose: Boolean = withContext(Dispatchers.Main) {
-                        when (val radius = c.settingsRepository.allowedCloseRadius) {
-                            is AllowedCloseRadius.Required -> when {
-                                location == null -> {
-                                    c.showCloseError(R.string.report_close_location_null_error, false)
-                                    true
-                                }
-                                distance > radius.distance -> {
-                                    c.showCloseError(R.string.report_close_location_far_error, false)
-                                    true
-                                }
-                                else -> {
-                                    messages.send(msgEffect(effectCloseEntranceClicked()))
-                                    false
-                                }
-                            }
-                            is AllowedCloseRadius.NotRequired -> when {
-                                location == null -> {
-                                    c.showCloseError(R.string.report_close_location_null_warning, true)
-                                    false
-                                }
-                                distance > radius.distance -> {
-                                    c.showCloseError(R.string.report_close_location_far_warning, true)
-                                    false
-                                }
-                                else -> {
-                                    messages.send(msgEffect(effectCloseEntranceClicked()))
-                                    false
-                                }
-                            }
+            if (appsIntervalPhotoRequired) {
+                messages.send(msgEffect(effectShowAppsChangedPhotoRequiredError()))
+            } else if (undeterminedAppPhotoRequired) {
+                messages.send(msgEffect(effectShowNotDeterminedPhotoRequiredError()))
+            } else if (withLocationLoading && (location == null || Date(location.time).isLocationExpired())) {
+                coroutineScope {
+                    messages.send(ReportMessages.msgAddLoaders(1))
+                    messages.send(ReportMessages.msgGPSLoading(true))
+                    val delayJob = async { delay(c.settingsRepository.closeGpsUpdateTime.close * 1000L) }
+                    val gpsJob = async(Dispatchers.Default) {
+                        c.locationProvider.updatesChannel().apply {
+                            receive()
+                            CustomLog.writeToFile("GPS LOG: Received new location")
+                            cancel()
                         }
                     }
-                    if (shadowClose) {
-                        effectCloseEntrance(false)(c, s)
+                    listOf(delayJob, gpsJob).awaitFirst()
+                    delayJob.cancel()
+                    gpsJob.cancel()
+                    CustomLog.writeToFile("GPS LOG: Got force coordinates")
+                    messages.send(ReportMessages.msgGPSLoading(false))
+                    messages.send(ReportMessages.msgAddLoaders(-1))
+                    messages.send(msgEffect(effectCloseCheck(false)))
+                }
+            } else {
+                val distance = location?.let {
+                    calculateDistance(
+                        location.latitude,
+                        location.longitude,
+                        taskItem.address.lat,
+                        taskItem.address.long
+                    )
+                } ?: Int.MAX_VALUE.toDouble()
+
+                val shadowClose: Boolean = withContext(Dispatchers.Main) {
+                    if (c.settingsRepository.isCloseRadiusRequired) {
+                        when {
+                            location == null -> {
+                                c.showCloseError(R.string.report_close_location_null_error, false)
+                                true
+                            }
+                            distance > taskItem.closeRadius -> {
+                                c.showCloseError(R.string.report_close_location_far_error, false)
+                                true
+                            }
+                            else -> {
+                                messages.send(msgEffect(effectCloseEntranceClicked()))
+                                false
+                            }
+                        }
+                    } else {
+                        when {
+                            location == null -> {
+                                c.showCloseError(R.string.report_close_location_null_warning, true)
+                                false
+                            }
+                            distance > taskItem.closeRadius -> {
+                                c.showCloseError(R.string.report_close_location_far_warning, true)
+                                false
+                            }
+                            else -> {
+                                messages.send(msgEffect(effectCloseEntranceClicked()))
+                                false
+                            }
+                        }
                     }
+                }
+                if (shadowClose) {
+                    effectCloseEntrance(false)(c, s)
                 }
             }
         }
@@ -464,8 +466,8 @@ object ReportEffects {
                 CustomLog.writeToFile(
                     "Validate photo radius (valid: ${!locationNotValid}): " +
                             "${location?.latitude}, ${location?.longitude}, ${location?.time}, " +
-                            "photoAnyDistance: ${c.settingsRepository.allowedCloseRadius.photoAnyDistance}, " +
-                            "allowedDistance: ${c.settingsRepository.allowedCloseRadius.distance}, " +
+                            "photoAnyDistance: ${!c.settingsRepository.isPhotoRadiusRequired}, " +
+                            "allowedDistance: ${s.taskItem.closeRadius}, " +
                             "distance: $distance, " +
                             "targetTaskItem: ${selected.id}"
                 )
@@ -492,8 +494,8 @@ object ReportEffects {
                         messages.send(msgEffect(effectValidatePhotoRadiusAnd(msgFactory, withAnyRadiusWarning, false)))
                     }
                 } else {
-                    if (c.settingsRepository.allowedCloseRadius.photoAnyDistance) {
-                        if (distance > c.settingsRepository.allowedCloseRadius.distance && withAnyRadiusWarning) {
+                    if (!c.settingsRepository.isPhotoRadiusRequired) {
+                        if (distance > s.taskItem.closeRadius && withAnyRadiusWarning) {
                             withContext(Dispatchers.Main) {
                                 c.showCloseError(R.string.report_close_location_far_warning, false)
                             }
@@ -504,7 +506,7 @@ object ReportEffects {
                             locationNotValid -> withContext(Dispatchers.Main) {
                                 c.showCloseError(R.string.report_close_location_null_error, false)
                             }
-                            distance > c.settingsRepository.allowedCloseRadius.distance -> withContext(Dispatchers.Main) {
+                            distance > s.taskItem.closeRadius -> withContext(Dispatchers.Main) {
                                 c.showCloseError(R.string.report_close_location_far_error, false)
                             }
                             else ->

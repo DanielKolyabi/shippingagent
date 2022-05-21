@@ -85,8 +85,8 @@ class ReportUseCase(
             isEntranceClosed,
             withRemove,
             distance.toInt(),
-            (settingsRepository.allowedCloseRadius as? AllowedCloseRadius.Required)?.distance ?: 0,
-            settingsRepository.allowedCloseRadius is AllowedCloseRadius.Required
+            taskItem.closeRadius,
+            settingsRepository.isCloseRadiusRequired
         )
 
         databaseRepository.createEntranceReport(report)
@@ -104,7 +104,8 @@ class ReportUseCase(
                 entrance,
                 entranceResult,
                 photos,
-                taskItem.entrancesMonitoringMode
+                taskItem.entrancesMonitoringMode,
+                taskItem.closeRadius
             )
         ) {
             entranceMonitoringRepository.trackEntrance(taskItem, entrance)
@@ -118,12 +119,10 @@ class ReportUseCase(
         entrance: Entrance,
         entranceResult: EntranceResultEntity?,
         photos: List<EntrancePhoto>,
-        entranceMonitoringMode: EntrancesMonitoringMode
+        entranceMonitoringMode: EntrancesMonitoringMode,
+        allowedDistance: Int
     ): Boolean {
-        val radiusAllowed = when (val r = settingsRepository.allowedCloseRadius) {
-            is AllowedCloseRadius.NotRequired -> true
-            is AllowedCloseRadius.Required -> distance <= r.distance
-        }
+        val radiusAllowed = settingsRepository.isCloseRadiusRequired || distance < allowedDistance
 
         val modeAllowed = when (entranceMonitoringMode) {
             EntrancesMonitoringMode.DeliveryControl -> apartmentResults.any {
@@ -135,12 +134,13 @@ class ReportUseCase(
                         it.state and 64 != 0
             }
             EntrancesMonitoringMode.HousesControl -> entranceResult != null && (
-                    entrance.startApartments != entranceResult.apartmentFrom ?: entrance.startApartments ||
-                            entrance.endApartments != entranceResult.apartmentTo ?: entrance.endApartments ||
+                    entrance.startApartments != (entranceResult.apartmentFrom ?: entrance.startApartments) ||
+                            entrance.endApartments != (entranceResult.apartmentTo ?: entrance.endApartments) ||
                             !entranceResult.code.isNullOrEmpty() ||
-                            (entrance.key != entranceResult.key ?: entrance.key && entranceResult.key != NO_KEY) ||
-                            (entrance.euroKey != entranceResult.euroKey ?: entrance.euroKey && entranceResult.euroKey != NO_KEY) ||
-                            entrance.mailboxType != entranceResult.mailboxType ?: entrance.mailboxType ||
+                            (entrance.key != (entranceResult.key ?: entrance.key) && entranceResult.key != NO_KEY) ||
+                            (entrance.euroKey != (entranceResult.euroKey
+                                ?: entrance.euroKey) && entranceResult.euroKey != NO_KEY) ||
+                            entrance.mailboxType != (entranceResult.mailboxType ?: entrance.mailboxType) ||
                             entranceResult.description?.isNotEmpty() == true ||
                             photos.isNotEmpty()
                     )

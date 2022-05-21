@@ -26,7 +26,8 @@ object DatabaseTaskItemMapper {
         buttonName = entity.buttonName,
         requiredApartments = entity.requiredApartments,
         publisherId = PublisherId(entity.publisherId),
-        entrancesMonitoringMode = EntrancesMonitoringMode.values()[entity.entrancesMonitoringMode]
+        entrancesMonitoringMode = EntrancesMonitoringMode.values()[entity.entrancesMonitoringMode],
+        closeRadius = entity.closeRadius
     )
 
     fun toEntity(model: TaskItem): TaskItemEntity = TaskItemEntity(
@@ -45,6 +46,7 @@ object DatabaseTaskItemMapper {
         buttonName = model.buttonName,
         requiredApartments = model.requiredApartments,
         publisherId = model.publisherId.id,
-        entrancesMonitoringMode = model.entrancesMonitoringMode.ordinal
+        entrancesMonitoringMode = model.entrancesMonitoringMode.ordinal,
+        closeRadius = model.closeRadius
     )
 }

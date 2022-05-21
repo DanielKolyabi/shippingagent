@@ -6,7 +6,8 @@ import ru.relabs.kurjercontroller.domain.models.GpsRefreshTimes
 
 object SettingsMapper {
     fun fromRaw(raw: SettingsResponse) = AppSettings(
-        radius = RadiusMapper.fromRaw(raw.radius),
+        isCloseRadiusRequired = !raw.radius.closeAnyDistance,
+        isPhotoRadiusRequired = !raw.radius.photoAnyDistance,
         gpsRefreshTimes = GpsRefreshTimes(
             close = raw.gpsRefreshTimes.close,
             photo = raw.gpsRefreshTimes.photo

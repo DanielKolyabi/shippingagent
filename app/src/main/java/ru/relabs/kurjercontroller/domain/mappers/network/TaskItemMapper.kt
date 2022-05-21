@@ -22,6 +22,7 @@ object TaskItemMapper {
         buttonName = raw.buttonName,
         requiredApartments = raw.requiredApartments,
         publisherId = PublisherId(raw.orderId),
-        entrancesMonitoringMode = entrancesMonitoringMode
+        entrancesMonitoringMode = entrancesMonitoringMode,
+        closeRadius = raw.closeRadius
     )
 }

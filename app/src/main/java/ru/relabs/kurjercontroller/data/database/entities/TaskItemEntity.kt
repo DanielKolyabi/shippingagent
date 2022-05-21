@@ -44,5 +44,7 @@ data class TaskItemEntity(
     @ColumnInfo(name = "order_id")
     val publisherId: Int,
     @ColumnInfo(name = "entrances_monitoring_mode")
-    val entrancesMonitoringMode: Int = 0
+    val entrancesMonitoringMode: Int = 0,
+    @ColumnInfo(name = "close_radius")
+    val closeRadius: Int
 )

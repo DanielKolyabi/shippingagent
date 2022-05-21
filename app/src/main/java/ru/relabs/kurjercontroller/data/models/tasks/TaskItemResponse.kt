@@ -18,5 +18,6 @@ data class TaskItemResponse(
     @SerializedName("wrong_method") val wrongMethod: Boolean,
     @SerializedName("button_name") val buttonName: String,
     @SerializedName("required_apartaments") val requiredApartments: String,
-    @SerializedName("order_id") val orderId: Int
+    @SerializedName("order_id") val orderId: Int,
+    @SerializedName("close_radius") val closeRadius: Int
 )
