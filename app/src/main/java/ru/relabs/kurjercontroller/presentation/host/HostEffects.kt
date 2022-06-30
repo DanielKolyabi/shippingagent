@@ -187,7 +187,6 @@ object HostEffects {
             }
             launch {
                 c.userRepository.currentUser
-                    .distinctUntilChanged { o, n -> o != n }
                     .collect { messages.send(HostMessages.msgUserLoaded(it)) }
             }
             launch {
