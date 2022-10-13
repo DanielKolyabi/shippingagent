@@ -30,7 +30,7 @@ import ru.relabs.kurjercontroller.presentation.host.HostActivity
 import ru.relabs.kurjercontroller.utils.*
 
 const val CHANNEL_ID = "controller_notification_channel"
-const val CLOSE_SERVICE_TIMEOUT = 80 * 60 * 1000
+const val CLOSE_SERVICE_TIMEOUT = 20 * 60 * 1000
 const val TASK_CHECK_DELAY = 25 * 60 * 1000
 
 enum class ServiceState {
