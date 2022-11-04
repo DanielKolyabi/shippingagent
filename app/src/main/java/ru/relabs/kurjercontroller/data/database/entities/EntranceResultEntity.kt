@@ -40,7 +40,9 @@ data class EntranceResultEntity(
     @ColumnInfo(name = "mailbox_type")
     val mailboxType: Int?,
     @ColumnInfo(name = "entrance_closed")
-    val entranceClosed: Boolean?
+    val entranceClosed: Boolean?,
+    @ColumnInfo(name = "is_stacked")
+    val isStacked: Boolean,
 ) {
     companion object {
         fun fromEntrance(taskItem: TaskItem, entrance: Entrance) = EntranceResultEntity(
@@ -58,7 +60,8 @@ data class EntranceResultEntity(
             key = entrance.key,
             euroKey = entrance.euroKey,
             mailboxType = entrance.mailboxType,
-            entranceClosed = false
+            entranceClosed = false,
+            isStacked = entrance.isStacked
         )
     }
 }

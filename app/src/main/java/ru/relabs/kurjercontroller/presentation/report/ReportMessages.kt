@@ -223,6 +223,10 @@ object ReportMessages {
         it.copy(saved = it.saved?.copy(hasLookupPost = it.saved.hasLookupPost?.not()))
     }
 
+    fun msgIsStackedChanged(): ReportMessage = msgUpdateSavedAndSave {
+        it.copy(saved = it.saved?.copy(isStacked = it.saved.isStacked?.not()))
+    }
+
     fun msgMailboxTypeChanged(type: Int): ReportMessage = msgUpdateSavedAndSave {
         it.copy(saved = it.saved?.copy(mailboxType = type))
     }

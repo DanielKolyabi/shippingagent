@@ -23,6 +23,7 @@ object Migrations: KoinComponent {
         migration_46_47,
         migration_47_48,
         migration_48_49,
+        migration_49_50,
     )
 
 
@@ -115,7 +116,13 @@ object Migrations: KoinComponent {
         override fun migrate(database: SupportSQLiteDatabase) {
             val storedRequiredRadius = preferences.getInt(SettingsRepository.RADIUS_KEY, SettingsRepository.DEFAULT_REQUIRED_RADIUS)
             database.execSQL("ALTER TABLE task_items ADD COLUMN close_radius INTEGER NOT NULL DEFAULT $storedRequiredRadius")
-
+        }
+    }
+    val migration_49_50 = object : Migration(49, 50) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE entrances ADD COLUMN is_stacked INTEGER NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE entrance_reports ADD COLUMN is_stacked INTEGER NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE entrance_results ADD COLUMN is_stacked INTEGER NOT NULL DEFAULT 0")
         }
     }
 }

@@ -224,6 +224,11 @@ object ReportRenders {
         { lookout.setSelectButtonActive(it) }
     )
 
+    fun renderStacked(stacked: Button): ReportRender = renderT(
+        { it.saved?.isStacked ?: it.entrance?.isStacked ?: false },
+        { stacked.setSelectButtonActive(it) }
+    )
+
     fun renderLayoutError(button: Button): ReportRender = renderT(
         { it.saved?.isDeliveryWrong ?: false },
         { button.setSelectButtonActive(it) }

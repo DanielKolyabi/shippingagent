@@ -37,27 +37,6 @@ data class Entrance(
     val floors: Int,
     val mailboxType: Int,
     var state: EntranceState,
-    val hasLookout: Boolean
-) : Parcelable {
-
-    fun toEntity(taskId: Int, taskItemId: Int): EntranceEntity =
-        EntranceEntity(
-            id = 0,
-            taskItemId = taskItemId,
-            state = state.toInt(),
-            euroKey = euroKey,
-            key = key,
-            code = code,
-            endApartments = endApartments,
-            floors = floors,
-            mailboxType = mailboxType,
-            startApartments = startApartments,
-            number = number.number,
-            taskId = taskId,
-            hasLookout = hasLookout
-        )
-
-    companion object {
-        const val NUMBER_TASK_ITEM = -1
-    }
-}
+    val hasLookout: Boolean,
+    val isStacked: Boolean
+) : Parcelable

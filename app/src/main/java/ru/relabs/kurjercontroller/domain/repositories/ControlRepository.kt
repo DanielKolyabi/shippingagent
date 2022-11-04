@@ -232,7 +232,8 @@ class ControlRepository(
             item.apartmentResult.map { ApartmentResultRequest(it.number.number, it.state, it.buttonGroup, it.description) },
             item.closeTime, photosMap, item.publisherId, item.mailboxType,
             item.gpsLat, item.gpsLong, item.gpsTime, item.entranceClosed,
-            item.closeDistance, item.allowedDistance, item.radiusRequired
+            item.closeDistance, item.allowedDistance, item.radiusRequired,
+            item.isStacked
         )
 
         api.sendTaskReport(

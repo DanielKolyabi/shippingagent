@@ -17,7 +17,8 @@ object DatabaseEntranceMapper {
         startApartments = model.startApartments,
         number = model.number.number,
         taskId = taskId.id,
-        hasLookout = model.hasLookout
+        hasLookout = model.hasLookout,
+        isStacked = model.isStacked
     )
 
     fun fromEntity(entity: EntranceEntity) = Entrance(
@@ -30,6 +31,7 @@ object DatabaseEntranceMapper {
         floors = entity.floors,
         mailboxType = entity.mailboxType,
         state = entity.state.toEntranceState(),
-        hasLookout = entity.hasLookout
+        hasLookout = entity.hasLookout,
+        isStacked = entity.isStacked
     )
 }

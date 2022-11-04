@@ -37,7 +37,8 @@ data class TaskItemReportRequest(
     @SerializedName("entrance_closed") val entranceClosed: Boolean,
     @SerializedName("close_distance") val closeDistance: Int,
     @SerializedName("allowed_distance") val allowedDistance: Int,
-    @SerializedName("radius_required") val radiusRequired: Boolean
+    @SerializedName("radius_required") val radiusRequired: Boolean,
+    @SerializedName("is_stacked") val isStacked: Boolean,
 )
 
 data class PhotoReportRequest(

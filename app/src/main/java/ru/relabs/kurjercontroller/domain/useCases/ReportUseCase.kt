@@ -86,7 +86,8 @@ class ReportUseCase(
             withRemove,
             distance.toInt(),
             taskItem.closeRadius,
-            settingsRepository.isCloseRadiusRequired
+            settingsRepository.isCloseRadiusRequired,
+    entranceResult?.isStacked ?: entrance.isStacked,
         )
 
         databaseRepository.createEntranceReport(report)

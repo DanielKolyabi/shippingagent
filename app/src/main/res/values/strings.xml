@@ -31,6 +31,7 @@
     <string name="entrance_euro_key">Евро</string>
     <string name="layout_error">ПСНР</string>
     <string name="lookout">Вахта</string>
+    <string name="stacked">Стопка</string>
     <string name="entrance_key">Подъезд</string>
     <string name="close_entrance_button">Закрыть подъезд</string>
     <string name="broken">Слом</string>

@@ -21,6 +21,7 @@ object EntranceMapper {
             1 -> EntranceState.CLOSED
             else -> throw RuntimeException("Unknown entrance state ${raw.state}")
         },
-        hasLookout = raw.hasLookout
+        hasLookout = raw.hasLookout,
+        isStacked = raw.isStacked
     )
 }

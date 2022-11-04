@@ -228,6 +228,7 @@ class ReportFragment : BaseFragment() {
                 ReportRenders.renderDescription(view.user_explanation_input),
                 ReportRenders.renderLayoutError(view.layout_error_button),
                 ReportRenders.renderLookout(view.lookout),
+                ReportRenders.renderStacked(view.stacked),
                 ReportRenders.renderMailboxType(view.mailbox_euro, view.mailbox_gap),
                 ReportRenders.renderEntranceClosed(view.entrance_closed),
                 ReportRenders.renderFloors(view.floors, floorsTextListener),
@@ -431,6 +432,9 @@ class ReportFragment : BaseFragment() {
         }
         view.lookout.setOnClickListener {
             uiScope.sendMessage(controller, ReportMessages.msgLookoutChanged())
+        }
+        view.stacked.setOnClickListener {
+            uiScope.sendMessage(controller, ReportMessages.msgIsStackedChanged())
         }
         view.mailbox_euro.setOnClickListener {
             uiScope.sendMessage(controller, ReportMessages.msgMailboxTypeChanged(1))

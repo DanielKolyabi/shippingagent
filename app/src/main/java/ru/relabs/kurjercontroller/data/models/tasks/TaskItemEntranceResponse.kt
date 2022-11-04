@@ -12,5 +12,6 @@ data class TaskItemEntranceResponse(
     @SerializedName("floors") val floors: Int,
     @SerializedName("mailbox_type") val mailboxType: Int,
     @SerializedName("state") val state: Int,
-    @SerializedName("lookout") val hasLookout: Boolean
+    @SerializedName("lookout") val hasLookout: Boolean,
+    @SerializedName("is_stacked") val isStacked: Boolean,
 )

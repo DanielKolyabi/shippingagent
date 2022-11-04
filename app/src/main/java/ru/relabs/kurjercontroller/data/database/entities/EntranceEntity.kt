@@ -35,7 +35,9 @@ data class EntranceEntity(
     val mailboxType: Int,
     var state: Int,
     @ColumnInfo(name = "has_lookout")
-    val hasLookout: Boolean
+    val hasLookout: Boolean,
+    @ColumnInfo(name = "is_stacked")
+    val isStacked: Boolean,
 ) {
     companion object {
         const val STATE_CLOSED = 1

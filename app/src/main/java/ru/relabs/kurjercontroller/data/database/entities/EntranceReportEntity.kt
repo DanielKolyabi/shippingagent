@@ -54,5 +54,6 @@ data class EntranceReportEntity(
     @ColumnInfo(name = "remove_after_send") var removeAfterSend: Boolean,
     @ColumnInfo(name = "close_distance") var closeDistance: Int,
     @ColumnInfo(name = "allowed_distance") var allowedDistance: Int,
-    @ColumnInfo(name = "radius_required") var radiusRequired: Boolean
+    @ColumnInfo(name = "radius_required") var radiusRequired: Boolean,
+    @ColumnInfo(name = "is_stacked") var isStacked: Boolean,
 )
