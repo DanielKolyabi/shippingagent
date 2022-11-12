@@ -368,7 +368,7 @@ class DatabaseRepository(
         db.filtersDao().deleteByTaskId(taskId.id)
 
         db.filtersDao().insertAll(filters.brigades.map {
-            DatabaseFilterMapper.toEntity(it, taskId, FilterType.Publisher)
+            DatabaseFilterMapper.toEntity(it, taskId, FilterType.Brigade)
         })
         db.filtersDao().insertAll(filters.publishers.map {
             DatabaseFilterMapper.toEntity(it, taskId, FilterType.Publisher)
