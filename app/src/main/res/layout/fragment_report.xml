@@ -88,8 +88,6 @@
             app:layout_constraintStart_toEndOf="@id/appartaments_to"
             app:layout_constraintTop_toTopOf="@id/appartaments_label" />
 
-    v
-
     <EditText
             android:id="@+id/floors"
             android:layout_width="wrap_content"
@@ -195,8 +193,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:orientation="horizontal"
             android:nestedScrollingEnabled="true"
+            android:orientation="horizontal"
             app:layout_constraintEnd_toStartOf="@id/stacked"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/entrance_key">
@@ -214,6 +212,7 @@
                     android:elevation="0dp"
                     android:minWidth="0dp"
                     android:text="@string/layout_error"
+                    android:textSize="12sp"
                     app:layout_constraintEnd_toStartOf="@id/stacked"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/entrance_key" />
@@ -227,6 +226,7 @@
                     android:elevation="0dp"
                     android:minWidth="0dp"
                     android:text="@string/stacked"
+                    android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="@+id/layout_error_button"
                     app:layout_constraintStart_toEndOf="@id/layout_error_button"
                     app:layout_constraintTop_toTopOf="@+id/layout_error_button" />
@@ -240,6 +240,7 @@
                     android:elevation="0dp"
                     android:minWidth="0dp"
                     android:text="@string/lookout"
+                    android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="@+id/stacked"
                     app:layout_constraintStart_toEndOf="@id/stacked"
                     app:layout_constraintTop_toTopOf="@+id/stacked" />
@@ -252,10 +253,12 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="4dp"
                     android:elevation="0dp"
+                    android:minWidth="0dp"
                     android:paddingStart="0dp"
                     android:paddingEnd="0dp"
                     android:text="Щел"
                     android:textAllCaps="false"
+                    android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="@+id/lookout"
                     app:layout_constraintStart_toEndOf="@id/mailbox_euro"
                     app:layout_constraintTop_toTopOf="@+id/lookout" />
@@ -267,10 +270,12 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="4dp"
                     android:elevation="0dp"
+                    android:minWidth="0dp"
                     android:paddingStart="0dp"
                     android:paddingEnd="0dp"
                     android:text="Евро"
                     android:textAllCaps="false"
+                    android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="@+id/lookout"
                     app:layout_constraintStart_toEndOf="@id/lookout"
                     app:layout_constraintTop_toTopOf="@+id/lookout" />
@@ -282,7 +287,9 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="4dp"
                     android:elevation="0dp"
+                    android:minWidth="0dp"
                     android:text="@string/entrance_closed_label"
+                    android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="@+id/lookout"
                     app:layout_constraintStart_toEndOf="@id/mailbox_gap"
                     app:layout_constraintTop_toTopOf="@+id/lookout" />

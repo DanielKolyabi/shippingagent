@@ -224,7 +224,7 @@ object ReportMessages {
     }
 
     fun msgIsStackedChanged(): ReportMessage = msgUpdateSavedAndSave {
-        it.copy(saved = it.saved?.copy(isStacked = it.saved.isStacked?.not()))
+        it.copy(saved = it.saved?.copy(isStacked = it.saved.isStacked?.not() ?: true))
     }
 
     fun msgMailboxTypeChanged(type: Int): ReportMessage = msgUpdateSavedAndSave {
