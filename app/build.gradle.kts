@@ -45,6 +45,10 @@ android {
             buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "true")
             buildConfigField("String", "API_URL", "\"http://warp.courdm.ru:8084\"")
         }
+        create("debugV2Server") {
+            buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "true")
+            buildConfigField("String", "API_URL", "\"http://warp.courdm.ru:8085\"")
+        }
         create("localServer") {
             buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "true")
             buildConfigField("String", "API_URL", "\"http://192.168.1.106:8090\"")
