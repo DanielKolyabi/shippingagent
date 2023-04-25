@@ -42,11 +42,11 @@ android {
             buildConfigField("String", "API_URL", "\"https://courrmobileapi.courdm.ru\"")
         }
         create("debugServer") {
-            buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "true")
+            buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "false")
             buildConfigField("String", "API_URL", "\"http://warp.courdm.ru:8084\"")
         }
         create("debugV2Server") {
-            buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "true")
+            buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "false")
             buildConfigField("String", "API_URL", "\"http://warp.courdm.ru:8085\"")
         }
         create("localServer") {

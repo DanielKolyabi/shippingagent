@@ -53,10 +53,20 @@ object NetworkHelper {
         context ?: return false
 
         val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val isNetworkConnecting = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE)?.isConnectedOrConnecting ?: false
+        val isMobileDataEnabled = try {
+            val cmClass = Class.forName(cm.javaClass.name)
+            val method = cmClass.getDeclaredMethod("getMobileDataEnabled")
+            method.isAccessible = true
 
-        return Settings.Secure.getInt(context.contentResolver, "mobile_data", 0) == 1 ||
-                cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).isConnectedOrConnecting ||
-                isMobileDataEnabledReflect(context)
+            val status = method.invoke(cm) as Boolean
+
+            status || isNetworkConnecting
+        } catch (e: java.lang.Exception) {
+            Settings.Global.getInt(context.contentResolver, "mobile_data", 0) == 1 ||
+                    Settings.Secure.getInt(context.contentResolver, "mobile_data", 0) == 1 || isNetworkConnecting
+        }
+        return isMobileDataEnabled
     }
 
     fun isNetworkEnabled(context: Context?): Boolean {
