@@ -8,7 +8,11 @@ import ru.relabs.kurjercontroller.data.database.entities.EntranceResultEntity
 import ru.relabs.kurjercontroller.data.database.models.ApartmentResult
 import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
 import ru.relabs.kurjercontroller.domain.controllers.TaskEventController
-import ru.relabs.kurjercontroller.domain.models.*
+import ru.relabs.kurjercontroller.domain.models.Entrance
+import ru.relabs.kurjercontroller.domain.models.EntranceNumber
+import ru.relabs.kurjercontroller.domain.models.EntrancePhoto
+import ru.relabs.kurjercontroller.domain.models.EntrancesMonitoringMode
+import ru.relabs.kurjercontroller.domain.models.TaskItem
 import ru.relabs.kurjercontroller.domain.providers.PathsProvider
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.domain.repositories.EntranceMonitoringRepository
@@ -17,7 +21,7 @@ import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
 import ru.relabs.kurjercontroller.presentation.report.ReportApartmentButtonsMode
 import ru.relabs.kurjercontroller.presentation.reportPager.TaskItemWithTaskIds
 import ru.relabs.kurjercontroller.utils.calculateDistance
-import java.util.*
+import java.util.UUID
 
 class ReportUseCase(
     private val databaseRepository: DatabaseRepository,
@@ -123,7 +127,7 @@ class ReportUseCase(
         entranceMonitoringMode: EntrancesMonitoringMode,
         allowedDistance: Int
     ): Boolean {
-        val radiusAllowed = settingsRepository.isCloseRadiusRequired || distance < allowedDistance
+        val radiusAllowed = !settingsRepository.isCloseRadiusRequired || distance < allowedDistance
 
         val modeAllowed = when (entranceMonitoringMode) {
             EntrancesMonitoringMode.DeliveryControl -> apartmentResults.any {
