@@ -4,7 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import org.joda.time.DateTime
-import ru.relabs.kurjercontroller.domain.models.EntrancesMonitoringMode
 
 /**
  * Created by ProOrange on 19.03.2019.

@@ -91,7 +91,7 @@ class ReportUseCase(
             distance.toInt(),
             taskItem.closeRadius,
             settingsRepository.isCloseRadiusRequired,
-    entranceResult?.isStacked ?: entrance.isStacked,
+            entranceResult?.isStacked ?: entrance.isStacked,
         )
 
         databaseRepository.createEntranceReport(report)
@@ -138,6 +138,7 @@ class ReportUseCase(
                         it.state and 32 != 0 ||
                         it.state and 64 != 0
             }
+
             EntrancesMonitoringMode.HousesControl -> entranceResult != null && (
                     entrance.startApartments != (entranceResult.apartmentFrom ?: entrance.startApartments) ||
                             entrance.endApartments != (entranceResult.apartmentTo ?: entrance.endApartments) ||
@@ -147,7 +148,7 @@ class ReportUseCase(
                                 ?: entrance.euroKey) && entranceResult.euroKey != NO_KEY) ||
                             entrance.mailboxType != (entranceResult.mailboxType ?: entrance.mailboxType) ||
                             entranceResult.description?.isNotEmpty() == true ||
-                            photos.isNotEmpty()
+                            photos.isNotEmpty() || entrance.floors != (entranceResult.floors ?: entrance.floors)
                     )
         }
 
