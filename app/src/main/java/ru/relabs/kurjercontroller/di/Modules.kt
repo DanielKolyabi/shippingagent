@@ -17,7 +17,12 @@ import ru.relabs.kurjercontroller.data.database.AppDatabase
 import ru.relabs.kurjercontroller.data.database.migrations.Migrations
 import ru.relabs.kurjercontroller.domain.controllers.ServiceEventController
 import ru.relabs.kurjercontroller.domain.controllers.TaskEventController
-import ru.relabs.kurjercontroller.domain.providers.*
+import ru.relabs.kurjercontroller.domain.providers.DeviceUUIDProvider
+import ru.relabs.kurjercontroller.domain.providers.DeviceUniqueIdProvider
+import ru.relabs.kurjercontroller.domain.providers.FirebaseTokenProvider
+import ru.relabs.kurjercontroller.domain.providers.LocationProvider
+import ru.relabs.kurjercontroller.domain.providers.PathsProvider
+import ru.relabs.kurjercontroller.domain.providers.getLocationProvider
 import ru.relabs.kurjercontroller.domain.repositories.ControlRepository
 import ru.relabs.kurjercontroller.domain.repositories.DatabaseRepository
 import ru.relabs.kurjercontroller.domain.repositories.EntranceMonitoringRepository
@@ -26,6 +31,7 @@ import ru.relabs.kurjercontroller.domain.storage.AppPreferences
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
 import ru.relabs.kurjercontroller.domain.storage.CurrentUserStorage
 import ru.relabs.kurjercontroller.domain.storage.MapCameraStorage
+import ru.relabs.kurjercontroller.domain.storage.SavedUserStorage
 import ru.relabs.kurjercontroller.domain.useCases.AppUpdateUseCase
 import ru.relabs.kurjercontroller.domain.useCases.LoginUseCase
 import ru.relabs.kurjercontroller.domain.useCases.OnlineTaskUseCase
@@ -67,6 +73,8 @@ val storagesModule = module {
     single<AuthTokenStorage> { AuthTokenStorage(get<AppPreferences>()) }
     single<CurrentUserStorage> { CurrentUserStorage(get<AppPreferences>()) }
     single<MapCameraStorage> { MapCameraStorage() }
+    single<SavedUserStorage> { SavedUserStorage(get<AppPreferences>()) }
+
 
     single<DeviceUUIDProvider> {
         DeviceUUIDProvider(
@@ -152,7 +160,8 @@ val useCasesModule = module {
             get<AuthTokenStorage>(),
             get<AppPreferences>(),
             get<SettingsRepository>(),
-            get<EntranceMonitoringRepository>()
+            get<EntranceMonitoringRepository>(),
+            savedUserStorage = get()
         )
     }
 

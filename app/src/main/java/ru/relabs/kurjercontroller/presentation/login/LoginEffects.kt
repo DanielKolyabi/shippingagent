@@ -1,5 +1,6 @@
 package ru.relabs.kurjercontroller.presentation.login
 
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.R
@@ -16,7 +17,14 @@ import ru.relabs.kurjercontroller.utils.Right
 object LoginEffects {
 
     fun effectInit(): LoginEffect = { c, s ->
-
+        when (val r = c.savedUserStorage.getCredentials()) {
+            null -> {}
+            else -> {
+                Log.d("zxc", r.password)
+                messages.send(LoginMessages.msgLoginChanged(r.login))
+                messages.send(LoginMessages.msgPasswordChanged(r.password))
+            }
+        }
     }
 
     fun effectLoginCheck(isNetworkEnabled: Boolean): LoginEffect = { c, s ->
@@ -26,6 +34,7 @@ object LoginEffects {
                     true -> messages.send(msgEffect(effectLogin()))
                     false -> c.showError(R.string.login_need_network)
                 }
+
                 false -> c.showError(R.string.login_need_update)
             }
         }

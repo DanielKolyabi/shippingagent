@@ -14,7 +14,7 @@ android {
         create("config") {
             keyAlias = "controller"
             keyPassword = "relabs"
-            storeFile = file("H:\\BackupsWindowsReinstall\\work\\DeliveryManProject\\android_deliveryman_controller\\key.jks")
+            storeFile = file("G:\\AndroidStudio\\AndroidStudioProjects\\android-app-controller\\key.jks")
             storePassword = "relabs"
             isV1SigningEnabled = true
             isV2SigningEnabled = true
@@ -40,6 +40,10 @@ android {
         create("productServer") {
             buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "false")
             buildConfigField("String", "API_URL", "\"https://courrmobileapi.courdm.ru\"")
+        }
+        create("productServerV2") {
+            buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "false")
+            buildConfigField("String", "API_URL", "\"http://warp.courr.ru:8086\"")
         }
         create("debugServer") {
             buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "false")
