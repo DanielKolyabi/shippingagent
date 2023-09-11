@@ -1,10 +1,10 @@
 package ru.relabs.kurjercontroller.presentation.login
 
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.data.models.common.DomainException
+import ru.relabs.kurjercontroller.domain.useCases.LoginResult
 import ru.relabs.kurjercontroller.presentation.RootScreen
 import ru.relabs.kurjercontroller.presentation.base.tea.CommonMessages
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
@@ -20,9 +20,7 @@ object LoginEffects {
         when (val r = c.savedUserStorage.getCredentials()) {
             null -> {}
             else -> {
-                Log.d("zxc", r.password)
                 messages.send(LoginMessages.msgLoginChanged(r.login))
-                messages.send(LoginMessages.msgPasswordChanged(r.password))
             }
         }
     }
@@ -40,7 +38,7 @@ object LoginEffects {
         }
     }
 
-    fun effectLogin(): LoginEffect = { c, s ->
+    private fun effectLogin(): LoginEffect = { c, s ->
         messages.send(LoginMessages.msgAddLoaders(1))
         when (val r = c.loginUseCase.login(s.login, s.password, s.isPasswordRemembered)) {
             is Right -> withContext(Dispatchers.Main) { c.router.replaceScreen(RootScreen.Tasks(true)) }
@@ -54,9 +52,10 @@ object LoginEffects {
 
     fun effectLoginOffline(): LoginEffect = { c, s ->
         messages.send(LoginMessages.msgAddLoaders(1))
-        when (c.loginUseCase.loginOffline()) {
-            null -> withContext(Dispatchers.Main) { c.showError(R.string.login_offline_error) }
-            else -> withContext(Dispatchers.Main) { c.router.replaceScreen(RootScreen.Tasks(false)) }
+        when (c.loginUseCase.loginOffline(s.login, s.password)) {
+            LoginResult.Success -> withContext(Dispatchers.Main) { c.router.replaceScreen(RootScreen.Tasks(false)) }
+            LoginResult.Wrong -> withContext(Dispatchers.Main) { c.showError(R.string.wrong_password_error) }
+            LoginResult.Error -> withContext(Dispatchers.Main) { c.showError(R.string.login_offline_error) }
         }
         messages.send(LoginMessages.msgAddLoaders(-1))
     }

@@ -165,4 +165,5 @@
     <string name="map_button_layer_task">Слой: %s</string>
     <string name="undefined">НО</string>
     <string name="error_report_tasks_unavailable">Не удалось получить задание</string>
+    <string name="wrong_password_error">Неправильный пароль</string>
 </resources>

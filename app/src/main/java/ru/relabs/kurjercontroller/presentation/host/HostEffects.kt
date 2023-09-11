@@ -3,15 +3,20 @@ package ru.relabs.kurjercontroller.presentation.host
 import android.net.Uri
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.iid.FirebaseInstanceId
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.relabs.kurjercontroller.BuildConfig
 import ru.relabs.kurjercontroller.R
 import ru.relabs.kurjercontroller.domain.controllers.ServiceEvent
 import ru.relabs.kurjercontroller.domain.controllers.TaskEvent
 import ru.relabs.kurjercontroller.domain.providers.FirebaseToken
 import ru.relabs.kurjercontroller.domain.useCases.AppUpdateUseCase
+import ru.relabs.kurjercontroller.domain.useCases.LoginResult
 import ru.relabs.kurjercontroller.presentation.RootScreen
 import ru.relabs.kurjercontroller.presentation.base.tea.msgEffect
 import ru.relabs.kurjercontroller.presentation.host.featureCheckers.FeatureChecker
@@ -24,7 +29,7 @@ import java.io.File
 object HostEffects {
     fun effectInit(restored: Boolean): HostEffect = { c, _ ->
         if (!restored) {
-            if (c.repository.isAuthenticated() && c.loginUseCase.isAutologinEnabled() && c.loginUseCase.loginOffline() != null) {
+            if (c.repository.isAuthenticated() && c.loginUseCase.isAutologinEnabled() && c.loginUseCase.autoLogin() == LoginResult.Success) {
                 c.userRepository.currentUser.value?.let {
                     messages.send(HostMessages.msgUserLoaded(it))
                 }
@@ -97,6 +102,7 @@ object HostEffects {
                     }
                 }
             }
+
             is Left -> withContext(Dispatchers.Main) {
                 c.showErrorDialog(R.string.update_cant_get_info)
             }
@@ -111,10 +117,12 @@ object HostEffects {
             when (it) {
                 is AppUpdateUseCase.DownloadState.Progress ->
                     messages.send(HostMessages.msgLoadProgress(((it.current / it.total.toFloat()) * 100).toInt()))
+
                 is AppUpdateUseCase.DownloadState.Success -> {
                     messages.send(HostMessages.msgUpdateLoaded(it.file))
                     messages.send(msgEffect(effectInstallUpdate(it.file)))
                 }
+
                 AppUpdateUseCase.DownloadState.Failed -> {
                     messages.send(HostMessages.msgUpdateLoadingFailed())
                     withContext(Dispatchers.Main) {

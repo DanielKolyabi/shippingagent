@@ -29,24 +29,32 @@ class LoginUseCase(
 
     fun isAutologinEnabled() = appPreferences.getUserAutologinEnabled()
 
-    suspend fun loginOffline(): User? {
-        val savedCredentials = savedUserStorage.getCredentials() ?: return null
-        val savedToken = savedUserStorage.getToken() ?: return null
+    suspend fun autoLogin(): LoginResult {
+        val currentLogin = currentUserStorage.getCurrentUserLogin() ?: return LoginResult.Error
+        val currentToken = authTokenStorage.getToken() ?: return LoginResult.Error
+        loginInternal(currentLogin, "", currentToken, true)
+        return LoginResult.Success
+    }
 
-        loginInternal(savedCredentials.login, savedCredentials.password, savedToken, offline = true)
-        return User(savedCredentials.login)
+    suspend fun loginOffline(login: UserLogin, password: String): LoginResult {
+        val savedCredentials = savedUserStorage.getCredentials() ?: return LoginResult.Error
+        val savedToken = savedUserStorage.getToken() ?: return LoginResult.Error
+        if (savedCredentials.login != login) return LoginResult.Error
+        if (savedCredentials.password != password) return LoginResult.Wrong
+        loginInternal(savedCredentials.login, savedCredentials.password, savedToken, false)
+        return LoginResult.Success
     }
 
     suspend fun login(login: UserLogin, password: String, remember: Boolean): EitherE<User> {
         appPreferences.setUserAutologinEnabled(remember)
         return controlRepository.login(login, password).fmap { (user, token) ->
-            loginInternal(user.login, token, token, offline = false)
+            loginInternal(user.login, token, token, false)
             user
         }
     }
 
 
-    private suspend fun loginInternal(login: UserLogin, password: String, token: String, offline: Boolean) = withContext(Dispatchers.IO) {
+    private suspend fun loginInternal(login: UserLogin, password: String, token: String, auto: Boolean) = withContext(Dispatchers.IO) {
         val lastUserLogin = savedUserStorage.getCredentials()?.login
         if (lastUserLogin != login) {
             databaseRepository.clearTasks()
@@ -55,8 +63,10 @@ class LoginUseCase(
         settingsRepository.startRemoteUpdating()
         authTokenStorage.saveToken(token)
         currentUserStorage.saveCurrentUserLogin(login)
-        savedUserStorage.saveCredentials(login, password)
-        savedUserStorage.saveToken(token)
+        if (!auto) {
+            savedUserStorage.saveCredentials(login, password)
+            savedUserStorage.saveToken(token)
+        }
         CustomLog.writeToFile("[IMEI] Update after login")
         controlRepository.updateDeviceIMEI()
         controlRepository.updatePushToken()
@@ -68,4 +78,8 @@ class LoginUseCase(
         authTokenStorage.resetToken()
         currentUserStorage.resetCurrentUserLogin()
     }
+}
+
+enum class LoginResult {
+    Success, Wrong, Error
 }
