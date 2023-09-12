@@ -48,7 +48,7 @@ class LoginUseCase(
     suspend fun login(login: UserLogin, password: String, remember: Boolean): EitherE<User> {
         appPreferences.setUserAutologinEnabled(remember)
         return controlRepository.login(login, password).fmap { (user, token) ->
-            loginInternal(user.login, token, token, false)
+            loginInternal(user.login, password, token, false)
             user
         }
     }
