@@ -14,7 +14,7 @@ android {
         create("config") {
             keyAlias = "controller"
             keyPassword = "relabs"
-            storeFile = file("G:\\AndroidStudio\\AndroidStudioProjects\\android-app-controller\\key.jks")
+            storeFile = file("C:\\Android\\AndroidStudioProjects\\android-app-controller\\key.jks")
             storePassword = "relabs"
             isV1SigningEnabled = true
             isV2SigningEnabled = true

@@ -2,6 +2,7 @@ package ru.relabs.kurjercontroller.domain.repositories
 
 import android.location.Location
 import android.net.Uri
+import android.util.Log
 import android.webkit.MimeTypeMap
 import com.google.gson.Gson
 import kotlinx.coroutines.CancellationException
@@ -33,6 +34,8 @@ import ru.relabs.kurjercontroller.domain.mappers.network.*
 import ru.relabs.kurjercontroller.domain.models.*
 import ru.relabs.kurjercontroller.domain.providers.*
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
+import ru.relabs.kurjercontroller.domain.storage.CurrentUserStorage
+import ru.relabs.kurjercontroller.domain.storage.SavedUserStorage
 import ru.relabs.kurjercontroller.utils.*
 import java.io.FileNotFoundException
 
@@ -44,8 +47,11 @@ class ControlRepository(
     private val firebaseTokenProvider: FirebaseTokenProvider,
     private val database: AppDatabase,
     private val networkClient: OkHttpClient,
-    private val pathsProvider: PathsProvider
-) {
+    private val pathsProvider: PathsProvider,
+    private val savedUserStorage: SavedUserStorage,
+    private val currentUserStorage: CurrentUserStorage,
+
+    ) {
     private var availableEntranceKeys: List<String> = listOf()
     private var availableEntranceEuroKeys: List<String> = listOf()
 
@@ -96,6 +102,7 @@ class ControlRepository(
                 is Right -> r.value
                 is Left -> throw r.value
             }
+
             is Left -> {
                 throw t.value
             }
@@ -290,6 +297,20 @@ class ControlRepository(
     }
 
     private fun currentTime(): String = DateTime().toString("yyyy-MM-dd'T'HH:mm:ss")
+
+    suspend fun updateSavedData() {
+        val token = authTokenStorage.getToken() ?: return
+        if (savedUserStorage.getCredentials() != null && savedUserStorage.getToken() != null) return
+        try {
+            savedUserStorage.saveToken(token)
+            savedUserStorage.saveCredentials(
+                currentUserStorage.getCurrentUserLogin() ?: UserLogin(""),
+                PasswordMapper.fromRaw(api.getPassword())
+            )
+        } catch (e: Exception) {
+            Log.d("ControlRepository", e.message ?: "")
+        }
+    }
 
     private suspend inline fun <T> authenticatedRequest(crossinline block: suspend (token: String) -> T): EitherE<T> {
         return authTokenStorage.getToken()?.let { token -> anonymousRequest { block(token) } }

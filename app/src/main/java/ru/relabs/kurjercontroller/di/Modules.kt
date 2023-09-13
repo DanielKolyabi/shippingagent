@@ -133,7 +133,9 @@ val repositoryModule = module {
             get<FirebaseTokenProvider>(),
             get<AppDatabase>(),
             get<ApiProvider>().httpClient,
-            get<PathsProvider>()
+            get<PathsProvider>(),
+            currentUserStorage = get(),
+            savedUserStorage = get()
         )
     }
     single<SettingsRepository> {

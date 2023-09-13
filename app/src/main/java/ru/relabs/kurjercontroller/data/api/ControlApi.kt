@@ -1,15 +1,29 @@
 package ru.relabs.kurjercontroller.data.api
 
 import okhttp3.MultipartBody
-import retrofit2.http.*
+import retrofit2.http.Body
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Multipart
+import retrofit2.http.POST
+import retrofit2.http.Part
+import retrofit2.http.Path
+import retrofit2.http.Query
 import ru.relabs.kurjercontroller.data.models.FiltersRequest
 import ru.relabs.kurjercontroller.data.models.SearchFiltersRequest
 import ru.relabs.kurjercontroller.data.models.TaskItemReportRequest
 import ru.relabs.kurjercontroller.data.models.UpdatesResponse
 import ru.relabs.kurjercontroller.data.models.auth.AuthResponse
+import ru.relabs.kurjercontroller.data.models.auth.PasswordResponse
 import ru.relabs.kurjercontroller.data.models.common.SettingsResponse
 import ru.relabs.kurjercontroller.data.models.common.StatusResponse
-import ru.relabs.kurjercontroller.data.models.tasks.*
+import ru.relabs.kurjercontroller.data.models.tasks.FilterResponse
+import ru.relabs.kurjercontroller.data.models.tasks.FilteredTaskDataResponse
+import ru.relabs.kurjercontroller.data.models.tasks.FilteredTasksCountResponse
+import ru.relabs.kurjercontroller.data.models.tasks.TaskResponse
+import ru.relabs.kurjercontroller.data.models.tasks.UserLocationsResponse
 
 interface ControlApi {
     @POST("api/v1/controller/auth")
@@ -91,4 +105,7 @@ interface ControlApi {
 
     @GET("api/v1/controller/has_online")
     suspend fun hasOnlineAccess(@Query("token") token: String): StatusResponse
+
+    @GET("/api/v1/controller/password")
+    suspend fun getPassword(): PasswordResponse
 }
