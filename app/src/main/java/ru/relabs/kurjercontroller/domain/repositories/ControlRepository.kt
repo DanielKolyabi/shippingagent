@@ -8,13 +8,22 @@ import com.google.gson.Gson
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.*
+import okhttp3.FormBody
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
 import org.joda.time.DateTime
 import retrofit2.HttpException
 import retrofit2.Response
 import ru.relabs.kurjercontroller.data.api.ControlApi
 import ru.relabs.kurjercontroller.data.database.AppDatabase
-import ru.relabs.kurjercontroller.data.database.entities.*
+import ru.relabs.kurjercontroller.data.database.entities.EntranceEuroKeyEntity
+import ru.relabs.kurjercontroller.data.database.entities.EntranceKeyEntity
+import ru.relabs.kurjercontroller.data.database.entities.EntrancePhotoEntity
+import ru.relabs.kurjercontroller.data.database.entities.EntranceReportEntity
+import ru.relabs.kurjercontroller.data.database.entities.SendQueryItemEntity
 import ru.relabs.kurjercontroller.data.models.FiltersRequest
 import ru.relabs.kurjercontroller.data.models.PhotoReportRequest
 import ru.relabs.kurjercontroller.data.models.SearchFiltersRequest
@@ -30,13 +39,38 @@ import ru.relabs.kurjercontroller.domain.mappers.FilterTypeMapper
 import ru.relabs.kurjercontroller.domain.mappers.SettingsMapper
 import ru.relabs.kurjercontroller.domain.mappers.UserLocationMapper
 import ru.relabs.kurjercontroller.domain.mappers.database.DatabaseEntrancePhotoMapper
-import ru.relabs.kurjercontroller.domain.mappers.network.*
-import ru.relabs.kurjercontroller.domain.models.*
-import ru.relabs.kurjercontroller.domain.providers.*
+import ru.relabs.kurjercontroller.domain.mappers.network.FilterMapper
+import ru.relabs.kurjercontroller.domain.mappers.network.FilteredTasksCountMapper
+import ru.relabs.kurjercontroller.domain.mappers.network.FilteredTasksDataMapper
+import ru.relabs.kurjercontroller.domain.mappers.network.PasswordMapper
+import ru.relabs.kurjercontroller.domain.mappers.network.TaskMapper
+import ru.relabs.kurjercontroller.domain.mappers.network.UpdatesMapper
+import ru.relabs.kurjercontroller.domain.mappers.network.UserMapper
+import ru.relabs.kurjercontroller.domain.models.AppSettings
+import ru.relabs.kurjercontroller.domain.models.AppUpdatesInfo
+import ru.relabs.kurjercontroller.domain.models.FilterType
+import ru.relabs.kurjercontroller.domain.models.FilteredTasksCount
+import ru.relabs.kurjercontroller.domain.models.FilteredTasksData
+import ru.relabs.kurjercontroller.domain.models.Task
+import ru.relabs.kurjercontroller.domain.models.TaskFilter
+import ru.relabs.kurjercontroller.domain.models.User
+import ru.relabs.kurjercontroller.domain.models.UserLocation
+import ru.relabs.kurjercontroller.domain.models.getFile
+import ru.relabs.kurjercontroller.domain.providers.DeviceUUIDProvider
+import ru.relabs.kurjercontroller.domain.providers.DeviceUniqueIdProvider
+import ru.relabs.kurjercontroller.domain.providers.FirebaseToken
+import ru.relabs.kurjercontroller.domain.providers.FirebaseTokenProvider
+import ru.relabs.kurjercontroller.domain.providers.PathsProvider
 import ru.relabs.kurjercontroller.domain.storage.AuthTokenStorage
 import ru.relabs.kurjercontroller.domain.storage.CurrentUserStorage
 import ru.relabs.kurjercontroller.domain.storage.SavedUserStorage
-import ru.relabs.kurjercontroller.utils.*
+import ru.relabs.kurjercontroller.utils.Either
+import ru.relabs.kurjercontroller.utils.Left
+import ru.relabs.kurjercontroller.utils.Right
+import ru.relabs.kurjercontroller.utils.bind
+import ru.relabs.kurjercontroller.utils.debug
+import ru.relabs.kurjercontroller.utils.fmap
+import ru.relabs.kurjercontroller.utils.log
 import java.io.FileNotFoundException
 
 class ControlRepository(
@@ -305,7 +339,7 @@ class ControlRepository(
             savedUserStorage.saveToken(token)
             savedUserStorage.saveCredentials(
                 currentUserStorage.getCurrentUserLogin() ?: UserLogin(""),
-                PasswordMapper.fromRaw(api.getPassword())
+                PasswordMapper.fromRaw(api.getPassword(token))
             )
         } catch (e: Exception) {
             Log.d("ControlRepository", e.message ?: "")
