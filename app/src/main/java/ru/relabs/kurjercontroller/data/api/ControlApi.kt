@@ -106,7 +106,7 @@ interface ControlApi {
     @GET("api/v1/controller/has_online")
     suspend fun hasOnlineAccess(@Query("token") token: String): StatusResponse
 
-    @GET("/api/v1/password")
+    @GET("/api/v1/controller/password")
     suspend fun getPassword(
         @Header("X-TOKEN") token: String
     ): PasswordResponse
