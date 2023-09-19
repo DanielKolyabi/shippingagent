@@ -43,7 +43,7 @@ android {
         }
         create("productServerV2") {
             buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "false")
-            buildConfigField("String", "API_URL", "\"http://warp.courr.ru:8086\"")
+            buildConfigField("String", "API_URL", "\"https://courrmobnew.courdm.ru\"")
         }
         create("debugServer") {
             buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "false")
