@@ -14,7 +14,7 @@ android {
         create("config") {
             keyAlias = "controller"
             keyPassword = "relabs"
-            storeFile = file("C:\\Android\\AndroidStudioProjects\\android-app-controller\\key.jks")
+            storeFile = file("E:\\android-app-controller\\key.jks")
             storePassword = "relabs"
             isV1SigningEnabled = true
             isV2SigningEnabled = true
@@ -26,8 +26,8 @@ android {
         applicationId = "ru.relabs.kurjercontroller"
         minSdkVersion(21)
         targetSdkVersion(29)
-        versionCode = 88
-        versionName = "88"
+        versionCode = 90
+        versionName = "90"
 
         buildConfigField("Boolean", "FEATURE_PHOTO_RADIUS", "false")
         buildConfigField("Boolean", "DISABLE_GPS_NETWORK_CHECK", "false")
